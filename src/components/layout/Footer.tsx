@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
-  ShoppingCart, Instagram, Facebook, MessageCircle,
+  ShoppingBag, Instagram, Facebook, MessageCircle,
   MapPin, Phone, Mail, Truck, RefreshCw, CreditCard, ArrowRight,
   ChevronDown
 } from 'lucide-react';
@@ -99,13 +99,11 @@ export default function Footer() {
           {/* Brand + contact */}
           <div className="flex-1 mb-4 sm:mb-0">
             <button onClick={() => navigate('/')} className="flex items-center gap-2 mb-3 group">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-blue-dark)] rounded-lg sm:rounded-xl flex items-center justify-center">
-                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-              </div>
-              <div className="flex items-baseline">
-                <span className="font-bold text-lg text-[var(--yp-blue-light)] font-heading">YOU</span>
-                <span className="font-bold text-lg text-[var(--yp-red-light)] font-heading">POSH</span>
-              </div>
+              <img
+                src="/images/categories/logo final.png"
+                alt="YouPosh"
+                className="h-10 w-auto object-contain group-hover:scale-105 transition-transform"
+              />
             </button>
             <p className="text-gray-400 text-xs leading-relaxed mb-3 line-clamp-2 max-w-xs">
               {t('footerDescription')}
@@ -117,9 +115,22 @@ export default function Footer() {
               <a href="mailto:contact@youposh.ma" className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors">
                 <Mail className="w-3.5 h-3.5" /> contact@youposh.ma
               </a>
-              <span className="flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5" /> Casablanca
-              </span>
+              <a href="https://maps.app.goo.gl/x4Ksr4TRyLTyn3k78" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors">
+                <MapPin className="w-3.5 h-3.5" /> Fès
+              </a>
+            </div>
+
+            {/* Embedded Google Map */}
+            <div className="mt-4 rounded-xl overflow-hidden w-full max-w-xs sm:max-w-sm border border-white/10">
+              <iframe
+                src="https://maps.google.com/maps?q=Fès,+Morocco&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="120"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
             </div>
           </div>
 

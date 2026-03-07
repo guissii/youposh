@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ShoppingCart, ImageOff } from 'lucide-react';
+import { ShoppingBag, ImageOff } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
 import type { Product } from '@/types';
 import { computeBadge } from '@/lib/productLogic';
@@ -60,14 +60,14 @@ export default function ProductCard({ product, variant = 'default' }: ProductCar
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-sm text-[var(--yp-dark)]">{product.price} dh</span>
               {product.originalPrice && (
-                <span className="text-[11px] text-[var(--yp-gray-500)] line-through">{product.originalPrice} dh</span>
+                <span className="text-xs font-medium text-[var(--yp-gray-400)] line-through decoration-[var(--yp-red)]/40">{product.originalPrice} dh</span>
               )}
             </div>
             <button
               onClick={handleAddToCart}
               className="w-8 h-8 rounded-full bg-[var(--yp-dark)] text-white flex items-center justify-center hover:bg-[var(--yp-gray-800)] transition-colors flex-shrink-0"
             >
-              <ShoppingCart className="w-3.5 h-3.5" />
+              <ShoppingBag className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -106,7 +106,7 @@ export default function ProductCard({ product, variant = 'default' }: ProductCar
               onClick={handleAddToCart}
               className="w-7 h-7 rounded-full bg-[var(--yp-dark)] text-white flex items-center justify-center hover:bg-[var(--yp-gray-800)] transition-colors"
             >
-              <ShoppingCart className="w-3 h-3" />
+              <ShoppingBag className="w-3 h-3" />
             </button>
           </div>
         </div>
@@ -116,78 +116,83 @@ export default function ProductCard({ product, variant = 'default' }: ProductCar
 
   // ══════════════════════════════════════════
   // ── Default variant — Clean Commercial Card
-  // Image → Badge → Title → Price → Cart
   // ══════════════════════════════════════════
   return (
     <div
       onClick={handleNavigate}
-      className="bg-white rounded-2xl overflow-hidden border border-[var(--yp-gray-200)] hover:shadow-lg transition-all duration-300 cursor-pointer group"
+      className="bg-white rounded-3xl p-3 sm:p-4 shadow-sm border border-slate-100 hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col h-full"
     >
-      {/* ── Image ── */}
-      <div className="relative aspect-square bg-[#f8f8f8] overflow-hidden">
-        {imgError ? <ImageFallback /> : (
-          <img
-            src={product.image}
-            alt={name}
-            className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
-            onError={() => setImgError(true)}
-          />
-        )}
-
-        {/* Badge promo — top left */}
-        {badge && (
-          <span className={`absolute top-2.5 left-2.5 text-[10px] sm:text-xs px-2.5 py-1 rounded-lg font-bold shadow-sm ${badge === 'promo' ? 'bg-[var(--yp-red)] text-white' :
+      {/* ── Badges (Top Row) ── */}
+      <div className="flex items-center justify-between mb-3 md:mb-4 min-h-[24px]">
+        {badge ? (
+          <span className={`text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full ${badge === 'promo' ? 'bg-red-500 text-white' :
             badge === 'new' ? 'bg-emerald-500 text-white' :
               'bg-[var(--yp-blue)] text-white'
             }`}>
             {badge === 'promo' ? 'PROMO' : badge === 'new' ? 'NOUVEAU' : 'BEST'}
           </span>
-        )}
+        ) : <div />}
 
-        {/* Discount % — top right */}
-        {discount > 0 && (
-          <span className="absolute top-2.5 right-2.5 bg-[var(--yp-red)] text-white text-[10px] sm:text-xs px-2 py-0.5 rounded-lg font-bold shadow-sm">
+        {discount > 0 ? (
+          <span className="bg-red-500 text-white text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-full">
             -{discount}%
           </span>
-        )}
+        ) : <div />}
+      </div>
+
+      {/* ── Image ── */}
+      <div className="flex justify-center mb-4 sm:mb-5 h-40 sm:h-48 md:h-56">
+        <div className="relative w-full h-full flex items-center justify-center">
+          {imgError ? <ImageFallback /> : (
+            <img
+              src={product.image}
+              alt={name}
+              className="max-w-full max-h-full object-contain group-hover:scale-[1.03] transition-transform duration-500"
+              onError={() => setImgError(true)}
+            />
+          )}
+        </div>
       </div>
 
       {/* ── Info ── */}
-      <div className="p-3 sm:p-3.5">
-        {/* Name — max 2 lines */}
-        <h3 className="font-medium text-[13px] sm:text-sm text-[var(--yp-dark)] leading-snug line-clamp-2 min-h-[36px]">
+      <div className="flex flex-col flex-grow">
+        <h3 className="text-sm sm:text-base lg:text-lg font-medium sm:font-semibold text-slate-900 leading-snug line-clamp-2 mb-2 transition-colors">
           {name}
         </h3>
 
-        {/* Best-seller stars */}
-        {(product.isBestSeller || product.salesCount >= 10) && (
-          <div className="flex mt-1">
-            {[...Array(5)].map((_, i) => (
-              <span key={i} className="text-[11px] sm:text-xs text-[var(--yp-dark)]">★</span>
-            ))}
-          </div>
-        )}
+        {/* Rating */}
+        <div className="flex items-center text-xs sm:text-sm text-slate-700/80 mb-4 sm:mb-5">
+          <span className="text-amber-400 tracking-wider">★★★★★</span>
+          <span className="text-[10px] sm:text-xs text-slate-400 ml-1.5 font-medium">({product.salesCount || 24})</span>
+        </div>
 
-        {/* Price row + cart button */}
-        <div className="flex items-end justify-between mt-2">
-          <div>
-            <span className="text-base sm:text-lg font-bold text-[var(--yp-dark)] block leading-none">
-              {product.price} dh
-            </span>
-            {product.originalPrice && (
-              <span className="text-[11px] text-[var(--yp-gray-500)] line-through mt-0.5 block">
-                {product.originalPrice} dh
-              </span>
-            )}
-          </div>
+        {/* Bottom wrapper to push to bottom */}
+        <div className="mt-auto pt-1">
+          <div className="flex items-end justify-between gap-2">
 
-          {/* Round cart button — bottom right */}
-          <button
-            onClick={handleAddToCart}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[var(--yp-dark)] hover:bg-[var(--yp-gray-800)] text-white flex items-center justify-center transition-all active:scale-90 shadow-md flex-shrink-0"
-          >
-            <ShoppingCart className="w-4 h-4" />
-          </button>
+            {/* Price Block */}
+            <div className="flex flex-col">
+              <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
+                <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 leading-none">
+                  {product.price} dh
+                </span>
+                {product.originalPrice && (
+                  <span className="text-xs sm:text-sm font-semibold text-slate-400 line-through decoration-slate-300 leading-none">
+                    {product.originalPrice} dh
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Cart Button */}
+            <button
+              onClick={handleAddToCart}
+              className="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-full bg-slate-900 hover:bg-[var(--yp-blue)] text-white flex items-center justify-center transition-all active:scale-95 shadow-md flex-shrink-0"
+              aria-label="Ajouter au panier"
+            >
+              <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 lg:w-[22px] lg:h-[22px]" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

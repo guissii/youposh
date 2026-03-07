@@ -40,7 +40,7 @@ const faqData: FAQItem[] = [
         category: 'Livraison',
         icon: Truck,
         question: 'Quels sont les délais de livraison ?',
-        answer: 'La livraison prend entre 24h et 48h pour Casablanca et les grandes villes. Pour les autres régions du Maroc, comptez 48h à 72h. Vous recevez un message de confirmation dès que votre colis est en route.',
+        answer: 'La livraison prend entre 24h et 48h pour Fès et les grandes villes. Pour les autres régions du Maroc, comptez 48h à 72h. Vous recevez un message de confirmation dès que votre colis est en route.',
     },
     {
         category: 'Livraison',
@@ -144,7 +144,7 @@ export default function FAQPage() {
                 {/* FAQ Accordion */}
                 <section className="max-w-3xl mx-auto px-4">
                     <div className="space-y-3">
-                        {filtered.map((item, index) => {
+                        {filtered.map((item) => {
                             const realIndex = faqData.indexOf(item);
                             const isOpen = openIndex === realIndex;
                             return (

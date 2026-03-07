@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  ShoppingCart, Search, Menu, X, ChevronDown, ChevronRight, Heart,
+  ShoppingBag, Search, Menu, X, ChevronDown, ChevronRight, Heart,
   MapPin, Phone, ArrowLeft, Globe,
   Home, Percent, TrendingUp, Sparkles, Grid3X3,
-  Truck, MessageCircle, HelpCircle, Headphones,
+  Truck, MessageCircle, HelpCircle,
   Smartphone, Home as HomeIcon, Sparkles as SparklesIcon, Shirt, Car, Gamepad2, Gift, Baby
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
@@ -95,19 +95,19 @@ export default function Header() {
               )}
             </div>
 
-            {/* Center — Logo */}
+            {/* Center — Logo + Brand */}
             <button
               onClick={() => navigate('/')}
-              className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5 group"
+              className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 group"
             >
-              <div className="relative">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-blue-dark)] rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-                  <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                </div>
-              </div>
+              <img
+                src="/images/categories/logo final.png"
+                alt="YouPosh"
+                className="h-10 sm:h-12 w-auto object-contain group-hover:scale-105 transition-transform"
+              />
               <div className="flex items-baseline">
-                <span className="font-bold text-lg sm:text-xl text-[var(--yp-blue)] tracking-tight font-heading">YOU</span>
-                <span className="font-bold text-lg sm:text-xl text-[var(--yp-red)] tracking-tight font-heading">POSH</span>
+                <span className="font-bold text-xl sm:text-2xl text-[var(--yp-blue)] tracking-tight font-heading">YOU</span>
+                <span className="font-bold text-xl sm:text-2xl text-[var(--yp-red)] tracking-tight font-heading">POSH</span>
               </div>
             </button>
 
@@ -132,7 +132,7 @@ export default function Header() {
                 onClick={() => setIsCartOpen(true)}
                 className="p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl relative transition-colors"
               >
-                <ShoppingCart className="w-5 h-5 text-[var(--yp-dark)]" />
+                <ShoppingBag className="w-5 h-5 text-[var(--yp-dark)]" />
                 {cartCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-[var(--yp-red)] text-white text-[10px] rounded-full flex items-center justify-center font-bold shadow-sm animate-scale-in">
                     {cartCount > 9 ? '9+' : cartCount}
@@ -232,18 +232,13 @@ export default function Header() {
           >
 
             {/* ═══ HEADER — Branded ═══ */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--yp-gray-300)] bg-gradient-to-r from-white to-[var(--yp-gray-100)]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-blue-dark)] rounded-xl flex items-center justify-center shadow-md">
-                  <ShoppingCart className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <div className="flex items-baseline">
-                    <span className="font-bold text-lg text-[var(--yp-blue)] font-heading tracking-tight">YOU</span>
-                    <span className="font-bold text-lg text-[var(--yp-red)] font-heading tracking-tight">POSH</span>
-                  </div>
-                  <p className="text-[10px] text-[var(--yp-gray-600)] -mt-0.5 font-medium">Boutique officielle 🇲🇦</p>
-                </div>
+            <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--yp-gray-300)] bg-gradient-to-r from-white to-[var(--yp-gray-100)]">
+              <div className="flex items-center gap-2">
+                <img
+                  src="/images/categories/logo final.png"
+                  alt="YouPosh"
+                  className="h-12 w-auto object-contain"
+                />
               </div>
               <button
                 onClick={() => { setIsMobileMenuOpen(false); setMobileCatsOpen(false); }}
@@ -322,7 +317,7 @@ export default function Header() {
                 <div className={`overflow-hidden transition-all duration-300 ease-out ${mobileCatsOpen ? 'max-h-[500px] opacity-100 mt-1' : 'max-h-0 opacity-0'
                   }`}>
                   <div className="pl-4 pr-2 space-y-0.5 pb-1">
-                    {categories.map((cat, i) => {
+                    {categories.map((cat) => {
                       const CatIcon = categoryIconMap[cat.icon] || Smartphone;
                       return (
                         <button

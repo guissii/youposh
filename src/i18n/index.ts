@@ -23,19 +23,19 @@ const resources = {
       trackOrder: 'Suivi commande',
       terms: 'Conditions',
       privacy: 'Confidentialité',
-      
+
       // Top Bar
       deliveryAllMorocco: 'Livraison partout au Maroc',
       deliveryShort: 'Livraison',
       deliveryTime: '24-48h',
-      
+
       // Hero
       specialOffer: 'Offre spéciale',
       newCollection: 'Nouvelle collection',
       shopNow: 'Acheter maintenant',
       discover: 'Découvrir',
       explore: 'Explorer',
-      
+
       // Categories
       browseCategories: 'Parcourir les catégories',
       electronique: 'Électronique',
@@ -46,7 +46,7 @@ const resources = {
       gaming: 'Gaming',
       cadeaux: 'Cadeaux',
       jouets: 'Jouets',
-      
+
       // Products
       allProducts: 'Tous les produits',
       productsFound: 'produits trouvés',
@@ -54,7 +54,7 @@ const resources = {
       tryDifferentFilters: 'Essayez d\'autres filtres',
       productNotFound: 'Produit non trouvé',
       backToHome: 'Retour à l\'accueil',
-      
+
       // Filters
       filters: 'Filtres',
       sort: 'Trier',
@@ -67,7 +67,7 @@ const resources = {
       biggestDiscount: 'Meilleures réductions',
       onSale: 'En promotion',
       inStockOnly: 'En stock uniquement',
-      
+
       // Product Card
       addToCart: 'Ajouter au panier',
       addToWishlist: 'Ajouter aux favoris',
@@ -80,7 +80,7 @@ const resources = {
       new: 'NOUVEAU',
       bestseller: 'TOP',
       save: 'Économisez',
-      
+
       // Product Page
       back: 'Retour',
       quantity: 'Quantité',
@@ -98,7 +98,7 @@ const resources = {
       year: 'an',
       origin: 'Origine',
       reviewText: 'Excellent produit, je recommande vivement ! Livraison rapide et emballage soigné.',
-      
+
       // Cart
       yourCart: 'Votre panier',
       emptyCart: 'Votre panier est vide',
@@ -108,27 +108,27 @@ const resources = {
       subtotal: 'Sous-total',
       shippingCalculated: 'Livraison calculée à la caisse',
       proceedCheckout: 'Passer la commande',
-      
+
       // Search
       searchPlaceholder: 'Rechercher un produit...',
       searchResults: 'Résultats de recherche',
       popularSearches: 'Recherches populaires',
       recentSearches: 'Recherches récentes',
       noResults: 'Aucun résultat trouvé',
-      
+
       // Flash Sales
       flashSales: 'Ventes flash',
       limitedTime: 'Offre limitée',
       seeAll: 'Voir tout',
-      
+
       // Popular
       popularProducts: 'Produits populaires',
-      
+
       // Promo Banner
       promoBannerTitle: 'Profitez de nos promotions',
       promoBannerDesc: 'Jusqu\'à 50% de réduction sur une sélection de produits',
       discoverPromos: 'Découvrir les promos',
-      
+
       // Trust Badges
       whatsappSupport: 'Support WhatsApp',
       whatsappSupportDesc: 'Réponse en moins de 5 min',
@@ -138,17 +138,17 @@ const resources = {
       bestPricesDesc: 'Prix compétitifs garantis',
       securePayment: 'Paiement sécurisé',
       securePaymentDesc: 'Paiement à la livraison',
-      
+
       // Footer
       yourPremier: 'Votre boutique en ligne de produits de qualité au meilleur prix.',
-      footerDescription: 'ChinaShop - Votre destination privilégiée pour les produits électroniques, accessoires et gadgets au Maroc.',
+      footerDescription: 'YouPosh - Votre destination privilégiée pour les produits électroniques, accessoires et gadgets au Maroc.',
       quickLinks: 'Liens rapides',
       help: 'Aide',
       aboutUs: 'Qui sommes-nous',
       followUs: 'Suivez-nous',
       paymentMethods: 'Paiement',
       allRightsReserved: 'Tous droits réservés',
-      
+
       // Benefits
       whatsappOrder: 'Commande WhatsApp',
       easyFast: 'Rapide & facile',
@@ -156,7 +156,7 @@ const resources = {
       payOnReceive: 'Payez à la réception',
       easyExchange: 'Échange facile',
       '7daysExchange': '7 jours pour échanger',
-      
+
       // Admin
       adminPanel: 'Panneau Admin',
       dashboard: 'Tableau de bord',
@@ -181,7 +181,7 @@ const resources = {
       shipped: 'Expédiée',
       delivered: 'Livrée',
       cancelled: 'Annulée',
-      
+
       // Misc
       loading: 'Chargement...',
       error: 'Erreur',
@@ -212,19 +212,19 @@ const resources = {
       trackOrder: 'تتبع الطلب',
       terms: 'الشروط',
       privacy: 'الخصوصية',
-      
+
       // Top Bar
       deliveryAllMorocco: 'توصيل لجميع أنحاء المغرب',
       deliveryShort: 'التوصيل',
       deliveryTime: '24-48 ساعة',
-      
+
       // Hero
       specialOffer: 'عرض خاص',
       newCollection: 'تشكيلة جديدة',
       shopNow: 'تسوق الآن',
       discover: 'اكتشف',
       explore: 'استكشف',
-      
+
       // Categories
       browseCategories: 'تصفح الفئات',
       electronique: 'إلكترونيات',
@@ -235,7 +235,7 @@ const resources = {
       gaming: 'ألعاب',
       cadeaux: 'هدايا',
       jouets: 'ألعاب أطفال',
-      
+
       // Products
       allProducts: 'جميع المنتجات',
       productsFound: 'منتجات تم العثور عليها',
@@ -243,7 +243,7 @@ const resources = {
       tryDifferentFilters: 'جرب مرشحات أخرى',
       productNotFound: 'المنتج غير موجود',
       backToHome: 'العودة للرئيسية',
-      
+
       // Filters
       filters: 'الفلاتر',
       sort: 'ترتيب',
@@ -256,7 +256,7 @@ const resources = {
       biggestDiscount: 'أكبر خصم',
       onSale: 'تخفيضات',
       inStockOnly: 'متوفر فقط',
-      
+
       // Product Card
       addToCart: 'أضف للسلة',
       addToWishlist: 'أضف للمفضلة',
@@ -269,7 +269,7 @@ const resources = {
       new: 'جديد',
       bestseller: 'الأكثر مبيعاً',
       save: 'وفر',
-      
+
       // Product Page
       back: 'رجوع',
       quantity: 'الكمية',
@@ -287,7 +287,7 @@ const resources = {
       year: 'سنة',
       origin: 'الأصل',
       reviewText: 'منتج ممتاز، أنصح به بشدة! توصيل سريع وتغليف جيد.',
-      
+
       // Cart
       yourCart: 'سلة التسوق',
       emptyCart: 'سلة التسوق فارغة',
@@ -297,27 +297,27 @@ const resources = {
       subtotal: 'المجموع الفرعي',
       shippingCalculated: 'الشحن يحسب عند الدفع',
       proceedCheckout: 'إتمام الشراء',
-      
+
       // Search
       searchPlaceholder: 'ابحث عن منتج...',
       searchResults: 'نتائج البحث',
       popularSearches: 'عمليات البحث الشائعة',
       recentSearches: 'عمليات البحث الأخيرة',
       noResults: 'لم يتم العثور على نتائج',
-      
+
       // Flash Sales
       flashSales: 'تخفيضات فلاش',
       limitedTime: 'عرض محدود',
       seeAll: 'عرض الكل',
-      
+
       // Popular
       popularProducts: 'المنتجات الشائعة',
-      
+
       // Promo Banner
       promoBannerTitle: 'استفد من عروضنا',
       promoBannerDesc: 'خصم يصل إلى 50% على مجموعة مختارة من المنتجات',
       discoverPromos: 'اكتشف العروض',
-      
+
       // Trust Badges
       whatsappSupport: 'دعم واتساب',
       whatsappSupportDesc: 'رد في أقل من 5 دقائق',
@@ -327,17 +327,17 @@ const resources = {
       bestPricesDesc: 'أسعار تنافسية مضمونة',
       securePayment: 'دفع آمن',
       securePaymentDesc: 'الدفع عند الاستلام',
-      
+
       // Footer
       yourPremier: 'متجرك الإلكتروني للمنتجات عالية الجودة بأفضل سعر.',
-      footerDescription: 'ChinaShop - وجهتك المفضلة للإلكترونيات والإكسسوارات والأدوات في المغرب.',
+      footerDescription: 'YouPosh - وجهتك المفضلة للإلكترونيات والإكسسوارات والأدوات في المغرب.',
       quickLinks: 'روابط سريعة',
       help: 'المساعدة',
       aboutUs: 'من نحن',
       followUs: 'تابعنا',
       paymentMethods: 'طرق الدفع',
       allRightsReserved: 'جميع الحقوق محفوظة',
-      
+
       // Benefits
       whatsappOrder: 'طلب واتساب',
       easyFast: 'سريع وسهل',
@@ -345,7 +345,7 @@ const resources = {
       payOnReceive: 'ادفع عند الاستلام',
       easyExchange: 'استبدال سهل',
       exchangePeriod: '7 أيام للاستبدال',
-      
+
       // Admin
       adminPanel: 'لوحة التحكم',
       dashboard: 'لوحة المعلومات',
@@ -370,7 +370,7 @@ const resources = {
       shipped: 'تم الشحن',
       delivered: 'تم التوصيل',
       cancelled: 'ملغاة',
-      
+
       // Misc
       loading: 'جاري التحميل...',
       error: 'خطأ',

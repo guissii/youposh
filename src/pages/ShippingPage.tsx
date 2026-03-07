@@ -8,7 +8,7 @@ import CartDrawer from '@/components/layout/CartDrawer';
 import WhatsAppButton from '@/components/ui/WhatsAppButton';
 
 const cities = [
-    { name: 'Casablanca', delay: '24h', price: '30 DH' },
+    { name: 'Fès', delay: '24h', price: '30 DH' },
     { name: 'Rabat', delay: '24h', price: '30 DH' },
     { name: 'Marrakech', delay: '24-48h', price: '35 DH' },
     { name: 'Fès', delay: '24-48h', price: '35 DH' },
