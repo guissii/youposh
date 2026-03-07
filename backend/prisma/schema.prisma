@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  nameAr   String    @default("")
+  icon     String    @default("")
+  image    String    @default("")
+  slug     String    @unique
+  products Product[]
+}
+
+model Product {
+  id            Int         @id @default(autoincrement())
+  name          String
+  nameAr        String      @default("")
+  price         Float
+  originalPrice Float?
+  image         String      @default("")
+  images        String[]    @default([])
+  badge         String?
+  rating        Float       @default(0)
+  reviews       Int         @default(0)
+  categorySlug  String      @default("")
+  category      Category?   @relation(fields: [categorySlug], references: [slug])
+  description   String      @default("")
+  descriptionAr String      @default("")
+  inStock       Boolean     @default(true)
+  isVisible     Boolean     @default(true)
+  sku           String      @default("")
+  tags          String[]    @default([])
+  features      String[]    @default([])
+  variants      Json        @default("[]")
+  isPopular     Boolean     @default(false)
+  isNew         Boolean     @default(false)
+  salesCount    Int         @default(0)
+  stock         Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  orderItems    OrderItem[]
+}
+
+model Customer {
+  id          Int      @id @default(autoincrement())
+  name        String
+  phone       String   @default("")
+  email       String   @default("")
+  city        String   @default("")
+  totalOrders Int      @default(0)
+  totalSpent  Float    @default(0)
+  createdAt   DateTime @default(now())
+  orders      Order[]
+}
+
+model Order {
+  id           String      @id @default(uuid())
+  customer     Customer?   @relation(fields: [customerId], references: [id])
+  customerId   Int?
+  customerName String      @default("")
+  phone        String      @default("")
+  city         String      @default("")
+  address      String      @default("")
+  notes        String?
+  total        Float       @default(0)
+  status       String      @default("pending")
+  promoCode    String?
+  discount     Float       @default(0)
+  items        OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  quantity  Int     @default(1)
+  price     Float
+}
+
+model PromoCode {
+  id            Int       @id @default(autoincrement())
+  code          String    @unique
+  description   String    @default("")
+  discountType  String    @default("percentage")
+  discountValue Float     @default(0)
+  minOrder      Float     @default(0)
+  maxUses       Int       @default(0)
+  usedCount     Int       @default(0)
+  isActive      Boolean   @default(true)
+  startDate     DateTime  @default(now())
+  endDate       DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
