@@ -58,6 +58,18 @@ export const updateCategory = (id: number, data: any) =>
     apiFetch<any>(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const deleteCategory = (id: number) =>
     apiFetch<any>(`/categories/${id}`, { method: 'DELETE' });
+export const uploadCategoryImage = async (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await fetch(`${API_BASE}/upload/category`, {
+        method: 'POST',
+        body: formData, // the browser will automatically set Content-Type to multipart/form-data
+    });
+    if (!res.ok) {
+        throw new Error('Failed to upload image');
+    }
+    return res.json();
+};
 
 // ─── Customers ─────────────────────────────────────────────────
 export const fetchCustomers = (params?: string) =>

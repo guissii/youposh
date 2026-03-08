@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -6,7 +6,7 @@ import {
   ArrowUpDown, Flame, Percent, Sparkles, Star, Tag, Package
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
-import { categories } from '@/data/products';
+import { fetchCategories, fetchProducts } from '@/lib/api';
 import ProductCard from '@/components/ui/ProductCard';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -17,7 +17,6 @@ import type { SortOption, FilterOption } from '@/types';
 export default function ShopPage() {
   const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { getFilteredProducts, searchProducts } = useStore();
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -32,16 +31,33 @@ export default function ShopPage() {
   const isNewPage = filterParam === 'new';
   const isBestsellerPage = filterParam === 'bestseller';
 
+  const [categories, setCategories] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+
+  // Load categories once
   useEffect(() => {
-    window.scrollTo(0, 0);
+    fetchCategories().then(setCategories).catch(console.error);
   }, []);
 
-  const products = useMemo(() => {
-    if (searchQuery) {
-      return searchProducts(searchQuery);
-    }
-    return getFilteredProducts(categoryParam, sortParam, filterParam);
-  }, [searchQuery, categoryParam, sortParam, filterParam, searchProducts, getFilteredProducts]);
+  // Fetch products based on URL params
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const loadData = async () => {
+      try {
+        const queryParams = new URLSearchParams();
+        if (categoryParam) queryParams.set('category', categoryParam);
+        if (searchQuery) queryParams.set('search', searchQuery);
+        if (sortParam) queryParams.set('sort', sortParam);
+        if (filterParam && filterParam !== 'all') queryParams.set('badge', filterParam);
+
+        const data = await fetchProducts(queryParams.toString());
+        setProducts(data);
+      } catch (err) {
+        console.error('Failed to load products', err);
+      }
+    };
+    loadData();
+  }, [categoryParam, searchQuery, sortParam, filterParam]);
 
   const updateParams = (updates: Record<string, string | undefined>) => {
     const newParams = new URLSearchParams(searchParams);
@@ -98,8 +114,8 @@ export default function ShopPage() {
       <main className="pb-20">
         {/* ═══ Page Header with promo context ═══ */}
         <div className={`border-b border-[var(--yp-gray-300)] ${isPromoPage
-            ? 'bg-gradient-to-r from-[var(--yp-red-50)] to-white'
-            : 'bg-white'
+          ? 'bg-gradient-to-r from-[var(--yp-red-50)] to-white'
+          : 'bg-white'
           }`}>
           <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
             <div className="flex items-start justify-between gap-4">
@@ -145,8 +161,8 @@ export default function ShopPage() {
                 <button
                   onClick={() => updateParams({ category: undefined })}
                   className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${!categoryParam
-                      ? 'bg-[var(--yp-blue)] text-white shadow-sm'
-                      : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-300)]'
+                    ? 'bg-[var(--yp-blue)] text-white shadow-sm'
+                    : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-300)]'
                     }`}
                 >
                   {t('all')}
@@ -156,8 +172,8 @@ export default function ShopPage() {
                     key={cat.id}
                     onClick={() => updateParams({ category: cat.slug })}
                     className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${categoryParam === cat.slug
-                        ? 'bg-[var(--yp-blue)] text-white shadow-sm'
-                        : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-300)]'
+                      ? 'bg-[var(--yp-blue)] text-white shadow-sm'
+                      : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-300)]'
                       }`}
                   >
                     {isAr ? cat.nameAr : cat.name}
@@ -180,8 +196,8 @@ export default function ShopPage() {
                         key={opt.value}
                         onClick={() => updateParams({ sort: opt.value })}
                         className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-left transition-colors ${sortParam === opt.value
-                            ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)] font-medium'
-                            : 'text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-200)]'
+                          ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)] font-medium'
+                          : 'text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-200)]'
                           }`}
                       >
                         <opt.icon className="w-4 h-4" />
@@ -233,8 +249,8 @@ export default function ShopPage() {
                         key={opt.value}
                         onClick={() => updateParams({ filter: opt.value === 'all' ? undefined : opt.value })}
                         className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-left transition-all ${filterParam === opt.value || (opt.value === 'all' && !filterParam)
-                            ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)] font-medium'
-                            : 'text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-200)]'
+                          ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)] font-medium'
+                          : 'text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-200)]'
                           }`}
                       >
                         <opt.icon className="w-4 h-4" />
@@ -251,8 +267,8 @@ export default function ShopPage() {
                     <button
                       onClick={() => updateParams({ category: undefined })}
                       className={`w-full px-3 py-2.5 rounded-xl text-sm text-left transition-all ${!categoryParam
-                          ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)] font-medium'
-                          : 'text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-200)]'
+                        ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)] font-medium'
+                        : 'text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-200)]'
                         }`}
                     >
                       {t('all')}
@@ -262,8 +278,8 @@ export default function ShopPage() {
                         key={cat.id}
                         onClick={() => updateParams({ category: cat.slug })}
                         className={`w-full px-3 py-2.5 rounded-xl text-sm text-left transition-all ${categoryParam === cat.slug
-                            ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)] font-medium'
-                            : 'text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-200)]'
+                          ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)] font-medium'
+                          : 'text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-200)]'
                           }`}
                       >
                         {isAr ? cat.nameAr : cat.name}
@@ -286,8 +302,8 @@ export default function ShopPage() {
                 </div>
               ) : (
                 <div className={`grid gap-4 sm:gap-5 ${viewMode === 'grid'
-                    ? 'grid-cols-2 lg:grid-cols-3'
-                    : 'grid-cols-1'
+                  ? 'grid-cols-2 lg:grid-cols-3'
+                  : 'grid-cols-1'
                   }`}>
                   {products.map(product => (
                     <ProductCard
@@ -340,8 +356,8 @@ export default function ShopPage() {
                       setIsFilterOpen(false);
                     }}
                     className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${!categoryParam
-                        ? 'bg-[var(--yp-blue)] text-white shadow-sm'
-                        : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
+                      ? 'bg-[var(--yp-blue)] text-white shadow-sm'
+                      : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
                       }`}
                   >
                     {t('all')}
@@ -354,8 +370,8 @@ export default function ShopPage() {
                         setIsFilterOpen(false);
                       }}
                       className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${categoryParam === cat.slug
-                          ? 'bg-[var(--yp-blue)] text-white shadow-sm'
-                          : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
+                        ? 'bg-[var(--yp-blue)] text-white shadow-sm'
+                        : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
                         }`}
                     >
                       {isAr ? cat.nameAr : cat.name}
@@ -376,8 +392,8 @@ export default function ShopPage() {
                         setIsFilterOpen(false);
                       }}
                       className={`w-full flex items-center gap-3 p-3.5 rounded-xl text-sm transition-all ${filterParam === opt.value || (opt.value === 'all' && !filterParam)
-                          ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)] font-medium'
-                          : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
+                        ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)] font-medium'
+                        : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
                         }`}
                     >
                       <opt.icon className="w-5 h-5" />
@@ -399,8 +415,8 @@ export default function ShopPage() {
                         setIsFilterOpen(false);
                       }}
                       className={`w-full flex items-center gap-3 p-3.5 rounded-xl text-sm transition-all ${sortParam === opt.value
-                          ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)] font-medium'
-                          : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
+                        ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)] font-medium'
+                        : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
                         }`}
                     >
                       <opt.icon className="w-5 h-5" />

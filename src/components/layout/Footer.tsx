@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
-  ShoppingBag, Instagram, Facebook, MessageCircle,
+  Instagram, Facebook, MessageCircle,
   MapPin, Phone, Mail, Truck, RefreshCw, CreditCard, ArrowRight,
   ChevronDown
 } from 'lucide-react';

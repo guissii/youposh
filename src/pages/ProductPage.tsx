@@ -7,7 +7,7 @@ import {
   X, ArrowRight, User, Phone, MapPin, FileText, Package
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
-import { getProductById, products } from '@/data/products';
+import { fetchProduct, fetchProducts } from '@/lib/api';
 import ProductCard from '@/components/ui/ProductCard';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -36,7 +36,9 @@ export default function ProductPage() {
   const [customerCity, setCustomerCity] = useState('');
   const [customerNote, setCustomerNote] = useState('');
 
-  const product = getProductById(Number(id));
+  const [product, setProduct] = useState<any>(null);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+
   const isAr = i18n.language === 'ar';
 
   useEffect(() => {
@@ -47,6 +49,24 @@ export default function ProductPage() {
     setCustomerPhone('');
     setCustomerCity('');
     setCustomerNote('');
+
+    // Fetch individual product details and its related products
+    async function loadProductData() {
+      try {
+        if (!id) return;
+        const p = await fetchProduct(Number(id));
+        setProduct(p);
+
+        // Fetch related products from the same category
+        if (p && p.category) {
+          const rel = await fetchProducts(`category=${p.category}`);
+          setRelatedProducts(rel.filter((r: any) => r.id !== p.id).slice(0, 4));
+        }
+      } catch (error) {
+        console.error('Failed to fetch product', error);
+      }
+    }
+    loadProductData();
   }, [id]);
 
   if (!product) {
@@ -65,10 +85,6 @@ export default function ProductPage() {
   const discount = product.originalPrice
     ? Math.round((1 - product.price / product.originalPrice) * 100)
     : 0;
-
-  const relatedProducts = products
-    .filter(p => p.category === product.category && p.id !== product.id)
-    .slice(0, 4);
 
   const subtotal = product.price * quantity;
 
@@ -151,7 +167,7 @@ export default function ProductPage() {
 
                 {/* Thumbnails */}
                 <div className="flex gap-2 overflow-x-auto pb-2">
-                  {product.images.map((img, i) => (
+                  {product.images?.map((img: string, i: number) => (
                     <button
                       key={i}
                       onClick={() => setSelectedImage(i)}
@@ -215,13 +231,13 @@ export default function ProductPage() {
                 </p>
 
                 {/* ═══ Bloc 3 — Options (Color / Size / Quantity) ═══ */}
-                {product.variants.map((variant) => (
+                {product.variants?.map((variant: any) => (
                   <div key={variant.name}>
                     <p className="font-semibold text-[var(--yp-dark)] mb-2.5 text-sm">
                       {isAr ? variant.nameAr : variant.name}
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {variant.options.map((option) => (
+                      {variant.options?.map((option: string) => (
                         <button
                           key={option}
                           onClick={() => setSelectedVariant(option)}
@@ -343,7 +359,7 @@ export default function ProductPage() {
                   </p>
                   <h3 className="text-lg font-bold text-[var(--yp-dark)] mt-6 mb-3 font-heading">{t('features')}</h3>
                   <ul className="space-y-2">
-                    {product.features.map((feature, i) => (
+                    {product.features?.map((feature: string, i: number) => (
                       <li key={i} className="flex items-center gap-2 text-[var(--yp-gray-600)]">
                         <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                         {feature}

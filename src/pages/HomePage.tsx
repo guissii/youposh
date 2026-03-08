@@ -7,14 +7,13 @@ import {
   Smartphone, Home, Sparkles as SparklesIcon, Shirt, Car, Gamepad2, Gift, Baby,
   Truck, Shield, Package, CreditCard
 } from 'lucide-react';
-import { categories, getPopularProducts, getNewProducts, getPromoProducts, getBestsellers } from '@/data/products';
+import { fetchCategories, fetchProducts } from '@/lib/api';
 import ProductCard from '@/components/ui/ProductCard';
 import WhatsAppButton from '@/components/ui/WhatsAppButton';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import CartDrawer from '@/components/layout/CartDrawer';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import { VideoModal } from '@/components/ui/VideoWidget';
 import { loadHeroSettings } from '@/data/heroSettings';
 import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
 
@@ -26,7 +25,6 @@ export default function HomePage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const isAr = i18n.language === 'ar';
-  const [isVideoOpen, setIsVideoOpen] = useState(false);
   const heroSettings = loadHeroSettings();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(heroSettings.videoAutoplay);
@@ -40,10 +38,36 @@ export default function HomePage() {
   const promoRef = useScrollReveal();
   const trustRef = useScrollReveal();
 
-  const popularProducts = getPopularProducts().slice(0, 8);
-  const newProducts = getNewProducts().slice(0, 4);
-  const promoProducts = getPromoProducts().slice(0, 4);
-  const bestsellers = getBestsellers().slice(0, 4);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [popularProducts, setPopularProducts] = useState<any[]>([]);
+  const [newProducts, setNewProducts] = useState<any[]>([]);
+  const [promoProducts, setPromoProducts] = useState<any[]>([]);
+  const [bestsellers, setBestsellers] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        // On effectue toutes les requêtes en parallèle vers l'API Backend
+        const [cats, pop, news, promos, bests] = await Promise.all([
+          fetchCategories(),
+          fetchProducts('badge=popular'), // Optionnel: ou filtrer coté front si la route ne gère pas exactement le badge
+          fetchProducts('sort=newest'),
+          fetchProducts('badge=promo'),
+          fetchProducts('sort=bestsellers'),
+        ]);
+
+        setCategories(cats);
+        // fallback filtering si l'API retourne tout par défaut
+        setPopularProducts(pop.filter((p: any) => p.isPopular).slice(0, 8));
+        setNewProducts(news.filter((p: any) => p.isNew).slice(0, 4));
+        setPromoProducts(promos.filter((p: any) => p.originalPrice > p.price).slice(0, 4));
+        setBestsellers(bests.filter((p: any) => p.isBestSeller).slice(0, 4));
+      } catch (error) {
+        console.error("Erreur chargement page accueil:", error);
+      }
+    }
+    loadData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[var(--yp-gray-100)]">
@@ -448,14 +472,6 @@ export default function HomePage() {
       <Footer />
       <CartDrawer />
       <WhatsAppButton variant="floating" />
-      <VideoModal
-        videoSrc={heroSettings.videoUrl}
-        posterSrc={heroSettings.videoPosterUrl}
-        ctaText={heroSettings.primaryCtaText}
-        ctaLink={heroSettings.primaryCtaLink}
-        isOpen={isVideoOpen}
-        onClose={() => setIsVideoOpen(false)}
-      />
     </div>
   );
 }

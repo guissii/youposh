@@ -5,7 +5,7 @@ import {
   ShoppingBag, Search, Menu, X, ChevronDown, ChevronRight, Heart,
   MapPin, Phone, ArrowLeft, Globe,
   Home, Percent, TrendingUp, Sparkles, Grid3X3,
-  Truck, MessageCircle, HelpCircle,
+  Truck, MessageCircle, CircleHelp,
   Smartphone, Home as HomeIcon, Sparkles as SparklesIcon, Shirt, Car, Gamepad2, Gift, Baby
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
@@ -355,7 +355,7 @@ export default function Header() {
                 <p className="px-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--yp-gray-500)]">{t('services') || 'Services'}</p>
                 <nav className="space-y-0.5">
                   {[
-                    { path: '/faq', label: t('faq') || 'FAQ', icon: HelpCircle },
+                    { path: '/faq', label: t('faq') || 'FAQ', icon: CircleHelp },
                     { path: '/shipping', label: t('deliveryInfo') || 'Livraison', icon: Truck },
                   ].map(item => (
                     <button

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { X, Save, FolderOpen } from 'lucide-react';
-import { createCategory, updateCategory } from '@/lib/api';
+import { X, Save, FolderOpen, Upload, ImageIcon } from 'lucide-react';
+import { createCategory, updateCategory, uploadCategoryImage } from '@/lib/api';
 
 interface Props {
     category?: any;
@@ -15,13 +15,35 @@ export const CategoryFormModal = ({ category, onClose, onSave }: Props) => {
         slug: category?.slug || '', icon: category?.icon || '',
         image: category?.image || '',
     });
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string>(category?.image || '');
     const [saving, setSaving] = useState(false);
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
         try {
-            const data = { ...form, slug: form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') };
+            let finalImageUrl = form.image;
+
+            if (imageFile) {
+                const uploadRes = await uploadCategoryImage(imageFile);
+                finalImageUrl = uploadRes.url;
+            }
+
+            const data = {
+                ...form,
+                image: finalImageUrl,
+                slug: form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+            };
+
             if (isEdit) await updateCategory(category.id, data);
             else await createCategory(data);
             onSave();
@@ -63,8 +85,34 @@ export const CategoryFormModal = ({ category, onClose, onSave }: Props) => {
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-[#666] mb-1">Image URL</label>
-                        <input type="text" value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} className={inputClass} />
+                        <label className="block text-sm font-medium text-[#666] mb-2">Image de la catégorie</label>
+                        <div className="flex items-center gap-4">
+                            {/* Preview */}
+                            <div className="w-20 h-20 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
+                                {imagePreview ? (
+                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                ) : (
+                                    <ImageIcon className="w-6 h-6 text-gray-400" />
+                                )}
+                            </div>
+
+                            {/* Upload Button */}
+                            <div className="flex-1">
+                                <label className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl hover:border-teal-500 hover:bg-teal-50 cursor-pointer transition-colors group">
+                                    <Upload className="w-5 h-5 text-gray-400 group-hover:text-teal-600" />
+                                    <span className="text-sm font-medium text-gray-500 group-hover:text-teal-600">
+                                        {imageFile ? imageFile.name : "Cliquez pour uploader une image"}
+                                    </span>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleImageChange}
+                                    />
+                                </label>
+                                <p className="text-xs text-gray-400 mt-1.5 ml-1">PNG, JPG, WEBP jusqu'à 5MB</p>
+                            </div>
+                        </div>
                     </div>
                     <div className="flex gap-3 pt-4 border-t">
                         <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-[#666] hover:bg-gray-50 font-medium">Annuler</button>

@@ -4,7 +4,7 @@ import {
   LayoutDashboard, ShoppingBag, Package, Users, Settings,
   LogOut, Search, Bell, DollarSign, Clock, CheckCircle,
   Eye, EyeOff, Plus, Pencil, Trash2, X,
-  TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Film
+  TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Image
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -20,6 +20,7 @@ import { ProductFormModal } from '@/components/admin/ProductFormModal';
 import { PromoFormModal } from '@/components/admin/PromoFormModal';
 import { CategoryFormModal } from '@/components/admin/CategoryFormModal';
 import { loadHeroSettings, saveHeroSettings, type HeroSettings } from '@/data/heroSettings';
+import * as XLSX from 'xlsx';
 
 type TabId = 'dashboard' | 'orders' | 'products' | 'categories' | 'promos' | 'customers' | 'hero' | 'settings';
 
@@ -45,6 +46,11 @@ const AdminPage = () => {
   const [categoryModal, setCategoryModal] = useState<{ open: boolean; category?: any }>({ open: false });
   const [orderDetail, setOrderDetail] = useState<any>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: string; id: any; label?: string } | null>(null);
+
+  const [exportModal, setExportModal] = useState(false);
+  const [exportColumns, setExportColumns] = useState({
+    name: true, phone: true, city: true, totalSpent: true, ordersCount: true, purchasedProducts: false
+  });
 
   // ─── Loaders ────────────────────────────────────────────────
   const loadDashboard = useCallback(async () => {
@@ -118,6 +124,28 @@ const AdminPage = () => {
       else if (deleteConfirm.type === 'promo') { await deletePromoCode(deleteConfirm.id); loadPromoCodes(); }
     } catch (e) { console.error(e); }
     setDeleteConfirm(null);
+  };
+
+  const handleExport = () => {
+    const data = customers.map(c => {
+      const row: any = {};
+      if (exportColumns.name) row['Client'] = c.name;
+      if (exportColumns.phone) row['Téléphone'] = c.phone || '';
+      if (exportColumns.city) row['Ville'] = c.city || '';
+      if (exportColumns.totalSpent) row['Total Dépensé'] = c.totalSpent;
+      if (exportColumns.ordersCount) row['Commandes'] = c._count?.orders ?? c.totalOrders;
+      if (exportColumns.purchasedProducts) {
+        const products = c.orders?.flatMap((o: any) => o.items?.map((i: any) => i.product?.name) || []) || [];
+        row['Produits Achetés'] = Array.from(new Set(products)).join(', ');
+      }
+      return row;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Clients");
+    XLSX.writeFile(workbook, "clients_youshop.xlsx");
+    setExportModal(false);
   };
 
   // ─── Dashboard ──────────────────────────────────────────────
@@ -340,7 +368,10 @@ const AdminPage = () => {
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
       <div className="p-5 border-b flex items-center justify-between flex-wrap gap-4">
         <h3 className="font-semibold text-[#333]">Clients ({customers.length})</h3>
-        <div className="relative"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Rechercher..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#f5a623]" /></div>
+        <div className="flex gap-3">
+          <div className="relative"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Rechercher..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#f5a623]" /></div>
+          <button onClick={() => setExportModal(true)} className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 flex items-center gap-2 shadow-sm whitespace-nowrap"><Save className="w-4 h-4" /> Export Excel</button>
+        </div>
       </div>
       {customers.length === 0 ? (
         <div className="p-12 text-center"><Users className="w-16 h-16 mx-auto text-gray-200 mb-4" /><h3 className="text-lg font-medium text-[#333]">Aucun client</h3><p className="text-[#999] text-sm mt-1">Les clients apparaîtront après leur première commande</p></div>
@@ -431,7 +462,7 @@ const AdminPage = () => {
 
       {/* Content */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h3 className="font-semibold text-[#333] mb-4 flex items-center gap-2"><Film className="w-5 h-5 text-[#f5a623]" /> Contenu Hero</h3>
+        <h3 className="font-semibold text-[#333] mb-4 flex items-center gap-2"><Image className="w-5 h-5 text-[#f5a623]" /> Contenu Hero</h3>
         <div className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             {heroInput('Badge', 'badgeText', 'text', 'Boutique N°1 au Maroc')}
@@ -540,7 +571,7 @@ const AdminPage = () => {
     { id: 'products', label: t('products'), icon: Package },
     { id: 'categories', label: 'Catégories', icon: FolderOpen },
     { id: 'promos', label: 'Codes Promo', icon: Ticket },
-    { id: 'hero', label: 'Hero Section', icon: Film },
+    { id: 'hero', label: 'Hero Section', icon: Image },
     { id: 'customers', label: 'Clients', icon: Users },
     { id: 'settings', label: t('settings'), icon: Settings },
   ];
@@ -594,6 +625,38 @@ const AdminPage = () => {
       {categoryModal.open && <CategoryFormModal category={categoryModal.category} onClose={() => setCategoryModal({ open: false })} onSave={() => { setCategoryModal({ open: false }); loadCategories(); }} />}
       {renderOrderDetail()}
       {deleteConfirm && <ConfirmModal message={`Êtes-vous sûr de vouloir supprimer ? Cette action est irréversible.`} onConfirm={handleDelete} onCancel={() => setDeleteConfirm(null)} />}
+
+      {/* EXPORT MODAL */}
+      {exportModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+            <div className="flex items-center justify-between p-5 border-b">
+              <h3 className="text-lg font-bold text-[#333]">Exporter sur Excel</h3>
+              <button onClick={() => setExportModal(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-5 space-y-3">
+              <p className="text-sm text-[#666] mb-4">Sélectionnez les colonnes à inclure :</p>
+              {[
+                { key: 'name', label: 'Nom du client' },
+                { key: 'phone', label: 'Téléphone' },
+                { key: 'city', label: 'Ville' },
+                { key: 'totalSpent', label: 'Total dépensé' },
+                { key: 'ordersCount', label: 'Nombre de commandes' },
+                { key: 'purchasedProducts', label: 'Produits achetés (Historique)' }
+              ].map(col => (
+                <label key={col.key} className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" checked={(exportColumns as any)[col.key]} onChange={e => setExportColumns(p => ({ ...p, [col.key]: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600" />
+                  <span className="text-sm font-medium text-[#333]">{col.label}</span>
+                </label>
+              ))}
+            </div>
+            <div className="p-5 border-t bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
+              <button onClick={() => setExportModal(false)} className="px-4 py-2 text-sm font-medium text-[#666] hover:bg-gray-200 rounded-xl">Annuler</button>
+              <button onClick={handleExport} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl shadow-sm">Télécharger .xlsx</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

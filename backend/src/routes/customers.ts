@@ -25,9 +25,8 @@ router.get('/', async (req, res) => {
             include: {
                 _count: { select: { orders: true } },
                 orders: {
-                    take: 5,
                     orderBy: { createdAt: 'desc' },
-                    select: { id: true, total: true, status: true, createdAt: true },
+                    include: { items: { include: { product: true } } },
                 }
             },
         });

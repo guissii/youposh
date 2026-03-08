@@ -174,9 +174,7 @@ export default function WhatsAppButton({
       aria-label="Contacter sur WhatsApp"
     >
       <MessageCircle className="w-5 h-5" />
-      {variant !== 'floating' && (
-        <span>{product ? t('orderNow') : t('orderViaWhatsApp')}</span>
-      )}
+      <span>{product ? t('orderNow') : t('orderViaWhatsApp')}</span>
     </button>
   );
 }

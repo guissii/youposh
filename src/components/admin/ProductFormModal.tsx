@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Save, Eye, TrendingUp, ShoppingCart, BarChart3 } from 'lucide-react';
+import { X, Save, Eye, TrendingUp, ShoppingCart, BarChart3, Plus } from 'lucide-react';
 import { createProduct, updateProduct, fetchCategories } from '@/lib/api';
 
 interface Props {
@@ -19,6 +19,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
         image: product?.image || '', sku: product?.sku || '',
         inStock: product?.inStock ?? true,
         tags: product?.tags?.join(', ') || '', features: product?.features?.join(', ') || '',
+        variants: product?.variants || [],
         // ── Visibility & Status ──
         status: product?.status || 'published',
         isVisible: product?.isVisible ?? true,
@@ -45,8 +46,9 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                 stock: Number(form.stock),
                 sortOrder: Number(form.sortOrder),
                 publishedAt: form.publishedAt ? new Date(form.publishedAt).toISOString() : null,
-                tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
-                features: form.features ? form.features.split(',').map(f => f.trim()).filter(Boolean) : [],
+                tags: form.tags ? form.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
+                features: form.features ? form.features.split(',').map((f: string) => f.trim()).filter(Boolean) : [],
+                variants: form.variants,
             };
             if (isEdit) await updateProduct(product.id, data);
             else await createProduct(data);
@@ -127,6 +129,50 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                     <div>
                         <label className="block text-sm font-medium text-[#666] mb-1">Caractéristiques (séparées par virgule)</label>
                         <input type="text" value={form.features} onChange={e => setForm(f => ({ ...f, features: e.target.value }))} className={inputClass} placeholder="Bluetooth 5.3, 30h autonomie" />
+                    </div>
+
+                    {/* ═══════════════════════════════════════════════
+                        VARIANTES
+                        ═══════════════════════════════════════════════ */}
+                    <div className="border border-gray-200 rounded-xl p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                            <h4 className="text-sm font-bold text-[#333] flex items-center gap-2">
+                                Variantes (Tailles, Couleurs, etc.)
+                            </h4>
+                            <button
+                                type="button"
+                                onClick={() => setForm(f => ({ ...f, variants: [...f.variants, { name: '', nameAr: '', options: [] }] }))}
+                                className="text-sm text-[#f5a623] font-medium flex items-center gap-1 hover:underline shadow-sm border border-gray-100 px-2 py-1 rounded-lg"
+                            >
+                                <Plus className="w-3 h-3" /> Ajouter
+                            </button>
+                        </div>
+                        {form.variants.map((variant: any, idx: number) => (
+                            <div key={idx} className="bg-gray-50 rounded-lg p-3 border border-gray-100 flex gap-3 relative">
+                                <button type="button" onClick={() => setForm(f => ({ ...f, variants: f.variants.filter((_: any, i: number) => i !== idx) }))} className="absolute right-2 top-2 text-red-500 hover:bg-red-50 p-1 rounded transition-colors">
+                                    <X className="w-4 h-4" />
+                                </button>
+                                <div className="flex-1 space-y-3">
+                                    <div className="grid grid-cols-2 gap-3 pr-8">
+                                        <div>
+                                            <input type="text" placeholder="Nom (Ex: Taille)" value={variant.name} onChange={e => {
+                                                const newV = [...form.variants]; newV[idx].name = e.target.value; setForm({ ...form, variants: newV });
+                                            }} className={inputClass} />
+                                        </div>
+                                        <div>
+                                            <input type="text" placeholder="Nom AR" dir="rtl" value={variant.nameAr} onChange={e => {
+                                                const newV = [...form.variants]; newV[idx].nameAr = e.target.value; setForm({ ...form, variants: newV });
+                                            }} className={inputClass} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <input type="text" placeholder="Options séparées par virgule (Ex: S, M, L)" value={variant.options.join(', ')} onChange={e => {
+                                            const newV = [...form.variants]; newV[idx].options = e.target.value.split(',').map(s => s.trim()).filter(Boolean); setForm({ ...form, variants: newV });
+                                        }} className={inputClass} />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
 
                     {/* ═══════════════════════════════════════════════
