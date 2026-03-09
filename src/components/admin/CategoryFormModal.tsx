@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { X, Save, FolderOpen, Upload, ImageIcon } from 'lucide-react';
+import { X, Save, FolderOpen, Upload, Image as ImageIcon } from 'lucide-react';
 import { createCategory, updateCategory, uploadCategoryImage } from '@/lib/api';
+import { loadStoreSettings } from '@/data/storeSettings';
 
 interface Props {
     category?: any;
@@ -34,7 +35,10 @@ export const CategoryFormModal = ({ category, onClose, onSave }: Props) => {
             let finalImageUrl = form.image;
 
             if (imageFile) {
-                const uploadRes = await uploadCategoryImage(imageFile);
+                const settings = loadStoreSettings();
+                const opacity = settings.watermarkEnabled ? settings.watermarkOpacity : 0;
+                const size = settings.watermarkSize || 30;
+                const uploadRes = await uploadCategoryImage(imageFile, opacity, size);
                 finalImageUrl = uploadRes.url;
             }
 
@@ -67,21 +71,21 @@ export const CategoryFormModal = ({ category, onClose, onSave }: Props) => {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-[#666] mb-1">Nom (FR) *</label>
-                            <input type="text" required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={inputClass} />
+                            <input type="text" required value={form.name} onChange={e => setForm((f: any) => ({ ...f, name: e.target.value }))} className={inputClass} />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-[#666] mb-1">Nom (AR)</label>
-                            <input type="text" dir="rtl" value={form.nameAr} onChange={e => setForm(f => ({ ...f, nameAr: e.target.value }))} className={inputClass} />
+                            <input type="text" dir="rtl" value={form.nameAr} onChange={e => setForm((f: any) => ({ ...f, nameAr: e.target.value }))} className={inputClass} />
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-[#666] mb-1">Slug *</label>
-                            <input type="text" required value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} className={inputClass} placeholder="electronique" />
+                            <input type="text" required value={form.slug} onChange={e => setForm((f: any) => ({ ...f, slug: e.target.value }))} className={inputClass} placeholder="electronique" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-[#666] mb-1">Icône</label>
-                            <input type="text" value={form.icon} onChange={e => setForm(f => ({ ...f, icon: e.target.value }))} className={inputClass} placeholder="Smartphone" />
+                            <input type="text" value={form.icon} onChange={e => setForm((f: any) => ({ ...f, icon: e.target.value }))} className={inputClass} placeholder="Smartphone" />
                         </div>
                     </div>
                     <div>

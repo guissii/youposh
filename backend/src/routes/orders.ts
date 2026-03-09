@@ -105,7 +105,7 @@ router.post('/', async (req, res) => {
 router.put('/:id/status', async (req, res) => {
     try {
         const { status } = req.body;
-        const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
+        const validStatuses = ['pending', 'processing', 'cancelled'];
 
         if (!validStatuses.includes(status)) {
             return res.status(400).json({ error: 'Invalid status' });

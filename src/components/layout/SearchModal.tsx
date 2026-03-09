@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, ArrowRight, Clock, TrendingUp } from 'lucide-react';
-import { useStore } from '@/contexts/StoreContext';
+import { fetchProducts } from '@/lib/api';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -22,9 +22,8 @@ const recentSearches: string[] = [];
 export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { searchProducts } = useStore();
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<ReturnType<typeof searchProducts>>([]);
+  const [results, setResults] = useState<any[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -35,11 +34,19 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   useEffect(() => {
     if (query.length >= 2) {
-      setResults(searchProducts(query).slice(0, 8));
+      const loadSearch = async () => {
+        try {
+          const data = await fetchProducts(`search=${encodeURIComponent(query)}`);
+          setResults(data.slice(0, 8));
+        } catch (error) {
+          console.error("Search failed", error);
+        }
+      };
+      loadSearch();
     } else {
       setResults([]);
     }
-  }, [query, searchProducts]);
+  }, [query]);
 
   const handleSearch = (searchQuery: string) => {
     if (searchQuery.trim()) {
@@ -54,11 +61,11 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   return (
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="absolute top-0 left-0 right-0 bg-white shadow-2xl">
         <div className="max-w-3xl mx-auto p-4">
@@ -75,7 +82,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
               className="w-full pl-12 pr-12 py-4 bg-gray-100 rounded-2xl text-lg focus:outline-none focus:ring-2 focus:ring-[#f5a623]"
             />
             {query && (
-              <button 
+              <button
                 onClick={() => setQuery('')}
                 className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-200 rounded-full"
               >
@@ -99,8 +106,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       }}
                       className="w-full flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors"
                     >
-                      <img 
-                        src={product.image} 
+                      <img
+                        src={product.image}
                         alt={i18n.language === 'ar' ? product.nameAr : product.name}
                         className="w-16 h-16 object-cover rounded-lg"
                       />

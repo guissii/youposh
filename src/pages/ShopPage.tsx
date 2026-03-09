@@ -5,7 +5,6 @@ import {
   Filter, Grid3X3, List, ChevronDown, X, SlidersHorizontal,
   ArrowUpDown, Flame, Percent, Sparkles, Star, Tag, Package
 } from 'lucide-react';
-import { useStore } from '@/contexts/StoreContext';
 import { fetchCategories, fetchProducts } from '@/lib/api';
 import ProductCard from '@/components/ui/ProductCard';
 import Header from '@/components/layout/Header';

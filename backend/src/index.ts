@@ -11,6 +11,7 @@ import dashboardRoutes from './routes/dashboard';
 import customerRoutes from './routes/customers';
 import promoCodeRoutes from './routes/promoCodes';
 import uploadRoutes from './routes/upload';
+import settingsRoutes from './routes/settings';
 import path from 'path';
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/promo-codes', promoCodeRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/settings', settingsRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

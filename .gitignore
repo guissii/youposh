@@ -1,1 +1,11 @@
 node_modules
+dist
+build
+.env
+.DS_Store
+*.log
+.originals
+uploads
+uploads/categories
+uploads/products
+brain

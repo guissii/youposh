@@ -6,11 +6,13 @@ import {
   MapPin, Phone, Mail, Truck, RefreshCw, CreditCard, ArrowRight,
   ChevronDown
 } from 'lucide-react';
+import { useStoreSettings } from '@/data/storeSettings';
 
 export default function Footer() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [openSection, setOpenSection] = useState<string | null>(null);
+  const storeSettings = useStoreSettings();
 
   const toggle = (section: string) =>
     setOpenSection(openSection === section ? null : section);
@@ -109,11 +111,11 @@ export default function Footer() {
               {t('footerDescription')}
             </p>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400">
-              <a href="tel:+212600000000" className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors">
-                <Phone className="w-3.5 h-3.5" /> +212 6XX XXX XXX
+              <a href={`tel:${storeSettings.phone.replace(/[^\d+]/g, '')}`} className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors">
+                <Phone className="w-3.5 h-3.5" /> {storeSettings.phone}
               </a>
-              <a href="mailto:contact@youposh.ma" className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors">
-                <Mail className="w-3.5 h-3.5" /> contact@youposh.ma
+              <a href={`mailto:${storeSettings.email}`} className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors">
+                <Mail className="w-3.5 h-3.5" /> {storeSettings.email}
               </a>
               <a href="https://maps.app.goo.gl/x4Ksr4TRyLTyn3k78" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors">
                 <MapPin className="w-3.5 h-3.5" /> Fès

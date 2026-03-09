@@ -18,7 +18,10 @@ interface OrderInfo {
   note?: string;
 }
 
-const WHATSAPP_NUMBER = '212600000000'; // Remplacez par votre numéro
+import { useStoreSettings } from '@/data/storeSettings';
+
+// Remove the hardcoded const WHATSAPP_NUMBER
+// since we will get it directly from settings now.
 
 export function generateWhatsAppMessage(product: Product, variant?: string): string {
   const variantText = variant ? `\nVariante: ${variant}` : '';
@@ -96,6 +99,7 @@ export default function WhatsAppButton({
 }: WhatsAppButtonProps) {
   const { t } = useTranslation();
   const [isMinimized, setIsMinimized] = useState(false);
+  const { phone } = useStoreSettings();
 
   const handleClick = () => {
     let message = '';
@@ -110,8 +114,10 @@ export default function WhatsAppButton({
       message = 'Bonjour, je suis intéressé par vos produits.';
     }
 
+    const cleanPhone = phone.replace(/[^\d]/g, '');
+    const finalPhone = cleanPhone || '212600000000';
     const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`, '_blank');
+    window.open(`https://wa.me/${finalPhone}?text=${encodedMessage}`, '_blank');
   };
 
   const baseStyles = 'flex items-center justify-center gap-2 font-semibold transition-all duration-300';

@@ -1,16 +1,8 @@
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react';
 import { toast } from 'sonner';
-import type { Product, CartItem, WishlistItem, Order, SortOption, FilterOption } from '@/types';
-import { products, searchProducts, getProductsByCategory } from '@/data/products';
-import { isActive, isNewProduct, isBestSellerProduct, getPopularityScore } from '@/lib/productLogic';
+import type { Product, CartItem, WishlistItem, Order } from '@/types';
 
 interface StoreContextType {
-  // Products
-  allProducts: Product[];
-  getFilteredProducts: (category?: string, sort?: SortOption, filter?: FilterOption) => Product[];
-  searchProducts: (query: string) => Product[];
-  getProductById: (id: number) => Product | undefined;
-
   // Cart
   cart: CartItem[];
   addToCart: (product: Product, quantity?: number, variant?: string) => void;
@@ -45,61 +37,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-
-  const allProducts = products;
-
-  const getFilteredProducts = useCallback((category?: string, sort: SortOption = 'popular', filter: FilterOption = 'all') => {
-    let result = category ? getProductsByCategory(category) : [...allProducts];
-
-    // Apply filter
-    switch (filter) {
-      case 'promo':
-        result = result.filter(p => isActive(p) && p.originalPrice != null && p.originalPrice > p.price);
-        break;
-      case 'new':
-        result = result.filter(p => isNewProduct(p));
-        break;
-      case 'bestseller':
-        result = result.filter(p => isBestSellerProduct(p));
-        break;
-      case 'in-stock':
-        result = result.filter(p => p.inStock);
-        break;
-    }
-
-    // Apply sort
-    switch (sort) {
-      case 'newest':
-        result = result.sort((a, b) => {
-          const dateA = new Date(a.publishedAt ?? 0).getTime();
-          const dateB = new Date(b.publishedAt ?? 0).getTime();
-          return dateB - dateA;
-        });
-        break;
-      case 'price-asc':
-        result = result.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-desc':
-        result = result.sort((a, b) => b.price - a.price);
-        break;
-      case 'promo':
-        result = result.sort((a, b) => {
-          const discountA = a.originalPrice ? a.originalPrice - a.price : 0;
-          const discountB = b.originalPrice ? b.originalPrice - b.price : 0;
-          return discountB - discountA;
-        });
-        break;
-      case 'popular':
-      default:
-        result = result.sort((a, b) => getPopularityScore(b) - getPopularityScore(a));
-    }
-
-    return result;
-  }, [allProducts]);
-
-  const getProductById = useCallback((id: number) => {
-    return allProducts.find(p => p.id === id);
-  }, [allProducts]);
 
   // Cart functions
   const addToCart = useCallback((product: Product, quantity = 1, variant?: string) => {
@@ -181,10 +118,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value: StoreContextType = {
-    allProducts,
-    getFilteredProducts,
-    searchProducts,
-    getProductById,
     cart,
     addToCart,
     removeFromCart,

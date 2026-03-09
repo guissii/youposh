@@ -10,7 +10,8 @@ import {
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { categories } from '@/data/products';
+import { useStoreSettings } from '@/data/storeSettings';
+import { fetchCategories } from '@/lib/api';
 import SearchModal from './SearchModal';
 
 const categoryIconMap: Record<string, React.ElementType> = {
@@ -23,14 +24,17 @@ export default function Header() {
   const location = useLocation();
   const { cartCount, setIsCartOpen } = useStore();
   const { language, toggleLanguage, isRTL } = useLanguage();
+  const { phone } = useStoreSettings();
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
   const [mobileCatsOpen, setMobileCatsOpen] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
+    fetchCategories().then(setCategories).catch(console.error);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
@@ -51,9 +55,9 @@ export default function Header() {
             <span className="sm:hidden text-gray-300">{t('deliveryShort')}</span>
           </div>
           <div className="flex items-center gap-4">
-            <a href="tel:+212600000000" className="flex items-center gap-1.5 text-gray-300 hover:text-[var(--yp-blue-light)] transition-colors">
+            <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className="flex items-center gap-1.5 text-gray-300 hover:text-[var(--yp-blue-light)] transition-colors">
               <Phone className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">+212 6XX XXX XXX</span>
+              <span className="hidden sm:inline">{phone}</span>
             </a>
             <div className="w-px h-3 bg-white/20" />
             <button
@@ -354,6 +358,7 @@ export default function Header() {
               <div className="px-3 py-2">
                 <p className="px-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--yp-gray-500)]">{t('services') || 'Services'}</p>
                 <nav className="space-y-0.5">
+                  {/* Services List */}
                   {[
                     { path: '/faq', label: t('faq') || 'FAQ', icon: CircleHelp },
                     { path: '/shipping', label: t('deliveryInfo') || 'Livraison', icon: Truck },
@@ -371,7 +376,8 @@ export default function Header() {
                   {/* WhatsApp Contact — Highlighted */}
                   <button
                     onClick={() => {
-                      window.open('https://wa.me/212600000000?text=' + encodeURIComponent('Bonjour, je suis intéressé par vos produits.'), '_blank');
+                      const cleanPhone = phone.replace(/[^\d]/g, '');
+                      window.open(`https://wa.me/${cleanPhone}?text=` + encodeURIComponent('Bonjour, je suis intéressé par vos produits.'), '_blank');
                       setIsMobileMenuOpen(false);
                     }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-[var(--yp-whatsapp-dark)] hover:bg-emerald-50 transition-all duration-200 active:scale-[0.98]"
@@ -408,11 +414,11 @@ export default function Header() {
 
               {/* Phone */}
               <a
-                href="tel:+212600000000"
+                href={`tel:${phone.replace(/[^\d+]/g, '')}`}
                 className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white text-sm text-[var(--yp-gray-600)] transition-colors"
               >
                 <Phone className="w-4 h-4" />
-                <span className="text-xs">+212 6XX XXX XXX</span>
+                <span className="text-xs">{phone}</span>
               </a>
             </div>
           </div>

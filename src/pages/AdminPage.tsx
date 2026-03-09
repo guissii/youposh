@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import {
   LayoutDashboard, ShoppingBag, Package, Users, Settings,
   LogOut, Search, Bell, DollarSign, Clock, CheckCircle,
   Eye, EyeOff, Plus, Pencil, Trash2, X,
-  TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Image
+  TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Image, Check
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -20,6 +21,7 @@ import { ProductFormModal } from '@/components/admin/ProductFormModal';
 import { PromoFormModal } from '@/components/admin/PromoFormModal';
 import { CategoryFormModal } from '@/components/admin/CategoryFormModal';
 import { loadHeroSettings, saveHeroSettings, type HeroSettings } from '@/data/heroSettings';
+import { loadStoreSettings, saveStoreSettings } from '@/data/storeSettings';
 import * as XLSX from 'xlsx';
 
 type TabId = 'dashboard' | 'orders' | 'products' | 'categories' | 'promos' | 'customers' | 'hero' | 'settings';
@@ -40,6 +42,7 @@ const AdminPage = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [promoCodes, setPromoCodes] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState('');
+  const [productCategoryFilter, setProductCategoryFilter] = useState<string>('all');
 
   const [productModal, setProductModal] = useState<{ open: boolean; product?: any }>({ open: false });
   const [promoModal, setPromoModal] = useState<{ open: boolean; promo?: any }>({ open: false });
@@ -160,7 +163,7 @@ const AdminPage = () => {
           { label: 'Total Commandes', value: stats?.totalOrders ?? '—', icon: ShoppingBag, color: 'from-blue-500 to-blue-600' },
           { label: 'Revenus', value: stats ? `${stats.totalRevenue.toFixed(2)} MAD` : '—', icon: DollarSign, color: 'from-emerald-500 to-emerald-600' },
           { label: 'En attente', value: stats?.pendingOrders ?? '—', icon: Clock, color: 'from-amber-500 to-orange-500' },
-          { label: 'Terminées', value: stats?.completedOrders ?? '—', icon: CheckCircle, color: 'from-purple-500 to-purple-600' },
+          { label: 'En traitement', value: stats?.processingOrders ?? '—', icon: Package, color: 'from-purple-500 to-purple-600' },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
@@ -206,7 +209,7 @@ const AdminPage = () => {
         <h3 className="font-semibold text-[#333]">Commandes ({orders.length})</h3>
         <div className="flex gap-3">
           <div className="relative"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Rechercher..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#f5a623]" /></div>
-          <div className="relative"><select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#f5a623] appearance-none pr-8 bg-white"><option value="">Tous</option><option value="pending">En attente</option><option value="processing">Traitement</option><option value="shipped">Expédié</option><option value="completed">Terminé</option><option value="cancelled">Annulé</option></select><ChevronDown className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 text-[#999] pointer-events-none" /></div>
+          <div className="relative"><select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#f5a623] appearance-none pr-8 bg-white"><option value="">Tous</option><option value="pending">En attente</option><option value="processing">Traitement</option><option value="cancelled">Annulé</option></select><ChevronDown className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 text-[#999] pointer-events-none" /></div>
         </div>
       </div>
       <div className="overflow-x-auto">
@@ -237,63 +240,90 @@ const AdminPage = () => {
     </div>
   );
 
-  // ─── Products ───────────────────────────────────────────────
-  const renderProducts = () => (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-      <div className="p-5 border-b flex items-center justify-between flex-wrap gap-4">
-        <h3 className="font-semibold text-[#333]">Produits ({products.length})</h3>
-        <div className="flex gap-3">
-          <div className="relative"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Rechercher..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#f5a623]" /></div>
-          <button onClick={() => setProductModal({ open: true })} className="px-4 py-2 bg-[#f5a623] text-white rounded-xl text-sm font-medium hover:bg-[#e09422] flex items-center gap-2 shadow-sm"><Plus className="w-4 h-4" />Ajouter</button>
+  const renderProducts = () => {
+    const filteredProducts = products.filter(p =>
+      productCategoryFilter === 'all' || p.categorySlug === productCategoryFilter || p.category?.slug === productCategoryFilter
+    );
+
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div className="p-5 border-b flex items-center justify-between flex-wrap gap-4">
+          <h3 className="font-semibold text-[#333]">Produits ({filteredProducts.length})</h3>
+          <div className="flex gap-3">
+            <div className="relative"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Rechercher..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#f5a623]" /></div>
+            <button onClick={() => setProductModal({ open: true })} className="px-4 py-2 bg-[#f5a623] text-white rounded-xl text-sm font-medium hover:bg-[#e09422] flex items-center gap-2 shadow-sm"><Plus className="w-4 h-4" />Ajouter</button>
+          </div>
+        </div>
+
+        {/* Category Pills Filter */}
+        <div className="w-full overflow-hidden border-b border-gray-100 bg-gray-50/50">
+          <div className="px-5 py-4 flex gap-2 overflow-x-auto no-scrollbar scroll-smooth">
+            <button
+              onClick={() => setProductCategoryFilter('all')}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${productCategoryFilter === 'all' ? 'bg-[#f5a623] text-white shadow-sm' : 'bg-white text-[#666] border border-gray-200 hover:bg-gray-100'}`}
+            >
+              Toutes les catégories
+            </button>
+            {categories.map(c => (
+              <button
+                key={c.id}
+                onClick={() => setProductCategoryFilter(c.slug)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${productCategoryFilter === c.slug ? 'bg-[#f5a623] text-white shadow-sm' : 'bg-white text-[#666] border border-gray-200 hover:bg-gray-100'}`}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="w-full max-w-[calc(100vw-300px)] overflow-x-auto">
+          <table className="w-full whitespace-nowrap">
+            <thead className="bg-gray-50/80"><tr>{['Produit', 'Catégorie', 'Prix', 'Stock', 'Ventes', 'Flags', 'Visible', 'Actions'].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#999] uppercase tracking-wider">{h}</th>)}</tr></thead>
+            <tbody className="divide-y">
+              {filteredProducts.length === 0 && <tr><td colSpan={8} className="px-5 py-12 text-center text-[#999]">Aucun produit trouvé</td></tr>}
+              {filteredProducts.map(p => (
+                <tr key={p.id} className={`hover:bg-gray-50/50 transition-colors ${!p.isVisible ? 'opacity-50' : ''}`}>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      {p.image && <img src={p.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-gray-100" />}
+                      <div><p className="font-medium text-[#333] text-sm">{p.name}</p><p className="text-xs text-[#999]">{p.sku}</p></div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3"><span className="text-xs bg-gray-100 px-2 py-1 rounded-lg text-[#666]">{p.category?.name || p.categorySlug || '—'}</span></td>
+                  <td className="px-4 py-3">
+                    <p className="text-[#f5a623] font-semibold text-sm">{p.price.toFixed(2)} MAD</p>
+                    {p.originalPrice && <p className="text-xs text-[#999] line-through">{p.originalPrice.toFixed(2)}</p>}
+                  </td>
+                  <td className="px-4 py-3"><span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${p.stock < 10 ? 'bg-red-100 text-red-600' : p.stock < 30 ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>{p.stock}</span></td>
+                  <td className="px-4 py-3 text-sm text-[#666]"><div className="flex items-center gap-1"><TrendingUp className="w-3 h-3 text-green-500" />{p.salesCount}</div></td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {p.originalPrice && p.originalPrice > p.price && <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-600">🏷 Promo</span>}
+                      {p.isNew && <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-600">✨ Nouveau</span>}
+                      {p.isBestSeller && <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-600">🔥 Best</span>}
+                      {p.isFeatured && <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-600">⭐ Mis en avant</span>}
+                      {!p.originalPrice && !p.isNew && !p.isBestSeller && !p.isFeatured && <span className="text-xs text-[#ccc]">—</span>}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <button onClick={() => toggleVisibility(p)} className={`p-2 rounded-lg transition-colors ${p.isVisible ? 'hover:bg-green-50 text-green-600' : 'hover:bg-red-50 text-red-400'}`} title={p.isVisible ? 'Masquer' : 'Afficher'}>
+                      {p.isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-1">
+                      <button onClick={() => setProductModal({ open: true, product: p })} className="p-2 hover:bg-blue-50 rounded-lg text-[#666] hover:text-blue-600"><Pencil className="w-4 h-4" /></button>
+                      <button onClick={() => setDeleteConfirm({ type: 'product', id: p.id })} className="p-2 hover:bg-red-50 rounded-lg text-[#666] hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50/80"><tr>{['Produit', 'Catégorie', 'Prix', 'Stock', 'Ventes', 'Flags', 'Visible', 'Actions'].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#999] uppercase tracking-wider">{h}</th>)}</tr></thead>
-          <tbody className="divide-y">
-            {products.length === 0 && <tr><td colSpan={8} className="px-5 py-12 text-center text-[#999]">Aucun produit trouvé</td></tr>}
-            {products.map(p => (
-              <tr key={p.id} className={`hover:bg-gray-50/50 transition-colors ${!p.isVisible ? 'opacity-50' : ''}`}>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    {p.image && <img src={p.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-gray-100" />}
-                    <div><p className="font-medium text-[#333] text-sm">{p.name}</p><p className="text-xs text-[#999]">{p.sku}</p></div>
-                  </div>
-                </td>
-                <td className="px-4 py-3"><span className="text-xs bg-gray-100 px-2 py-1 rounded-lg text-[#666]">{p.category?.name || p.categorySlug || '—'}</span></td>
-                <td className="px-4 py-3">
-                  <p className="text-[#f5a623] font-semibold text-sm">{p.price.toFixed(2)} MAD</p>
-                  {p.originalPrice && <p className="text-xs text-[#999] line-through">{p.originalPrice.toFixed(2)}</p>}
-                </td>
-                <td className="px-4 py-3"><span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${p.stock < 10 ? 'bg-red-100 text-red-600' : p.stock < 30 ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>{p.stock}</span></td>
-                <td className="px-4 py-3 text-sm text-[#666]"><div className="flex items-center gap-1"><TrendingUp className="w-3 h-3 text-green-500" />{p.salesCount}</div></td>
-                <td className="px-4 py-3">
-                  <div className="flex flex-wrap gap-1">
-                    {p.originalPrice && p.originalPrice > p.price && <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-600">🏷 Promo</span>}
-                    {p.isNew && <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-600">✨ Nouveau</span>}
-                    {p.isBestSeller && <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-600">🔥 Best</span>}
-                    {p.isFeatured && <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-600">⭐ Mis en avant</span>}
-                    {!p.originalPrice && !p.isNew && !p.isBestSeller && !p.isFeatured && <span className="text-xs text-[#ccc]">—</span>}
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <button onClick={() => toggleVisibility(p)} className={`p-2 rounded-lg transition-colors ${p.isVisible ? 'hover:bg-green-50 text-green-600' : 'hover:bg-red-50 text-red-400'}`} title={p.isVisible ? 'Masquer' : 'Afficher'}>
-                    {p.isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                  </button>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-1">
-                    <button onClick={() => setProductModal({ open: true, product: p })} className="p-2 hover:bg-blue-50 rounded-lg text-[#666] hover:text-blue-600"><Pencil className="w-4 h-4" /></button>
-                    <button onClick={() => setDeleteConfirm({ type: 'product', id: p.id })} className="p-2 hover:bg-red-50 rounded-lg text-[#666] hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+    );
+  };
 
   // ─── Categories ─────────────────────────────────────────────
   const renderCategories = () => (
@@ -398,16 +428,154 @@ const AdminPage = () => {
   );
 
   // ─── Settings ───────────────────────────────────────────────
+  const [storeForm, setStoreForm] = useState(loadStoreSettings());
+  const [storeSaved, setStoreSaved] = useState(false);
+  const [applyingWatermark, setApplyingWatermark] = useState(false);
+
+  const handleStoreSave = async () => {
+    try {
+      await saveStoreSettings(storeForm);
+      setStoreSaved(true);
+      toast.success('Paramètres enregistrés');
+      setTimeout(() => setStoreSaved(false), 2000);
+    } catch (e) {
+      toast.error('Erreur lors de la sauvegarde');
+    }
+  };
+
   const renderSettings = () => (
     <div className="space-y-6">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h3 className="font-semibold text-[#333] mb-4">Informations de la boutique</h3>
         <div className="grid md:grid-cols-2 gap-4">
-          {[{ label: 'Nom de la boutique', value: 'YouShop' }, { label: 'Téléphone WhatsApp', value: '+212 6XX XXX XXX' }, { label: 'Devise', value: 'MAD' }, { label: 'Frais de livraison', value: '30' }].map(f => (
-            <div key={f.label}><label className="block text-sm font-medium text-[#666] mb-1">{f.label}</label><input type="text" defaultValue={f.value} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#f5a623]" /></div>
-          ))}
+          <div><label className="block text-sm font-medium text-[#666] mb-1">Nom de la boutique</label><input type="text" value={storeForm.storeName} onChange={e => setStoreForm((f: any) => ({ ...f, storeName: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#f5a623]" placeholder="YouShop" /></div>
+          <div><label className="block text-sm font-medium text-[#666] mb-1">Téléphone WhatsApp</label><input type="text" value={storeForm.phone} onChange={e => setStoreForm((f: any) => ({ ...f, phone: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#f5a623]" placeholder="+212 6XX XXX XXX" /></div>
+          <div><label className="block text-sm font-medium text-[#666] mb-1">Email de contact</label><input type="email" value={storeForm.email} onChange={e => setStoreForm((f: any) => ({ ...f, email: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#f5a623]" placeholder="contact@youposh.ma" /></div>
+          <div><label className="block text-sm font-medium text-[#666] mb-1">Devise</label><input type="text" value={storeForm.currency} onChange={e => setStoreForm((f: any) => ({ ...f, currency: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#f5a623]" placeholder="MAD" /></div>
+          <div><label className="block text-sm font-medium text-[#666] mb-1">Frais de livraison ({storeForm.currency})</label><input type="number" value={storeForm.shippingFee} onChange={e => setStoreForm((f: any) => ({ ...f, shippingFee: Number(e.target.value) }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#f5a623]" placeholder="30" /></div>
         </div>
-        <button className="mt-4 px-6 py-2.5 bg-[#f5a623] text-white rounded-xl hover:bg-[#e09422] font-medium flex items-center gap-2"><Save className="w-4 h-4" />Enregistrer</button>
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          <h4 className="font-medium text-[#333] mb-4">Filigrane (Watermark) sur les images</h4>
+          <div className="space-y-4">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" checked={storeForm.watermarkEnabled ?? true} onChange={e => setStoreForm((f: any) => ({ ...f, watermarkEnabled: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#f5a623] focus:ring-[#f5a623]" />
+              <span className="text-sm font-medium text-[#333]">Activer le filigrane automatique (Logo YOUPOSH au centre)</span>
+            </label>
+
+            {(storeForm.watermarkEnabled ?? true) && (
+              <div className="flex gap-6 flex-wrap lg:flex-nowrap">
+                {/* Controls */}
+                <div className="flex-1 min-w-[280px] space-y-4">
+                  {/* Opacity slider */}
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-sm font-medium text-[#666]">Opacité du logo</label>
+                      <span className="text-sm font-bold text-[#f5a623]">{storeForm.watermarkOpacity ?? 20}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="5"
+                      value={storeForm.watermarkOpacity ?? 20}
+                      onChange={e => setStoreForm((f: any) => ({ ...f, watermarkOpacity: Number(e.target.value) }))}
+                      className="w-full accent-[#f5a623]"
+                    />
+                    <div className="flex justify-between text-[10px] text-[#999] mt-1"><span>Invisible</span><span>Opaque</span></div>
+                  </div>
+
+                  {/* Size slider */}
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-sm font-medium text-[#666]">Taille du logo</label>
+                      <span className="text-sm font-bold text-[#f5a623]">{storeForm.watermarkSize ?? 30}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="10"
+                      max="80"
+                      step="5"
+                      value={storeForm.watermarkSize ?? 30}
+                      onChange={e => setStoreForm((f: any) => ({ ...f, watermarkSize: Number(e.target.value) }))}
+                      className="w-full accent-[#f5a623]"
+                    />
+                    <div className="flex justify-between text-[10px] text-[#999] mt-1"><span>Petit</span><span>Grand</span></div>
+                  </div>
+                </div>
+
+                {/* Live Preview */}
+                <div className="flex-shrink-0">
+                  <p className="text-xs font-medium text-[#666] mb-2 uppercase tracking-wider">Aperçu en direct</p>
+                  <div className="relative w-[220px] h-[220px] rounded-xl overflow-hidden border-2 border-gray-200 shadow-inner"
+                    style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%)' }}
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="w-24 h-24 mx-auto rounded-2xl bg-white/60 shadow-sm flex items-center justify-center mb-2">
+                          <span className="text-4xl">📦</span>
+                        </div>
+                        <p className="text-xs text-gray-400 font-medium">Image produit</p>
+                      </div>
+                    </div>
+                    <div
+                      className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-200"
+                      style={{ opacity: (storeForm.watermarkOpacity ?? 20) / 100 }}
+                    >
+                      <img
+                        src="/images/categories/logo final.png"
+                        alt="Watermark"
+                        className="object-contain drop-shadow-lg transition-all duration-200"
+                        style={{ width: `${storeForm.watermarkSize ?? 30}%`, height: `${storeForm.watermarkSize ?? 30}%` }}
+                      />
+                    </div>
+                    <div className="absolute bottom-2 left-2 right-2 flex justify-between">
+                      <span className="bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-full font-medium">
+                        Opacité : {storeForm.watermarkOpacity ?? 20}%
+                      </span>
+                      <span className="bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-full font-medium">
+                        Taille : {storeForm.watermarkSize ?? 30}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-3 mt-4">
+          <button onClick={handleStoreSave} className="px-6 py-2.5 bg-[#f5a623] text-white rounded-xl hover:bg-[#e09422] font-medium flex items-center gap-2 transition-colors">
+            {storeSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {storeSaved ? 'Enregistré' : 'Enregistrer'}
+          </button>
+          {(storeForm.watermarkEnabled ?? true) && (
+            <button
+              onClick={async () => {
+                // Save settings first
+                saveStoreSettings(storeForm);
+                setApplyingWatermark(true);
+                try {
+                  const res = await fetch('http://localhost:5000/api/upload/watermark-all', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ opacity: storeForm.watermarkOpacity ?? 20, size: storeForm.watermarkSize ?? 30 }),
+                  });
+                  const data = await res.json();
+                  toast.success(`Watermark appliqué ! ✅ ${data.success}/${data.total} images traitées`);
+                } catch (err) {
+                  toast.error('Erreur lors de l\'application du watermark');
+                  console.error(err);
+                } finally {
+                  setApplyingWatermark(false);
+                }
+              }}
+              disabled={applyingWatermark}
+              className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 font-medium flex items-center gap-2 transition-all disabled:opacity-60 shadow-sm"
+            >
+              {applyingWatermark ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Image className="w-4 h-4" />}
+              {applyingWatermark ? 'Application en cours...' : 'Appliquer aux images existantes'}
+            </button>
+          )}
+        </div>
       </div>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h3 className="font-semibold text-[#333] mb-2">Base de données</h3>
@@ -421,10 +589,14 @@ const AdminPage = () => {
   const [heroForm, setHeroForm] = useState<HeroSettings>(loadHeroSettings());
   const [heroSaved, setHeroSaved] = useState(false);
 
-  const handleHeroSave = () => {
-    saveHeroSettings(heroForm);
-    setHeroSaved(true);
-    setTimeout(() => setHeroSaved(false), 2000);
+  const handleHeroSave = async () => {
+    try {
+      await saveHeroSettings(heroForm);
+      setHeroSaved(true);
+      setTimeout(() => setHeroSaved(false), 2000);
+    } catch (e) {
+      toast.error('Erreur lors de la sauvegarde');
+    }
   };
 
   const heroInput = (label: string, key: keyof HeroSettings, type: string = 'text', placeholder = '') => (
@@ -539,7 +711,7 @@ const AdminPage = () => {
   const renderOrderDetail = () => {
     if (!orderDetail) return null;
     const o = orderDetail;
-    const statusFlow = ['pending', 'processing', 'shipped', 'delivered', 'completed'];
+    const statusFlow = ['pending', 'processing'];
     const cur = statusFlow.indexOf(o.status);
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -603,7 +775,7 @@ const AdminPage = () => {
         <header className="bg-white/80 backdrop-blur-md shadow-sm px-8 py-4 flex items-center justify-between sticky top-0 z-[5] border-b border-gray-100">
           <div><h1 className="text-xl font-bold text-[#333]">{tabTitles[activeTab]}</h1><p className="text-xs text-[#999] mt-0.5">{new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
           <div className="flex items-center gap-3">
-            <button className="p-2.5 hover:bg-gray-100 rounded-xl relative"><Bell className="w-5 h-5 text-[#666]" />{stats && stats.pendingOrders > 0 && <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 rounded-full text-[10px] text-white font-bold flex items-center justify-center">{stats.pendingOrders}</span>}</button>
+            <button className="p-2.5 hover:bg-gray-100 rounded-xl relative"><Bell className="w-5 h-5 text-[#666]" />{(stats?.pendingOrders ?? 0) > 0 && <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 rounded-full text-[10px] text-white font-bold flex items-center justify-center">{stats?.pendingOrders}</span>}</button>
             <div className="w-10 h-10 bg-gradient-to-br from-[#f5a623] to-[#e09422] rounded-xl flex items-center justify-center text-white font-bold shadow-md">A</div>
           </div>
         </header>

@@ -13,14 +13,14 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import CartDrawer from '@/components/layout/CartDrawer';
 import WhatsAppButton, { generateOrderWhatsAppMessage } from '@/components/ui/WhatsAppButton';
-
-const WHATSAPP_NUMBER = '212600000000';
+import { useStoreSettings } from '@/data/storeSettings';
 
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { addToCart, addToWishlist, isInWishlist } = useStore();
+  const { phone } = useStoreSettings();
 
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -108,7 +108,8 @@ export default function ProductPage() {
       },
       deliveryFee
     );
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+    const cleanPhone = phone.replace(/[^\d]/g, '') || '212600000000';
+    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleAddToCart = () => {

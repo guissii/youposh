@@ -3,18 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { X, Plus, Minus, ShoppingBag, Trash2, MessageCircle, ArrowRight } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
 import { generateCartWhatsAppMessage } from '@/components/ui/WhatsAppButton';
-
-const WHATSAPP_NUMBER = '212600000000';
+import { useStoreSettings } from '@/data/storeSettings';
 
 export default function CartDrawer() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateCartQuantity, cartTotal } = useStore();
+  const { phone } = useStoreSettings();
 
   const handleWhatsAppOrder = () => {
     if (cart.length === 0) return;
     const message = generateCartWhatsAppMessage(cart);
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+    const cleanPhone = phone.replace(/[^\d]/g, '') || '212600000000';
+    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   if (!isCartOpen) return null;
@@ -22,11 +23,11 @@ export default function CartDrawer() {
   return (
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={() => setIsCartOpen(false)}
       />
-      
+
       {/* Drawer */}
       <div className={`absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col ${i18n.language === 'ar' ? 'right-auto left-0' : ''}`}>
         {/* Header */}
@@ -38,7 +39,7 @@ export default function CartDrawer() {
               {cart.length}
             </span>
           </div>
-          <button 
+          <button
             onClick={() => setIsCartOpen(false)}
             className="p-2 hover:bg-gray-100 rounded-lg"
           >
@@ -55,7 +56,7 @@ export default function CartDrawer() {
               </div>
               <h3 className="text-lg font-medium text-[#333] mb-2">{t('emptyCart')}</h3>
               <p className="text-[#666] mb-6">{t('emptyCartDesc')}</p>
-              <button 
+              <button
                 onClick={() => {
                   setIsCartOpen(false);
                   navigate('/shop');
@@ -84,7 +85,7 @@ export default function CartDrawer() {
                     <p className="text-[#f5a623] font-bold mt-1">
                       {item.product.price} dh
                     </p>
-                    
+
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center gap-2">
                         <button
@@ -122,9 +123,9 @@ export default function CartDrawer() {
               <span className="text-[#666]">{t('subtotal')}</span>
               <span className="text-2xl font-bold text-[#f5a623]">{cartTotal} dh</span>
             </div>
-            
+
             <p className="text-xs text-[#666]">{t('shippingCalculated')}</p>
-            
+
             <button
               onClick={handleWhatsAppOrder}
               className="w-full bg-green-500 hover:bg-green-600 text-white py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors"
@@ -132,7 +133,7 @@ export default function CartDrawer() {
               <MessageCircle className="w-5 h-5" />
               {t('orderViaWhatsApp')}
             </button>
-            
+
             <button
               onClick={() => {
                 setIsCartOpen(false);

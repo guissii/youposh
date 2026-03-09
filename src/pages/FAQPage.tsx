@@ -95,9 +95,12 @@ const faqData: FAQItem[] = [
     },
 ];
 
+import { useStoreSettings } from '@/data/storeSettings';
+
 export default function FAQPage() {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
     const [activeCategory, setActiveCategory] = useState<string>('Tous');
+    const { phone } = useStoreSettings();
 
     const categoriesList = ['Tous', ...Array.from(new Set(faqData.map(f => f.category)))];
     const filtered = activeCategory === 'Tous' ? faqData : faqData.filter(f => f.category === activeCategory);
@@ -202,7 +205,10 @@ export default function FAQPage() {
                                 Notre équipe est disponible sur WhatsApp pour répondre à toutes vos questions.
                             </p>
                             <button
-                                onClick={() => window.open('https://wa.me/212600000000?text=' + encodeURIComponent('Bonjour, j\'ai une question.'), '_blank')}
+                                onClick={() => {
+                                    const cleanPhone = phone.replace(/[^\d]/g, '') || '212600000000';
+                                    window.open(`https://wa.me/${cleanPhone}?text=` + encodeURIComponent('Bonjour, j\'ai une question.'), '_blank');
+                                }}
                                 className="bg-[var(--yp-whatsapp)] hover:bg-[var(--yp-whatsapp-dark)] text-white px-7 py-3.5 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl active:scale-[0.98] flex items-center gap-2 mx-auto"
                             >
                                 <MessageCircle className="w-5 h-5" />

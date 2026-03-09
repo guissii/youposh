@@ -102,3 +102,38 @@ model PromoCode {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
+
+model StoreSettings {
+  id               Int      @id @default(1)
+  storeName        String   @default("YouShop")
+  phone            String   @default("+212 6XX XXX XXX")
+  email            String   @default("contact@youposh.ma")
+  currency         String   @default("MAD")
+  shippingFee      Float    @default(30)
+  watermarkEnabled Boolean  @default(true)
+  watermarkOpacity Int      @default(20)
+  watermarkSize    Int      @default(30)
+  updatedAt        DateTime @updatedAt
+}
+
+model HeroSettings {
+  id               Int      @id @default(1)
+  isEnabled        Boolean  @default(true)
+  badgeText        String   @default("Boutique N°1 au Maroc")
+  title            String   @default("Des produits tendance pour votre quotidien")
+  subtitle         String   @default("Gadgets, accessoires et articles utiles sélectionnés pour vous. Livraison partout au Maroc — paiement à la livraison.")
+  slogan           String   @default("Votre boutique tendance au Maroc")
+  primaryCtaText   String   @default("Explorer la boutique")
+  primaryCtaLink   String   @default("/shop")
+  secondaryCtaText String   @default("Voir les promotions")
+  secondaryCtaLink String   @default("/shop?filter=promo")
+  videoEnabled     Boolean  @default(true)
+  videoUrl         String   @default("/videos/demo.mp4")
+  videoPosterUrl   String   @default("/images/products/headphones.jpg")
+  videoAutoplay    Boolean  @default(true)
+  videoMuted       Boolean  @default(true)
+  videoLoop        Boolean  @default(true)
+  showOnMobile     Boolean  @default(true)
+  overlayOpacity   Int      @default(55)
+  updatedAt        DateTime @updatedAt
+}

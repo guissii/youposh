@@ -52,7 +52,10 @@ const steps = [
     },
 ];
 
+import { useStoreSettings } from '@/data/storeSettings';
+
 export default function ShippingPage() {
+    const { phone } = useStoreSettings();
 
     return (
         <div className="min-h-screen bg-[var(--yp-gray-100)]">
@@ -199,7 +202,10 @@ export default function ShippingPage() {
                                 Livraison rapide, paiement à la livraison. Commandez maintenant sur WhatsApp !
                             </p>
                             <button
-                                onClick={() => window.open('https://wa.me/212600000000?text=' + encodeURIComponent('Bonjour, je souhaite passer une commande.'), '_blank')}
+                                onClick={() => {
+                                    const cleanPhone = phone.replace(/[^\d]/g, '') || '212600000000';
+                                    window.open(`https://wa.me/${cleanPhone}?text=` + encodeURIComponent('Bonjour, je souhaite passer une commande.'), '_blank');
+                                }}
                                 className="bg-[var(--yp-whatsapp)] hover:bg-[var(--yp-whatsapp-dark)] text-white px-7 py-3.5 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl active:scale-[0.98] flex items-center gap-2 mx-auto"
                             >
                                 <MessageCircle className="w-5 h-5" />
