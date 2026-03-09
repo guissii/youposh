@@ -143,7 +143,7 @@ export default function ProductPage() {
               <div className="space-y-4">
                 <div className="relative aspect-square bg-white rounded-2xl overflow-hidden shadow-card">
                   <img
-                    src={product.images[selectedImage]}
+                    src={`${product.images[selectedImage]}?v=wmki`}
                     alt={isAr ? product.nameAr : product.name}
                     className="w-full h-full object-cover"
                   />
@@ -175,7 +175,7 @@ export default function ProductPage() {
                       className={`w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === i ? 'border-[var(--yp-blue)] shadow-md' : 'border-transparent hover:border-[var(--yp-gray-400)]'
                         }`}
                     >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
+                      <img src={`${img}?v=wmki`} alt="" className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
@@ -628,7 +628,7 @@ export default function ProductPage() {
             <X className="w-6 h-6 text-white" />
           </button>
           <img
-            src={product.images[selectedImage]}
+            src={`${product.images[selectedImage]}?v=wmki`}
             alt=""
             className="max-w-full max-h-[90vh] object-contain"
             onClick={(e) => e.stopPropagation()}

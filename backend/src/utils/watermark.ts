@@ -13,8 +13,10 @@ const LOGO_PATH = path.join(__dirname, '../../../public/images/categories/logo f
  * @param inputPath - Absolute path to the image to watermark
  * @param opacity   - Opacity percentage (0-100). Example: 20 means the logo is 20% visible.
  * @param sizePct   - Size percentage (10-80). The logo will be this % of the image's smaller dimension.
+ * @param posX      - Custom X position percentage (0-100)
+ * @param posY      - Custom Y position percentage (0-100)
  */
-export async function applyWatermark(inputPath: string, opacity: number, sizePct: number = 30): Promise<void> {
+export async function applyWatermark(inputPath: string, opacity: number, sizePct: number = 30, posX: number = 50, posY: number = 50): Promise<void> {
     if (!fs.existsSync(LOGO_PATH)) {
         console.warn('[watermark] Logo file not found at', LOGO_PATH, '— skipping watermark.');
         return;
@@ -79,11 +81,24 @@ export async function applyWatermark(inputPath: string, opacity: number, sizePct
         .png()
         .toBuffer();
 
-    // Composite the watermark onto the source image, centered
+    // Ensure bounds
+    const clampX = Math.max(0, Math.min(100, posX));
+    const clampY = Math.max(0, Math.min(100, posY));
+
+    // Calculate precise coordinates, aligning the *center* of the logo to the chosen percentage
+    let left = Math.round((targetWidth * (clampX / 100)) - (logoW / 2));
+    let top = Math.round((targetHeight * (clampY / 100)) - (logoH / 2));
+
+    // Constrain so logo doesn't overflow
+    left = Math.max(0, Math.min(targetWidth - logoW, left));
+    top = Math.max(0, Math.min(targetHeight - logoH, top));
+
+    // Composite the watermark onto the source image at coordinates
     const outputBuffer = await sharp(sourceBuffer)
         .composite([{
             input: watermarkBuffer,
-            gravity: 'centre',
+            top: top,
+            left: left,
         }])
         .toBuffer();
 
@@ -127,7 +142,7 @@ export async function getAllImages(dir: string): Promise<string[]> {
  * Apply watermark to ALL images in the standard directories.
  * Returns { total, success, failed } counts.
  */
-export async function applyWatermarkToAll(opacity: number, sizePct: number): Promise<{ total: number; success: number; failed: number }> {
+export async function applyWatermarkToAll(opacity: number, sizePct: number, posX: number = 50, posY: number = 50): Promise<{ total: number; success: number; failed: number }> {
     const dirs = [
         path.join(__dirname, '../../../public/images/products'),
         path.join(__dirname, '../../../uploads/categories'),
@@ -141,11 +156,50 @@ export async function applyWatermarkToAll(opacity: number, sizePct: number): Pro
         for (const img of images) {
             total++;
             try {
-                await applyWatermark(img, opacity, sizePct);
+                await applyWatermark(img, opacity, sizePct, posX, posY);
                 success++;
             } catch (err: any) {
                 console.error(`[watermark] ❌ ${path.basename(img)}: ${err.message}`);
                 failed++;
+            }
+        }
+    }
+
+    return { total, success, failed };
+}
+
+/**
+ * Remove watermarks by restoring ALL original images from their backups.
+ * Returns { total, success, failed } counts.
+ */
+export async function restoreAllOriginals(): Promise<{ total: number; success: number; failed: number }> {
+    const dirs = [
+        path.join(__dirname, '../../../public/images/products'),
+        path.join(__dirname, '../../../uploads/categories'),
+        path.join(__dirname, '../../../uploads/products'),
+    ];
+
+    let total = 0, success = 0, failed = 0;
+
+    for (const dir of dirs) {
+        const backupDir = path.join(dir, '.originals');
+        if (!fs.existsSync(backupDir)) continue;
+
+        const entries = fs.readdirSync(backupDir, { withFileTypes: true });
+        for (const entry of entries) {
+            if (entry.isFile() && IMAGE_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) {
+                total++;
+                const backupPath = path.join(backupDir, entry.name);
+                const targetPath = path.join(dir, entry.name);
+
+                try {
+                    // Copy backup over the watermarked image
+                    fs.copyFileSync(backupPath, targetPath);
+                    success++;
+                } catch (err: any) {
+                    console.error(`[watermark-restore] ❌ ${entry.name}: ${err.message}`);
+                    failed++;
+                }
             }
         }
     }

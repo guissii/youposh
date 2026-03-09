@@ -46,7 +46,7 @@ export default function ProductCard({ product, variant = 'default' }: ProductCar
       >
         <div className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden bg-[#f8f8f8]">
           {imgError ? <ImageFallback /> : (
-            <img src={product.image} alt={name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
+            <img src={`${product.image}?v=wmki`} alt={name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
           )}
           {discount > 0 && (
             <span className="absolute top-1 right-1 bg-[var(--yp-red)] text-white text-[9px] px-1.5 py-0.5 rounded-md font-bold">
@@ -84,7 +84,7 @@ export default function ProductCard({ product, variant = 'default' }: ProductCar
       >
         <div className="relative aspect-square bg-[#f8f8f8]">
           {imgError ? <ImageFallback /> : (
-            <img src={product.image} alt={name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
+            <img src={`${product.image}?v=wmki`} alt={name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
           )}
           {badge && (
             <span className={`absolute top-2 left-2 text-[10px] px-2 py-0.5 rounded-md font-bold ${badge === 'promo' ? 'bg-[var(--yp-red)] text-white' :
@@ -145,7 +145,7 @@ export default function ProductCard({ product, variant = 'default' }: ProductCar
         <div className="relative w-full h-full flex items-center justify-center">
           {imgError ? <ImageFallback /> : (
             <img
-              src={product.image}
+              src={`${product.image}?v=wmki`}
               alt={name}
               className="max-w-full max-h-full object-contain group-hover:scale-[1.03] transition-transform duration-500"
               onError={() => setImgError(true)}

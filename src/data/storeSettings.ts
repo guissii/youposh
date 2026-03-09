@@ -7,6 +7,8 @@ export interface StoreSettings {
     watermarkEnabled: boolean;
     watermarkOpacity: number;
     watermarkSize: number;
+    watermarkPosX: number;
+    watermarkPosY: number;
 }
 
 export const defaultStoreSettings: StoreSettings = {
@@ -18,6 +20,8 @@ export const defaultStoreSettings: StoreSettings = {
     watermarkEnabled: true,
     watermarkOpacity: 20,
     watermarkSize: 30,
+    watermarkPosX: 50,
+    watermarkPosY: 50,
 };
 
 import { useState, useEffect } from 'react';

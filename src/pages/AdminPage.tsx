@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
@@ -431,6 +431,53 @@ const AdminPage = () => {
   const [storeForm, setStoreForm] = useState(loadStoreSettings());
   const [storeSaved, setStoreSaved] = useState(false);
   const [applyingWatermark, setApplyingWatermark] = useState(false);
+  const [isDraggingWatermark, setIsDraggingWatermark] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
+
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    setIsDraggingWatermark(true);
+  };
+
+  const handleDrag = useCallback((e: MouseEvent | TouchEvent) => {
+    if (!isDraggingWatermark || !previewRef.current) return;
+
+    const rect = previewRef.current.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
+
+    let x = ((clientX - rect.left) / rect.width) * 100;
+    let y = ((clientY - rect.top) / rect.height) * 100;
+
+    x = Math.max(0, Math.min(100, Math.round(x)));
+    y = Math.max(0, Math.min(100, Math.round(y)));
+
+    setStoreForm((f: any) => ({ ...f, watermarkPosX: x, watermarkPosY: y }));
+  }, [isDraggingWatermark]);
+
+  const handleDragEnd = useCallback(() => {
+    setIsDraggingWatermark(false);
+  }, []);
+
+  useEffect(() => {
+    if (isDraggingWatermark) {
+      window.addEventListener('mousemove', handleDrag);
+      window.addEventListener('mouseup', handleDragEnd);
+      window.addEventListener('touchmove', handleDrag);
+      window.addEventListener('touchend', handleDragEnd);
+    } else {
+      window.removeEventListener('mousemove', handleDrag);
+      window.removeEventListener('mouseup', handleDragEnd);
+      window.removeEventListener('touchmove', handleDrag);
+      window.removeEventListener('touchend', handleDragEnd);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleDrag);
+      window.removeEventListener('mouseup', handleDragEnd);
+      window.removeEventListener('touchmove', handleDrag);
+      window.removeEventListener('touchend', handleDragEnd);
+    };
+  }, [isDraggingWatermark, handleDrag, handleDragEnd]);
 
   const handleStoreSave = async () => {
     try {
@@ -459,7 +506,7 @@ const AdminPage = () => {
           <div className="space-y-4">
             <label className="flex items-center gap-3 cursor-pointer">
               <input type="checkbox" checked={storeForm.watermarkEnabled ?? true} onChange={e => setStoreForm((f: any) => ({ ...f, watermarkEnabled: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#f5a623] focus:ring-[#f5a623]" />
-              <span className="text-sm font-medium text-[#333]">Activer le filigrane automatique (Logo YOUPOSH au centre)</span>
+              <span className="text-sm font-medium text-[#333]">Activer le filigrane automatique</span>
             </label>
 
             {(storeForm.watermarkEnabled ?? true) && (
@@ -501,34 +548,56 @@ const AdminPage = () => {
                     />
                     <div className="flex justify-between text-[10px] text-[#999] mt-1"><span>Petit</span><span>Grand</span></div>
                   </div>
+
+                  {/* Position selector instructions */}
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <label className="text-sm font-medium text-[#666] block mb-2">Position du logo</label>
+                    <p className="text-xs text-[#999]">
+                      Glissez et déposez (drag & drop) le logo avec votre souris directement dans la zone d'aperçu pour choisir sa position exacte.
+                    </p>
+                    <div className="mt-3 flex gap-2">
+                      <span className="bg-white border border-gray-200 text-[#666] text-[10px] px-2 py-1 rounded-md font-medium">X: {storeForm.watermarkPosX ?? 50}%</span>
+                      <span className="bg-white border border-gray-200 text-[#666] text-[10px] px-2 py-1 rounded-md font-medium">Y: {storeForm.watermarkPosY ?? 50}%</span>
+                      <button onClick={() => setStoreForm((f: any) => ({ ...f, watermarkPosX: 50, watermarkPosY: 50 }))} className="text-[#f5a623] hover:underline text-[10px] font-medium ml-auto">Centrer</button>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Live Preview */}
                 <div className="flex-shrink-0">
                   <p className="text-xs font-medium text-[#666] mb-2 uppercase tracking-wider">Aperçu en direct</p>
-                  <div className="relative w-[220px] h-[220px] rounded-xl overflow-hidden border-2 border-gray-200 shadow-inner"
+                  <div
+                    ref={previewRef}
+                    className="relative w-[220px] h-[220px] rounded-xl overflow-hidden border-2 border-gray-200 shadow-inner select-none touch-none"
                     style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%)' }}
                   >
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="text-center">
-                        <div className="w-24 h-24 mx-auto rounded-2xl bg-white/60 shadow-sm flex items-center justify-center mb-2">
-                          <span className="text-4xl">📦</span>
-                        </div>
-                        <p className="text-xs text-gray-400 font-medium">Image produit</p>
+                        <p className="text-xs text-gray-400 font-medium mt-16 pointer-events-none">Image produit</p>
                       </div>
                     </div>
-                    <div
-                      className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-200"
-                      style={{ opacity: (storeForm.watermarkOpacity ?? 20) / 100 }}
-                    >
+
+                    <div className="absolute inset-0 pointer-events-none">
                       <img
-                        src="/images/categories/logo final.png"
+                        src="/images/categories/logo final.png?v=wmki"
                         alt="Watermark"
-                        className="object-contain drop-shadow-lg transition-all duration-200"
-                        style={{ width: `${storeForm.watermarkSize ?? 30}%`, height: `${storeForm.watermarkSize ?? 30}%` }}
+                        onMouseDown={handleDragStart}
+                        onTouchStart={handleDragStart}
+                        className={`absolute object-contain drop-shadow-lg pointer-events-auto transition-opacity duration-200 cursor-move ${isDraggingWatermark ? 'scale-105' : 'hover:scale-105'} transition-transform`}
+                        style={{
+                          width: `${storeForm.watermarkSize ?? 30}%`,
+                          height: `${storeForm.watermarkSize ?? 30}%`,
+                          opacity: (storeForm.watermarkOpacity ?? 20) / 100,
+                          left: `${storeForm.watermarkPosX ?? 50}%`,
+                          top: `${storeForm.watermarkPosY ?? 50}%`,
+                          transform: 'translate(-50%, -50%)',
+                          zIndex: 10
+                        }}
+                        draggable={false}
                       />
                     </div>
-                    <div className="absolute bottom-2 left-2 right-2 flex justify-between">
+
+                    <div className="absolute bottom-2 left-2 right-2 flex justify-between pointer-events-none z-0">
                       <span className="bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-full font-medium">
                         Opacité : {storeForm.watermarkOpacity ?? 20}%
                       </span>
@@ -548,32 +617,64 @@ const AdminPage = () => {
             {storeSaved ? 'Enregistré' : 'Enregistrer'}
           </button>
           {(storeForm.watermarkEnabled ?? true) && (
-            <button
-              onClick={async () => {
-                // Save settings first
-                saveStoreSettings(storeForm);
-                setApplyingWatermark(true);
-                try {
-                  const res = await fetch('http://localhost:5000/api/upload/watermark-all', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ opacity: storeForm.watermarkOpacity ?? 20, size: storeForm.watermarkSize ?? 30 }),
-                  });
-                  const data = await res.json();
-                  toast.success(`Watermark appliqué ! ✅ ${data.success}/${data.total} images traitées`);
-                } catch (err) {
-                  toast.error('Erreur lors de l\'application du watermark');
-                  console.error(err);
-                } finally {
-                  setApplyingWatermark(false);
-                }
-              }}
-              disabled={applyingWatermark}
-              className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 font-medium flex items-center gap-2 transition-all disabled:opacity-60 shadow-sm"
-            >
-              {applyingWatermark ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Image className="w-4 h-4" />}
-              {applyingWatermark ? 'Application en cours...' : 'Appliquer aux images existantes'}
-            </button>
+            <>
+              <button
+                onClick={async () => {
+                  // Save settings first
+                  saveStoreSettings(storeForm);
+                  setApplyingWatermark(true);
+                  try {
+                    const res = await fetch('http://localhost:5000/api/upload/watermark-all', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        opacity: storeForm.watermarkOpacity ?? 20,
+                        size: storeForm.watermarkSize ?? 30,
+                        posX: storeForm.watermarkPosX ?? 50,
+                        posY: storeForm.watermarkPosY ?? 50,
+                      }),
+                    });
+                    const data = await res.json();
+                    toast.success(`Watermark appliqué ! ✅ ${data.success}/${data.total} images traitées`);
+                  } catch (err) {
+                    toast.error('Erreur lors de l\'application du watermark');
+                    console.error(err);
+                  } finally {
+                    setApplyingWatermark(false);
+                  }
+                }}
+                disabled={applyingWatermark}
+                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 font-medium flex items-center gap-2 transition-all disabled:opacity-60 shadow-sm"
+              >
+                {applyingWatermark ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Image className="w-4 h-4" />}
+                {applyingWatermark ? 'Application en cours...' : 'Appliquer aux images existantes'}
+              </button>
+
+              <button
+                onClick={async () => {
+                  if (!confirm("Voulez-vous vraiment supprimer le filigrane de toutes les images ? Cela restaurera les images originales si elles sont disponibles.")) return;
+
+                  setApplyingWatermark(true);
+                  try {
+                    const res = await fetch('http://localhost:5000/api/upload/watermark-remove', {
+                      method: 'POST'
+                    });
+                    const data = await res.json();
+                    toast.success(`Filigranes supprimés ! ✅ ${data.success} images restaurées`);
+                  } catch (err) {
+                    toast.error('Erreur lors de la suppression des filigranes');
+                    console.error(err);
+                  } finally {
+                    setApplyingWatermark(false);
+                  }
+                }}
+                disabled={applyingWatermark}
+                className="px-6 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl hover:bg-red-100 font-medium flex items-center gap-2 transition-colors disabled:opacity-60 shadow-sm"
+              >
+                <Trash2 className="w-4 h-4" />
+                Supprimer le filigrane
+              </button>
+            </>
           )}
         </div>
       </div>
