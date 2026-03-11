@@ -4,10 +4,9 @@ import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   Flame, TrendingUp, Percent, Sparkles,
-  Smartphone, Home, Sparkles as SparklesIcon, Shirt, Car, Gamepad2, Gift, Baby,
   Truck, Shield, Package, CreditCard, Ticket
 } from 'lucide-react';
-import { fetchCategories, fetchProducts } from '@/lib/api';
+import { fetchProducts } from '@/lib/api';
 import ProductCard from '@/components/ui/ProductCard';
 import WhatsAppButton from '@/components/ui/WhatsAppButton';
 import Header from '@/components/layout/Header';
@@ -19,9 +18,6 @@ import { loadHeroSettings } from '@/data/heroSettings';
 import { useStore } from '@/contexts/StoreContext';
 
 
-const iconMap: Record<string, React.ElementType> = {
-  Smartphone, Home, Sparkles: SparklesIcon, Shirt, Car, Gamepad2, Gift, Baby
-};
 
 export default function HomePage() {
   const { t, i18n } = useTranslation();
@@ -36,28 +32,24 @@ export default function HomePage() {
     setPromoInput(promoCode || '');
   }, [promoCode]);
 
-  const categoriesRef = useScrollReveal();
   const flashRef = useScrollReveal();
   const bestsellersRef = useScrollReveal();
   const trustBadgesRef = useScrollReveal();
   const exclusivesRef = useScrollReveal();
   const discoverRef = useScrollReveal();
 
-  const [categories, setCategories] = useState<any[]>([]);
   const [promoProducts, setPromoProducts] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadData() {
       try {
         // On effectue toutes les requêtes en parallèle vers l'API Backend
-        const [cats, promos] = await Promise.all([
-          fetchCategories(),
+        const [promos] = await Promise.all([
           fetchProducts('badge=promo'),
         ]);
 
-        setCategories(cats);
-        // fallback filtering - Limiter à 4 produits maximum
-        setPromoProducts(promos.filter((p: any) => p.isVisible !== false && p.originalPrice > p.price).slice(0, 4));
+        // fallback filtering - Limiter à 6 produits maximum pour l'affichage
+        setPromoProducts(promos.filter((p: any) => p.isVisible !== false && p.originalPrice > p.price).slice(0, 6));
       } catch (error) {
         console.error("Erreur chargement page accueil:", error);
       }
@@ -275,38 +267,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════════
-            CATEGORIES — Card grid
-            ══════════════════════════════════════════════ */}
-        <section className="py-5 sm:py-6" ref={categoriesRef}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 reveal">
-            <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-6">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[var(--yp-blue-50)] rounded-lg sm:rounded-xl flex items-center justify-center">
-                <SparklesIcon className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--yp-blue)]" />
-              </div>
-              <h2 className="text-lg sm:text-2xl font-bold text-[var(--yp-dark)] tracking-tight font-heading">{t('browseCategories')}</h2>
-            </div>
-            <div className="flex overflow-x-auto scrollbar-hide gap-4 sm:gap-5 pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-4 lg:grid-cols-8">
-              {categories.map((cat, i) => {
-                const Icon = iconMap[cat.icon] || Smartphone;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => navigate(`/shop?category=${cat.slug}`)}
-                    className={`flex flex-col items-center gap-2 sm:gap-2.5 group flex-shrink-0 min-w-[60px] sm:min-w-0 reveal reveal-delay-${Math.min(i + 1, 4)}`}
-                  >
-                    <div className="w-[52px] h-[52px] sm:w-16 sm:h-16 bg-white rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:bg-[var(--yp-blue-50)] group-hover:shadow-md transition-all duration-300 group-hover:scale-105 border border-[var(--yp-gray-300)]">
-                      <Icon className="w-5 h-5 sm:w-7 sm:h-7 text-[var(--yp-gray-600)] group-hover:text-[var(--yp-blue)] transition-colors" />
-                    </div>
-                    <span className="text-[10px] sm:text-xs text-[var(--yp-gray-700)] text-center line-clamp-1 sm:line-clamp-2 font-medium w-[60px] sm:w-auto">
-                      {isAr ? cat.nameAr : cat.name}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </section>
 
         {/* ══════════════════════════════════════════════
             FLASH SALES — Contained red card avec design 3D premium
@@ -361,7 +321,7 @@ export default function HomePage() {
                         </div>
                       </div>
 
-                      <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                      <div className="hidden sm:grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                         {promoProducts.map(product => (
                           <ProductCard key={product.id} product={product} variant="compact" />
                         ))}
