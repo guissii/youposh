@@ -134,7 +134,7 @@ export async function fetchStoreSettingsGlobal(): Promise<StoreSettings> {
         const settings = await fetchStoreSettingsAPI();
         cachedStoreSettings = { ...defaultStoreSettings, ...settings };
         applyBrandTheme(cachedStoreSettings as StoreSettings);
-        window.dispatchEvent(new Event(UPDATE_EVENT));
+        window.dispatchEvent(new CustomEvent(UPDATE_EVENT, { detail: cachedStoreSettings }));
         return cachedStoreSettings as StoreSettings;
     } catch (e) {
         console.warn('Failed to fetch store settings:', e);
@@ -145,12 +145,13 @@ export async function fetchStoreSettingsGlobal(): Promise<StoreSettings> {
     }
 }
 
-export async function saveStoreSettings(settings: StoreSettings): Promise<void> {
+export async function saveStoreSettings(settings: Partial<StoreSettings>): Promise<StoreSettings> {
     try {
         const updated = await updateStoreSettingsAPI(settings);
         cachedStoreSettings = { ...defaultStoreSettings, ...updated };
         applyBrandTheme(cachedStoreSettings as StoreSettings);
         window.dispatchEvent(new CustomEvent(UPDATE_EVENT, { detail: cachedStoreSettings }));
+        return cachedStoreSettings as StoreSettings;
     } catch (e) {
         console.warn('Failed to save store settings:', e);
         throw e;

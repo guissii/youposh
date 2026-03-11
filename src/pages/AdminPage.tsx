@@ -14,7 +14,7 @@ import {
   fetchOrders, updateOrderStatus, deleteOrder,
   fetchCategories, deleteCategory,
   fetchPromoCodes, deletePromoCode,
-  type DashboardStats, setWatermarkStatusAPI, updateStoreSettingsAPI
+  type DashboardStats, setWatermarkStatusAPI
 } from '@/lib/api';
 import {
   ConfirmModal,
@@ -28,7 +28,7 @@ import { ProductFormModal } from '@/components/admin/ProductFormModal';
 import { PromoFormModal } from '@/components/admin/PromoFormModal';
 import { CategoryFormModal } from '@/components/admin/CategoryFormModal';
 import { loadHeroSettings, saveHeroSettings, type HeroSettings } from '@/data/heroSettings';
-import { loadStoreSettings } from '@/data/storeSettings';
+import { loadStoreSettings, saveStoreSettings } from '@/data/storeSettings';
 import { getImageUrl } from '@/lib/utils';
 import * as XLSX from 'xlsx';
 
@@ -588,7 +588,7 @@ const AdminPage = () => {
 
   const handleStoreSave = async () => {
     try {
-      await updateStoreSettingsAPI(storeForm);
+      await saveStoreSettings(storeForm);
       setStoreSaved(true);
       toast.success('Paramètres enregistrés');
       setTimeout(() => setStoreSaved(false), 2000);
