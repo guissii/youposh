@@ -32,7 +32,7 @@ export const defaultHeroSettings: HeroSettings = {
     primaryCtaLink: '/shop',
     secondaryCtaText: 'Voir les promotions',
     secondaryCtaLink: '/shop?filter=promo',
-    videoEnabled: true,
+    videoEnabled: false,
     videoUrl: '/videos/hero-video.mp4',
     videoPosterUrl: '/images/products/headphones.jpg',
     videoAutoplay: true,

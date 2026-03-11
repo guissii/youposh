@@ -86,10 +86,11 @@ export default function HomePage() {
               style={{ filter: 'brightness(1.1) contrast(1.06) saturate(0.92)' }}
             />
           ) : (
-            <img
-              src={heroSettings.videoPosterUrl}
-              alt="YOUPOSH Hero"
-              className="absolute inset-0 w-full h-full object-cover"
+            <div
+              className="absolute inset-0 w-full h-full"
+              style={{
+                background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 30%, #2563eb 60%, #1e40af 100%)',
+              }}
             />
           )}
 

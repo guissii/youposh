@@ -62,6 +62,7 @@ const resources = {
       promoSubtitle: 'Découvrez nos meilleures offres du moment',
       newSubtitle: 'Les derniers produits ajoutés à notre catalogue',
       bestsellerSubtitle: 'Les produits les plus appréciés par nos clients',
+      bestsellerDesc: 'Les plus vendus ce mois',
 
       // Filters
       filters: 'Filtres',
@@ -197,6 +198,7 @@ const resources = {
       close: 'Fermer',
       confirm: 'Confirmer',
       cancel: 'Annuler',
+      needHelp: 'Besoin d\'aide ?',
     }
   },
   ar: {
@@ -259,6 +261,7 @@ const resources = {
       promoSubtitle: 'شوف أحسن العروض ديالنا',
       newSubtitle: 'آخر المنتوجات لي زدناهم',
       bestsellerSubtitle: 'المنتوجات لي عجبو الناس بزاف',
+      bestsellerDesc: 'لي باعو بزاف هاد الشهر',
 
       // Filters
       filters: 'الفيلتر',
@@ -394,6 +397,7 @@ const resources = {
       close: 'سدّ',
       confirm: 'أكّد',
       cancel: 'إلغاء',
+      needHelp: 'عندك سؤال؟',
     }
   }
 };
