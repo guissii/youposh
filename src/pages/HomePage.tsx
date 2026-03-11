@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   Flame, TrendingUp, Percent, Sparkles,
-  Truck, Shield, Package, CreditCard, Ticket
+  Ticket
 } from 'lucide-react';
 import { fetchProducts } from '@/lib/api';
 import ProductCard from '@/components/ui/ProductCard';
@@ -129,33 +129,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════════
-            TRUST STRIP — 4 pillars under hero
-            ══════════════════════════════════════════════ */}
-        <section className="relative z-10 -mt-6 sm:-mt-4">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-white rounded-2xl shadow-card border border-[var(--yp-gray-300)] p-3 sm:p-5 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-5">
-              {[
-                { icon: Truck, title: 'Livraison Express', desc: 'Gratuite partout au Maroc', color: 'var(--yp-blue)' },
-                { icon: CreditCard, title: 'Paiement à la livraison', desc: 'Sécurisé & sans engagement', color: 'var(--yp-dark)' },
-                { icon: Package, title: 'Qualité Premium', desc: 'Produits vérifiés & garantis', color: 'var(--yp-blue)' },
-                { icon: Shield, title: 'Service Client VIP', desc: 'Support premium 7/7', color: 'var(--yp-dark)' },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2.5 sm:gap-3 group">
-                  <div
-                    className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 bg-[var(--yp-gray-200)] group-hover:scale-105 transition-transform"
-                  >
-                    <item.icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: item.color }} />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-xs sm:text-sm text-[var(--yp-dark)] leading-tight">{item.title}</p>
-                    <p className="text-[10px] sm:text-xs text-[var(--yp-gray-600)] hidden sm:block">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* ══════════════════════════════════════════════
             PROMO CODE ENTRY — visible dès l’arrivée
