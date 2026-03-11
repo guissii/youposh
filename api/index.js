@@ -1,3 +1,7 @@
-const app = require('../backend/dist/index').default;
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
 
-module.exports = app;
+const backend = require('../backend/dist/index.js');
+const app = backend.default || backend;
+
+export default app;
