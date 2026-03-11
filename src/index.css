@@ -32,6 +32,11 @@
     --yp-blue: #00b2ea; /* Blue for "YOU" */
     --yp-red: #fd0e24;  /* Red for "POSH" */
 
+    /* Individual Color Overrides */
+    --yp-color-you: var(--yp-blue);
+    --yp-color-posh: var(--yp-red);
+    --yp-color-cart: var(--yp-blue);
+
     /* Secondary Brand Colors (Pictogram / Accents) */
     --yp-blue-alt: #01B3EA;
     --yp-red-alt: #FE0E25;

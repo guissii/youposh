@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useMemo, useEffect, t
 import { toast } from 'sonner';
 import type { Product, CartItem, WishlistItem, Order } from '@/types';
 import { validatePromoCode } from '@/lib/api';
+import { useStoreSettings } from '@/data/storeSettings';
 
 interface StoreContextType {
   // Cart
@@ -41,6 +42,9 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
+  // Load global store settings and apply theme
+  useStoreSettings();
+
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
