@@ -170,9 +170,9 @@ export default function ShopPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => updateParams({ category: undefined })}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${!categoryParam
-                    ? 'bg-[var(--yp-dark)] text-white'
-                    : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${!categoryParam
+                    ? 'bg-[var(--yp-dark)] text-white border-[var(--yp-dark)]'
+                    : 'bg-white text-[var(--yp-gray-700)] border-[var(--yp-gray-200)]'
                     }`}
                 >
                   {t('all')}
@@ -181,9 +181,9 @@ export default function ShopPage() {
                   <button
                     key={cat.id}
                     onClick={() => updateParams({ category: cat.slug })}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${categoryParam === cat.slug
-                      ? 'bg-[var(--yp-dark)] text-white'
-                      : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${categoryParam === cat.slug
+                      ? 'bg-[var(--yp-dark)] text-white border-[var(--yp-dark)]'
+                      : 'bg-white text-[var(--yp-gray-700)] border-[var(--yp-gray-200)]'
                       }`}
                   >
                     {isAr ? cat.nameAr : cat.name}
@@ -207,9 +207,9 @@ export default function ShopPage() {
               <div className="hidden lg:flex items-center gap-2 overflow-x-auto scrollbar-hide">
                 <button
                   onClick={() => updateParams({ category: undefined })}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${!categoryParam
-                    ? 'bg-[var(--yp-dark)] text-white'
-                    : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-300)]'
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all border ${!categoryParam
+                    ? 'bg-[var(--yp-dark)] text-white border-[var(--yp-dark)]'
+                    : 'bg-white text-[var(--yp-gray-700)] border-[var(--yp-gray-200)] hover:bg-[var(--yp-gray-50)]'
                     }`}
                 >
                   {t('all')}
@@ -218,9 +218,9 @@ export default function ShopPage() {
                   <button
                     key={cat.id}
                     onClick={() => updateParams({ category: cat.slug })}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${categoryParam === cat.slug
-                      ? 'bg-[var(--yp-dark)] text-white'
-                      : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-300)]'
+                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all border ${categoryParam === cat.slug
+                      ? 'bg-[var(--yp-dark)] text-white border-[var(--yp-dark)]'
+                      : 'bg-white text-[var(--yp-gray-700)] border-[var(--yp-gray-200)] hover:bg-[var(--yp-gray-50)]'
                       }`}
                   >
                     {isAr ? cat.nameAr : cat.name}
