@@ -5,6 +5,8 @@ import { useStore } from '@/contexts/StoreContext';
 import { useTranslation } from 'react-i18next';
 import type { Product } from '@/types';
 import { computeBadge } from '@/lib/productLogic';
+import { getImageUrl } from '@/lib/utils';
+import { useStoreSettings } from '@/data/storeSettings';
 
 interface ProductCardProps {
   product: Product;
@@ -18,12 +20,13 @@ export default function ProductCard({
   variant = 'default',
 }: ProductCardProps) {
   const navigate = useNavigate();
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useStore();
 
   const isAr = i18n.language === 'ar';
   const [imgError, setImgError] = useState(false);
   const [activeThumb, setActiveThumb] = useState(0);
+  const settings = useStoreSettings();
   const isFavorite = isInWishlist(product.id);
 
   const badge = computeBadge(product);
@@ -32,7 +35,8 @@ export default function ProductCard({
     : 0;
 
   const name = isAr && product.nameAr ? product.nameAr : product.name;
-  const brandName = product.brand || 'YouPosh';
+  const brandName = product.brand || 'YOUPOSH';
+  const isOutOfStock = product.inStock === false || (typeof (product as any).stock === 'number' && Number((product as any).stock) <= 0);
 
   // All images: main + extras
   const allImages = [product.image, ...(product.images || [])].filter(Boolean);
@@ -64,8 +68,8 @@ export default function ProductCard({
   };
 
   const ImageFallback = () => (
-    <div className="w-full h-full flex items-center justify-center bg-[#2a2a3d]">
-      <ImageOff className="w-8 h-8 text-gray-500" />
+    <div className="w-full h-full flex items-center justify-center bg-[#F0F0F0]">
+      <ImageOff className="w-8 h-8 text-gray-400" />
     </div>
   );
 
@@ -81,7 +85,7 @@ export default function ProductCard({
             <ImageFallback />
           ) : (
             <img
-              src={product.image}
+              src={getImageUrl(product.image)}
               alt={name}
               className="w-full h-full object-cover"
               onError={() => setImgError(true)}
@@ -102,9 +106,10 @@ export default function ProductCard({
             </span>
             <button
               onClick={handleAddToCart}
-              className="px-3 py-2 rounded-full bg-[#111] text-white text-xs font-semibold"
+              disabled={isOutOfStock}
+              className={`px-2.5 py-1.5 rounded-full text-[11px] font-semibold transition-colors ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-blue)] text-white hover:bg-[var(--yp-blue-dark)]'}`}
             >
-              Add to Cart
+              {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('addToCart') || 'Ajouter au panier')}
             </button>
           </div>
         </div>
@@ -112,34 +117,103 @@ export default function ProductCard({
     );
   }
 
-  // ── Compact variant ──
+  // ── Compact variant (Flash Sales) ──
   if (variant === 'compact') {
+    const compactOutLabel = isAr ? (t('outOfStock') || 'غير متوفر') : 'Indisponible';
     return (
       <div
         onClick={handleNavigate}
-        className="bg-white rounded-[24px] border border-gray-200 overflow-hidden cursor-pointer"
+        className="product-card group w-full bg-white rounded-[16px] overflow-hidden border border-[#E8E8E8] shadow-[0_2px_12px_rgba(0,0,0,0.06)] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)]"
       >
-        <div className="relative aspect-square bg-[#F6F6F6]">
-          {imgError ? (
+        {/* Image area */}
+        <div className="relative bg-[#F5F5F5] h-[150px] sm:h-[180px] overflow-hidden">
+          {/* Badge */}
+          {(badge || discount > 0) && (
+            <span className={`absolute top-2.5 left-2.5 z-10 inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-wide shadow-sm border border-black/5 bg-white/90 ${badge === 'new'
+              ? 'text-[var(--yp-blue)]'
+              : badge === 'bestseller'
+                ? 'text-[var(--yp-dark)]'
+                : 'text-[var(--yp-red)]'
+              }`}>
+              {badge === 'promo'
+                ? `${discount}% OFF`
+                : badge === 'new'
+                  ? 'New'
+                  : badge === 'bestseller'
+                    ? 'Best Seller'
+                    : `${discount}% OFF`}
+            </span>
+          )}
+
+          {isOutOfStock && (
+            <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold bg-white/90 text-[var(--yp-gray-700)] border border-black/5 shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--yp-gray-400)]" />
+              {compactOutLabel}
+            </span>
+          )}
+
+          {imgError || !activeImage ? (
             <ImageFallback />
           ) : (
             <img
-              src={product.image}
+              src={getImageUrl(activeImage)}
               alt={name}
-              className="w-full h-full object-contain p-4"
+              className={`w-full h-full object-cover transition-transform duration-500 hover:scale-105 ${isOutOfStock ? 'grayscale' : ''}`}
+              style={{
+                objectPosition: `${product.cardFocalX ?? 50}% ${product.cardFocalY ?? 50}%`,
+                transform: `scale(${product.cardZoom ?? 1})`,
+              }}
               onError={() => setImgError(true)}
             />
           )}
+
+          {isOutOfStock && (
+            <div className="absolute inset-0 bg-black/20 z-[5]" />
+          )}
         </div>
 
-        <div className="p-3">
-          <p className="text-xs text-[#65A88B] mb-1">{brandName}</p>
-          <h3 className="text-sm font-semibold text-[#111] line-clamp-2">
+        {/* Product info */}
+        <div className="px-3 pt-2 pb-1">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#888]">
+            {typeof product.category === 'string' ? product.category : (product.category as any)?.name || brandName}
+          </p>
+          <h3 className="mt-0.5 text-[13px] sm:text-[14px] font-bold leading-tight text-[#1a1a1a] line-clamp-2">
             {name}
           </h3>
-          <p className="mt-2 text-base font-bold text-[#111]">
-            {product.price} dh
-          </p>
+          <div className="mt-1 flex items-baseline gap-1.5">
+            <span className="text-[16px] font-extrabold text-[#1a1a1a]">
+              {product.price} dh
+            </span>
+            {product.originalPrice && (
+              <span className="text-[11px] text-[#aaa] line-through">
+                {product.originalPrice} dh
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom actions */}
+        <div className="px-3 pb-2.5 pt-1 flex items-stretch gap-1.5">
+          <button
+            onClick={handleAddToCart}
+            disabled={isOutOfStock}
+            className={`flex-1 h-[30px] rounded-xl text-[10px] font-bold uppercase tracking-[0.06em] transition-all duration-200 active:scale-[0.98] ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-blue)] text-white hover:bg-[var(--yp-blue-dark)]'}`}
+          >
+            {isOutOfStock ? compactOutLabel : (t('addToCart') || 'Ajouter au panier')}
+          </button>
+          <button
+            onClick={handleWishlistToggle}
+            className={`w-[34px] h-[34px] rounded-xl flex items-center justify-center transition-all duration-200 border-2 ${isFavorite
+              ? 'bg-red-50 border-[#D92C2C]'
+              : 'bg-white border-[#E8E8E8] hover:border-[#D92C2C]'
+              }`}
+            aria-label={isFavorite ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            <Heart
+              className={`w-4 h-4 transition-colors duration-200 ${isFavorite ? 'text-[#D92C2C] fill-[#D92C2C]' : 'text-[#D92C2C]'
+                }`}
+            />
+          </button>
         </div>
       </div>
     );
@@ -149,13 +223,13 @@ export default function ProductCard({
   return (
     <div
       onClick={handleNavigate}
-      className="product-card w-full max-w-[320px] bg-white rounded-[16px] overflow-hidden border border-[#E8E8E8] shadow-[0_2px_12px_rgba(0,0,0,0.06)] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)]"
+      className="product-card group w-full max-w-[320px] bg-white rounded-[16px] overflow-hidden border border-[#E8E8E8] shadow-[0_2px_12px_rgba(0,0,0,0.06)] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)]"
     >
       {/* ── Image area ── */}
-      <div className="relative bg-[#1e1e2f] h-[200px] sm:h-[220px] flex items-center justify-center overflow-hidden">
+      <div className="relative bg-[#F5F5F5] h-[150px] sm:h-[200px] flex items-center justify-center overflow-hidden">
         {/* Badge */}
         {(badge || discount > 0) && (
-          <span className="absolute top-3 left-3 z-10 inline-flex items-center rounded-md px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide bg-[#F5841F] text-white shadow-md">
+          <span className="absolute top-3 left-3 z-10 inline-flex items-center rounded-md px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide bg-[#D92C2C] text-white shadow-md">
             {badge === 'promo'
               ? `${discount}% OFF`
               : badge === 'new'
@@ -166,40 +240,81 @@ export default function ProductCard({
           </span>
         )}
 
+        {isOutOfStock && (
+          <span className="absolute top-3 right-3 z-10 inline-flex items-center rounded-md px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide bg-[#DC2626] text-white shadow-md">
+            {t('outOfStock') || 'Rupture de stock'}
+          </span>
+        )}
+
+        {/* Details CTA */}
+        <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="bg-white/95 backdrop-blur-sm text-[#111] px-5 py-2.5 rounded-full font-bold text-[12px] uppercase tracking-wider shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+            Voir détails
+          </div>
+        </div>
+
+        {/* CSS Watermark Layer */}
+        {settings.watermarkEnabled && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-[15]">
+            <img
+              src="/images/finalwatermak.png"
+              alt="Watermark"
+              className="absolute select-none pointer-events-none drop-shadow-md filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]"
+              style={{
+                width: `${settings.watermarkSize}%`,
+                height: 'auto',
+                opacity: settings.watermarkOpacity / 100,
+                left: `${settings.watermarkPosX}%`,
+                top: `${settings.watermarkPosY}%`,
+                transform: 'translate(-50%, -50%)',
+                mixBlendMode: 'multiply'
+              }}
+            />
+          </div>
+        )}
+
         {/* Main image */}
-        {imgError ? (
+        {imgError || !activeImage ? (
           <ImageFallback />
         ) : (
           <img
-            src={activeImage}
+            src={getImageUrl(activeImage)}
             alt={name}
-            className="max-w-[80%] max-h-[80%] object-contain drop-shadow-[0_4px_20px_rgba(0,0,0,0.35)] transition-transform duration-500 hover:scale-105"
+            className={`w-full h-full object-cover transition-transform duration-500 hover:scale-105 ${isOutOfStock ? 'grayscale' : ''}`}
+            style={{
+              objectPosition: `${product.cardFocalX ?? 50}% ${product.cardFocalY ?? 50}%`,
+              transform: `scale(${product.cardZoom ?? 1})`,
+            }}
             onError={() => setImgError(true)}
           />
+        )}
+
+        {isOutOfStock && (
+          <div className="absolute inset-0 bg-black/20 z-[16]" />
         )}
       </div>
 
       {/* ── Thumbnails row ── */}
       {allImages.length > 1 && (
-        <div className="flex items-center gap-2 px-3 py-2 bg-white border-b border-[#F0F0F0]">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border-b border-[#F0F0F0]">
           {visibleThumbs.map((img, i) => (
             <button
               key={i}
               onClick={(e) => handleThumbClick(e, i)}
-              className={`w-10 h-10 rounded-lg overflow-hidden border-2 transition-all duration-200 flex-shrink-0 ${activeThumb === i
-                ? 'border-[#F5841F] shadow-sm'
+              className={`w-8 h-8 rounded-md overflow-hidden border-2 transition-all duration-200 flex-shrink-0 ${activeThumb === i
+                ? 'border-[#202442] shadow-sm'
                 : 'border-[#E8E8E8] hover:border-gray-400'
                 }`}
             >
               <img
-                src={img}
+                src={getImageUrl(img)}
                 alt={`${name} ${i + 1}`}
                 className="w-full h-full object-cover"
               />
             </button>
           ))}
           {extraCount > 0 && (
-            <span className="text-[13px] font-semibold text-[#F5841F] ml-1">
+            <span className="text-[13px] font-semibold text-[#202442] ml-1">
               +{extraCount}
             </span>
           )}
@@ -207,7 +322,7 @@ export default function ProductCard({
       )}
 
       {/* ── Product info ── */}
-      <div className="px-4 pt-3 pb-2">
+      <div className="px-3 pt-2 pb-1">
         <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#888]">
           {typeof product.category === 'string' ? product.category : (product.category as any)?.name || brandName}
         </p>
@@ -216,7 +331,7 @@ export default function ProductCard({
           {name}
         </h3>
 
-        <div className="mt-2 flex items-baseline gap-2">
+        <div className="mt-1 flex items-baseline gap-2">
           <span className="text-[18px] font-extrabold text-[#1a1a1a]">
             {product.price} dh
           </span>
@@ -229,23 +344,24 @@ export default function ProductCard({
       </div>
 
       {/* ── Bottom actions ── */}
-      <div className="px-4 pb-4 pt-1 flex items-stretch gap-2">
+      <div className="px-3 pb-3 pt-1 flex items-stretch gap-2">
         <button
           onClick={handleAddToCart}
-          className="flex-1 h-[44px] rounded-xl bg-[#1C1C2E] text-white text-[13px] font-bold uppercase tracking-[0.06em] transition-all duration-200 hover:bg-[#2a2a40] active:scale-[0.98]"
+          disabled={isOutOfStock}
+          className={`flex-1 h-[34px] rounded-xl text-[11px] font-bold uppercase tracking-[0.06em] transition-all duration-200 active:scale-[0.98] ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-blue)] text-white hover:bg-[var(--yp-blue-dark)]'}`}
         >
-          Add to Cart
+          {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('addToCart') || 'Ajouter au panier')}
         </button>
         <button
           onClick={handleWishlistToggle}
-          className={`w-[44px] h-[44px] rounded-xl flex items-center justify-center transition-all duration-200 border-2 ${isFavorite
-            ? 'bg-[#FFF3E8] border-[#F5841F]'
-            : 'bg-white border-[#E8E8E8] hover:border-[#F5841F]'
+          className={`w-[38px] h-[38px] rounded-xl flex items-center justify-center transition-all duration-200 border-2 ${isFavorite
+            ? 'bg-red-50 border-[#D92C2C]'
+            : 'bg-white border-[#E8E8E8] hover:border-[#D92C2C]'
             }`}
           aria-label={isFavorite ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <Heart
-            className={`w-5 h-5 transition-colors duration-200 ${isFavorite ? 'text-[#F5841F] fill-[#F5841F]' : 'text-[#F5841F]'
+            className={`w-5 h-5 transition-colors duration-200 ${isFavorite ? 'text-[#D92C2C] fill-[#D92C2C]' : 'text-[#D92C2C]'
               }`}
           />
         </button>

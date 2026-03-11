@@ -3,7 +3,10 @@ export interface StoreSettings {
     phone: string;
     email: string;
     currency: string;
-    shippingFee: number;
+    brandPrimary: string;
+    brandSecondary: string;
+    shippingFeeLocal: number;
+    shippingFeeNational: number;
     watermarkEnabled: boolean;
     watermarkOpacity: number;
     watermarkSize: number;
@@ -12,11 +15,14 @@ export interface StoreSettings {
 }
 
 export const defaultStoreSettings: StoreSettings = {
-    storeName: 'YouShop',
-    phone: '+212 6XX XXX XXX',
+    storeName: 'YOUPOSH',
+    phone: '+212 690-93909',
     email: 'contact@youposh.ma',
     currency: 'MAD',
-    shippingFee: 30,
+    brandPrimary: '#2563EB',
+    brandSecondary: '#DC2626',
+    shippingFeeLocal: 20,
+    shippingFeeNational: 35,
     watermarkEnabled: true,
     watermarkOpacity: 20,
     watermarkSize: 30,
@@ -32,6 +38,73 @@ const UPDATE_EVENT = 'youposh_store_settings_updated';
 let cachedStoreSettings: StoreSettings | null = null;
 let isStoreSettingsLoading = false;
 
+function clampInt(n: number): number {
+    return Math.max(0, Math.min(255, Math.round(n)));
+}
+
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+    const raw = String(hex || '').trim().replace('#', '');
+    if (!/^[0-9a-fA-F]{3}$/.test(raw) && !/^[0-9a-fA-F]{6}$/.test(raw)) return null;
+    const full = raw.length === 3 ? raw.split('').map(c => c + c).join('') : raw;
+    const r = parseInt(full.slice(0, 2), 16);
+    const g = parseInt(full.slice(2, 4), 16);
+    const b = parseInt(full.slice(4, 6), 16);
+    return { r, g, b };
+}
+
+function rgbToHex(rgb: { r: number; g: number; b: number }): string {
+    const to = (n: number) => clampInt(n).toString(16).padStart(2, '0');
+    return `#${to(rgb.r)}${to(rgb.g)}${to(rgb.b)}`.toUpperCase();
+}
+
+function mix(hexA: string, hexB: string, t: number): string {
+    const a = hexToRgb(hexA);
+    const b = hexToRgb(hexB);
+    if (!a || !b) return hexA;
+    const tt = Math.max(0, Math.min(1, t));
+    return rgbToHex({
+        r: a.r + (b.r - a.r) * tt,
+        g: a.g + (b.g - a.g) * tt,
+        b: a.b + (b.b - a.b) * tt,
+    });
+}
+
+function shade(hex: string, amount: number): string {
+    const base = hexToRgb(hex);
+    if (!base) return hex;
+    const t = Math.max(-1, Math.min(1, amount));
+    const target = t >= 0 ? { r: 255, g: 255, b: 255 } : { r: 0, g: 0, b: 0 };
+    return rgbToHex({
+        r: base.r + (target.r - base.r) * Math.abs(t),
+        g: base.g + (target.g - base.g) * Math.abs(t),
+        b: base.b + (target.b - base.b) * Math.abs(t),
+    });
+}
+
+function applyBrandTheme(settings: StoreSettings) {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+
+    const primary = settings.brandPrimary || defaultStoreSettings.brandPrimary;
+    const secondary = settings.brandSecondary || defaultStoreSettings.brandSecondary;
+
+    const primaryRgb = hexToRgb(primary);
+    const secondaryRgb = hexToRgb(secondary);
+
+    root.style.setProperty('--yp-blue', primary);
+    root.style.setProperty('--yp-blue-dark', shade(primary, -0.18));
+    root.style.setProperty('--yp-blue-light', shade(primary, 0.12));
+    root.style.setProperty('--yp-blue-50', mix('#FFFFFF', primary, 0.08));
+    root.style.setProperty('--yp-blue-100', mix('#FFFFFF', primary, 0.16));
+    if (primaryRgb) root.style.setProperty('--yp-blue-rgb', `${primaryRgb.r} ${primaryRgb.g} ${primaryRgb.b}`);
+
+    root.style.setProperty('--yp-red', secondary);
+    root.style.setProperty('--yp-red-dark', shade(secondary, -0.18));
+    root.style.setProperty('--yp-red-light', shade(secondary, 0.12));
+    root.style.setProperty('--yp-red-50', mix('#FFFFFF', secondary, 0.08));
+    if (secondaryRgb) root.style.setProperty('--yp-red-rgb', `${secondaryRgb.r} ${secondaryRgb.g} ${secondaryRgb.b}`);
+}
+
 // We export this for places that need it synchronously,
 // but it might return default until loaded.
 export function loadStoreSettings(): StoreSettings {
@@ -44,10 +117,12 @@ export async function fetchStoreSettingsGlobal(): Promise<StoreSettings> {
     try {
         const settings = await fetchStoreSettingsAPI();
         cachedStoreSettings = { ...defaultStoreSettings, ...settings };
+        applyBrandTheme(cachedStoreSettings as StoreSettings);
         window.dispatchEvent(new Event(UPDATE_EVENT));
         return cachedStoreSettings as StoreSettings;
     } catch (e) {
         console.warn('Failed to fetch store settings:', e);
+        applyBrandTheme(cachedStoreSettings || { ...defaultStoreSettings });
         return cachedStoreSettings || { ...defaultStoreSettings };
     } finally {
         isStoreSettingsLoading = false;
@@ -58,6 +133,7 @@ export async function saveStoreSettings(settings: StoreSettings): Promise<void> 
     try {
         const updated = await updateStoreSettingsAPI(settings);
         cachedStoreSettings = { ...defaultStoreSettings, ...updated };
+        applyBrandTheme(cachedStoreSettings as StoreSettings);
         window.dispatchEvent(new CustomEvent(UPDATE_EVENT, { detail: cachedStoreSettings }));
     } catch (e) {
         console.warn('Failed to save store settings:', e);
@@ -69,6 +145,7 @@ export function useStoreSettings() {
     const [settings, setSettings] = useState<StoreSettings>(loadStoreSettings());
 
     useEffect(() => {
+        applyBrandTheme(loadStoreSettings());
         // Fetch from network on mount
         fetchStoreSettingsGlobal().then(data => {
             setSettings(data);

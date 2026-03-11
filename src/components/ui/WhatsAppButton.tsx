@@ -15,6 +15,7 @@ interface OrderInfo {
   customerName: string;
   phone: string;
   city: string;
+  address?: string;
   note?: string;
 }
 
@@ -46,12 +47,18 @@ export function generateOrderWhatsAppMessage(
   quantity: number,
   selectedVariant: string | undefined,
   customer: OrderInfo,
-  deliveryFee: number = 50
+  deliveryFee: number = 50,
+  promo?: { code: string; discount: number }
 ): string {
   const variantLine = selectedVariant ? `\nVariante: ${selectedVariant}` : '';
   const noteLine = customer.note ? `\nRemarque: ${customer.note}` : '';
   const subtotal = product.price * quantity;
-  const grandTotal = subtotal + deliveryFee;
+  const promoDiscount = promo && typeof promo.discount === 'number' ? Math.max(0, Math.min(subtotal, promo.discount)) : 0;
+  const subtotalAfterPromo = Math.max(0, subtotal - promoDiscount);
+  const grandTotal = subtotalAfterPromo + deliveryFee;
+  const promoLines = promo && promoDiscount > 0
+    ? `🎟️ Code promo (${promo.code}): -${promoDiscount} dh\n💵 Sous-total après promo: ${subtotalAfterPromo} dh\n`
+    : '';
 
   return `Bonjour, je souhaite commander ce produit :
 
@@ -59,13 +66,13 @@ export function generateOrderWhatsAppMessage(
 🔢 Quantité: ${quantity}
 💰 Prix unitaire: ${product.price} dh
 💵 Sous-total: ${subtotal} dh
-🚚 Livraison: ${deliveryFee} dh
+${promoLines}🚚 Livraison: ${deliveryFee} dh
 💰 Total: ${grandTotal} dh
 
 👤 Mes informations :
 Nom: ${customer.customerName}
 Téléphone: ${customer.phone}
-Ville: ${customer.city}${noteLine}
+Ville: ${customer.city}${customer.address ? `\nAdresse: ${customer.address}` : ''}${noteLine}
 
 Merci !`;
 }

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  Filter, Grid3X3, List, ChevronDown, X, SlidersHorizontal,
+  Grid3X3, List, ChevronDown, X, SlidersHorizontal,
   ArrowUpDown, Flame, Percent, Sparkles, Star, Tag, Package
 } from 'lucide-react';
 import { fetchCategories, fetchProducts } from '@/lib/api';
@@ -24,6 +24,10 @@ export default function ShopPage() {
   const searchQuery = searchParams.get('q') || '';
   const sortParam = (searchParams.get('sort') as SortOption) || 'popular';
   const filterParam = (searchParams.get('filter') as FilterOption) || 'all';
+  const avParam = searchParams.get('av') || '';
+  const selectedAvIds = avParam
+    ? avParam.split(',').map(s => parseInt(s.trim())).filter(n => Number.isFinite(n))
+    : [];
 
   const isAr = i18n.language === 'ar';
   const isPromoPage = filterParam === 'promo';
@@ -32,11 +36,26 @@ export default function ShopPage() {
 
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const selectedCategory = categoryParam ? categories.find(c => c.slug === categoryParam) : undefined;
+  const categoryAttributes = Array.isArray(selectedCategory?.attributes) ? selectedCategory.attributes : [];
 
   // Load categories once
   useEffect(() => {
     fetchCategories().then(setCategories).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    if (!categoryParam || categoryAttributes.length === 0) return;
+    const allowed = new Set<number>();
+    categoryAttributes.forEach((a: any) => (Array.isArray(a.values) ? a.values : []).forEach((v: any) => {
+      const id = Number(v?.id);
+      if (Number.isFinite(id)) allowed.add(id);
+    }));
+    const next = selectedAvIds.filter(id => allowed.has(id));
+    if (next.length !== selectedAvIds.length) {
+      updateParams({ av: next.length ? next.join(',') : undefined });
+    }
+  }, [categoryParam, categories.length]);
 
   // Fetch products based on URL params
   useEffect(() => {
@@ -48,6 +67,7 @@ export default function ShopPage() {
         if (searchQuery) queryParams.set('search', searchQuery);
         if (sortParam) queryParams.set('sort', sortParam);
         if (filterParam && filterParam !== 'all') queryParams.set('badge', filterParam);
+        if (selectedAvIds.length) queryParams.set('av', selectedAvIds.join(','));
 
         const data = await fetchProducts(queryParams.toString());
         setProducts(data);
@@ -56,7 +76,7 @@ export default function ShopPage() {
       }
     };
     loadData();
-  }, [categoryParam, searchQuery, sortParam, filterParam]);
+  }, [categoryParam, searchQuery, sortParam, filterParam, avParam]);
 
   const updateParams = (updates: Record<string, string | undefined>) => {
     const newParams = new URLSearchParams(searchParams);
@@ -69,6 +89,16 @@ export default function ShopPage() {
     });
     setSearchParams(newParams);
   };
+
+  const toggleAttributeValue = (id: number) => {
+    const set = new Set(selectedAvIds);
+    if (set.has(id)) set.delete(id);
+    else set.add(id);
+    const next = [...set];
+    updateParams({ av: next.length ? next.join(',') : undefined });
+  };
+
+  const clearAttributeFilters = () => updateParams({ av: undefined });
 
   const getPageTitle = () => {
     if (searchQuery) return `${t('searchResults')}: "${searchQuery}"`;
@@ -111,47 +141,65 @@ export default function ShopPage() {
       <Header />
 
       <main className="pb-20">
-        {/* ═══ Page Header with promo context ═══ */}
-        <div className={`border-b border-[var(--yp-gray-300)] ${isPromoPage
-          ? 'bg-gradient-to-r from-[var(--yp-red-50)] to-white'
-          : 'bg-white'
-          }`}>
-          <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
-            <div className="flex items-start justify-between gap-4">
+        {/* ═══ Page Header ═══ */}
+        <div className="bg-white border-b border-[var(--yp-gray-300)]">
+          <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <div className="flex items-center gap-3 mb-2">
-                  {isPromoPage && <Tag className="w-5 h-5 text-[var(--yp-red)]" />}
-                  {isBestsellerPage && <Flame className="w-5 h-5 text-[var(--yp-blue)]" />}
-                  {isNewPage && <Sparkles className="w-5 h-5 text-emerald-500" />}
-                  <h1 className="text-xl sm:text-2xl font-bold text-[var(--yp-dark)] font-heading">
+                <div className="flex items-center gap-2 mb-0.5">
+                  {isPromoPage && <Tag className="w-4 h-4 text-[var(--yp-red)]" />}
+                  {isBestsellerPage && <Flame className="w-4 h-4 text-[var(--yp-blue)]" />}
+                  {isNewPage && <Sparkles className="w-4 h-4 text-emerald-500" />}
+                  <h1 className="text-lg sm:text-xl font-bold text-[var(--yp-dark)] font-heading">
                     {getPageTitle()}
                   </h1>
                 </div>
-                <p className="text-sm text-[var(--yp-gray-600)]">
+                <p className="text-xs sm:text-sm text-[var(--yp-gray-600)]">
                   {getPageSubtitle()}
                 </p>
               </div>
-              {/* Promo badge */}
-              {isPromoPage && (
-                <span className="hidden sm:inline-flex items-center gap-1.5 bg-[var(--yp-red)] text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md">
-                  <Percent className="w-4 h-4" />
-                  {t('upTo') || "Jusqu'à"} -40%
-                </span>
-              )}
             </div>
           </div>
         </div>
 
-        {/* ═══ Controls Bar ═══ */}
+        {/* ═══ Controls Bar — sticky ═══ */}
         <div className="bg-white border-b border-[var(--yp-gray-300)] sticky top-[60px] sm:top-[72px] z-30">
-          <div className="max-w-7xl mx-auto px-4 py-3">
-            <div className="flex items-center justify-between gap-3">
+          <div className="max-w-7xl mx-auto px-4">
+            {/* Mobile category pills — horizontal scroll */}
+            <div className="lg:hidden -mx-4 px-4 py-2.5 overflow-x-auto scrollbar-hide border-b border-[var(--yp-gray-300)]">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => updateParams({ category: undefined })}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${!categoryParam
+                    ? 'bg-[var(--yp-dark)] text-white'
+                    : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
+                    }`}
+                >
+                  {t('all')}
+                </button>
+                {categories.map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => updateParams({ category: cat.slug })}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${categoryParam === cat.slug
+                      ? 'bg-[var(--yp-dark)] text-white'
+                      : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
+                      }`}
+                  >
+                    {isAr ? cat.nameAr : cat.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Controls row */}
+            <div className="flex items-center justify-between gap-2 py-2.5">
               {/* Filter Button (Mobile) */}
               <button
                 onClick={() => setIsFilterOpen(true)}
-                className="lg:hidden flex items-center gap-2 px-4 py-2.5 border border-[var(--yp-gray-300)] rounded-xl text-sm font-medium text-[var(--yp-dark)] hover:border-[var(--yp-blue)] transition-colors"
+                className="lg:hidden flex items-center gap-1.5 px-3 py-2 border border-[var(--yp-gray-300)] rounded-lg text-xs font-medium text-[var(--yp-dark)] hover:border-[var(--yp-blue)] transition-colors"
               >
-                <Filter className="w-4 h-4" />
+                <SlidersHorizontal className="w-3.5 h-3.5" />
                 {t('filters')}
               </button>
 
@@ -159,8 +207,8 @@ export default function ShopPage() {
               <div className="hidden lg:flex items-center gap-2 overflow-x-auto scrollbar-hide">
                 <button
                   onClick={() => updateParams({ category: undefined })}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${!categoryParam
-                    ? 'bg-[var(--yp-blue)] text-white shadow-sm'
+                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${!categoryParam
+                    ? 'bg-[var(--yp-dark)] text-white'
                     : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-300)]'
                     }`}
                 >
@@ -170,8 +218,8 @@ export default function ShopPage() {
                   <button
                     key={cat.id}
                     onClick={() => updateParams({ category: cat.slug })}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${categoryParam === cat.slug
-                      ? 'bg-[var(--yp-blue)] text-white shadow-sm'
+                    className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${categoryParam === cat.slug
+                      ? 'bg-[var(--yp-dark)] text-white'
                       : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-300)]'
                       }`}
                   >
@@ -184,22 +232,22 @@ export default function ShopPage() {
               <div className="flex items-center gap-2">
                 {/* Sort Dropdown */}
                 <div className="relative group">
-                  <button className="flex items-center gap-2 px-4 py-2.5 border border-[var(--yp-gray-300)] rounded-xl text-sm font-medium text-[var(--yp-dark)] hover:border-[var(--yp-blue)] transition-colors">
-                    <ArrowUpDown className="w-4 h-4" />
+                  <button className="flex items-center gap-1.5 px-3 py-2 border border-[var(--yp-gray-300)] rounded-lg text-xs sm:text-sm font-medium text-[var(--yp-dark)] hover:border-[var(--yp-blue)] transition-colors">
+                    <ArrowUpDown className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">{t('sort')}</span>
-                    <ChevronDown className="w-3.5 h-3.5" />
+                    <ChevronDown className="w-3 h-3" />
                   </button>
-                  <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-[var(--yp-gray-300)] p-2 hidden group-hover:block z-20">
+                  <div className="absolute right-0 top-full mt-1.5 w-48 bg-white rounded-xl shadow-xl border border-[var(--yp-gray-300)] p-1.5 hidden group-hover:block z-20">
                     {sortOptions.map(opt => (
                       <button
                         key={opt.value}
                         onClick={() => updateParams({ sort: opt.value })}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-left transition-colors ${sortParam === opt.value
+                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-left transition-colors ${sortParam === opt.value
                           ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)] font-medium'
                           : 'text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-200)]'
                           }`}
                       >
-                        <opt.icon className="w-4 h-4" />
+                        <opt.icon className="w-3.5 h-3.5" />
                         {opt.label}
                       </button>
                     ))}
@@ -207,18 +255,18 @@ export default function ShopPage() {
                 </div>
 
                 {/* View Mode — desktop only */}
-                <div className="hidden sm:flex items-center border border-[var(--yp-gray-300)] rounded-xl overflow-hidden">
+                <div className="hidden sm:flex items-center border border-[var(--yp-gray-300)] rounded-lg overflow-hidden">
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-2.5 transition-colors ${viewMode === 'grid' ? 'bg-[var(--yp-blue)] text-white' : 'text-[var(--yp-gray-600)] hover:bg-[var(--yp-gray-200)]'}`}
+                    className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-[var(--yp-dark)] text-white' : 'text-[var(--yp-gray-600)] hover:bg-[var(--yp-gray-200)]'}`}
                   >
-                    <Grid3X3 className="w-4 h-4" />
+                    <Grid3X3 className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-2.5 transition-colors ${viewMode === 'list' ? 'bg-[var(--yp-blue)] text-white' : 'text-[var(--yp-gray-600)] hover:bg-[var(--yp-gray-200)]'}`}
+                    className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-[var(--yp-dark)] text-white' : 'text-[var(--yp-gray-600)] hover:bg-[var(--yp-gray-200)]'}`}
                   >
-                    <List className="w-4 h-4" />
+                    <List className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -286,6 +334,44 @@ export default function ShopPage() {
                     ))}
                   </div>
                 </div>
+
+                {categoryParam && categoryAttributes.length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-xs font-semibold text-[var(--yp-gray-500)] uppercase tracking-wider">Attributs</p>
+                      {selectedAvIds.length > 0 && (
+                        <button
+                          onClick={clearAttributeFilters}
+                          className="text-xs font-semibold text-[var(--yp-blue)] hover:underline"
+                        >
+                          Réinitialiser
+                        </button>
+                      )}
+                    </div>
+                    <div className="space-y-4">
+                      {categoryAttributes.map((attr: any) => (
+                        <div key={attr.id || attr.code || attr.name}>
+                          <p className="text-sm font-semibold text-[var(--yp-dark)] mb-2">{isAr ? (attr.nameAr || attr.name) : (attr.name || attr.nameAr)}</p>
+                          <div className="space-y-1">
+                            {(Array.isArray(attr.values) ? attr.values : []).map((v: any) => (
+                              <label key={v.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl hover:bg-[var(--yp-gray-200)] cursor-pointer">
+                                <span className="flex items-center gap-2 text-sm text-[var(--yp-gray-700)]">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedAvIds.includes(Number(v.id))}
+                                    onChange={() => toggleAttributeValue(Number(v.id))}
+                                    className="w-4 h-4 rounded border-gray-300 text-[var(--yp-blue)] focus:ring-[var(--yp-blue)]"
+                                  />
+                                  <span>{isAr ? (v.valueAr || v.value) : (v.value || v.valueAr)}</span>
+                                </span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </aside>
 
@@ -300,7 +386,7 @@ export default function ShopPage() {
                   <p className="text-sm text-[var(--yp-gray-600)]">{t('tryDifferentFilters')}</p>
                 </div>
               ) : (
-                <div className={`grid gap-4 sm:gap-5 ${viewMode === 'grid'
+                <div className={`grid gap-3 sm:gap-4 ${viewMode === 'grid'
                   ? 'grid-cols-2 lg:grid-cols-3'
                   : 'grid-cols-1'
                   }`}>
@@ -331,8 +417,8 @@ export default function ShopPage() {
           />
           <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] overflow-auto shadow-2xl animate-slide-up">
             {/* Handle */}
-            <div className="sticky top-0 bg-white rounded-t-3xl z-10 pt-3 pb-2 px-6 border-b border-[var(--yp-gray-300)]">
-              <div className="w-10 h-1 bg-[var(--yp-gray-400)] rounded-full mx-auto mb-3" />
+            <div className="sticky top-0 bg-white rounded-t-2xl z-10 pt-3 pb-2 px-5 border-b border-[var(--yp-gray-300)]">
+              <div className="w-8 h-1 bg-[var(--yp-gray-400)] rounded-full mx-auto mb-2.5" />
               <div className="flex items-center justify-between">
                 <h2 className="font-bold text-lg text-[var(--yp-dark)] font-heading">{t('filters')}</h2>
                 <button
@@ -344,7 +430,7 @@ export default function ShopPage() {
               </div>
             </div>
 
-            <div className="p-6 space-y-7">
+            <div className="p-5 space-y-5">
               {/* Categories */}
               <div>
                 <p className="text-xs font-semibold text-[var(--yp-gray-500)] uppercase tracking-wider mb-3">{t('categories')}</p>
@@ -354,8 +440,8 @@ export default function ShopPage() {
                       updateParams({ category: undefined });
                       setIsFilterOpen(false);
                     }}
-                    className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${!categoryParam
-                      ? 'bg-[var(--yp-blue)] text-white shadow-sm'
+                    className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${!categoryParam
+                      ? 'bg-[var(--yp-dark)] text-white'
                       : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
                       }`}
                   >
@@ -368,8 +454,8 @@ export default function ShopPage() {
                         updateParams({ category: cat.slug });
                         setIsFilterOpen(false);
                       }}
-                      className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${categoryParam === cat.slug
-                        ? 'bg-[var(--yp-blue)] text-white shadow-sm'
+                      className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${categoryParam === cat.slug
+                        ? 'bg-[var(--yp-dark)] text-white'
                         : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
                         }`}
                     >
@@ -390,17 +476,55 @@ export default function ShopPage() {
                         updateParams({ filter: opt.value === 'all' ? undefined : opt.value });
                         setIsFilterOpen(false);
                       }}
-                      className={`w-full flex items-center gap-3 p-3.5 rounded-xl text-sm transition-all ${filterParam === opt.value || (opt.value === 'all' && !filterParam)
+                      className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors ${filterParam === opt.value || (opt.value === 'all' && !filterParam)
                         ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)] font-medium'
                         : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
                         }`}
                     >
-                      <opt.icon className="w-5 h-5" />
+                      <opt.icon className="w-4 h-4" />
                       {opt.label}
                     </button>
                   ))}
                 </div>
               </div>
+
+              {categoryParam && categoryAttributes.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs font-semibold text-[var(--yp-gray-500)] uppercase tracking-wider">Attributs</p>
+                    {selectedAvIds.length > 0 && (
+                      <button
+                        onClick={clearAttributeFilters}
+                        className="text-xs font-semibold text-[var(--yp-blue)] hover:underline"
+                      >
+                        Réinitialiser
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-4">
+                    {categoryAttributes.map((attr: any) => (
+                      <div key={attr.id || attr.code || attr.name} className="bg-[var(--yp-gray-200)] rounded-2xl p-3">
+                        <p className="text-sm font-semibold text-[var(--yp-dark)] mb-2">{isAr ? (attr.nameAr || attr.name) : (attr.name || attr.nameAr)}</p>
+                        <div className="space-y-1">
+                          {(Array.isArray(attr.values) ? attr.values : []).map((v: any) => (
+                            <label key={v.id} className="flex items-center justify-between gap-3 px-2 py-2 rounded-xl hover:bg-white/60 cursor-pointer">
+                              <span className="flex items-center gap-2 text-sm text-[var(--yp-gray-700)]">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedAvIds.includes(Number(v.id))}
+                                  onChange={() => toggleAttributeValue(Number(v.id))}
+                                  className="w-4 h-4 rounded border-gray-300 text-[var(--yp-blue)] focus:ring-[var(--yp-blue)]"
+                                />
+                                <span>{isAr ? (v.valueAr || v.value) : (v.value || v.valueAr)}</span>
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Sort */}
               <div>
@@ -413,12 +537,12 @@ export default function ShopPage() {
                         updateParams({ sort: opt.value });
                         setIsFilterOpen(false);
                       }}
-                      className={`w-full flex items-center gap-3 p-3.5 rounded-xl text-sm transition-all ${sortParam === opt.value
+                      className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors ${sortParam === opt.value
                         ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)] font-medium'
                         : 'bg-[var(--yp-gray-200)] text-[var(--yp-gray-700)]'
                         }`}
                     >
-                      <opt.icon className="w-5 h-5" />
+                      <opt.icon className="w-4 h-4" />
                       {opt.label}
                     </button>
                   ))}

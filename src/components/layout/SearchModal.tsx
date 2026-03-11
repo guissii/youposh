@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, ArrowRight, Clock, TrendingUp } from 'lucide-react';
 import { fetchProducts } from '@/lib/api';
+import { getImageUrl } from '@/lib/utils';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -79,7 +80,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch(query)}
               placeholder={t('searchPlaceholder')}
-              className="w-full pl-12 pr-12 py-4 bg-gray-100 rounded-2xl text-lg focus:outline-none focus:ring-2 focus:ring-[#f5a623]"
+              className="w-full pl-12 pr-12 py-4 bg-gray-100 rounded-2xl text-lg focus:outline-none focus:ring-2 focus:ring-[var(--yp-blue)]"
             />
             {query && (
               <button
@@ -107,7 +108,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       className="w-full flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors"
                     >
                       <img
-                        src={product.image}
+                        src={getImageUrl(product.image)}
                         alt={i18n.language === 'ar' ? product.nameAr : product.name}
                         className="w-16 h-16 object-cover rounded-lg"
                       />
@@ -115,7 +116,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         <p className="font-medium text-[#333]">
                           {i18n.language === 'ar' ? product.nameAr : product.name}
                         </p>
-                        <p className="text-[#f5a623] font-bold">{product.price} dh</p>
+                        <p className="text-[var(--yp-blue)] font-bold">{product.price} dh</p>
                       </div>
                       <ArrowRight className="w-5 h-5 text-[#999]" />
                     </button>

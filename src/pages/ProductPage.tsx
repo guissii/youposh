@@ -4,28 +4,32 @@ import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft, Heart, Star, Plus, Minus, MessageCircle,
   ShoppingCart, Truck, RefreshCw, Shield, Check, ChevronRight,
-  X, ArrowRight, User, Phone, MapPin, FileText, Package
+  X, ArrowRight, User, Phone, MapPin, FileText, Package, Ticket
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
-import { fetchProduct, fetchProducts } from '@/lib/api';
+import { fetchProduct, fetchProducts, createOrder, validatePromoCode } from '@/lib/api';
 import ProductCard from '@/components/ui/ProductCard';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import CartDrawer from '@/components/layout/CartDrawer';
 import WhatsAppButton, { generateOrderWhatsAppMessage } from '@/components/ui/WhatsAppButton';
 import { useStoreSettings } from '@/data/storeSettings';
+import { getImageUrl } from '@/lib/utils';
 
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { addToCart, addToWishlist, isInWishlist } = useStore();
-  const { phone } = useStoreSettings();
+  const { addToCart, addToWishlist, isInWishlist, promoCode, applyPromoCode, removePromoCode } = useStore();
+  const settings = useStoreSettings();
+  const { phone } = settings;
 
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedVariant, setSelectedVariant] = useState<string>('');
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews'>('description');
+  const storeSettings = useStoreSettings();
+
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -34,8 +38,15 @@ export default function ProductPage() {
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerCity, setCustomerCity] = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
   const [customerNote, setCustomerNote] = useState('');
+  const [promoInput, setPromoInput] = useState(promoCode || '');
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoStatus, setPromoStatus] = useState<'idle' | 'loading' | 'applied' | 'error'>('idle');
+  const [promoMessage, setPromoMessage] = useState('');
 
+  const [isLoadingProduct, setIsLoadingProduct] = useState(true);
+  const [productLoadError, setProductLoadError] = useState('');
   const [product, setProduct] = useState<any>(null);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
 
@@ -48,32 +59,108 @@ export default function ProductPage() {
     setCustomerName('');
     setCustomerPhone('');
     setCustomerCity('');
+    setCustomerAddress('');
     setCustomerNote('');
 
     // Fetch individual product details and its related products
     async function loadProductData() {
       try {
         if (!id) return;
+        setIsLoadingProduct(true);
+        setProductLoadError('');
         const p = await fetchProduct(Number(id));
-        setProduct(p);
+        const normalized = {
+          ...p,
+          images: Array.isArray(p?.images) ? p.images : [],
+          variants: Array.isArray(p?.variants) ? p.variants : [],
+          attributeValues: Array.isArray(p?.attributeValues) ? p.attributeValues : [],
+        };
+        setProduct(normalized);
+        setSelectedImage(0);
+        const nextSelected: Record<string, string> = {};
+        (Array.isArray(normalized?.variants) ? normalized.variants : []).forEach((v: any) => {
+          const opts = Array.isArray(v?.options) ? v.options : [];
+          const firstAvailable = opts.find((o: any) => {
+            if (typeof o === 'string') return true;
+            if (o && typeof o === 'object' && typeof o.value === 'string') {
+              return typeof o.stock === 'number' ? o.stock > 0 : true;
+            }
+            return false;
+          });
+          if (!firstAvailable) return;
+          nextSelected[v.name] = typeof firstAvailable === 'string' ? firstAvailable : firstAvailable.value;
+        });
+        setSelectedVariants(nextSelected);
+        setQuantity(1);
 
         // Fetch related products from the same category
-        if (p && p.category) {
-          const rel = await fetchProducts(`category=${p.category}`);
-          setRelatedProducts(rel.filter((r: any) => r.id !== p.id).slice(0, 4));
+        const relatedCategory = normalized?.categorySlug || normalized?.category?.slug;
+        if (relatedCategory) {
+          const rel = await fetchProducts(`category=${relatedCategory}`);
+          setRelatedProducts(rel.filter((r: any) => r.id !== normalized.id).slice(0, 4));
         }
       } catch (error) {
         console.error('Failed to fetch product', error);
+        setProduct(null);
+        setRelatedProducts([]);
+        setSelectedVariants({});
+        setQuantity(1);
+        setSelectedImage(0);
+        setProductLoadError(error instanceof Error ? error.message : 'Failed to fetch product');
+      } finally {
+        setIsLoadingProduct(false);
       }
     }
     loadProductData();
   }, [id]);
 
+  const subtotal = product ? product.price * quantity : 0;
+
+  useEffect(() => {
+    setPromoInput(promoCode || '');
+  }, [promoCode]);
+
+  useEffect(() => {
+    if (!promoCode) {
+      setPromoDiscount(0);
+      setPromoStatus('idle');
+      setPromoMessage('');
+      return;
+    }
+    let cancelled = false;
+    setPromoStatus('loading');
+    validatePromoCode(promoCode, subtotal)
+      .then((res: any) => {
+        if (cancelled) return;
+        setPromoDiscount(typeof res?.discount === 'number' ? res.discount : 0);
+        setPromoStatus('applied');
+        setPromoMessage(typeof res?.message === 'string' ? res.message : '');
+      })
+      .catch((e: any) => {
+        if (cancelled) return;
+        const msg = e instanceof Error ? e.message : 'Code promo invalide';
+        setPromoDiscount(0);
+        setPromoStatus('error');
+        setPromoMessage(msg);
+      });
+    return () => { cancelled = true; };
+  }, [promoCode, subtotal]);
+
   if (!product) {
+    if (isLoadingProduct) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center text-[var(--yp-gray-600)]">
+            {t('loading') || 'Chargement...'}
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">{t('productNotFound')}</h1>
+          {productLoadError ? <p className="text-sm text-[var(--yp-gray-600)] mb-4">{productLoadError}</p> : null}
           <button onClick={() => navigate('/')} className="btn-primary">
             {t('backToHome')}
           </button>
@@ -82,38 +169,106 @@ export default function ProductPage() {
     );
   }
 
+  const variantsArray = Array.isArray(product.variants) ? product.variants : [];
+  const galleryImages = [product.image, ...(Array.isArray(product.images) ? product.images : [])].filter(Boolean);
+
   const discount = product.originalPrice
     ? Math.round((1 - product.price / product.originalPrice) * 100)
     : 0;
 
-  const subtotal = product.price * quantity;
+  const getOptionValue = (opt: any): string => (typeof opt === 'string' ? opt : String(opt?.value ?? ''));
+  const getOptionStock = (opt: any): number | undefined => {
+    if (!opt || typeof opt !== 'object') return undefined;
+    return typeof opt.stock === 'number' ? opt.stock : undefined;
+  };
 
-  // Smart delivery fee: Fès = 20 dh, rest of Morocco = 50 dh
-  const isFes = /^f[eèé]s$/i.test(customerCity.trim());
-  const deliveryFee = customerCity.trim().length >= 2 ? (isFes ? 20 : 50) : 50;
-  const grandTotal = subtotal + deliveryFee;
+  const selectedVariantLabel = Object.entries(selectedVariants)
+    .map(([k, v]) => `${k}: ${v}`)
+    .join(' / ');
 
-  const isFormValid = customerName.trim().length >= 2 && customerPhone.trim().length >= 8 && customerCity.trim().length >= 2;
+  const requiredVariantCount = variantsArray.length;
+  const isVariantSelectionComplete = requiredVariantCount === 0 || Object.keys(selectedVariants).length === requiredVariantCount;
 
-  const handleConfirmWhatsApp = () => {
+  const selectedStocks = variantsArray
+    .map((v: any) => {
+      const selected = selectedVariants?.[v?.name];
+      if (!selected) return undefined;
+      const opt = (v?.options ?? []).find((o: any) => getOptionValue(o) === selected);
+      return getOptionStock(opt);
+    })
+    .filter((n: any) => typeof n === 'number') as number[];
+
+  const maxQty = Math.max(0, Math.min(product.stock ?? Infinity, ...(selectedStocks.length ? selectedStocks : [Infinity])));
+  const isOutOfStock = product.inStock === false || Number(product.stock ?? 0) <= 0 || maxQty <= 0;
+
+  const attributeGroups = (() => {
+    const links = Array.isArray(product.attributeValues) ? product.attributeValues : [];
+    const map = new Map<string, { key: string; label: string; values: string[] }>();
+    for (const link of links) {
+      const attr = link?.attributeValue?.attribute;
+      const attrLabel = isAr ? (attr?.nameAr || attr?.name) : (attr?.name || attr?.nameAr);
+      const key = String(attr?.code || attr?.id || attrLabel || '');
+      if (!key) continue;
+      const value = isAr ? (link?.attributeValue?.valueAr || link?.attributeValue?.value) : (link?.attributeValue?.value || link?.attributeValue?.valueAr);
+      if (!value) continue;
+      const existing = map.get(key);
+      if (existing) existing.values.push(String(value));
+      else map.set(key, { key, label: String(attrLabel || ''), values: [String(value)] });
+    }
+    return [...map.values()];
+  })();
+
+  const subtotalAfterPromo = Math.max(0, subtotal - (promoStatus === 'applied' ? promoDiscount : 0));
+
+  // Delivery fee: flat national rate
+  const deliveryFee = settings.shippingFeeNational ?? 35;
+  const grandTotal = subtotalAfterPromo + deliveryFee;
+
+  const isFormValid = customerName.trim().length >= 2 && customerPhone.trim().length >= 8 && customerCity.trim().length >= 2 && customerAddress.trim().length >= 5;
+
+  const handleConfirmWhatsApp = async () => {
+    // 1) Save order to DB so it appears in admin
+    try {
+      await createOrder({
+        customerName,
+        phone: customerPhone,
+        city: customerCity,
+        address: customerAddress,
+        notes: customerNote || '',
+        promoCode: promoStatus === 'applied' && promoCode ? promoCode : undefined,
+        items: [{
+          productId: product.id,
+          quantity,
+          price: product.price,
+          variant: selectedVariantLabel || undefined,
+        }],
+      });
+    } catch (err) {
+      console.error('Failed to save order:', err);
+      // Still open WhatsApp even if save fails
+    }
+
+    // 2) Open WhatsApp
     const message = generateOrderWhatsAppMessage(
       product,
       quantity,
-      selectedVariant || undefined,
+      selectedVariantLabel || undefined,
       {
         customerName,
         phone: customerPhone,
         city: customerCity,
+        address: customerAddress,
         note: customerNote || undefined,
       },
-      deliveryFee
+      deliveryFee,
+      promoStatus === 'applied' && promoCode && promoDiscount > 0 ? { code: promoCode, discount: promoDiscount } : undefined
     );
     const cleanPhone = phone.replace(/[^\d]/g, '') || '212600000000';
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleAddToCart = () => {
-    addToCart(product, quantity, selectedVariant || undefined);
+    addToCart(product, quantity, selectedVariantLabel || undefined);
   };
 
   return (
@@ -143,39 +298,65 @@ export default function ProductPage() {
               <div className="space-y-4">
                 <div className="relative aspect-square bg-white rounded-2xl overflow-hidden shadow-card">
                   <img
-                    src={`${product.images[selectedImage]}?v=wmki`}
+                    src={`${getImageUrl(galleryImages[selectedImage])}?v=wmki`}
                     alt={isAr ? product.nameAr : product.name}
                     className="w-full h-full object-cover"
                   />
                   <button
                     onClick={() => setIsZoomOpen(true)}
-                    className="absolute bottom-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg text-sm font-bold text-[var(--yp-dark)] hover:bg-white transition-colors"
+                    className="absolute bottom-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg text-sm font-bold text-[var(--yp-dark)] hover:bg-white transition-colors z-20"
                   >
-                    +{product.images.length}
+                    +{galleryImages.length}
                   </button>
+
+                  {/* CSS Watermark Layer */}
+                  {storeSettings.watermarkEnabled && (
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
+                      <img
+                        src="/images/finalwatermak.png"
+                        alt="Watermark"
+                        className="absolute select-none pointer-events-none drop-shadow-md filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]"
+                        style={{
+                          width: `${storeSettings.watermarkSize}%`,
+                          height: 'auto',
+                          opacity: storeSettings.watermarkOpacity / 100,
+                          left: `${storeSettings.watermarkPosX}%`,
+                          top: `${storeSettings.watermarkPosY}%`,
+                          transform: 'translate(-50%, -50%)',
+                          mixBlendMode: 'multiply'
+                        }}
+                      />
+                    </div>
+                  )}
+
                   {discount > 0 && (
                     <span className="absolute top-4 left-4 badge-discount text-sm px-3 py-1.5">
                       -{discount}%
                     </span>
                   )}
-                  {product.inStock && (
+                  {product.inStock ? (
                     <span className="absolute top-4 right-4 bg-emerald-500 text-white text-xs px-2.5 py-1 rounded-lg font-medium flex items-center gap-1">
                       <Check className="w-3 h-3" />
                       {t('inStock')}
+                    </span>
+                  ) : (
+                    <span className="absolute top-4 right-4 bg-[var(--yp-red)] text-white text-xs px-2.5 py-1 rounded-lg font-medium flex items-center gap-1">
+                      <X className="w-3 h-3" />
+                      {t('outOfStock') || 'Rupture de stock'}
                     </span>
                   )}
                 </div>
 
                 {/* Thumbnails */}
                 <div className="flex gap-2 overflow-x-auto pb-2">
-                  {product.images?.map((img: string, i: number) => (
+                  {galleryImages.map((img: string, i: number) => (
                     <button
                       key={i}
                       onClick={() => setSelectedImage(i)}
                       className={`w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === i ? 'border-[var(--yp-blue)] shadow-md' : 'border-transparent hover:border-[var(--yp-gray-400)]'
                         }`}
                     >
-                      <img src={`${img}?v=wmki`} alt="" className="w-full h-full object-cover" />
+                      <img src={`${getImageUrl(img)}?v=wmki`} alt="" className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
@@ -238,18 +419,37 @@ export default function ProductPage() {
                       {isAr ? variant.nameAr : variant.name}
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {variant.options?.map((option: string) => (
-                        <button
-                          key={option}
-                          onClick={() => setSelectedVariant(option)}
-                          className={`px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-all ${selectedVariant === option
-                            ? 'border-[var(--yp-blue)] bg-[var(--yp-blue-50)] text-[var(--yp-blue)]'
-                            : 'border-[var(--yp-gray-300)] hover:border-[var(--yp-blue)] text-[var(--yp-gray-700)]'
-                            }`}
-                        >
-                          {option}
-                        </button>
-                      ))}
+                      {variant.options?.map((opt: any) => {
+                        const value = getOptionValue(opt);
+                        const stock = getOptionStock(opt);
+                        const isSelected = selectedVariants?.[variant.name] === value;
+                        const isDisabled = typeof stock === 'number' && stock <= 0;
+                        return (
+                          <button
+                            key={value}
+                            onClick={() => {
+                              setSelectedVariants(prev => ({ ...prev, [variant.name]: value }));
+                              setQuantity(1);
+                            }}
+                            disabled={isDisabled}
+                            title={isDisabled ? (t('outOfStock') || 'Indisponible') : undefined}
+                            className={`relative px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-all ${isSelected
+                              ? 'border-[var(--yp-blue)] bg-[var(--yp-blue-50)] text-[var(--yp-blue)]'
+                              : isDisabled
+                                ? 'border-[var(--yp-gray-200)] bg-[var(--yp-gray-100)] text-[var(--yp-gray-500)] cursor-not-allowed opacity-70'
+                                : 'border-[var(--yp-gray-300)] hover:border-[var(--yp-blue)] text-[var(--yp-gray-700)]'
+                              }`}
+                          >
+                            <span className={`relative z-10 ${isDisabled ? 'line-through' : ''}`}>{value}</span>
+                            {isDisabled && (
+                              <>
+                                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[var(--yp-red)]/70" />
+                                <span className="absolute left-2 right-2 top-1/2 h-px bg-[var(--yp-gray-500)]/40 -rotate-12" />
+                              </>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
@@ -267,7 +467,7 @@ export default function ProductPage() {
                       </button>
                       <span className="w-12 text-center font-bold text-[var(--yp-dark)]">{quantity}</span>
                       <button
-                        onClick={() => setQuantity(quantity + 1)}
+                        onClick={() => setQuantity(Math.min(quantity + 1, Math.max(1, maxQty || 1)))}
                         className="w-11 h-11 flex items-center justify-center hover:bg-[var(--yp-gray-200)] transition-colors"
                       >
                         <Plus className="w-4 h-4" />
@@ -281,20 +481,27 @@ export default function ProductPage() {
 
                 {/* ═══ Actions ═══ */}
                 <div className="space-y-3 pt-2">
+                  {isOutOfStock && (
+                    <div className="bg-[var(--yp-red-50)] border border-[var(--yp-red)]/20 text-[var(--yp-red)] rounded-xl px-4 py-3 text-sm font-semibold">
+                      {t('outOfStock') || 'Rupture de stock'} — {isAr ? 'غير متوفر حاليا' : 'Actuellement indisponible. Revenez bientôt.'}
+                    </div>
+                  )}
                   {/* Primary CTA — Continuer la commande */}
                   <button
                     onClick={() => setShowOrderForm(true)}
+                    disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
                     className="w-full bg-[var(--yp-blue)] hover:bg-[var(--yp-blue-dark)] text-white py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2.5 transition-all shadow-lg shadow-[var(--yp-blue)]/20 active:scale-[0.98]"
                   >
-                    {t('continueOrder') || 'Continuer la commande'}
-                    <ArrowRight className="w-5 h-5" />
+                    {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('continueOrder') || 'Continuer la commande')}
+                    {!isOutOfStock && <ArrowRight className="w-5 h-5" />}
                   </button>
 
                   {/* Secondary — Cart + Wishlist */}
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={handleAddToCart}
-                      className="bg-[var(--yp-gray-200)] hover:bg-[var(--yp-gray-300)] text-[var(--yp-dark)] py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors text-sm"
+                      disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
+                      className="bg-[var(--yp-blue)] hover:bg-[var(--yp-blue-dark)] text-white py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors text-xs shadow-sm hover:shadow-md active:scale-95"
                     >
                       <ShoppingCart className="w-4 h-4" />
                       {t('addToCart')}
@@ -380,8 +587,14 @@ export default function ProductPage() {
                       </tr>
                       <tr className="border-b border-[var(--yp-gray-300)]">
                         <td className="py-3 text-[var(--yp-gray-600)] text-sm">{t('category')}</td>
-                        <td className="py-3 font-medium text-[var(--yp-dark)] text-sm">{product.category}</td>
+                        <td className="py-3 font-medium text-[var(--yp-dark)] text-sm">{product.category?.name || product.categorySlug || '—'}</td>
                       </tr>
+                      {attributeGroups.map(g => (
+                        <tr key={g.key} className="border-b border-[var(--yp-gray-300)]">
+                          <td className="py-3 text-[var(--yp-gray-600)] text-sm">{g.label}</td>
+                          <td className="py-3 font-medium text-[var(--yp-dark)] text-sm">{g.values.join(', ')}</td>
+                        </tr>
+                      ))}
                       <tr className="border-b border-[var(--yp-gray-300)]">
                         <td className="py-3 text-[var(--yp-gray-600)] text-sm">{t('warranty')}</td>
                         <td className="py-3 font-medium text-[var(--yp-dark)] text-sm">1 {t('year')}</td>
@@ -512,24 +725,29 @@ export default function ProductPage() {
                     type="text"
                     value={customerCity}
                     onChange={(e) => setCustomerCity(e.target.value)}
-                    placeholder="Fès"
-                    list="cities-list"
+                    placeholder="Ex: Fès, Casablanca, Marrakech..."
                     className="w-full px-4 py-3 bg-[var(--yp-gray-200)] border border-[var(--yp-gray-300)] rounded-xl text-[var(--yp-dark)] placeholder-[var(--yp-gray-500)] focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-[var(--yp-blue)]/20 transition-all"
                   />
-                  <datalist id="cities-list">
-                    {['Fès', 'Casablanca', 'Rabat', 'Marrakech', 'Tanger', 'Agadir', 'Meknès', 'Oujda', 'Kénitra', 'Tétouan', 'Salé', 'Nador', 'Mohammedia', 'El Jadida', 'Béni Mellal'].map(city => (
-                      <option key={city} value={city} />
-                    ))}
-                  </datalist>
                   {customerCity.trim().length >= 2 && (
-                    <p className={`text-xs mt-1.5 flex items-center gap-1 ${isFes ? 'text-emerald-600' : 'text-[var(--yp-gray-500)]'
-                      }`}>
+                    <p className="text-xs mt-1.5 flex items-center gap-1 text-[var(--yp-gray-500)]">
                       <Truck className="w-3 h-3" />
-                      {isFes
-                        ? (t('deliveryFes') || 'Livraison Fès : 20 dh')
-                        : (t('deliveryMaroc') || 'Livraison Maroc : 50 dh')}
+                      {t('deliveryMaroc') || 'Livraison Maroc : 35 dh'}
                     </p>
                   )}
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-semibold text-[var(--yp-dark)] mb-2">
+                    <MapPin className="w-4 h-4 text-[var(--yp-blue)]" />
+                    {t('address') || 'Adresse'} *
+                  </label>
+                  <input
+                    type="text"
+                    value={customerAddress}
+                    onChange={(e) => setCustomerAddress(e.target.value)}
+                    placeholder={t('addressPlaceholder') || 'Rue, quartier, n° de maison...'}
+                    className="w-full px-4 py-3 bg-[var(--yp-gray-200)] border border-[var(--yp-gray-300)] rounded-xl text-[var(--yp-dark)] placeholder-[var(--yp-gray-500)] focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-[var(--yp-blue)]/20 transition-all"
+                  />
                 </div>
 
                 <div>
@@ -545,6 +763,70 @@ export default function ProductPage() {
                     className="w-full px-4 py-3 bg-[var(--yp-gray-200)] border border-[var(--yp-gray-300)] rounded-xl text-[var(--yp-dark)] placeholder-[var(--yp-gray-500)] focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-[var(--yp-blue)]/20 transition-all"
                   />
                 </div>
+
+                <div className="bg-[var(--yp-gray-200)] rounded-2xl p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-[var(--yp-dark)] text-sm flex items-center gap-2">
+                        <Ticket className="w-4 h-4 text-[var(--yp-blue)]" />
+                        Code promo
+                      </p>
+                      {promoMessage && (
+                        <p className={`text-xs mt-1 ${promoStatus === 'error' ? 'text-red-500' : 'text-emerald-600'}`}>
+                          {promoMessage}
+                        </p>
+                      )}
+                    </div>
+                    {promoCode && promoStatus !== 'idle' && (
+                      <button
+                        type="button"
+                        onClick={() => { removePromoCode(); setPromoInput(''); }}
+                        className="text-xs font-semibold text-red-500 hover:underline whitespace-nowrap"
+                      >
+                        Supprimer
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex gap-2">
+                    <input
+                      type="text"
+                      value={promoInput}
+                      onChange={(e) => setPromoInput(e.target.value)}
+                      placeholder="Saisissez votre code"
+                      className="flex-1 px-4 py-3 bg-white border border-[var(--yp-gray-300)] rounded-xl text-[var(--yp-dark)] placeholder-[var(--yp-gray-500)] focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-[var(--yp-blue)]/20 transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const code = String(promoInput ?? '').trim();
+                        if (!code) return;
+                        setPromoStatus('loading');
+                        setPromoMessage('');
+                        setPromoDiscount(0);
+                        applyPromoCode(code, { silent: true });
+                        try {
+                          const res: any = await validatePromoCode(code, subtotal);
+                          setPromoDiscount(typeof res?.discount === 'number' ? res.discount : 0);
+                          setPromoStatus('applied');
+                          setPromoMessage(typeof res?.message === 'string' ? res.message : '');
+                        } catch (e) {
+                          const msg = e instanceof Error ? e.message : 'Code promo invalide';
+                          setPromoDiscount(0);
+                          setPromoStatus('error');
+                          setPromoMessage(msg);
+                        }
+                      }}
+                      disabled={promoStatus === 'loading'}
+                      className={`px-4 py-3 rounded-xl font-bold text-sm ${promoStatus === 'loading'
+                        ? 'bg-[var(--yp-gray-300)] text-[var(--yp-gray-500)] cursor-not-allowed'
+                        : 'bg-[var(--yp-blue)] text-white hover:opacity-95'
+                        }`}
+                    >
+                      Appliquer le code
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* ── Order Summary ── */}
@@ -557,10 +839,10 @@ export default function ProductPage() {
                   <div className="flex justify-between text-[var(--yp-gray-700)]">
                     <span className="line-clamp-1 flex-1 mr-2">{isAr ? product.nameAr : product.name}</span>
                   </div>
-                  {selectedVariant && (
+                  {selectedVariantLabel && (
                     <div className="flex justify-between text-[var(--yp-gray-600)]">
                       <span>{t('variant') || 'Variante'}</span>
-                      <span className="font-medium text-[var(--yp-dark)]">{selectedVariant}</span>
+                      <span className="font-medium text-[var(--yp-dark)]">{selectedVariantLabel}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-[var(--yp-gray-600)]">
@@ -575,11 +857,22 @@ export default function ProductPage() {
                     <span>{t('subtotal') || 'Sous-total'}</span>
                     <span className="font-medium text-[var(--yp-dark)]">{subtotal} dh</span>
                   </div>
-                  <div className={`flex justify-between items-center ${isFes ? 'text-emerald-600' : 'text-[var(--yp-gray-600)]'}`}>
+                  {promoStatus === 'applied' && promoCode && promoDiscount > 0 && (
+                    <div className="flex justify-between text-emerald-700">
+                      <span>Code promo ({promoCode})</span>
+                      <span className="font-semibold">- {promoDiscount} dh</span>
+                    </div>
+                  )}
+                  {promoStatus === 'applied' && promoCode && promoDiscount > 0 && (
+                    <div className="flex justify-between text-[var(--yp-gray-600)]">
+                      <span>Sous-total après promo</span>
+                      <span className="font-medium text-[var(--yp-dark)]">{subtotalAfterPromo} dh</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center text-[var(--yp-gray-600)]">
                     <span className="flex items-center gap-1">
                       <Truck className="w-3.5 h-3.5" />
                       {t('delivery') || 'Livraison'}
-                      {isFes && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium ml-1">Fès</span>}
                     </span>
                     <span className="font-medium">{deliveryFee} dh</span>
                   </div>
@@ -628,7 +921,7 @@ export default function ProductPage() {
             <X className="w-6 h-6 text-white" />
           </button>
           <img
-            src={`${product.images[selectedImage]}?v=wmki`}
+            src={`${getImageUrl(galleryImages[selectedImage])}?v=wmki`}
             alt=""
             className="max-w-full max-h-[90vh] object-contain"
             onClick={(e) => e.stopPropagation()}

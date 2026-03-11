@@ -1,7 +1,29 @@
+export interface ProductVariantOption {
+  value: string;
+  stock?: number;
+}
+
 export interface ProductVariant {
   name: string;
   nameAr: string;
-  options: string[];
+  options: Array<string | ProductVariantOption>;
+}
+
+export interface CategoryAttributeValue {
+  id: number;
+  value: string;
+  valueAr: string;
+  sortOrder: number;
+}
+
+export interface CategoryAttribute {
+  id: number;
+  code: string;
+  name: string;
+  nameAr: string;
+  isMulti: boolean;
+  sortOrder: number;
+  values: CategoryAttributeValue[];
 }
 
 export interface Product {
@@ -20,6 +42,7 @@ export interface Product {
   description: string;
   descriptionAr: string;
   inStock: boolean;
+  stock?: number;
   sku: string;
   tags: string[];
   variants: ProductVariant[];
@@ -43,6 +66,11 @@ export interface Product {
   // ── Dates & ordering ──
   publishedAt: string | null;
   sortOrder: number;
+
+  // ── Card crop settings ──
+  cardZoom: number;
+  cardFocalX: number;
+  cardFocalY: number;
 }
 
 export interface Category {
@@ -52,6 +80,7 @@ export interface Category {
   icon: string;
   image: string;
   slug: string;
+  attributes?: CategoryAttribute[];
 }
 
 export interface CartItem {
@@ -73,11 +102,13 @@ export interface Order {
   city: string;
   address: string;
   notes?: string;
+  promoCode?: string;
+  discount?: number;
   total: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   createdAt: Date;
   whatsappMessage?: string;
 }
 
-export type SortOption = 'popular' | 'newest' | 'price-asc' | 'price-desc' | 'promo';
+export type SortOption = 'popular' | 'newest' | 'price-asc' | 'price-desc' | 'promo' | 'bestsellers';
 export type FilterOption = 'all' | 'promo' | 'new' | 'bestseller' | 'in-stock';

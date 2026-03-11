@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   Instagram, Facebook, MessageCircle,
-  MapPin, Phone, Mail, Truck, RefreshCw, CreditCard, ArrowRight,
+  MapPin, Phone, Mail, Truck, CreditCard, ArrowRight,
   ChevronDown
 } from 'lucide-react';
 import { useStoreSettings } from '@/data/storeSettings';
@@ -50,12 +50,11 @@ export default function Footer() {
       {/* ── Reassurance — Compact 2×2 grid on mobile ── */}
       <div className="border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 py-5 sm:py-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+          <div className="grid grid-cols-3 gap-3 sm:gap-6">
             {[
               { icon: Truck, title: t('deliveryAllMorocco') || 'Livraison Maroc', color: 'var(--yp-blue)' },
               { icon: MessageCircle, title: t('whatsappOrder') || 'WhatsApp', color: 'var(--yp-whatsapp)' },
               { icon: CreditCard, title: t('cashOnDelivery') || 'Paiement livraison', color: 'var(--yp-red)' },
-              { icon: RefreshCw, title: t('easyExchange') || 'Échange facile', color: 'var(--yp-blue-light)' },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2.5 sm:gap-4">
                 <div
@@ -99,25 +98,25 @@ export default function Footer() {
         {/* Top row: Brand + Contact — always visible */}
         <div className="flex flex-col sm:flex-row sm:gap-10 mb-6 sm:mb-10">
           {/* Brand + contact */}
-          <div className="flex-1 mb-4 sm:mb-0">
+          <div className="flex-1 mb-4 sm:mb-0 text-left" dir="ltr">
             <button onClick={() => navigate('/')} className="flex items-center gap-2 mb-3 group">
               <img
                 src="/images/categories/logo final.png"
-                alt="YouPosh"
+                alt={storeSettings.storeName}
                 className="h-10 w-auto object-contain group-hover:scale-105 transition-transform"
               />
             </button>
-            <p className="text-gray-400 text-xs leading-relaxed mb-3 line-clamp-2 max-w-xs">
-              {t('footerDescription')}
+            <p className="text-gray-400 text-xs leading-relaxed mb-3 line-clamp-2 max-w-xs text-left">
+              {String(t('footerDescription') || '').replace('YouPosh', storeSettings.storeName)}
             </p>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400">
+            <div className="flex flex-row flex-wrap items-center justify-start gap-x-4 gap-y-1 text-xs text-gray-400" dir="ltr">
               <a href={`tel:${storeSettings.phone.replace(/[^\d+]/g, '')}`} className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors">
-                <Phone className="w-3.5 h-3.5" /> {storeSettings.phone}
+                <Phone className="w-3.5 h-3.5" /> <span dir="ltr">{storeSettings.phone}</span>
               </a>
-              <a href={`mailto:${storeSettings.email}`} className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors">
+              <a href={`mailto:${storeSettings.email}`} className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors" dir="ltr">
                 <Mail className="w-3.5 h-3.5" /> {storeSettings.email}
               </a>
-              <a href="https://maps.app.goo.gl/x4Ksr4TRyLTyn3k78" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors">
+              <a href="https://maps.app.goo.gl/x4Ksr4TRyLTyn3k78" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors" dir="ltr">
                 <MapPin className="w-3.5 h-3.5" /> Fès
               </a>
             </div>
@@ -224,7 +223,7 @@ export default function Footer() {
         <div className="border-t border-white/10 mt-4 pt-3 sm:pt-5">
           <div className="flex items-center justify-between">
             <p className="text-[10px] sm:text-xs text-gray-500">
-              © {new Date().getFullYear()} YouPosh. {t('allRightsReserved')}
+              © {new Date().getFullYear()} YOUPOSH. {t('allRightsReserved')}
             </p>
             <div className="flex items-center gap-1">
               <span className="w-5 h-0.5 bg-[var(--yp-blue)] rounded-full" />

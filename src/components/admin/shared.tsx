@@ -16,20 +16,39 @@ export const ConfirmModal = ({ message, onConfirm, onCancel }: { message: string
     </div>
 );
 
-export const getStatusColor = (status: string) => {
-    switch (status) {
-        case 'pending': return 'bg-yellow-100 text-yellow-700';
-        case 'processing': return 'bg-blue-100 text-blue-700';
-        case 'cancelled': return 'bg-red-100 text-red-700';
-        default: return 'bg-gray-100 text-gray-700';
-    }
+type StatusMeta = { label: string; color: string };
+
+const ORDER_STATUS_MAP: Record<string, StatusMeta> = {
+    pending: { label: 'En attente', color: 'bg-yellow-100 text-yellow-700' },
+    processing: { label: 'En cours de traitement', color: 'bg-blue-100 text-blue-700' },
+    shipped: { label: 'Confirmée', color: 'bg-violet-100 text-violet-700' },
+    delivered: { label: 'Terminée', color: 'bg-emerald-100 text-emerald-700' },
+    completed: { label: 'Terminée', color: 'bg-emerald-100 text-emerald-700' },
+    cancelled: { label: 'Annulée', color: 'bg-red-100 text-red-700' },
 };
 
-export const getStatusLabel = (status: string) => {
-    switch (status) {
-        case 'pending': return 'En attente';
-        case 'processing': return 'Traitement';
-        case 'cancelled': return 'Annulé';
-        default: return status;
-    }
+const DELIVERY_STATUS_MAP: Record<string, StatusMeta> = {
+    not_shipped: { label: 'Non expédiée', color: 'bg-gray-100 text-gray-700' },
+    prepared: { label: 'Préparée', color: 'bg-blue-100 text-blue-700' },
+    shipped: { label: 'Expédiée', color: 'bg-amber-100 text-amber-700' },
+    delivered: { label: 'Livrée', color: 'bg-emerald-100 text-emerald-700' },
+    returned: { label: 'Retour', color: 'bg-rose-100 text-rose-700' },
 };
+
+export const getDeliveryStatusFromOrderStatus = (status: string) => {
+    if (status === 'cancelled') return 'returned';
+    if (status === 'pending') return 'not_shipped';
+    if (status === 'processing') return 'prepared';
+    if (status === 'shipped') return 'shipped';
+    if (status === 'delivered' || status === 'completed') return 'delivered';
+    return 'not_shipped';
+};
+
+export const getOrderStatusColor = (status: string) => ORDER_STATUS_MAP[status]?.color || 'bg-gray-100 text-gray-700';
+export const getOrderStatusLabel = (status: string) => ORDER_STATUS_MAP[status]?.label || status;
+
+export const getDeliveryStatusColor = (deliveryStatus: string) => DELIVERY_STATUS_MAP[deliveryStatus]?.color || 'bg-gray-100 text-gray-700';
+export const getDeliveryStatusLabel = (deliveryStatus: string) => DELIVERY_STATUS_MAP[deliveryStatus]?.label || deliveryStatus;
+
+export const getStatusColor = getOrderStatusColor;
+export const getStatusLabel = getOrderStatusLabel;

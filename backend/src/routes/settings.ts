@@ -39,6 +39,25 @@ router.post('/store', async (req, res) => {
     }
 });
 
+// ── Watermark status (non-destructive overlay) ──
+router.patch('/watermark/status', async (req, res) => {
+    try {
+        const { isEnabled } = req.body ?? {};
+        if (typeof isEnabled !== 'boolean') {
+            return res.status(400).json({ error: 'isEnabled boolean is required' });
+        }
+        const settings = await prisma.storeSettings.upsert({
+            where: { id: 1 },
+            update: { watermarkEnabled: isEnabled },
+            create: { id: 1, watermarkEnabled: isEnabled },
+        });
+        res.json(settings);
+    } catch (error) {
+        console.error('Error updating watermark status:', error);
+        res.status(500).json({ error: 'Failed to update watermark status' });
+    }
+});
+
 // ── Hero Settings ──
 
 router.get('/hero', async (req, res) => {

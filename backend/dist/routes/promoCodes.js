@@ -28,23 +28,47 @@ router.get('/', (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
 }));
 // POST validate a promo code (for frontend checkout)
 router.post('/validate', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     try {
-        const { code, orderTotal } = req.body;
+        const codeRaw = (_a = req.body) === null || _a === void 0 ? void 0 : _a.code;
+        const orderTotalRaw = (_b = req.body) === null || _b === void 0 ? void 0 : _b.orderTotal;
+        const code = typeof codeRaw === 'string' ? codeRaw.trim() : '';
+        const orderTotal = typeof orderTotalRaw === 'number' && Number.isFinite(orderTotalRaw) ? orderTotalRaw : undefined;
+        if (!code)
+            return res.status(400).json({ error: 'Code promo invalide' });
         const promo = yield prisma.promoCode.findUnique({ where: { code } });
         if (!promo)
             return res.status(404).json({ error: 'Code promo invalide' });
         if (!promo.isActive)
             return res.status(400).json({ error: 'Code promo expiré' });
+        if (promo.startDate && new Date(promo.startDate) > new Date())
+            return res.status(400).json({ error: 'Code promo pas encore actif' });
         if (promo.maxUses > 0 && promo.usedCount >= promo.maxUses)
             return res.status(400).json({ error: 'Code promo épuisé' });
         if (promo.endDate && new Date(promo.endDate) < new Date())
             return res.status(400).json({ error: 'Code promo expiré' });
-        if (promo.minOrder > 0 && orderTotal < promo.minOrder)
+        if (typeof orderTotal === 'number' && promo.minOrder > 0 && orderTotal < promo.minOrder)
             return res.status(400).json({ error: `Commande minimum: ${promo.minOrder} MAD` });
-        const discount = promo.discountType === 'percentage'
+        if (typeof orderTotal !== 'number') {
+            return res.json({
+                valid: true,
+                discount: 0,
+                promo,
+                message: 'Code promo enregistré. Il sera appliqué à votre panier au moment du paiement.',
+            });
+        }
+        const rawDiscount = promo.discountType === 'percentage'
             ? (orderTotal * promo.discountValue) / 100
             : promo.discountValue;
-        res.json({ valid: true, discount, promo });
+        const discount = Math.max(0, Math.min(orderTotal, rawDiscount));
+        res.json({
+            valid: true,
+            discount,
+            promo,
+            cartTotalBefore: orderTotal,
+            cartTotalAfter: Math.max(0, orderTotal - discount),
+            message: 'Code promo appliqué avec succès',
+        });
     }
     catch (error) {
         res.status(500).json({ error: 'Erreur de validation' });

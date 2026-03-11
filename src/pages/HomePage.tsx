@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  ArrowRight, Star,
+  ArrowRight,
   Flame, TrendingUp, Percent, Sparkles,
   Smartphone, Home, Sparkles as SparklesIcon, Shirt, Car, Gamepad2, Gift, Baby,
-  Truck, Shield, Package, CreditCard
+  Truck, Shield, Package, CreditCard, Ticket
 } from 'lucide-react';
 import { fetchCategories, fetchProducts } from '@/lib/api';
 import ProductCard from '@/components/ui/ProductCard';
@@ -16,6 +16,8 @@ import CartDrawer from '@/components/layout/CartDrawer';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { loadHeroSettings } from '@/data/heroSettings';
 import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { useStore } from '@/contexts/StoreContext';
+
 
 const iconMap: Record<string, React.ElementType> = {
   Smartphone, Home, Sparkles: SparklesIcon, Shirt, Car, Gamepad2, Gift, Baby
@@ -29,39 +31,32 @@ export default function HomePage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(heroSettings.videoAutoplay);
   const [isMuted, setIsMuted] = useState(heroSettings.videoMuted);
+  const { promoCode, promoStatus, promoMessage, applyPromoCode, removePromoCode } = useStore();
+  const [promoInput, setPromoInput] = useState(promoCode || '');
+
+  useEffect(() => {
+    setPromoInput(promoCode || '');
+  }, [promoCode]);
 
   const categoriesRef = useScrollReveal();
   const flashRef = useScrollReveal();
-  const bestsellersRef = useScrollReveal();
-  const popularRef = useScrollReveal();
-  const newArrivalsRef = useScrollReveal();
-  const promoRef = useScrollReveal();
   const trustRef = useScrollReveal();
 
   const [categories, setCategories] = useState<any[]>([]);
-  const [popularProducts, setPopularProducts] = useState<any[]>([]);
-  const [newProducts, setNewProducts] = useState<any[]>([]);
   const [promoProducts, setPromoProducts] = useState<any[]>([]);
-  const [bestsellers, setBestsellers] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadData() {
       try {
         // On effectue toutes les requêtes en parallèle vers l'API Backend
-        const [cats, pop, news, promos, bests] = await Promise.all([
+        const [cats, promos] = await Promise.all([
           fetchCategories(),
-          fetchProducts('badge=popular'), // Optionnel: ou filtrer coté front si la route ne gère pas exactement le badge
-          fetchProducts('sort=newest'),
           fetchProducts('badge=promo'),
-          fetchProducts('sort=bestsellers'),
         ]);
 
         setCategories(cats);
-        // fallback filtering si l'API retourne tout par défaut
-        setPopularProducts(pop.filter((p: any) => p.isPopular).slice(0, 8));
-        setNewProducts(news.filter((p: any) => p.isNew).slice(0, 4));
-        setPromoProducts(promos.filter((p: any) => p.originalPrice > p.price).slice(0, 4));
-        setBestsellers(bests.filter((p: any) => p.isBestSeller).slice(0, 4));
+        // fallback filtering - Limiter à 4 produits maximum
+        setPromoProducts(promos.filter((p: any) => p.isVisible !== false && p.originalPrice > p.price).slice(0, 4));
       } catch (error) {
         console.error("Erreur chargement page accueil:", error);
       }
@@ -83,17 +78,17 @@ export default function HomePage() {
             <video
               ref={videoRef}
               src={heroSettings.videoUrl}
-              poster={heroSettings.videoPosterUrl}
               autoPlay={heroSettings.videoAutoplay}
               muted={isMuted}
               loop={heroSettings.videoLoop}
               playsInline
               className="absolute inset-0 w-full h-full object-cover"
+              style={{ filter: 'brightness(1.1) contrast(1.06) saturate(0.92)' }}
             />
           ) : (
             <img
               src={heroSettings.videoPosterUrl}
-              alt="YouPosh Hero"
+              alt="YOUPOSH Hero"
               className="absolute inset-0 w-full h-full object-cover"
             />
           )}
@@ -101,11 +96,10 @@ export default function HomePage() {
           {/* Dark overlay — opacity controlled by admin */}
           <div
             className="absolute inset-0 bg-black"
-            style={{ opacity: heroSettings.overlayOpacity / 100 }}
+            style={{ opacity: (heroSettings.overlayOpacity / 100) * 0.55 }}
           />
 
-          {/* Gradient overlays for extra depth */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/5" />
 
           {/* Video controls — top right */}
           {heroSettings.videoEnabled && (
@@ -118,7 +112,7 @@ export default function HomePage() {
                     setIsPlaying(!isPlaying);
                   }
                 }}
-                className="w-8 h-8 bg-white/15 backdrop-blur-md rounded-full flex items-center justify-center text-white/80 hover:bg-white/25 transition-colors"
+                className="w-8 h-8 bg-black/35 rounded-full flex items-center justify-center text-white/90 hover:bg-black/45 transition-colors"
               >
                 {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
               </button>
@@ -127,7 +121,7 @@ export default function HomePage() {
                   if (videoRef.current) videoRef.current.muted = !isMuted;
                   setIsMuted(!isMuted);
                 }}
-                className="w-8 h-8 bg-white/15 backdrop-blur-md rounded-full flex items-center justify-center text-white/80 hover:bg-white/25 transition-colors"
+                className="w-8 h-8 bg-black/35 rounded-full flex items-center justify-center text-white/90 hover:bg-black/45 transition-colors"
               >
                 {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
               </button>
@@ -136,43 +130,56 @@ export default function HomePage() {
 
           {/* Content — superimposed over video */}
           <div className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 py-16 sm:py-20 text-center">
-            {/* Slogan */}
-            <p className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-white/70 font-medium mb-3">
-              {heroSettings.slogan}
-            </p>
+            <div className="max-w-3xl mx-auto">
+              {/* Slogan */}
+              <p className="text-[10px] sm:text-xs uppercase tracking-[0.28em] text-white/80 font-semibold mb-4">
+                {isAr ? 'علامة مغربية رائدة' : 'YOUPOSH — MARQUE MAROCAINE'}
+              </p>
 
-            {/* Badge */}
-            <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium border border-white/20 mb-5">
-              <Shield className="w-3.5 h-3.5" />
-              {heroSettings.badgeText}
-            </span>
+              {/* Badge */}
+              <span className="inline-flex items-center gap-2.5 bg-white/10 text-white px-5 py-2 rounded-full text-xs sm:text-sm font-semibold border border-white/15 mb-6">
+                <span className="inline-flex items-center justify-center w-[18px] h-[12px] rounded-sm overflow-hidden border border-white/25">
+                  <svg viewBox="0 0 18 12" className="w-full h-full">
+                    <rect x="0" y="0" width="18" height="12" fill="#c1272d" />
+                    <path
+                      d="M9 2.1 L10.4 6.1 L14.7 6.1 L11.2 8.5 L12.6 12.5 L9 10.1 L5.4 12.5 L6.8 8.5 L3.3 6.1 L7.6 6.1 Z"
+                      fill="none"
+                      stroke="#006233"
+                      strokeWidth="1.1"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+                {t('heroBadgeTitle')}
+              </span>
 
-            {/* Title */}
-            <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-white leading-tight font-heading max-w-3xl mx-auto mb-4 drop-shadow-lg">
-              {heroSettings.title}
-            </h1>
+              {/* Title */}
+              <h1 className="text-3xl sm:text-4xl lg:text-6xl font-extrabold text-white leading-[1.15] font-heading max-w-4xl mx-auto mb-5">
+                {t('heroTitle')}
+              </h1>
 
-            {/* Subtitle */}
-            <p className="text-sm sm:text-base lg:text-lg text-white/80 max-w-xl mx-auto leading-relaxed mb-8 drop-shadow">
-              {heroSettings.subtitle}
-            </p>
+              {/* Subtitle */}
+              <p className="text-sm sm:text-base lg:text-lg text-white/75 max-w-2xl mx-auto leading-relaxed mb-8 font-medium">
+                {t('heroSubtitle')}
+              </p>
 
-            {/* CTA buttons */}
-            <div className="flex flex-wrap justify-center gap-3">
-              <button
-                onClick={() => navigate(heroSettings.primaryCtaLink)}
-                className="bg-white hover:bg-white/90 text-[var(--yp-dark)] px-7 py-3.5 rounded-xl font-semibold flex items-center gap-2 text-sm transition-all shadow-xl hover:shadow-2xl active:scale-[0.97]"
-              >
-                {heroSettings.primaryCtaText}
-                <ArrowRight className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => navigate(heroSettings.secondaryCtaLink)}
-                className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white px-7 py-3.5 rounded-xl font-semibold flex items-center gap-2 text-sm transition-all border border-white/25"
-              >
-                <Percent className="w-4 h-4" />
-                {heroSettings.secondaryCtaText}
-              </button>
+              {/* CTA buttons */}
+              <div className="flex flex-wrap justify-center gap-3">
+                <button
+                  onClick={() => navigate(heroSettings.primaryCtaLink)}
+                  className="bg-white hover:bg-white/90 text-[var(--yp-dark)] px-7 py-3.5 rounded-xl font-semibold flex items-center gap-2 text-sm transition-all active:scale-[0.97]"
+                >
+                  {heroSettings.primaryCtaText}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => navigate(heroSettings.secondaryCtaLink)}
+                  className="bg-white/15 hover:bg-white/25 text-white px-7 py-3.5 rounded-xl font-semibold flex items-center gap-2 text-sm transition-all border border-white/20"
+                >
+                  <Percent className="w-4 h-4" />
+                  {heroSettings.secondaryCtaText}
+                </button>
+              </div>
             </div>
           </div>
         </section>
@@ -184,10 +191,10 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="bg-white rounded-2xl shadow-card border border-[var(--yp-gray-300)] p-3 sm:p-5 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
               {[
-                { icon: Truck, title: t('deliveryAllMorocco') || 'Livraison Maroc', desc: '24-48h', color: 'var(--yp-blue)' },
-                { icon: CreditCard, title: t('cashOnDelivery') || 'Paiement livraison', desc: 'Payez à la réception', color: 'var(--yp-dark)' },
-                { icon: Package, title: 'Produits certifiés', desc: 'Qualité garantie', color: 'var(--yp-blue)' },
-                { icon: Shield, title: 'Support client', desc: 'Réactif & disponible', color: 'var(--yp-dark)' },
+                { icon: Truck, title: 'Livraison Express', desc: 'Gratuite partout au Maroc', color: 'var(--yp-blue)' },
+                { icon: CreditCard, title: 'Paiement à la livraison', desc: 'Sécurisé & sans engagement', color: 'var(--yp-dark)' },
+                { icon: Package, title: 'Qualité Premium', desc: 'Produits vérifiés & garantis', color: 'var(--yp-blue)' },
+                { icon: Shield, title: 'Service Client VIP', desc: 'Support premium 7/7', color: 'var(--yp-dark)' },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-2.5 sm:gap-3 group">
                   <div
@@ -201,6 +208,66 @@ export default function HomePage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════
+            PROMO CODE ENTRY — visible dès l’arrivée
+            ══════════════════════════════════════════════ */}
+        <section className="py-5 sm:py-7">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="rounded-2xl bg-gradient-to-r from-[var(--yp-blue)] to-indigo-600 p-[1px] shadow-card">
+              <div className="bg-white rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-blue-dark)] flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <Ticket className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm sm:text-base font-bold bg-gradient-to-r from-[var(--yp-dark)] to-[var(--yp-blue)] bg-clip-text text-transparent">
+                      Profitez d'un avantage exclusif
+                    </p>
+                    <p className="text-xs sm:text-sm text-[var(--yp-gray-600)] leading-relaxed">
+                      Saisissez votre code promo et bénéficiez d'une remise immédiate sur vos achats
+                    </p>
+                    {promoMessage && (
+                      <p className={`text-xs sm:text-sm mt-1 ${promoStatus === 'error' ? 'text-red-500' : 'text-emerald-600'}`}>
+                        {promoMessage}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2 sm:items-center">
+                  <div className="flex gap-2">
+                    <input
+                      value={promoInput}
+                      onChange={(e) => setPromoInput(e.target.value)}
+                      placeholder="Saisissez votre code"
+                      className="flex-1 sm:w-56 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)] text-sm"
+                    />
+                    <button
+                      onClick={() => applyPromoCode(promoInput)}
+                      disabled={promoStatus === 'loading'}
+                      className={`px-5 py-2.5 rounded-xl font-semibold text-sm ${promoStatus === 'loading'
+                        ? 'bg-gray-200 text-gray-400'
+                        : 'bg-[var(--yp-blue)] text-white hover:opacity-95'
+                        }`}
+                    >
+                      Appliquer le code
+                    </button>
+                  </div>
+
+                  {promoCode && promoStatus !== 'idle' && (
+                    <button
+                      onClick={() => { removePromoCode(); setPromoInput(''); }}
+                      className="text-xs font-semibold text-red-500 hover:underline text-left sm:text-right"
+                    >
+                      Supprimer le code
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -288,37 +355,65 @@ export default function HomePage() {
         </section>
 
         {/* ══════════════════════════════════════════════
-            FLASH SALES — Contained red card
+            FLASH SALES — Contained red card avec design 3D premium
             ══════════════════════════════════════════════ */}
         <section className="py-6" ref={flashRef}>
           <div className="max-w-7xl mx-auto px-4 reveal">
-            <div className="bg-gradient-to-br from-[var(--yp-red)] via-[var(--yp-red-dark)] to-[#991B1B] rounded-2xl p-5 sm:p-7 text-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <div className="rounded-2xl overflow-hidden border border-[var(--yp-gray-300)] bg-white">
+              <div className="p-4 sm:p-6 lg:p-8">
 
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                      <Flame className="w-6 h-6" />
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-[var(--yp-red)] rounded-xl flex items-center justify-center">
+                      <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold font-heading">{t('flashSales')}</h2>
-                      <p className="text-sm text-white/70">{t('limitedTime')}</p>
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <span className="inline-flex rounded-full h-1.5 w-1.5 bg-[var(--yp-red)]" />
+                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-[var(--yp-red)]">
+                          Offre Flash
+                        </span>
+                      </div>
+                      <h2 className="text-[22px] sm:text-[28px] font-extrabold font-heading text-[var(--yp-dark)] leading-none tracking-tight">
+                        Ventes Flash
+                      </h2>
                     </div>
                   </div>
+
                   <button
                     onClick={() => navigate('/shop?filter=promo')}
-                    className="text-sm font-semibold flex items-center gap-1.5 bg-white/15 hover:bg-white/25 px-4 py-2 rounded-xl transition-colors backdrop-blur-sm"
+                    className="group w-full sm:w-auto text-[13px] sm:text-sm font-bold flex justify-center items-center gap-2 bg-[var(--yp-red-50)] text-[var(--yp-red)] hover:bg-[var(--yp-red)] hover:text-white px-5 py-2.5 rounded-xl transition-colors duration-300"
                   >
-                    {t('seeAll')}
-                    <ArrowRight className="w-4 h-4" />
+                    Voir Toutes les Offres
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                  {promoProducts.map(product => (
-                    <ProductCard key={product.id} product={product} variant="compact" />
-                  ))}
+                <div className="mt-4 sm:mt-6">
+                  {promoProducts.length === 0 ? (
+                    <div className="bg-white/60 rounded-2xl border border-[var(--yp-gray-300)] p-4 text-center">
+                      <p className="text-sm font-semibold text-[var(--yp-dark)]">Aucune offre flash pour le moment</p>
+                      <p className="text-xs text-[var(--yp-gray-600)] mt-1">Revenez bientôt, de nouvelles promos arrivent.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="sm:hidden -mx-4 px-4 overflow-x-auto scrollbar-hide">
+                        <div className="flex gap-3 pb-1 snap-x snap-mandatory">
+                          {promoProducts.map(product => (
+                            <div key={product.id} className="snap-start shrink-0 w-[calc((100%-12px)/2)]">
+                              <ProductCard product={product} variant="compact" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                        {promoProducts.map(product => (
+                          <ProductCard key={product.id} product={product} variant="compact" />
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -328,7 +423,7 @@ export default function HomePage() {
         {/* ══════════════════════════════════════════════
             BESTSELLERS
             ══════════════════════════════════════════════ */}
-        <section className="py-6" ref={bestsellersRef}>
+        <section className="py-6" ref={trustRef}>
           <div className="max-w-7xl mx-auto px-4 reveal">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -349,112 +444,27 @@ export default function HomePage() {
               </button>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {bestsellers.map(product => (
+              {promoProducts.slice(0, 4).map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════════
-            POPULAR PRODUCTS
-            ══════════════════════════════════════════════ */}
-        <section className="py-6" ref={popularRef}>
-          <div className="max-w-7xl mx-auto px-4 reveal">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[var(--yp-red-50)] rounded-xl flex items-center justify-center">
-                  <Star className="w-5 h-5 text-[var(--yp-red)]" />
-                </div>
-                <div>
-                  <h2 className="section-title">{t('popularProducts')}</h2>
-                  <p className="section-subtitle">{t('popularDesc') || 'Sélection populaire'}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => navigate('/shop')}
-                className="text-sm text-[var(--yp-blue)] font-semibold flex items-center gap-1.5 hover:gap-2.5 transition-all"
-              >
-                {t('seeAll')}
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {popularProducts.slice(0, 4).map(product => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* Section supprimée pour page épurée */}
 
-        {/* ══════════════════════════════════════════════
-            PROMO BANNER — Subtle, not aggressive
-            ══════════════════════════════════════════════ */}
-        <section className="py-6" ref={promoRef}>
-          <div className="max-w-7xl mx-auto px-4 reveal">
-            <div className="bg-[var(--yp-dark)] rounded-2xl p-8 sm:p-12 text-white text-center relative overflow-hidden">
-              <div className="absolute top-4 left-4 w-20 h-20 border border-white/5 rounded-full" />
-              <div className="absolute bottom-4 right-4 w-28 h-28 border border-white/5 rounded-full" />
-
-              <div className="relative z-10">
-                <div className="inline-flex items-center justify-center w-14 h-14 bg-white/10 rounded-2xl mb-5">
-                  <Percent className="w-7 h-7" />
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-3 font-heading">{t('promoBannerTitle')}</h2>
-                <p className="text-white/60 mb-8 max-w-md mx-auto">{t('promoBannerDesc')}</p>
-                <button
-                  onClick={() => navigate('/shop?filter=promo')}
-                  className="bg-white text-[var(--yp-dark)] px-7 py-3.5 rounded-xl font-bold hover:bg-white/90 transition-all shadow-lg active:scale-[0.98]"
-                >
-                  {t('discoverPromos')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ══════════════════════════════════════════════
-            NEW ARRIVALS
-            ══════════════════════════════════════════════ */}
-        <section className="py-6" ref={newArrivalsRef}>
-          <div className="max-w-7xl mx-auto px-4 reveal">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-emerald-500" />
-                </div>
-                <div>
-                  <h2 className="section-title">{t('newArrivals')}</h2>
-                  <p className="section-subtitle">{t('newArrivalsDesc') || 'Derniers produits ajoutés'}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => navigate('/shop?filter=new')}
-                className="text-sm text-[var(--yp-blue)] font-semibold flex items-center gap-1.5 hover:gap-2.5 transition-all"
-              >
-                {t('seeAll')}
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {newProducts.map(product => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* Sections produits supprimées pour page épurée */}
 
         {/* ══════════════════════════════════════════════
             TRUST BADGES — Bottom advantage cards
             ══════════════════════════════════════════════ */}
         <section className="py-5 sm:py-8" ref={trustRef}>
           <div className="max-w-7xl mx-auto px-4">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+            <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
               {[
                 { icon: Truck, title: 'Livraison rapide', desc: '24-72h partout au Maroc', color: 'var(--yp-blue)' },
                 { icon: CreditCard, title: 'Paiement à la livraison', desc: 'Payez à la réception', color: 'var(--yp-dark)' },
                 { icon: Percent, title: 'Meilleurs prix', desc: 'Qualité au meilleur prix', color: 'var(--yp-red)' },
-                { icon: Shield, title: 'Achat sécurisé', desc: 'Échange facile garanti', color: 'var(--yp-blue)' },
               ].map((item, i) => (
                 <div key={i} className={`reveal reveal-delay-${i + 1} bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center border border-[var(--yp-gray-300)] hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 group`}>
                   <div className="w-9 h-9 sm:w-12 sm:h-12 bg-[var(--yp-gray-200)] rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
@@ -467,6 +477,76 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* ══════════════════════════════════════════════
+            DEUX CATÉGORIES PRINCIPALES - Section Premium
+            ══════════════════════════════════════════════ */}
+
+        {/* Section 1: Exclusivités YOUPOSH */}
+        <section className="py-8 reveal">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-blue-dark)] rounded-2xl flex items-center justify-center shadow-lg">
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-[var(--yp-dark)] to-[var(--yp-blue)] bg-clip-text text-transparent">
+                    Exclusivités YOUPOSH
+                  </h2>
+                  <p className="text-sm text-[var(--yp-gray-600)]">Des pièces uniques disponibles nulle part ailleurs</p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/shop?filter=exclusive')}
+                className="text-sm text-[var(--yp-blue)] font-semibold flex items-center gap-1.5 hover:gap-2.5 transition-all"
+              >
+                Voir tout
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Grille 2x2 pour mobile et desktop */}
+            <div className="grid grid-cols-2 gap-4">
+              {promoProducts.slice(0, 4).map(product => (
+                <ProductCard key={product.id} product={product} variant="compact" />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Sections supprimées pour une page épurée */}
+
+        {/* ══════════════════════════════════════════════
+            DISCOVER MORE — Bottom CTA
+            ══════════════════════════════════════════════ */}
+        <section className="py-8 sm:py-12 reveal">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="border-t border-[var(--yp-gray-300)]" />
+            <div className="pt-8 sm:pt-10 pb-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-[var(--yp-blue)] mb-1.5">
+                  YOUPOSH Collection
+                </p>
+                <h2 className="text-lg sm:text-xl font-bold text-[var(--yp-dark)] leading-snug">
+                  Vous n'avez pas encore tout vu
+                </h2>
+                <p className="text-sm text-[var(--yp-gray-600)] mt-1.5 max-w-md">
+                  Découvrez le reste de notre collection et trouvez ce qu'il vous faut.
+                </p>
+              </div>
+              <button
+                onClick={() => navigate('/shop')}
+                className="bg-[#202442] hover:bg-[#1A1D38] text-white pl-6 pr-5 py-3 rounded-xl font-semibold text-sm transition-all active:scale-[0.97] inline-flex items-center gap-2.5 shadow-sm whitespace-nowrap"
+              >
+                Explorer la boutique
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Page épurée - Pas de sections supplémentaires */}
       </main>
 
       <Footer />

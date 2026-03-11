@@ -12,12 +12,10 @@ export function isActive(p: Product): boolean {
 /**
  * A product counts as "new" if:
  *  - it is active  (published + visible + in stock)
- *  - AND: admin flagged `isNew = true`
- *         OR   `publishedAt` is within `days` days from now
+ *  - AND: `publishedAt` is within `days` days from now
  */
 export function isNewProduct(p: Product, days = 30): boolean {
     if (!isActive(p)) return false;
-    if (p.isNew) return true;
     if (!p.publishedAt) return false;
 
     const publishedMs = new Date(p.publishedAt).getTime();
@@ -28,12 +26,10 @@ export function isNewProduct(p: Product, days = 30): boolean {
 /**
  * A product counts as "best seller" if:
  *  - it is active
- *  - AND: admin flagged `isBestSeller = true`
- *         OR   `salesCount >= minSales`
+ *  - AND: `salesCount >= minSales`
  */
 export function isBestSellerProduct(p: Product, minSales = 10): boolean {
     if (!isActive(p)) return false;
-    if (p.isBestSeller) return true;
     return p.salesCount >= minSales;
 }
 
@@ -94,11 +90,18 @@ export function getPromoProducts(allProducts: Product[], limit = 8): Product[] {
         .slice(0, limit);
 }
 
-/** Admin-picked featured products for homepage hero etc. */
+/** 
+ * Admin-picked featured products are now replaced by the most recent active products
+ * since we removed the manual featured flag.
+ */
 export function getFeaturedProducts(allProducts: Product[], limit = 8): Product[] {
     return allProducts
-        .filter(p => isActive(p) && p.isFeatured)
-        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .filter(p => isActive(p))
+        .sort((a, b) => {
+            const dateA = new Date(a.publishedAt ?? 0).getTime();
+            const dateB = new Date(b.publishedAt ?? 0).getTime();
+            return dateB - dateA; // Newest first
+        })
         .slice(0, limit);
 }
 

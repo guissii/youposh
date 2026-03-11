@@ -1,0 +1,14 @@
+﻿PrismaClientKnownRequestError: 
+Invalid `prisma.product.create()` invocation:
+
+
+Foreign key constraint violated on the constraint: `Product_categorySlug_fkey`
+    at ei.handleRequestError (C:\Users\MSI\Desktop\you shop\backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\MSI\Desktop\you shop\backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\MSI\Desktop\you shop\backend\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\MSI\Desktop\you shop\backend\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async main (file:///C:/Users/MSI/Desktop/you%20shop/backend/test_prisma.mjs:31:25) {
+  code: 'P2003',
+  meta: { modelName: 'Product', constraint: 'Product_categorySlug_fkey' },
+  clientVersion: '6.19.2'
+}

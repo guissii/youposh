@@ -24,10 +24,10 @@ export interface HeroSettings {
 
 export const defaultHeroSettings: HeroSettings = {
     isEnabled: true,
-    badgeText: 'Boutique N°1 au Maroc',
+    badgeText: 'Une marque marocaine pensée pour votre quotidien',
     title: 'Des produits tendance pour votre quotidien',
-    subtitle: 'Gadgets, accessoires et articles utiles sélectionnés pour vous. Livraison partout au Maroc — paiement à la livraison.',
-    slogan: 'Votre boutique tendance au Maroc',
+    subtitle: 'Des accessoires et produits utiles sélectionnés pour vous, partout au Maroc.',
+    slogan: 'UNE MARQUE MAROCAINE',
     primaryCtaText: 'Explorer la boutique',
     primaryCtaLink: '/shop',
     secondaryCtaText: 'Voir les promotions',
@@ -39,7 +39,7 @@ export const defaultHeroSettings: HeroSettings = {
     videoMuted: true,
     videoLoop: true,
     showOnMobile: true,
-    overlayOpacity: 55,
+    overlayOpacity: 35,
 };
 
 import { useState, useEffect } from 'react';

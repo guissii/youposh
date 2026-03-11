@@ -1,8 +1,172 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { google } from 'googleapis';
 
 const router = Router();
 const prisma = new PrismaClient();
+
+type OrderForSheet = {
+    id: string;
+    createdAt: Date;
+    customerName: string;
+    phone: string;
+    city: string | null;
+    address: string | null;
+    total: number;
+    status: string;
+    notes?: string | null;
+    promoCode?: string | null;
+    discount?: number | null;
+    items?: Array<{
+        quantity: number;
+        price: number;
+        productId: number;
+        product?: { name?: string | null; sku?: string | null } | null;
+    }>;
+};
+
+const SHEETS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
+
+function getDeliveryStatusFromOrderStatus(status: string) {
+    if (status === 'cancelled') return 'returned';
+    if (status === 'pending') return 'not_shipped';
+    if (status === 'processing') return 'prepared';
+    if (status === 'shipped') return 'shipped';
+    if (status === 'delivered' || status === 'completed') return 'delivered';
+    return 'not_shipped';
+}
+
+async function getSheetsClient() {
+    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+    const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+    const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY;
+
+    if (!spreadsheetId || !clientEmail || !privateKeyRaw) {
+        throw new Error('Google Sheets env vars missing');
+    }
+
+    const privateKey = privateKeyRaw.replace(/\\n/g, '\n');
+    const auth = new google.auth.JWT({
+        email: clientEmail,
+        key: privateKey,
+        scopes: SHEETS_SCOPES,
+    });
+
+    const sheets = google.sheets({ version: 'v4', auth });
+    return { sheets, spreadsheetId };
+}
+
+async function ensureSheetTabExists(sheetTitle: string) {
+    const { sheets, spreadsheetId } = await getSheetsClient();
+    const meta = await sheets.spreadsheets.get({
+        spreadsheetId,
+        fields: 'sheets.properties.title',
+    });
+
+    const exists = (meta.data.sheets ?? []).some(s => s.properties?.title === sheetTitle);
+    if (!exists) {
+        await sheets.spreadsheets.batchUpdate({
+            spreadsheetId,
+            requestBody: { requests: [{ addSheet: { properties: { title: sheetTitle } } }] },
+        });
+    }
+
+    return { sheets, spreadsheetId };
+}
+
+async function ensureHeaderRow(sheets: any, spreadsheetId: string, sheetTitle: string) {
+    const headerRange = `'${sheetTitle}'!1:1`;
+    const existing = await sheets.spreadsheets.values.get({ spreadsheetId, range: headerRange });
+    const hasHeader = Array.isArray(existing.data.values) && existing.data.values.length > 0 && (existing.data.values[0] ?? []).length > 0;
+    if (hasHeader) return;
+
+    const headers = [
+        'ID commande',
+        'Date création',
+        'Nom client',
+        'Téléphone',
+        'Ville',
+        'Adresse',
+        'Produits',
+        'Quantité totale',
+        'Total',
+        'Statut commande',
+        'Statut livraison',
+        'Code promo',
+        'Remise',
+        'Remarque',
+        'Dernière mise à jour',
+    ];
+
+    await sheets.spreadsheets.values.update({
+        spreadsheetId,
+        range: `'${sheetTitle}'!A1`,
+        valueInputOption: 'RAW',
+        requestBody: { values: [headers] },
+    });
+}
+
+async function appendOrderToGoogleSheet(order: OrderForSheet) {
+    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+    if (!spreadsheetId) return;
+
+    const createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
+    const sheetTitle = `Commandes_${createdAt.getFullYear()}_${String(createdAt.getMonth() + 1).padStart(2, '0')}`;
+
+    const { sheets } = await ensureSheetTabExists(sheetTitle);
+    await ensureHeaderRow(sheets, spreadsheetId, sheetTitle);
+
+    const items = order.items ?? [];
+    const productsLabel = items
+        .map(it => {
+            const name = it.product?.name || `#${it.productId}`;
+            return `${it.quantity}x ${name}`;
+        })
+        .join(', ');
+    const qtyTotal = items.reduce((sum, it) => sum + Number(it.quantity ?? 0), 0);
+
+    const deliveryStatus = getDeliveryStatusFromOrderStatus(order.status);
+
+    const row = [
+        order.id,
+        createdAt.toISOString(),
+        order.customerName ?? '',
+        order.phone ?? '',
+        order.city ?? '',
+        order.address ?? '',
+        productsLabel,
+        qtyTotal,
+        order.total ?? 0,
+        order.status ?? '',
+        deliveryStatus,
+        order.promoCode ?? '',
+        order.discount ?? 0,
+        order.notes ?? '',
+        new Date().toISOString(),
+    ];
+
+    await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range: `'${sheetTitle}'!A1`,
+        valueInputOption: 'RAW',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: { values: [row] },
+    });
+}
+
+function parseVariantSelection(label: any): Record<string, string> {
+    if (typeof label !== 'string') return {};
+    const parts = label.split('/').map(p => p.trim()).filter(Boolean);
+    const out: Record<string, string> = {};
+    for (const part of parts) {
+        const idx = part.indexOf(':');
+        if (idx === -1) continue;
+        const key = part.slice(0, idx).trim();
+        const value = part.slice(idx + 1).trim();
+        if (key && value) out[key] = value;
+    }
+    return out;
+}
 
 // GET all orders with optional status filter
 router.get('/', async (req, res) => {
@@ -10,7 +174,11 @@ router.get('/', async (req, res) => {
         const { status, search } = req.query;
 
         const where: any = {};
-        if (status) where.status = status;
+        if (status === 'delivered' || status === 'completed') {
+            where.status = { in: ['delivered', 'completed'] };
+        } else if (status) {
+            where.status = status;
+        }
         if (search) {
             where.OR = [
                 { customerName: { contains: search as string, mode: 'insensitive' } },
@@ -26,7 +194,6 @@ router.get('/', async (req, res) => {
                 items: {
                     include: { product: true }
                 },
-                customer: true,
             },
         });
         res.json(orders);
@@ -43,7 +210,6 @@ router.get('/:id', async (req, res) => {
             where: { id: req.params.id },
             include: {
                 items: { include: { product: true } },
-                customer: true,
             },
         });
         if (!order) return res.status(404).json({ error: 'Order not found' });
@@ -56,48 +222,195 @@ router.get('/:id', async (req, res) => {
 // POST create order
 router.post('/', async (req, res) => {
     try {
-        const { customerName, phone, city, address, notes, items } = req.body;
+        const { customerName, phone, city, address, notes, items, promoCode: promoCodeRaw } = req.body;
 
-        // Calculate total
-        const total = items.reduce((sum: number, item: any) => sum + item.price * item.quantity, 0);
+        const promoCode = typeof promoCodeRaw === 'string' ? promoCodeRaw.trim() : '';
+        const normalizedItems = Array.isArray(items)
+            ? items
+                .map((it: any) => ({
+                    productId: Number(it?.productId),
+                    quantity: Number(it?.quantity),
+                    variant: typeof it?.variant === 'string' ? it.variant : undefined,
+                }))
+                .filter((it: any) => Number.isFinite(it.productId) && Number.isFinite(it.quantity) && it.quantity > 0)
+            : [];
 
-        // Create order with items
-        const order = await prisma.order.create({
-            data: {
-                customerName,
-                phone,
-                city,
-                address,
-                notes,
-                total,
-                items: {
-                    create: items.map((item: any) => ({
-                        productId: item.productId,
-                        quantity: item.quantity,
-                        price: item.price,
-                    })),
-                },
-            },
-            include: {
-                items: { include: { product: true } },
-            },
-        });
+        if (!normalizedItems.length) {
+            return res.status(400).json({ error: 'Panier vide' });
+        }
 
-        // Update product stock and sales
-        for (const item of items) {
-            await prisma.product.update({
-                where: { id: item.productId },
+        const extraNotes = (items ?? [])
+            .map((item: any) => (typeof item?.variant === 'string' && item.variant.trim() ? `Produit ${item.productId}: ${item.variant.trim()}` : null))
+            .filter(Boolean)
+            .join('\n');
+
+        const finalNotes = [notes, extraNotes].filter((s: any) => typeof s === 'string' && s.trim()).join('\n');
+
+        const order = await prisma.$transaction(async (tx) => {
+            const productIds = [...new Set(normalizedItems.map((it: any) => it.productId))];
+            const products = await tx.product.findMany({
+                where: { id: { in: productIds } },
+                select: { id: true, price: true, stock: true, inStock: true, variants: true },
+            });
+            const productById = new Map<number, { id: number; price: number; stock: number; inStock: boolean; variants: any }>(
+                products.map((p: any) => [p.id, p])
+            );
+
+            let subtotal = 0;
+            for (const item of normalizedItems) {
+                const product = productById.get(item.productId);
+                if (!product) {
+                    throw new Error(`Product not found: ${item.productId}`);
+                }
+                if (product.inStock === false) {
+                    throw new Error(`Produit en rupture de stock: ${item.productId}`);
+                }
+                if (Number(product.stock ?? 0) < Number(item.quantity ?? 0)) {
+                    throw new Error(`Out of stock: ${item.productId}`);
+                }
+                subtotal += Number(product.price) * Number(item.quantity);
+            }
+
+            let appliedPromo: any = null;
+            let discount = 0;
+            if (promoCode) {
+                const promo = await tx.promoCode.findUnique({ where: { code: promoCode } });
+                if (!promo) throw new Error('Code promo invalide');
+                if (!promo.isActive) throw new Error('Code promo expiré');
+                if (promo.startDate && new Date(promo.startDate) > new Date()) throw new Error('Code promo pas encore actif');
+                if (promo.maxUses > 0 && promo.usedCount >= promo.maxUses) throw new Error('Code promo épuisé');
+                if (promo.endDate && new Date(promo.endDate) < new Date()) throw new Error('Code promo expiré');
+                if (promo.minOrder > 0 && subtotal < promo.minOrder) throw new Error(`Commande minimum: ${promo.minOrder} MAD`);
+
+                const rawDiscount = promo.discountType === 'percentage'
+                    ? (subtotal * promo.discountValue) / 100
+                    : promo.discountValue;
+                discount = Math.max(0, Math.min(subtotal, rawDiscount));
+                appliedPromo = promo;
+            }
+
+            const totalAfterDiscount = Math.max(0, subtotal - discount);
+
+            const created = await tx.order.create({
                 data: {
-                    stock: { decrement: item.quantity },
-                    salesCount: { increment: item.quantity },
+                    customerName,
+                    phone,
+                    city,
+                    address,
+                    notes: finalNotes || undefined,
+                    promoCode: appliedPromo ? appliedPromo.code : undefined,
+                    discount,
+                    total: totalAfterDiscount,
+                    items: {
+                        create: normalizedItems.map((item: any) => {
+                            const product = productById.get(item.productId);
+                            const price = product ? Number(product.price) : 0;
+                            return {
+                                productId: item.productId,
+                                quantity: item.quantity,
+                                price,
+                            };
+                        }),
+                    },
+                },
+                include: {
+                    items: { include: { product: true } },
                 },
             });
+
+            for (const item of normalizedItems) {
+                const product = await tx.product.findUnique({
+                    where: { id: item.productId },
+                    select: {
+                        id: true,
+                        stock: true,
+                        inStock: true,
+                        variants: true,
+                    },
+                });
+
+                if (!product) {
+                    throw new Error(`Product not found: ${item.productId}`);
+                }
+
+                if (product.inStock === false) {
+                    throw new Error(`Produit en rupture de stock: ${item.productId}`);
+                }
+
+                if (Number(product.stock ?? 0) < Number(item.quantity ?? 0)) {
+                    throw new Error(`Out of stock: ${item.productId}`);
+                }
+
+                const selection = parseVariantSelection(item?.variant);
+                let nextVariants: any = product.variants;
+
+                if (selection && product.variants && Array.isArray(product.variants)) {
+                    const updated = product.variants.map((v: any) => {
+                        const selectedValue = selection?.[v?.name];
+                        if (!selectedValue || !Array.isArray(v?.options)) return v;
+
+                        const newOptions = v.options.map((opt: any) => {
+                            if (!opt || typeof opt !== 'object') return opt;
+                            if (typeof opt.value !== 'string') return opt;
+                            if (opt.value !== selectedValue) return opt;
+                            if (typeof opt.stock !== 'number') return opt;
+                            if (opt.stock < item.quantity) {
+                                throw new Error(`Out of stock: ${item.productId} (${v.name}: ${opt.value})`);
+                            }
+                            return { ...opt, stock: opt.stock - item.quantity };
+                        });
+
+                        return { ...v, options: newOptions };
+                    });
+                    nextVariants = updated;
+                }
+
+                const newStock = Number(product.stock ?? 0) - Number(item.quantity ?? 0);
+
+                await tx.product.update({
+                    where: { id: item.productId },
+                    data: {
+                        stock: { decrement: item.quantity },
+                        salesCount: { increment: item.quantity },
+                        variants: nextVariants,
+                        inStock: product.inStock && newStock <= 0 ? false : product.inStock,
+                    },
+                });
+            }
+
+            if (appliedPromo && discount > 0) {
+                await tx.promoCode.update({
+                    where: { id: appliedPromo.id },
+                    data: { usedCount: { increment: 1 } },
+                });
+            }
+
+            return created;
+        });
+
+        try {
+            await appendOrderToGoogleSheet(order as unknown as OrderForSheet);
+        } catch (e) {
+            console.warn('Sheets sync failed:', e instanceof Error ? e.message : String(e));
         }
 
         res.status(201).json(order);
     } catch (error) {
         console.error('Error creating order:', error);
-        res.status(500).json({ error: 'Failed to create order' });
+        const message = error instanceof Error ? error.message : 'Failed to create order';
+        const clientErrors = [
+            'Panier vide',
+            'Code promo invalide',
+            'Code promo expiré',
+            'Code promo épuisé',
+            'Code promo pas encore actif',
+            'Commande minimum:',
+            'Product not found:',
+            'Produit en rupture de stock:',
+            'Out of stock:',
+        ];
+        const isClientError = clientErrors.some(prefix => message.startsWith(prefix));
+        res.status(isClientError ? 400 : 500).json({ error: message });
     }
 });
 
@@ -105,7 +418,7 @@ router.post('/', async (req, res) => {
 router.put('/:id/status', async (req, res) => {
     try {
         const { status } = req.body;
-        const validStatuses = ['pending', 'processing', 'cancelled'];
+        const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
 
         if (!validStatuses.includes(status)) {
             return res.status(400).json({ error: 'Invalid status' });
@@ -116,7 +429,6 @@ router.put('/:id/status', async (req, res) => {
             data: { status },
             include: {
                 items: { include: { product: true } },
-                customer: true,
             },
         });
         res.json(order);

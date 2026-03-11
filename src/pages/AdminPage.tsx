@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
-  LayoutDashboard, ShoppingBag, Package, Users, Settings,
+  LayoutDashboard, ShoppingBag, Package, Settings,
   LogOut, Search, Bell, DollarSign, Clock, CheckCircle,
   Eye, EyeOff, Plus, Pencil, Trash2, X,
   TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Image, Check
@@ -12,19 +12,27 @@ import {
   fetchDashboardStats, fetchRecentOrders, fetchTopProducts,
   fetchProducts, updateProduct, deleteProduct,
   fetchOrders, updateOrderStatus, deleteOrder,
-  fetchCustomers, fetchCategories, deleteCategory,
+  fetchCategories, deleteCategory,
   fetchPromoCodes, deletePromoCode,
-  type DashboardStats
+  type DashboardStats, setWatermarkStatusAPI
 } from '@/lib/api';
-import { ConfirmModal, getStatusColor, getStatusLabel } from '@/components/admin/shared';
+import {
+  ConfirmModal,
+  getOrderStatusColor,
+  getOrderStatusLabel,
+  getDeliveryStatusColor,
+  getDeliveryStatusFromOrderStatus,
+  getDeliveryStatusLabel
+} from '@/components/admin/shared';
 import { ProductFormModal } from '@/components/admin/ProductFormModal';
 import { PromoFormModal } from '@/components/admin/PromoFormModal';
 import { CategoryFormModal } from '@/components/admin/CategoryFormModal';
 import { loadHeroSettings, saveHeroSettings, type HeroSettings } from '@/data/heroSettings';
 import { loadStoreSettings, saveStoreSettings } from '@/data/storeSettings';
+import { getImageUrl } from '@/lib/utils';
 import * as XLSX from 'xlsx';
 
-type TabId = 'dashboard' | 'orders' | 'products' | 'categories' | 'promos' | 'customers' | 'hero' | 'settings';
+type TabId = 'dashboard' | 'orders' | 'products' | 'categories' | 'promos' | 'hero' | 'settings';
 
 const AdminPage = () => {
   const { t } = useTranslation();
@@ -38,10 +46,10 @@ const AdminPage = () => {
   const [topProducts, setTopProducts] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
-  const [customers, setCustomers] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [promoCodes, setPromoCodes] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState('');
+  const [deliveryStatusFilter, setDeliveryStatusFilter] = useState('');
   const [productCategoryFilter, setProductCategoryFilter] = useState<string>('all');
 
   const [productModal, setProductModal] = useState<{ open: boolean; product?: any }>({ open: false });
@@ -52,7 +60,8 @@ const AdminPage = () => {
 
   const [exportModal, setExportModal] = useState(false);
   const [exportColumns, setExportColumns] = useState({
-    name: true, phone: true, city: true, totalSpent: true, ordersCount: true, purchasedProducts: false
+    id: false, date: false, customerName: true, phone: true, city: true, address: true,
+    total: false, status: false, items: false, history: false
   });
 
   // ─── Loaders ────────────────────────────────────────────────
@@ -64,7 +73,10 @@ const AdminPage = () => {
 
   const loadProducts = useCallback(async () => {
     setLoading(true);
-    try { setProducts(await fetchProducts(searchQuery ? `search=${encodeURIComponent(searchQuery)}` : '')); } catch (e) { console.error(e); }
+    try {
+      const query = searchQuery ? `search=${encodeURIComponent(searchQuery)}&all=true` : 'all=true';
+      setProducts(await fetchProducts(query));
+    } catch (e) { console.error(e); }
     setLoading(false);
   }, [searchQuery]);
 
@@ -73,12 +85,6 @@ const AdminPage = () => {
     try { const p = new URLSearchParams(); if (statusFilter) p.set('status', statusFilter); if (searchQuery) p.set('search', searchQuery); setOrders(await fetchOrders(p.toString())); } catch (e) { console.error(e); }
     setLoading(false);
   }, [statusFilter, searchQuery]);
-
-  const loadCustomers = useCallback(async () => {
-    setLoading(true);
-    try { setCustomers(await fetchCustomers(searchQuery ? `search=${encodeURIComponent(searchQuery)}` : '')); } catch (e) { console.error(e); }
-    setLoading(false);
-  }, [searchQuery]);
 
   const loadCategories = useCallback(async () => {
     setLoading(true);
@@ -93,11 +99,10 @@ const AdminPage = () => {
   }, []);
 
   useEffect(() => {
-    setSearchQuery(''); setStatusFilter('');
+    setSearchQuery(''); setStatusFilter(''); setDeliveryStatusFilter('');
     if (activeTab === 'dashboard') loadDashboard();
     if (activeTab === 'products') loadProducts();
     if (activeTab === 'orders') loadOrders();
-    if (activeTab === 'customers') loadCustomers();
     if (activeTab === 'categories') loadCategories();
     if (activeTab === 'promos') loadPromoCodes();
   }, [activeTab]);
@@ -106,13 +111,17 @@ const AdminPage = () => {
     const t = setTimeout(() => {
       if (activeTab === 'products') loadProducts();
       if (activeTab === 'orders') loadOrders();
-      if (activeTab === 'customers') loadCustomers();
     }, 300); return () => clearTimeout(t);
   }, [searchQuery, statusFilter]);
 
   const handleStatusChange = async (oid: string, status: string) => {
     try { await updateOrderStatus(oid, status); loadOrders(); if (orderDetail?.id === oid) setOrderDetail((p: any) => ({ ...p, status })); } catch (e) { console.error(e); }
   };
+
+  const getVisibleOrders = useCallback(
+    () => orders.filter(o => !deliveryStatusFilter || getDeliveryStatusFromOrderStatus(o.status) === deliveryStatusFilter),
+    [orders, deliveryStatusFilter]
+  );
 
   const toggleVisibility = async (product: any) => {
     try { await updateProduct(product.id, { isVisible: !product.isVisible }); loadProducts(); } catch (e) { console.error(e); }
@@ -129,34 +138,150 @@ const AdminPage = () => {
     setDeleteConfirm(null);
   };
 
-  const handleExport = () => {
-    const data = customers.map(c => {
-      const row: any = {};
-      if (exportColumns.name) row['Client'] = c.name;
-      if (exportColumns.phone) row['Téléphone'] = c.phone || '';
-      if (exportColumns.city) row['Ville'] = c.city || '';
-      if (exportColumns.totalSpent) row['Total Dépensé'] = c.totalSpent;
-      if (exportColumns.ordersCount) row['Commandes'] = c._count?.orders ?? c.totalOrders;
-      if (exportColumns.purchasedProducts) {
-        const products = c.orders?.flatMap((o: any) => o.items?.map((i: any) => i.product?.name) || []) || [];
-        row['Produits Achetés'] = Array.from(new Set(products)).join(', ');
-      }
-      return row;
-    });
-
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Clients");
-    XLSX.writeFile(workbook, "clients_youshop.xlsx");
-    setExportModal(false);
-  };
-
   // ─── Dashboard ──────────────────────────────────────────────
   const renderDashboard = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-[#333]">Vue d'ensemble</h2>
         <button onClick={loadDashboard} className="p-2 hover:bg-gray-100 rounded-lg text-[#666]"><RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /></button>
+      </div>
+      {/* Watermark */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 className="font-semibold text-[#333] mb-4">Watermark (overlay visuel non destructif)</h3>
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Controls */}
+          <div className="space-y-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={!!storeForm.watermarkEnabled}
+                onChange={e => setStoreForm((f: any) => ({ ...f, watermarkEnabled: e.target.checked }))}
+                className="w-4 h-4 rounded border-gray-300 text-[var(--yp-blue)] focus:ring-[var(--yp-blue)]"
+              />
+              <span className="text-sm text-[#666]">Activer le watermark</span>
+            </label>
+            <div>
+              <label className="block text-sm font-medium text-[#666] mb-1">Opacité ({storeForm.watermarkOpacity}%)</label>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={storeForm.watermarkOpacity ?? 20}
+                onChange={e => setStoreForm((f: any) => ({ ...f, watermarkOpacity: Number(e.target.value) }))}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#666] mb-1">Taille ({storeForm.watermarkSize}%)</label>
+              <input
+                type="range"
+                min={10}
+                max={80}
+                value={storeForm.watermarkSize ?? 30}
+                onChange={e => setStoreForm((f: any) => ({ ...f, watermarkSize: Number(e.target.value) }))}
+                className="w-full"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-[#666] mb-1">Position X ({storeForm.watermarkPosX}%)</label>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={storeForm.watermarkPosX ?? 50}
+                  onChange={e => setStoreForm((f: any) => ({ ...f, watermarkPosX: Number(e.target.value) }))}
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#666] mb-1">Position Y ({storeForm.watermarkPosY}%)</label>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={storeForm.watermarkPosY ?? 50}
+                  onChange={e => setStoreForm((f: any) => ({ ...f, watermarkPosY: Number(e.target.value) }))}
+                  className="w-full"
+                />
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <button
+                onClick={async () => {
+                  try {
+                    await setWatermarkStatusAPI(true);
+                    setStoreForm((f: any) => ({ ...f, watermarkEnabled: true }));
+                    toast.success('Watermark appliqué à toutes les images (overlay)');
+                  } catch {
+                    toast.error('Impossible d’activer le watermark');
+                  }
+                }}
+                className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm hover:bg-gray-50"
+              >
+                Appliquer à toutes les photos
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await setWatermarkStatusAPI(false);
+                    setStoreForm((f: any) => ({ ...f, watermarkEnabled: false }));
+                    toast.success('Watermark retiré de toutes les images (overlay)');
+                  } catch {
+                    toast.error('Impossible de désactiver le watermark');
+                  }
+                }}
+                className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm hover:bg-gray-50"
+              >
+                Retirer de toutes les photos
+              </button>
+              <button onClick={handleStoreSave} className="px-6 py-2.5 bg-[var(--yp-blue)] text-white rounded-xl hover:bg-[var(--yp-blue-dark)] font-medium">Sauvegarder</button>
+            </div>
+          </div>
+          {/* Preview — draggable */}
+          <div>
+            <p className="text-sm text-[#666] mb-2">Prévisualisation (drag pour déplacer)</p>
+            <div
+              className="relative w-full aspect-square bg-[var(--yp-gray-200)] rounded-2xl overflow-hidden select-none"
+              onMouseDown={(e) => {
+                const container = e.currentTarget as HTMLDivElement;
+                const onMove = (ev: MouseEvent) => {
+                  const rect = container.getBoundingClientRect();
+                  const x = Math.max(0, Math.min(100, ((ev.clientX - rect.left) / rect.width) * 100));
+                  const y = Math.max(0, Math.min(100, ((ev.clientY - rect.top) / rect.height) * 100));
+                  setStoreForm((f: any) => ({ ...f, watermarkPosX: Math.round(x), watermarkPosY: Math.round(y) }));
+                };
+                const onUp = () => {
+                  window.removeEventListener('mousemove', onMove);
+                  window.removeEventListener('mouseup', onUp);
+                };
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('mouseup', onUp);
+              }}
+            >
+              <img
+                src="/images/products/headphones.jpg"
+                alt="Preview"
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+              />
+              {storeForm.watermarkEnabled && (
+                <img
+                  src="/images/finalwatermak.png"
+                  alt="Watermark"
+                  className="absolute pointer-events-none drop-shadow-md"
+                  style={{
+                    width: `${storeForm.watermarkSize ?? 30}%`,
+                    opacity: (storeForm.watermarkOpacity ?? 20) / 100,
+                    left: `${storeForm.watermarkPosX ?? 50}%`,
+                    top: `${storeForm.watermarkPosY ?? 50}%`,
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
@@ -175,25 +300,25 @@ const AdminPage = () => {
       </div>
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-          <div className="p-5 border-b flex items-center justify-between"><h3 className="font-semibold text-[#333]">Commandes récentes</h3><button onClick={() => setActiveTab('orders')} className="text-[#f5a623] hover:underline text-sm font-medium">Voir tout →</button></div>
+          <div className="p-5 border-b flex items-center justify-between"><h3 className="font-semibold text-[#333]">Commandes récentes</h3><button onClick={() => setActiveTab('orders')} className="text-[var(--yp-blue)] hover:underline text-sm font-medium">Voir tout →</button></div>
           <div className="divide-y">
             {recentOrders.length === 0 && <div className="p-8 text-center text-[#999]">Aucune commande</div>}
             {recentOrders.slice(0, 5).map(o => (
               <div key={o.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
                 <div className="flex items-center gap-3"><div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center"><ShoppingBag className="w-5 h-5 text-[#666]" /></div><div><p className="font-medium text-[#333] text-sm">{o.customerName}</p><p className="text-xs text-[#999]">{new Date(o.createdAt).toLocaleDateString('fr-FR')}</p></div></div>
-                <div className="text-right"><p className="font-semibold text-[#f5a623] text-sm">{o.total.toFixed(2)} MAD</p><span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(o.status)}`}>{getStatusLabel(o.status)}</span></div>
+                <div className="text-right"><p className="font-semibold text-[var(--yp-blue)] text-sm">{o.total.toFixed(2)} MAD</p><span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getOrderStatusColor(o.status)}`}>{getOrderStatusLabel(o.status)}</span></div>
               </div>
             ))}
           </div>
         </div>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-          <div className="p-5 border-b flex items-center justify-between"><h3 className="font-semibold text-[#333]">Produits populaires</h3><button onClick={() => setActiveTab('products')} className="text-[#f5a623] hover:underline text-sm font-medium">Voir tout →</button></div>
+          <div className="p-5 border-b flex items-center justify-between"><h3 className="font-semibold text-[#333]">Produits populaires</h3><button onClick={() => setActiveTab('products')} className="text-[var(--yp-blue)] hover:underline text-sm font-medium">Voir tout →</button></div>
           <div className="divide-y">
             {topProducts.length === 0 && <div className="p-8 text-center text-[#999]">Aucun produit</div>}
             {topProducts.slice(0, 5).map((p, i) => (
               <div key={p.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                <div className="flex items-center gap-3"><span className="w-8 h-8 bg-[#f5a623]/10 rounded-lg flex items-center justify-center text-sm font-bold text-[#f5a623]">{i + 1}</span><div><p className="font-medium text-[#333] text-sm">{p.name}</p><p className="text-xs text-[#999]">{p.salesCount} ventes</p></div></div>
-                <div className="text-right"><p className="font-semibold text-[#f5a623] text-sm">{p.price.toFixed(2)} MAD</p><p className="text-xs text-[#999]">{p.stock} en stock</p></div>
+                <div className="flex items-center gap-3"><span className="w-8 h-8 bg-[var(--yp-blue)]/10 rounded-lg flex items-center justify-center text-sm font-bold text-[var(--yp-blue)]">{i + 1}</span><div><p className="font-medium text-[#333] text-sm">{p.name}</p><p className="text-xs text-[#999]">{p.salesCount} ventes</p></div></div>
+                <div className="text-right"><p className="font-semibold text-[var(--yp-blue)] text-sm">{p.price.toFixed(2)} MAD</p><p className="text-xs text-[#999]">{p.stock} en stock</p></div>
               </div>
             ))}
           </div>
@@ -203,28 +328,72 @@ const AdminPage = () => {
   );
 
   // ─── Orders ─────────────────────────────────────────────────
-  const renderOrders = () => (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+  const handleExportOrders = () => {
+    const visibleOrders = getVisibleOrders();
+    const phoneCounts: Record<string, number> = {};
+    visibleOrders.forEach(o => {
+      if (o.phone) {
+        phoneCounts[o.phone] = (phoneCounts[o.phone] || 0) + 1;
+      }
+    });
+
+    const data = visibleOrders.map(o => {
+      const row: any = {};
+      if (exportColumns.id) row['ID'] = o.id.slice(0, 8);
+      if (exportColumns.date) row['Date'] = new Date(o.createdAt).toLocaleDateString('fr-FR');
+      if (exportColumns.customerName) row['Nom'] = o.customerName;
+      if (exportColumns.phone) row['Téléphone'] = o.phone;
+      if (exportColumns.city) row['Ville'] = o.city;
+      if (exportColumns.address) row['Adresse'] = o.address;
+      if (exportColumns.total) row['Total'] = o.total;
+      if (exportColumns.status) row['Statut commande'] = getOrderStatusLabel(o.status);
+      row['Statut livraison'] = getDeliveryStatusLabel(getDeliveryStatusFromOrderStatus(o.status));
+      if (exportColumns.items) {
+        const products = o.items?.map((i: any) => `${i.quantity}x ${i.product?.name}`) || [];
+        row['Articles'] = products.join(', ');
+      }
+      if (exportColumns.history) {
+        row['Historique (Nb Commandes)'] = o.phone ? phoneCounts[o.phone] : 1;
+      }
+      return row;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Commandes");
+    XLSX.writeFile(workbook, "commandes_youposh.xlsx");
+    setExportModal(false);
+  };
+
+  const renderOrders = () => {
+    const visibleOrders = getVisibleOrders();
+    return <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
       <div className="p-5 border-b flex items-center justify-between flex-wrap gap-4">
-        <h3 className="font-semibold text-[#333]">Commandes ({orders.length})</h3>
+        <h3 className="font-semibold text-[#333]">Commandes ({visibleOrders.length})</h3>
         <div className="flex gap-3">
-          <div className="relative"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Rechercher..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#f5a623]" /></div>
-          <div className="relative"><select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#f5a623] appearance-none pr-8 bg-white"><option value="">Tous</option><option value="pending">En attente</option><option value="processing">Traitement</option><option value="cancelled">Annulé</option></select><ChevronDown className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 text-[#999] pointer-events-none" /></div>
+          <div className="relative"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Rechercher..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)]" /></div>
+          <div className="relative"><select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)] appearance-none pr-8 bg-white"><option value="">Commande: Tous</option><option value="pending">Commande: En attente</option><option value="processing">Commande: En cours de traitement</option><option value="shipped">Commande: Confirmée</option><option value="delivered">Commande: Terminée</option><option value="cancelled">Commande: Annulée</option></select><ChevronDown className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 text-[#999] pointer-events-none" /></div>
+          <div className="relative"><select value={deliveryStatusFilter} onChange={e => setDeliveryStatusFilter(e.target.value)} className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)] appearance-none pr-8 bg-white"><option value="">Livraison: Tous</option><option value="not_shipped">Livraison: Non expédiée</option><option value="prepared">Livraison: Préparée</option><option value="shipped">Livraison: Expédiée</option><option value="delivered">Livraison: Livrée</option><option value="returned">Livraison: Retour</option></select><ChevronDown className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 text-[#999] pointer-events-none" /></div>
+          <button onClick={() => setExportModal(true)} className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 flex items-center gap-2 shadow-sm whitespace-nowrap"><Save className="w-4 h-4" /> Export Excel</button>
         </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50/80"><tr>{['ID', 'Client', 'Date', 'Articles', 'Total', 'Statut', 'Actions'].map(h => <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-[#999] uppercase tracking-wider">{h}</th>)}</tr></thead>
+          <thead className="bg-gray-50/80"><tr>{['ID', 'Date', 'Client', 'Téléphone', 'Ville', 'Adresse', 'Articles', 'Total', 'Statut commande', 'Statut livraison', 'Actions'].map(h => <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-[#999] uppercase tracking-wider">{h}</th>)}</tr></thead>
           <tbody className="divide-y">
-            {orders.length === 0 && <tr><td colSpan={7} className="px-5 py-12 text-center text-[#999]">Aucune commande trouvée</td></tr>}
-            {orders.map(o => (
+            {visibleOrders.length === 0 && <tr><td colSpan={11} className="px-5 py-12 text-center text-[#999]">Aucune commande trouvée</td></tr>}
+            {visibleOrders.map(o => (
               <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
-                <td className="px-5 py-4 font-mono text-xs text-[#666]">{o.id.slice(0, 8)}...</td>
-                <td className="px-5 py-4"><p className="font-medium text-[#333] text-sm">{o.customerName}</p><p className="text-xs text-[#999]">{o.phone}</p></td>
+                <td className="px-5 py-4 font-mono text-xs text-[#666]" title={o.id}>{o.id.slice(0, 8)}...</td>
                 <td className="px-5 py-4 text-sm text-[#666]">{new Date(o.createdAt).toLocaleDateString('fr-FR')}</td>
+                <td className="px-5 py-4 font-medium text-[#333] text-sm">{o.customerName}</td>
+                <td className="px-5 py-4 text-sm text-[#666]">{o.phone}</td>
+                <td className="px-5 py-4 text-sm text-[#666]">{o.city}</td>
+                <td className="px-5 py-4 text-sm text-[#666] max-w-[200px] truncate" title={o.address}>{o.address || '—'}</td>
                 <td className="px-5 py-4 text-sm text-[#666]">{o.items?.length || 0}</td>
-                <td className="px-5 py-4 font-semibold text-[#f5a623] text-sm">{o.total.toFixed(2)} MAD</td>
-                <td className="px-5 py-4"><span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(o.status)}`}>{getStatusLabel(o.status)}</span></td>
+                <td className="px-5 py-4 font-semibold text-[var(--yp-blue)] text-sm">{o.total.toFixed(2)} MAD</td>
+                <td className="px-5 py-4"><span className={`px-3 py-1 rounded-full text-xs font-medium ${getOrderStatusColor(o.status)}`}>{getOrderStatusLabel(o.status)}</span></td>
+                <td className="px-5 py-4"><span className={`px-3 py-1 rounded-full text-xs font-medium ${getDeliveryStatusColor(getDeliveryStatusFromOrderStatus(o.status))}`}>{getDeliveryStatusLabel(getDeliveryStatusFromOrderStatus(o.status))}</span></td>
                 <td className="px-5 py-4">
                   <div className="flex gap-1">
                     <button onClick={() => setOrderDetail(o)} className="p-2 hover:bg-blue-50 rounded-lg text-[#666] hover:text-blue-600" title="Détails"><Eye className="w-4 h-4" /></button>
@@ -237,8 +406,8 @@ const AdminPage = () => {
           </tbody>
         </table>
       </div>
-    </div>
-  );
+    </div>;
+  };
 
   const renderProducts = () => {
     const filteredProducts = products.filter(p =>
@@ -250,8 +419,8 @@ const AdminPage = () => {
         <div className="p-5 border-b flex items-center justify-between flex-wrap gap-4">
           <h3 className="font-semibold text-[#333]">Produits ({filteredProducts.length})</h3>
           <div className="flex gap-3">
-            <div className="relative"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Rechercher..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#f5a623]" /></div>
-            <button onClick={() => setProductModal({ open: true })} className="px-4 py-2 bg-[#f5a623] text-white rounded-xl text-sm font-medium hover:bg-[#e09422] flex items-center gap-2 shadow-sm"><Plus className="w-4 h-4" />Ajouter</button>
+            <div className="relative"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Rechercher..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)]" /></div>
+            <button onClick={() => setProductModal({ open: true })} className="px-4 py-2 bg-[var(--yp-blue)] text-white rounded-xl text-sm font-medium hover:bg-[var(--yp-blue-dark)] flex items-center gap-2 shadow-sm"><Plus className="w-4 h-4" />Ajouter</button>
           </div>
         </div>
 
@@ -260,7 +429,7 @@ const AdminPage = () => {
           <div className="px-5 py-4 flex gap-2 overflow-x-auto no-scrollbar scroll-smooth">
             <button
               onClick={() => setProductCategoryFilter('all')}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${productCategoryFilter === 'all' ? 'bg-[#f5a623] text-white shadow-sm' : 'bg-white text-[#666] border border-gray-200 hover:bg-gray-100'}`}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${productCategoryFilter === 'all' ? 'bg-[var(--yp-blue)] text-white shadow-sm' : 'bg-white text-[#666] border border-gray-200 hover:bg-gray-100'}`}
             >
               Toutes les catégories
             </button>
@@ -268,7 +437,7 @@ const AdminPage = () => {
               <button
                 key={c.id}
                 onClick={() => setProductCategoryFilter(c.slug)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${productCategoryFilter === c.slug ? 'bg-[#f5a623] text-white shadow-sm' : 'bg-white text-[#666] border border-gray-200 hover:bg-gray-100'}`}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${productCategoryFilter === c.slug ? 'bg-[var(--yp-blue)] text-white shadow-sm' : 'bg-white text-[#666] border border-gray-200 hover:bg-gray-100'}`}
               >
                 {c.name}
               </button>
@@ -285,13 +454,13 @@ const AdminPage = () => {
                 <tr key={p.id} className={`hover:bg-gray-50/50 transition-colors ${!p.isVisible ? 'opacity-50' : ''}`}>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      {p.image && <img src={p.image} alt="" className="w-10 h-10 rounded-lg object-cover bg-gray-100" />}
+                      {p.image && <img src={getImageUrl(p.image)} alt="" className="w-10 h-10 rounded-lg object-cover bg-gray-100" />}
                       <div><p className="font-medium text-[#333] text-sm">{p.name}</p><p className="text-xs text-[#999]">{p.sku}</p></div>
                     </div>
                   </td>
                   <td className="px-4 py-3"><span className="text-xs bg-gray-100 px-2 py-1 rounded-lg text-[#666]">{p.category?.name || p.categorySlug || '—'}</span></td>
                   <td className="px-4 py-3">
-                    <p className="text-[#f5a623] font-semibold text-sm">{p.price.toFixed(2)} MAD</p>
+                    <p className="text-[var(--yp-blue)] font-semibold text-sm">{p.price.toFixed(2)} MAD</p>
                     {p.originalPrice && <p className="text-xs text-[#999] line-through">{p.originalPrice.toFixed(2)}</p>}
                   </td>
                   <td className="px-4 py-3"><span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${p.stock < 10 ? 'bg-red-100 text-red-600' : p.stock < 30 ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>{p.stock}</span></td>
@@ -393,91 +562,10 @@ const AdminPage = () => {
     </div>
   );
 
-  // ─── Customers ──────────────────────────────────────────────
-  const renderCustomers = () => (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-      <div className="p-5 border-b flex items-center justify-between flex-wrap gap-4">
-        <h3 className="font-semibold text-[#333]">Clients ({customers.length})</h3>
-        <div className="flex gap-3">
-          <div className="relative"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Rechercher..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#f5a623]" /></div>
-          <button onClick={() => setExportModal(true)} className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 flex items-center gap-2 shadow-sm whitespace-nowrap"><Save className="w-4 h-4" /> Export Excel</button>
-        </div>
-      </div>
-      {customers.length === 0 ? (
-        <div className="p-12 text-center"><Users className="w-16 h-16 mx-auto text-gray-200 mb-4" /><h3 className="text-lg font-medium text-[#333]">Aucun client</h3><p className="text-[#999] text-sm mt-1">Les clients apparaîtront après leur première commande</p></div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50/80"><tr>{['Client', 'Téléphone', 'Ville', 'Commandes', 'Total dépensé', 'Inscrit le'].map(h => <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-[#999] uppercase tracking-wider">{h}</th>)}</tr></thead>
-            <tbody className="divide-y">
-              {customers.map(c => (
-                <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-5 py-4"><div className="flex items-center gap-3"><div className="w-10 h-10 bg-[#f5a623]/10 rounded-xl flex items-center justify-center text-[#f5a623] font-bold text-sm">{c.name.charAt(0).toUpperCase()}</div><div><p className="font-medium text-[#333] text-sm">{c.name}</p>{c.email && <p className="text-xs text-[#999]">{c.email}</p>}</div></div></td>
-                  <td className="px-5 py-4 text-sm text-[#666]">{c.phone || '—'}</td>
-                  <td className="px-5 py-4 text-sm text-[#666]">{c.city || '—'}</td>
-                  <td className="px-5 py-4 text-sm font-medium text-[#333]">{c._count?.orders ?? c.totalOrders}</td>
-                  <td className="px-5 py-4 text-sm font-semibold text-[#f5a623]">{c.totalSpent.toFixed(2)} MAD</td>
-                  <td className="px-5 py-4 text-sm text-[#999]">{new Date(c.createdAt).toLocaleDateString('fr-FR')}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
 
   // ─── Settings ───────────────────────────────────────────────
   const [storeForm, setStoreForm] = useState(loadStoreSettings());
   const [storeSaved, setStoreSaved] = useState(false);
-  const [applyingWatermark, setApplyingWatermark] = useState(false);
-  const [isDraggingWatermark, setIsDraggingWatermark] = useState(false);
-  const previewRef = useRef<HTMLDivElement>(null);
-
-  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    setIsDraggingWatermark(true);
-  };
-
-  const handleDrag = useCallback((e: MouseEvent | TouchEvent) => {
-    if (!isDraggingWatermark || !previewRef.current) return;
-
-    const rect = previewRef.current.getBoundingClientRect();
-    const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
-
-    let x = ((clientX - rect.left) / rect.width) * 100;
-    let y = ((clientY - rect.top) / rect.height) * 100;
-
-    x = Math.max(0, Math.min(100, Math.round(x)));
-    y = Math.max(0, Math.min(100, Math.round(y)));
-
-    setStoreForm((f: any) => ({ ...f, watermarkPosX: x, watermarkPosY: y }));
-  }, [isDraggingWatermark]);
-
-  const handleDragEnd = useCallback(() => {
-    setIsDraggingWatermark(false);
-  }, []);
-
-  useEffect(() => {
-    if (isDraggingWatermark) {
-      window.addEventListener('mousemove', handleDrag);
-      window.addEventListener('mouseup', handleDragEnd);
-      window.addEventListener('touchmove', handleDrag);
-      window.addEventListener('touchend', handleDragEnd);
-    } else {
-      window.removeEventListener('mousemove', handleDrag);
-      window.removeEventListener('mouseup', handleDragEnd);
-      window.removeEventListener('touchmove', handleDrag);
-      window.removeEventListener('touchend', handleDragEnd);
-    }
-    return () => {
-      window.removeEventListener('mousemove', handleDrag);
-      window.removeEventListener('mouseup', handleDragEnd);
-      window.removeEventListener('touchmove', handleDrag);
-      window.removeEventListener('touchend', handleDragEnd);
-    };
-  }, [isDraggingWatermark, handleDrag, handleDragEnd]);
 
   const handleStoreSave = async () => {
     try {
@@ -495,187 +583,32 @@ const AdminPage = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h3 className="font-semibold text-[#333] mb-4">Informations de la boutique</h3>
         <div className="grid md:grid-cols-2 gap-4">
-          <div><label className="block text-sm font-medium text-[#666] mb-1">Nom de la boutique</label><input type="text" value={storeForm.storeName} onChange={e => setStoreForm((f: any) => ({ ...f, storeName: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#f5a623]" placeholder="YouShop" /></div>
-          <div><label className="block text-sm font-medium text-[#666] mb-1">Téléphone WhatsApp</label><input type="text" value={storeForm.phone} onChange={e => setStoreForm((f: any) => ({ ...f, phone: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#f5a623]" placeholder="+212 6XX XXX XXX" /></div>
-          <div><label className="block text-sm font-medium text-[#666] mb-1">Email de contact</label><input type="email" value={storeForm.email} onChange={e => setStoreForm((f: any) => ({ ...f, email: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#f5a623]" placeholder="contact@youposh.ma" /></div>
-          <div><label className="block text-sm font-medium text-[#666] mb-1">Devise</label><input type="text" value={storeForm.currency} onChange={e => setStoreForm((f: any) => ({ ...f, currency: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#f5a623]" placeholder="MAD" /></div>
-          <div><label className="block text-sm font-medium text-[#666] mb-1">Frais de livraison ({storeForm.currency})</label><input type="number" value={storeForm.shippingFee} onChange={e => setStoreForm((f: any) => ({ ...f, shippingFee: Number(e.target.value) }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#f5a623]" placeholder="30" /></div>
-        </div>
-        <div className="mt-6 pt-6 border-t border-gray-100">
-          <h4 className="font-medium text-[#333] mb-4">Filigrane (Watermark) sur les images</h4>
-          <div className="space-y-4">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" checked={storeForm.watermarkEnabled ?? true} onChange={e => setStoreForm((f: any) => ({ ...f, watermarkEnabled: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#f5a623] focus:ring-[#f5a623]" />
-              <span className="text-sm font-medium text-[#333]">Activer le filigrane automatique</span>
-            </label>
-
-            {(storeForm.watermarkEnabled ?? true) && (
-              <div className="flex gap-6 flex-wrap lg:flex-nowrap">
-                {/* Controls */}
-                <div className="flex-1 min-w-[280px] space-y-4">
-                  {/* Opacity slider */}
-                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="text-sm font-medium text-[#666]">Opacité du logo</label>
-                      <span className="text-sm font-bold text-[#f5a623]">{storeForm.watermarkOpacity ?? 20}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      step="5"
-                      value={storeForm.watermarkOpacity ?? 20}
-                      onChange={e => setStoreForm((f: any) => ({ ...f, watermarkOpacity: Number(e.target.value) }))}
-                      className="w-full accent-[#f5a623]"
-                    />
-                    <div className="flex justify-between text-[10px] text-[#999] mt-1"><span>Invisible</span><span>Opaque</span></div>
-                  </div>
-
-                  {/* Size slider */}
-                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="text-sm font-medium text-[#666]">Taille du logo</label>
-                      <span className="text-sm font-bold text-[#f5a623]">{storeForm.watermarkSize ?? 30}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="10"
-                      max="80"
-                      step="5"
-                      value={storeForm.watermarkSize ?? 30}
-                      onChange={e => setStoreForm((f: any) => ({ ...f, watermarkSize: Number(e.target.value) }))}
-                      className="w-full accent-[#f5a623]"
-                    />
-                    <div className="flex justify-between text-[10px] text-[#999] mt-1"><span>Petit</span><span>Grand</span></div>
-                  </div>
-
-                  {/* Position selector instructions */}
-                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                    <label className="text-sm font-medium text-[#666] block mb-2">Position du logo</label>
-                    <p className="text-xs text-[#999]">
-                      Glissez et déposez (drag & drop) le logo avec votre souris directement dans la zone d'aperçu pour choisir sa position exacte.
-                    </p>
-                    <div className="mt-3 flex gap-2">
-                      <span className="bg-white border border-gray-200 text-[#666] text-[10px] px-2 py-1 rounded-md font-medium">X: {storeForm.watermarkPosX ?? 50}%</span>
-                      <span className="bg-white border border-gray-200 text-[#666] text-[10px] px-2 py-1 rounded-md font-medium">Y: {storeForm.watermarkPosY ?? 50}%</span>
-                      <button onClick={() => setStoreForm((f: any) => ({ ...f, watermarkPosX: 50, watermarkPosY: 50 }))} className="text-[#f5a623] hover:underline text-[10px] font-medium ml-auto">Centrer</button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Live Preview */}
-                <div className="flex-shrink-0">
-                  <p className="text-xs font-medium text-[#666] mb-2 uppercase tracking-wider">Aperçu en direct</p>
-                  <div
-                    ref={previewRef}
-                    className="relative w-[220px] h-[220px] rounded-xl overflow-hidden border-2 border-gray-200 shadow-inner select-none touch-none"
-                    style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%)' }}
-                  >
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="text-center">
-                        <p className="text-xs text-gray-400 font-medium mt-16 pointer-events-none">Image produit</p>
-                      </div>
-                    </div>
-
-                    <div className="absolute inset-0 pointer-events-none">
-                      <img
-                        src="/images/categories/logo final.png?v=wmki"
-                        alt="Watermark"
-                        onMouseDown={handleDragStart}
-                        onTouchStart={handleDragStart}
-                        className={`absolute object-contain drop-shadow-lg pointer-events-auto transition-opacity duration-200 cursor-move ${isDraggingWatermark ? 'scale-105' : 'hover:scale-105'} transition-transform`}
-                        style={{
-                          width: `${storeForm.watermarkSize ?? 30}%`,
-                          height: `${storeForm.watermarkSize ?? 30}%`,
-                          opacity: (storeForm.watermarkOpacity ?? 20) / 100,
-                          left: `${storeForm.watermarkPosX ?? 50}%`,
-                          top: `${storeForm.watermarkPosY ?? 50}%`,
-                          transform: 'translate(-50%, -50%)',
-                          zIndex: 10
-                        }}
-                        draggable={false}
-                      />
-                    </div>
-
-                    <div className="absolute bottom-2 left-2 right-2 flex justify-between pointer-events-none z-0">
-                      <span className="bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-full font-medium">
-                        Opacité : {storeForm.watermarkOpacity ?? 20}%
-                      </span>
-                      <span className="bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-full font-medium">
-                        Taille : {storeForm.watermarkSize ?? 30}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+          <div><label className="block text-sm font-medium text-[#666] mb-1">Nom de la boutique</label><input type="text" value={storeForm.storeName} onChange={e => setStoreForm((f: any) => ({ ...f, storeName: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" placeholder="Edupoche" /></div>
+          <div><label className="block text-sm font-medium text-[#666] mb-1">Téléphone WhatsApp</label><input type="text" value={storeForm.phone} onChange={e => setStoreForm((f: any) => ({ ...f, phone: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" placeholder="+212 6XX XXX XXX" /></div>
+          <div><label className="block text-sm font-medium text-[#666] mb-1">Email de contact</label><input type="email" value={storeForm.email} onChange={e => setStoreForm((f: any) => ({ ...f, email: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" placeholder="contact@youposh.ma" /></div>
+          <div><label className="block text-sm font-medium text-[#666] mb-1">Devise</label><input type="text" value={storeForm.currency} onChange={e => setStoreForm((f: any) => ({ ...f, currency: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" placeholder="MAD" /></div>
+          <div>
+            <label className="block text-sm font-medium text-[#666] mb-1">Couleur principale (logo)</label>
+            <div className="flex items-center gap-2">
+              <input type="color" value={storeForm.brandPrimary || '#2563EB'} onChange={e => setStoreForm((f: any) => ({ ...f, brandPrimary: e.target.value }))} className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white" />
+              <input type="text" value={storeForm.brandPrimary || ''} onChange={e => setStoreForm((f: any) => ({ ...f, brandPrimary: e.target.value }))} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" placeholder="#2563EB" />
+            </div>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-[#666] mb-1">Couleur secondaire (logo)</label>
+            <div className="flex items-center gap-2">
+              <input type="color" value={storeForm.brandSecondary || '#DC2626'} onChange={e => setStoreForm((f: any) => ({ ...f, brandSecondary: e.target.value }))} className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white" />
+              <input type="text" value={storeForm.brandSecondary || ''} onChange={e => setStoreForm((f: any) => ({ ...f, brandSecondary: e.target.value }))} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" placeholder="#DC2626" />
+            </div>
+          </div>
+          <div><label className="block text-sm font-medium text-[#666] mb-1">Livraison locale / même ville ({storeForm.currency})</label><input type="number" value={storeForm.shippingFeeLocal} onChange={e => setStoreForm((f: any) => ({ ...f, shippingFeeLocal: Number(e.target.value) }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" placeholder="20" /></div>
+          <div><label className="block text-sm font-medium text-[#666] mb-1">Livraison nationale ({storeForm.currency})</label><input type="number" value={storeForm.shippingFeeNational} onChange={e => setStoreForm((f: any) => ({ ...f, shippingFeeNational: Number(e.target.value) }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" placeholder="35" /></div>
         </div>
         <div className="flex flex-wrap gap-3 mt-4">
-          <button onClick={handleStoreSave} className="px-6 py-2.5 bg-[#f5a623] text-white rounded-xl hover:bg-[#e09422] font-medium flex items-center gap-2 transition-colors">
+          <button onClick={handleStoreSave} className="px-6 py-2.5 bg-[var(--yp-blue)] text-white rounded-xl hover:bg-[var(--yp-blue-dark)] font-medium flex items-center gap-2 transition-colors">
             {storeSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
             {storeSaved ? 'Enregistré' : 'Enregistrer'}
           </button>
-          {(storeForm.watermarkEnabled ?? true) && (
-            <>
-              <button
-                onClick={async () => {
-                  // Save settings first
-                  saveStoreSettings(storeForm);
-                  setApplyingWatermark(true);
-                  try {
-                    const res = await fetch('http://localhost:5000/api/upload/watermark-all', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        opacity: storeForm.watermarkOpacity ?? 20,
-                        size: storeForm.watermarkSize ?? 30,
-                        posX: storeForm.watermarkPosX ?? 50,
-                        posY: storeForm.watermarkPosY ?? 50,
-                      }),
-                    });
-                    const data = await res.json();
-                    toast.success(`Watermark appliqué ! ✅ ${data.success}/${data.total} images traitées`);
-                  } catch (err) {
-                    toast.error('Erreur lors de l\'application du watermark');
-                    console.error(err);
-                  } finally {
-                    setApplyingWatermark(false);
-                  }
-                }}
-                disabled={applyingWatermark}
-                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 font-medium flex items-center gap-2 transition-all disabled:opacity-60 shadow-sm"
-              >
-                {applyingWatermark ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Image className="w-4 h-4" />}
-                {applyingWatermark ? 'Application en cours...' : 'Appliquer aux images existantes'}
-              </button>
-
-              <button
-                onClick={async () => {
-                  if (!confirm("Voulez-vous vraiment supprimer le filigrane de toutes les images ? Cela restaurera les images originales si elles sont disponibles.")) return;
-
-                  setApplyingWatermark(true);
-                  try {
-                    const res = await fetch('http://localhost:5000/api/upload/watermark-remove', {
-                      method: 'POST'
-                    });
-                    const data = await res.json();
-                    toast.success(`Filigranes supprimés ! ✅ ${data.success} images restaurées`);
-                  } catch (err) {
-                    toast.error('Erreur lors de la suppression des filigranes');
-                    console.error(err);
-                  } finally {
-                    setApplyingWatermark(false);
-                  }
-                }}
-                disabled={applyingWatermark}
-                className="px-6 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl hover:bg-red-100 font-medium flex items-center gap-2 transition-colors disabled:opacity-60 shadow-sm"
-              >
-                <Trash2 className="w-4 h-4" />
-                Supprimer le filigrane
-              </button>
-            </>
-          )}
         </div>
       </div>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -707,7 +640,7 @@ const AdminPage = () => {
         type={type}
         value={heroForm[key] as string}
         onChange={e => setHeroForm(f => ({ ...f, [key]: e.target.value }))}
-        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#f5a623] text-sm"
+        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)] text-sm"
         placeholder={placeholder}
       />
     </div>
@@ -719,7 +652,7 @@ const AdminPage = () => {
         type="checkbox"
         checked={heroForm[key] as boolean}
         onChange={e => setHeroForm(f => ({ ...f, [key]: e.target.checked }))}
-        className="w-4 h-4 rounded border-gray-300 text-[#f5a623] focus:ring-[#f5a623]"
+        className="w-4 h-4 rounded border-gray-300 text-[var(--yp-blue)] focus:ring-[var(--yp-blue)]"
       />
       <span className="text-sm text-[#666]">{label}</span>
     </label>
@@ -735,7 +668,7 @@ const AdminPage = () => {
 
       {/* Content */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h3 className="font-semibold text-[#333] mb-4 flex items-center gap-2"><Image className="w-5 h-5 text-[#f5a623]" /> Contenu Hero</h3>
+        <h3 className="font-semibold text-[#333] mb-4 flex items-center gap-2"><Image className="w-5 h-5 text-[var(--yp-blue)]" /> Contenu Hero</h3>
         <div className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             {heroInput('Badge', 'badgeText', 'text', 'Boutique N°1 au Maroc')}
@@ -748,7 +681,7 @@ const AdminPage = () => {
               rows={2}
               value={heroForm.subtitle}
               onChange={e => setHeroForm(f => ({ ...f, subtitle: e.target.value }))}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#f5a623] text-sm resize-none"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)] text-sm resize-none"
             />
           </div>
         </div>
@@ -787,7 +720,7 @@ const AdminPage = () => {
             min={0} max={100} step={5}
             value={heroForm.overlayOpacity}
             onChange={e => setHeroForm(f => ({ ...f, overlayOpacity: Number(e.target.value) }))}
-            className="w-full accent-[#f5a623]"
+            className="w-full accent-[var(--yp-blue)]"
           />
           <div className="flex justify-between text-[10px] text-[#999] mt-1"><span>Clair</span><span>Sombre</span></div>
         </div>
@@ -802,7 +735,7 @@ const AdminPage = () => {
         )}
       </div>
 
-      <button onClick={handleHeroSave} className="px-6 py-3 bg-[#f5a623] text-white rounded-xl hover:bg-[#e09422] font-semibold flex items-center gap-2 shadow-sm">
+      <button onClick={handleHeroSave} className="px-6 py-3 bg-[var(--yp-blue)] text-white rounded-xl hover:bg-[var(--yp-blue-dark)] font-semibold flex items-center gap-2 shadow-sm">
         <Save className="w-4 h-4" /> Sauvegarder le Hero
       </button>
     </div>
@@ -812,8 +745,7 @@ const AdminPage = () => {
   const renderOrderDetail = () => {
     if (!orderDetail) return null;
     const o = orderDetail;
-    const statusFlow = ['pending', 'processing'];
-    const cur = statusFlow.indexOf(o.status);
+    const deliveryStatus = getDeliveryStatusFromOrderStatus(o.status);
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
@@ -823,13 +755,26 @@ const AdminPage = () => {
               <div><p className="text-xs text-[#666] uppercase">Client</p><p className="font-medium text-[#333]">{o.customerName}</p></div>
               <div><p className="text-xs text-[#666] uppercase">Téléphone</p><p className="font-medium text-[#333]">{o.phone}</p></div>
               <div><p className="text-xs text-[#666] uppercase">Ville</p><p className="font-medium text-[#333]">{o.city || '—'}</p></div>
-              <div><p className="text-xs text-[#666] uppercase">Total</p><p className="font-bold text-[#f5a623]">{o.total.toFixed(2)} MAD</p></div>
+              <div><p className="text-xs text-[#666] uppercase">Total</p><p className="font-bold text-[var(--yp-blue)]">{o.total.toFixed(2)} MAD</p></div>
             </div>
-            {o.items?.length > 0 && <div><p className="text-xs text-[#666] uppercase mb-2">Articles</p><div className="bg-gray-50 rounded-xl p-3 space-y-2">{o.items.map((it: any, i: number) => <div key={i} className="flex justify-between text-sm"><span className="text-[#333]">{it.product?.name || `#${it.productId}`} × {it.quantity}</span><span className="font-medium text-[#f5a623]">{(it.price * it.quantity).toFixed(2)} MAD</span></div>)}</div></div>}
-            <div><p className="text-xs text-[#666] uppercase mb-2">Changer le statut</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-gray-100 p-3"><p className="text-[11px] text-[#666] uppercase mb-2">Statut commande</p><span className={`px-3 py-1 rounded-full text-xs font-medium ${getOrderStatusColor(o.status)}`}>{getOrderStatusLabel(o.status)}</span></div>
+              <div className="rounded-xl border border-gray-100 p-3"><p className="text-[11px] text-[#666] uppercase mb-2">Statut livraison</p><span className={`px-3 py-1 rounded-full text-xs font-medium ${getDeliveryStatusColor(deliveryStatus)}`}>{getDeliveryStatusLabel(deliveryStatus)}</span></div>
+            </div>
+            {o.items?.length > 0 && <div><p className="text-xs text-[#666] uppercase mb-2">Articles</p><div className="bg-gray-50 rounded-xl p-3 space-y-2">{o.items.map((it: any, i: number) => <div key={i} className="flex justify-between text-sm"><span className="text-[#333]">{it.product?.name || `#${it.productId}`} × {it.quantity}</span><span className="font-medium text-[var(--yp-blue)]">{(it.price * it.quantity).toFixed(2)} MAD</span></div>)}</div></div>}
+            <div><p className="text-xs text-[#666] uppercase mb-2">Changer le statut commande</p>
               <div className="flex flex-wrap gap-2">
-                {statusFlow.map((s, i) => <button key={s} onClick={() => handleStatusChange(o.id, s)} disabled={i <= cur && o.status !== 'cancelled'} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${o.status === s ? 'bg-[#f5a623] text-white' : i <= cur ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-[#666] hover:bg-[#f5a623]/10'}`}>{getStatusLabel(s)}</button>)}
-                <button onClick={() => handleStatusChange(o.id, 'cancelled')} className={`px-3 py-1.5 rounded-lg text-xs font-medium ${o.status === 'cancelled' ? 'bg-red-500 text-white' : 'bg-red-50 text-red-500 hover:bg-red-100'}`}>Annuler</button>
+                {['pending', 'processing', 'shipped', 'delivered'].map(s => <button key={s} onClick={() => handleStatusChange(o.id, s)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${o.status === s ? 'bg-[var(--yp-blue)] text-white' : 'bg-gray-100 text-[#666] hover:bg-[var(--yp-blue)]/10'}`}>{getOrderStatusLabel(s)}</button>)}
+                <button onClick={() => handleStatusChange(o.id, 'cancelled')} className={`px-3 py-1.5 rounded-lg text-xs font-medium ${o.status === 'cancelled' ? 'bg-red-500 text-white' : 'bg-red-50 text-red-500 hover:bg-red-100'}`}>Annulée</button>
+              </div>
+            </div>
+            <div><p className="text-xs text-[#666] uppercase mb-2">Changer le statut livraison</p>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => handleStatusChange(o.id, 'pending')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${deliveryStatus === 'not_shipped' ? 'bg-[var(--yp-blue)] text-white' : 'bg-gray-100 text-[#666] hover:bg-[var(--yp-blue)]/10'}`}>Non expédiée</button>
+                <button onClick={() => handleStatusChange(o.id, 'processing')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${deliveryStatus === 'prepared' ? 'bg-[var(--yp-blue)] text-white' : 'bg-gray-100 text-[#666] hover:bg-[var(--yp-blue)]/10'}`}>Préparée</button>
+                <button onClick={() => handleStatusChange(o.id, 'shipped')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${deliveryStatus === 'shipped' ? 'bg-[var(--yp-blue)] text-white' : 'bg-gray-100 text-[#666] hover:bg-[var(--yp-blue)]/10'}`}>Expédiée</button>
+                <button onClick={() => handleStatusChange(o.id, 'delivered')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${deliveryStatus === 'delivered' ? 'bg-[var(--yp-blue)] text-white' : 'bg-gray-100 text-[#666] hover:bg-[var(--yp-blue)]/10'}`}>Livrée</button>
+                <button onClick={() => handleStatusChange(o.id, 'cancelled')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${deliveryStatus === 'returned' ? 'bg-red-500 text-white' : 'bg-red-50 text-red-500 hover:bg-red-100'}`}>Retour</button>
               </div>
             </div>
           </div>
@@ -845,25 +790,24 @@ const AdminPage = () => {
     { id: 'categories', label: 'Catégories', icon: FolderOpen },
     { id: 'promos', label: 'Codes Promo', icon: Ticket },
     { id: 'hero', label: 'Hero Section', icon: Image },
-    { id: 'customers', label: 'Clients', icon: Users },
     { id: 'settings', label: t('settings'), icon: Settings },
   ];
 
-  const tabTitles: Record<TabId, string> = { dashboard: t('dashboard'), orders: t('orders'), products: t('products'), categories: 'Catégories', promos: 'Codes Promo', hero: 'Hero Section', customers: 'Clients', settings: t('settings') };
+  const tabTitles: Record<TabId, string> = { dashboard: t('dashboard'), orders: t('orders'), products: t('products'), categories: 'Catégories', promos: 'Codes Promo', hero: 'Hero Section', settings: t('settings') };
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex">
       <aside className="w-[260px] bg-white shadow-lg fixed h-full z-10 border-r border-gray-100">
         <div className="p-5 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#f5a623] to-[#e09422] rounded-xl flex items-center justify-center shadow-md"><ShoppingBag className="w-5 h-5 text-white" /></div>
-            <div><span className="font-bold text-[#333] text-lg">YouShop</span><p className="text-[10px] text-[#999] font-medium uppercase tracking-wider">Admin Pro</p></div>
+            <div className="w-10 h-10 bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-blue-dark)] rounded-xl flex items-center justify-center shadow-md"><ShoppingBag className="w-5 h-5 text-white" /></div>
+            <div><span className="font-bold text-[#333] text-lg">{storeForm.storeName || 'Boutique'}</span><p className="text-[10px] text-[#999] font-medium uppercase tracking-wider">Admin Pro</p></div>
           </div>
         </div>
         <nav className="p-3 space-y-0.5">
           {sidebarItems.map(item => (
-            <button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-sm ${activeTab === item.id ? 'bg-[#f5a623]/10 text-[#f5a623] font-semibold' : 'text-[#666] hover:bg-gray-50'}`}>
-              <item.icon className="w-5 h-5" />{item.label}{activeTab === item.id && <div className="ml-auto w-1.5 h-1.5 bg-[#f5a623] rounded-full" />}
+            <button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-sm ${activeTab === item.id ? 'bg-[var(--yp-blue)]/10 text-[var(--yp-blue)] font-semibold' : 'text-[#666] hover:bg-gray-50'}`}>
+              <item.icon className="w-5 h-5" />{item.label}{activeTab === item.id && <div className="ml-auto w-1.5 h-1.5 bg-[var(--yp-blue)] rounded-full" />}
             </button>
           ))}
         </nav>
@@ -877,23 +821,23 @@ const AdminPage = () => {
           <div><h1 className="text-xl font-bold text-[#333]">{tabTitles[activeTab]}</h1><p className="text-xs text-[#999] mt-0.5">{new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
           <div className="flex items-center gap-3">
             <button className="p-2.5 hover:bg-gray-100 rounded-xl relative"><Bell className="w-5 h-5 text-[#666]" />{(stats?.pendingOrders ?? 0) > 0 && <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 rounded-full text-[10px] text-white font-bold flex items-center justify-center">{stats?.pendingOrders}</span>}</button>
-            <div className="w-10 h-10 bg-gradient-to-br from-[#f5a623] to-[#e09422] rounded-xl flex items-center justify-center text-white font-bold shadow-md">A</div>
+            <div className="w-10 h-10 bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-blue-dark)] rounded-xl flex items-center justify-center text-white font-bold shadow-md">A</div>
           </div>
         </header>
         <div className="p-6 lg:p-8">
-          {loading && <div className="flex items-center justify-center py-4 mb-4"><RefreshCw className="w-5 h-5 animate-spin text-[#f5a623]" /><span className="ml-2 text-sm text-[#999]">Chargement...</span></div>}
+          {loading && <div className="flex items-center justify-center py-4 mb-4"><RefreshCw className="w-5 h-5 animate-spin text-[var(--yp-blue)]" /><span className="ml-2 text-sm text-[#999]">Chargement...</span></div>}
           {activeTab === 'dashboard' && renderDashboard()}
           {activeTab === 'orders' && renderOrders()}
           {activeTab === 'products' && renderProducts()}
           {activeTab === 'categories' && renderCategories()}
           {activeTab === 'promos' && renderPromoCodes()}
           {activeTab === 'hero' && renderHero()}
-          {activeTab === 'customers' && renderCustomers()}
           {activeTab === 'settings' && renderSettings()}
         </div>
       </main>
 
-      {productModal.open && <ProductFormModal product={productModal.product} onClose={() => setProductModal({ open: false })} onSave={() => { setProductModal({ open: false }); loadProducts(); }} />}
+      {activeTab === 'products' && productModal.open && <ProductFormModal product={productModal.product} onClose={() => setProductModal({ open: false })} onSave={() => { setProductModal({ open: false }); loadProducts(); toast.success('Produit enregistré avec succès'); }} />}
+      {productModal.open && activeTab !== 'products' && <ProductFormModal product={productModal.product} onClose={() => setProductModal({ open: false })} onSave={() => { setProductModal({ open: false }); loadProducts(); toast.success('Produit enregistré avec succès'); }} />}
       {promoModal.open && <PromoFormModal promo={promoModal.promo} onClose={() => setPromoModal({ open: false })} onSave={() => { setPromoModal({ open: false }); loadPromoCodes(); }} />}
       {categoryModal.open && <CategoryFormModal category={categoryModal.category} onClose={() => setCategoryModal({ open: false })} onSave={() => { setCategoryModal({ open: false }); loadCategories(); }} />}
       {renderOrderDetail()}
@@ -904,28 +848,34 @@ const AdminPage = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="flex items-center justify-between p-5 border-b">
-              <h3 className="text-lg font-bold text-[#333]">Exporter sur Excel</h3>
+              <h3 className="text-lg font-bold text-[#333]">Exporter les Commandes</h3>
               <button onClick={() => setExportModal(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-5 space-y-3">
-              <p className="text-sm text-[#666] mb-4">Sélectionnez les colonnes à inclure :</p>
+              <p className="text-sm text-[#666] mb-4">Sélectionnez les colonnes à inclure dans le fichier Excel :</p>
               {[
-                { key: 'name', label: 'Nom du client' },
+                { key: 'id', label: 'ID Commande' },
+                { key: 'date', label: 'Date' },
+                { key: 'customerName', label: 'Nom du client' },
                 { key: 'phone', label: 'Téléphone' },
                 { key: 'city', label: 'Ville' },
-                { key: 'totalSpent', label: 'Total dépensé' },
-                { key: 'ordersCount', label: 'Nombre de commandes' },
-                { key: 'purchasedProducts', label: 'Produits achetés (Historique)' }
+                { key: 'address', label: 'Adresse détaillée' },
+                { key: 'total', label: 'Montant Total' },
+                { key: 'history', label: 'Historique (Nb de commandes du client)' },
+                { key: 'items', label: 'Articles (Liste)' },
+                { key: 'status', label: 'Statut de la commande' }
               ].map(col => (
                 <label key={col.key} className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" checked={(exportColumns as any)[col.key]} onChange={e => setExportColumns(p => ({ ...p, [col.key]: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600" />
+                  <input type="checkbox" checked={(exportColumns as any)[col.key]} onChange={e => setExportColumns(p => ({ ...p, [col.key]: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[var(--yp-blue)] focus:ring-[var(--yp-blue)]" />
                   <span className="text-sm font-medium text-[#333]">{col.label}</span>
                 </label>
               ))}
             </div>
             <div className="p-5 border-t bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
-              <button onClick={() => setExportModal(false)} className="px-4 py-2 text-sm font-medium text-[#666] hover:bg-gray-200 rounded-xl">Annuler</button>
-              <button onClick={handleExport} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl shadow-sm">Télécharger .xlsx</button>
+              <button onClick={() => setExportModal(false)} className="px-4 py-2 text-sm font-medium text-[#666] hover:bg-gray-200 rounded-xl transition-colors">Annuler</button>
+              <button onClick={handleExportOrders} className="px-4 py-2 bg-[var(--yp-blue)] hover:bg-[var(--yp-blue-dark)] text-white text-sm font-medium rounded-xl shadow-sm transition-colors flex items-center gap-2">
+                <Save className="w-4 h-4" /> Exporter (.xlsx)
+              </button>
             </div>
           </div>
         </div>

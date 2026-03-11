@@ -4,14 +4,51 @@ import { PrismaClient } from '@prisma/client';
 const router = Router();
 const prisma = new PrismaClient();
 
+function isActive(p: any): boolean {
+    return p.status === 'published' && p.isVisible === true && p.inStock === true;
+}
+
+function isNewProduct(p: any, days = 30): boolean {
+    if (!isActive(p)) return false;
+    if (!p.publishedAt) return false;
+    const publishedMs = new Date(p.publishedAt).getTime();
+    const limitMs = days * 24 * 60 * 60 * 1000;
+    return Date.now() - publishedMs <= limitMs;
+}
+
+function isBestSellerProduct(p: any, minSales = 10): boolean {
+    if (!isActive(p)) return false;
+    return Number(p.salesCount ?? 0) >= minSales;
+}
+
+function getPopularityScore(p: any): number {
+    const sales = Number(p.salesCount ?? 0);
+    const views = Number(p.viewsCount ?? 0);
+    const cart = Number(p.cartAddCount ?? 0);
+    return sales * 10 + views * 0.2 + cart * 1.5;
+}
+
+function computeBadge(p: any): 'promo' | 'bestseller' | 'new' | undefined {
+    if (p.originalPrice != null && Number(p.originalPrice) > Number(p.price)) return 'promo';
+    if (isBestSellerProduct(p)) return 'bestseller';
+    if (isNewProduct(p)) return 'new';
+    return undefined;
+}
+
 // GET all products with optional filters
 router.get('/', async (req, res) => {
     try {
-        const { category, badge, search, sort, inStock } = req.query;
+        const { category, badge, search, sort, inStock, all, av } = req.query;
+        const showAll = all === 'true';
 
+        // By default, only show visible products, unless "all=true" is passed (e.g. by admin)
         const where: any = {};
+        if (!showAll) {
+            where.isVisible = true;
+            where.status = 'published';
+        }
+
         if (category) where.categorySlug = category;
-        if (badge) where.badge = badge;
         if (inStock === 'true') where.inStock = true;
         if (search) {
             where.OR = [
@@ -21,17 +58,120 @@ router.get('/', async (req, res) => {
             ];
         }
 
-        let orderBy: any = { salesCount: 'desc' };
-        if (sort === 'newest') orderBy = { createdAt: 'desc' };
-        if (sort === 'price-asc') orderBy = { price: 'asc' };
-        if (sort === 'price-desc') orderBy = { price: 'desc' };
+        const avIds = typeof av === 'string'
+            ? av.split(',').map(s => parseInt(s.trim())).filter(n => Number.isFinite(n))
+            : [];
+        if (avIds.length) {
+            where.AND = [
+                ...(Array.isArray(where.AND) ? where.AND : []),
+                ...avIds.map(id => ({ attributeValues: { some: { attributeValueId: id } } })),
+            ];
+        }
+
+        const sortKey = (sort as string | undefined) ?? 'popular';
+        let orderBy: any = [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }];
+        if (sortKey === 'newest') orderBy = [{ publishedAt: 'desc' }, { createdAt: 'desc' }];
+        if (sortKey === 'price-asc') orderBy = [{ price: 'asc' }];
+        if (sortKey === 'price-desc') orderBy = [{ price: 'desc' }];
+        if (sortKey === 'bestsellers') orderBy = [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }];
 
         const products = await prisma.product.findMany({
             where,
             orderBy,
-            include: { category: true },
+            include: {
+                category: true,
+                attributeValues: {
+                    include: {
+                        attributeValue: {
+                            include: {
+                                attribute: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
-        res.json(products);
+
+        const activeProducts = await prisma.product.findMany({
+            where: { status: 'published', isVisible: true, inStock: true },
+            select: {
+                id: true,
+                price: true,
+                originalPrice: true,
+                publishedAt: true,
+                salesCount: true,
+                viewsCount: true,
+                cartAddCount: true,
+                status: true,
+                isVisible: true,
+                inStock: true,
+            },
+        });
+
+        const popularIds = new Set(
+            [...activeProducts]
+                .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
+                .slice(0, 8)
+                .map(p => p.id)
+        );
+
+        const featuredIds = new Set(
+            [...activeProducts]
+                .sort((a, b) => {
+                    const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+                    const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+                    return db - da;
+                })
+                .slice(0, 8)
+                .map(p => p.id)
+        );
+
+        const withComputed = products.map(p => {
+            const computed = {
+                ...p,
+                badge: computeBadge(p),
+                isNew: isNewProduct(p),
+                isBestSeller: isBestSellerProduct(p),
+                isPopular: popularIds.has(p.id),
+                isFeatured: featuredIds.has(p.id),
+            };
+            return computed;
+        });
+
+        const badgeKey = badge as string | undefined;
+        let filtered = withComputed;
+
+        if (badgeKey === 'promo') {
+            filtered = filtered.filter(p => p.originalPrice != null && Number(p.originalPrice) > Number(p.price));
+        } else if (badgeKey === 'new') {
+            filtered = filtered.filter(p => p.isNew);
+        } else if (badgeKey === 'bestseller') {
+            filtered = filtered.filter(p => p.isBestSeller);
+        } else if (badgeKey === 'popular') {
+            filtered = filtered.filter(p => p.isPopular);
+        } else if (badgeKey === 'in-stock') {
+            filtered = filtered.filter(p => p.inStock === true);
+        }
+
+        if (sortKey === 'popular') {
+            filtered = [...filtered].sort((a, b) => getPopularityScore(b) - getPopularityScore(a));
+        } else if (sortKey === 'promo') {
+            filtered = [...filtered].sort((a, b) => {
+                const discA = (Number(a.originalPrice ?? 0) - Number(a.price));
+                const discB = (Number(b.originalPrice ?? 0) - Number(b.price));
+                return discB - discA;
+            });
+        } else if (sortKey === 'newest') {
+            filtered = [...filtered].sort((a, b) => {
+                const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+                const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+                return db - da;
+            });
+        } else if (sortKey === 'bestsellers') {
+            filtered = [...filtered].sort((a, b) => Number(b.salesCount ?? 0) - Number(a.salesCount ?? 0));
+        }
+
+        res.json(filtered);
     } catch (error) {
         console.error('Error fetching products:', error);
         res.status(500).json({ error: 'Failed to fetch products' });
@@ -43,10 +183,63 @@ router.get('/:id', async (req, res) => {
     try {
         const product = await prisma.product.findUnique({
             where: { id: parseInt(req.params.id) },
-            include: { category: true },
+            include: {
+                category: true,
+                attributeValues: {
+                    include: {
+                        attributeValue: {
+                            include: {
+                                attribute: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
         if (!product) return res.status(404).json({ error: 'Product not found' });
-        res.json(product);
+
+        const activeProducts = await prisma.product.findMany({
+            where: { status: 'published', isVisible: true, inStock: true },
+            select: {
+                id: true,
+                price: true,
+                originalPrice: true,
+                publishedAt: true,
+                salesCount: true,
+                viewsCount: true,
+                cartAddCount: true,
+                status: true,
+                isVisible: true,
+                inStock: true,
+            },
+        });
+
+        const popularIds = new Set(
+            [...activeProducts]
+                .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
+                .slice(0, 8)
+                .map(p => p.id)
+        );
+
+        const featuredIds = new Set(
+            [...activeProducts]
+                .sort((a, b) => {
+                    const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+                    const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+                    return db - da;
+                })
+                .slice(0, 8)
+                .map(p => p.id)
+        );
+
+        res.json({
+            ...product,
+            badge: computeBadge(product),
+            isNew: isNewProduct(product),
+            isBestSeller: isBestSellerProduct(product),
+            isPopular: popularIds.has(product.id),
+            isFeatured: featuredIds.has(product.id),
+        });
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch product' });
     }
@@ -55,8 +248,40 @@ router.get('/:id', async (req, res) => {
 // POST create product
 router.post('/', async (req, res) => {
     try {
+        const {
+            badge,
+            isNew,
+            isPopular,
+            isBestSeller,
+            isFeatured,
+            attributeValueIds,
+            ...rest
+        } = req.body ?? {};
+
+        const data = { ...rest };
+        if (data.categorySlug === "") {
+            delete data.categorySlug;
+        }
+
+        const ids = Array.isArray(attributeValueIds)
+            ? attributeValueIds.map((n: any) => parseInt(String(n))).filter((n: any) => Number.isFinite(n))
+            : [];
+
         const product = await prisma.product.create({
-            data: req.body,
+            data: {
+                ...data,
+                ...(ids.length ? { attributeValues: { create: ids.map((attributeValueId: number) => ({ attributeValueId })) } } : {}),
+            },
+            include: {
+                category: true,
+                attributeValues: {
+                    include: {
+                        attributeValue: {
+                            include: { attribute: true },
+                        },
+                    },
+                },
+            },
         });
         res.status(201).json(product);
     } catch (error) {
@@ -68,9 +293,55 @@ router.post('/', async (req, res) => {
 // PUT update product
 router.put('/:id', async (req, res) => {
     try {
-        const product = await prisma.product.update({
-            where: { id: parseInt(req.params.id) },
-            data: req.body,
+        const {
+            badge,
+            isNew,
+            isPopular,
+            isBestSeller,
+            isFeatured,
+            attributeValueIds,
+            ...rest
+        } = req.body ?? {};
+
+        const data = { ...rest };
+        if (data.categorySlug === "") {
+            data.categorySlug = null;
+        }
+
+        const id = parseInt(req.params.id);
+        const ids = Array.isArray(attributeValueIds)
+            ? attributeValueIds.map((n: any) => parseInt(String(n))).filter((n: any) => Number.isFinite(n))
+            : undefined;
+
+        const product = await prisma.$transaction(async (tx) => {
+            const updated = await tx.product.update({
+                where: { id },
+                data,
+            });
+
+            if (Array.isArray(ids)) {
+                await tx.productAttributeValue.deleteMany({ where: { productId: updated.id } });
+                if (ids.length) {
+                    await tx.productAttributeValue.createMany({
+                        data: ids.map((attributeValueId: number) => ({ productId: updated.id, attributeValueId })),
+                        skipDuplicates: true,
+                    });
+                }
+            }
+
+            return tx.product.findUnique({
+                where: { id: updated.id },
+                include: {
+                    category: true,
+                    attributeValues: {
+                        include: {
+                            attributeValue: {
+                                include: { attribute: true },
+                            },
+                        },
+                    },
+                },
+            });
         });
         res.json(product);
     } catch (error) {

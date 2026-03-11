@@ -41,7 +41,7 @@ export const PromoFormModal = ({ promo, onClose, onSave }: Props) => {
         finally { setSaving(false); }
     };
 
-    const inputClass = "w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#f5a623] focus:ring-2 focus:ring-[#f5a623]/20 text-sm";
+    const inputClass = "w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-[var(--yp-blue)]/20 text-sm";
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -95,7 +95,7 @@ export const PromoFormModal = ({ promo, onClose, onSave }: Props) => {
                         <div className="flex items-end pb-1">
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" checked={form.isActive} onChange={e => setForm(f => ({ ...f, isActive: e.target.checked }))}
-                                    className="w-4 h-4 rounded border-gray-300 text-[#f5a623] focus:ring-[#f5a623]" />
+                                    className="w-4 h-4 rounded border-gray-300 text-[var(--yp-blue)] focus:ring-[var(--yp-blue)]" />
                                 <span className="text-sm text-[#666]">✅ Actif</span>
                             </label>
                         </div>

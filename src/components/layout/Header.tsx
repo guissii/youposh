@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  ShoppingBag, Search, Menu, X, ChevronDown, ChevronRight, Heart,
+  ShoppingBag, Search, Menu, X, ChevronDown, Heart,
   MapPin, Phone, ArrowLeft, Globe,
   Home, Percent, TrendingUp, Sparkles, Grid3X3,
   Truck, MessageCircle, CircleHelp,
@@ -24,7 +24,8 @@ export default function Header() {
   const location = useLocation();
   const { cartCount, setIsCartOpen } = useStore();
   const { language, toggleLanguage, isRTL } = useLanguage();
-  const { phone } = useStoreSettings();
+  const storeSettings = useStoreSettings();
+  const { phone } = storeSettings;
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -103,15 +104,24 @@ export default function Header() {
             <button
               onClick={() => navigate('/')}
               className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 group"
+              dir="ltr"
             >
               <img
                 src="/images/categories/logo final.png"
-                alt="YouPosh"
+                alt={storeSettings.storeName}
                 className="h-10 sm:h-12 w-auto object-contain group-hover:scale-105 transition-transform"
               />
               <div className="flex items-baseline">
-                <span className="font-bold text-xl sm:text-2xl text-[var(--yp-blue)] tracking-tight font-heading">YOU</span>
-                <span className="font-bold text-xl sm:text-2xl text-[var(--yp-red)] tracking-tight font-heading">POSH</span>
+                <span
+                  className="font-bold text-xl sm:text-2xl tracking-tight font-heading"
+                  style={{
+                    background: 'linear-gradient(90deg, var(--yp-blue), var(--yp-red))',
+                    WebkitBackgroundClip: 'text',
+                    color: 'transparent',
+                  }}
+                >
+                  {storeSettings.storeName}
+                </span>
               </div>
             </button>
 
@@ -235,187 +245,139 @@ export default function Header() {
             style={{ animation: 'sidebar-slide-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}
           >
 
-            {/* ═══ HEADER — Branded ═══ */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--yp-gray-300)] bg-gradient-to-r from-white to-[var(--yp-gray-100)]">
-              <div className="flex items-center gap-2">
+            {/* ── HEADER ── */}
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--yp-gray-300)]">
+              <button onClick={() => navigate('/')} className="flex items-center gap-2" dir="ltr">
                 <img
                   src="/images/categories/logo final.png"
-                  alt="YouPosh"
-                  className="h-12 w-auto object-contain"
+                  alt={storeSettings.storeName}
+                  className="h-10 w-auto object-contain"
                 />
-              </div>
+              </button>
               <button
                 onClick={() => { setIsMobileMenuOpen(false); setMobileCatsOpen(false); }}
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-[var(--yp-gray-200)] hover:bg-[var(--yp-gray-300)] transition-colors"
-                aria-label="Fermer le menu"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--yp-gray-200)] transition-colors"
+                aria-label="Fermer"
               >
-                <X className="w-4.5 h-4.5 text-[var(--yp-gray-700)]" />
+                <X className="w-4 h-4 text-[var(--yp-gray-700)]" />
               </button>
             </div>
 
-            {/* ═══ SCROLLABLE CONTENT ═══ */}
+            {/* ── SCROLLABLE CONTENT ── */}
             <div className="flex-1 overflow-y-auto overscroll-contain">
 
-              {/* ── Navigation Principale ── */}
-              <div className="px-3 pt-4 pb-2">
-                <nav className="space-y-0.5">
-                  {[
-                    { path: '/', label: t('home') || 'Accueil', icon: Home, active: location.pathname === '/' },
-                    { path: '/shop?filter=promo', label: t('promotions') || 'Promotions', icon: Percent, highlight: true, badge: 'HOT' },
-                    { path: '/shop?sort=popular', label: t('bestsellers') || 'Meilleures ventes', icon: TrendingUp },
-                    { path: '/shop?filter=new', label: t('newArrivals') || 'Nouveautés', icon: Sparkles },
-                    { path: '/wishlist', label: t('wishlist') || 'Favoris', icon: Heart, iconColor: 'var(--yp-red)' },
-                  ].map((item, i) => (
-                    <button
-                      key={item.path}
-                      onClick={() => { navigate(item.path); setIsMobileMenuOpen(false); setMobileCatsOpen(false); }}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 active:scale-[0.98] ${item.active
-                        ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)]'
-                        : item.highlight
-                          ? 'text-[var(--yp-red)] hover:bg-[var(--yp-red-50)]'
-                          : 'text-[var(--yp-dark)] hover:bg-[var(--yp-gray-200)]'
-                        }`}
-                      style={{ animationDelay: `${i * 40}ms` }}
-                    >
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${item.active
-                        ? 'bg-[var(--yp-blue)]/10'
-                        : item.highlight
-                          ? 'bg-[var(--yp-red-50)]'
-                          : 'bg-[var(--yp-gray-200)]'
-                        }`}>
-                        <item.icon className="w-[18px] h-[18px]" style={{ color: item.iconColor || (item.active ? 'var(--yp-blue)' : item.highlight ? 'var(--yp-red)' : 'var(--yp-gray-600)') }} />
-                      </div>
-                      <span className="flex-1 text-left">{item.label}</span>
-                      {item.badge && (
-                        <span className="text-[10px] font-bold bg-[var(--yp-red)] text-white px-2 py-0.5 rounded-md">
-                          {item.badge}
-                        </span>
-                      )}
-                      <ChevronRight className="w-4 h-4 text-[var(--yp-gray-400)]" />
-                    </button>
-                  ))}
-                </nav>
-              </div>
+              {/* ZONE 1 — Navigation */}
+              <nav className="px-2 pt-3 pb-1">
+                {[
+                  { path: '/', label: t('home') || 'Accueil', icon: Home, active: location.pathname === '/' },
+                  { path: '/shop?filter=promo', label: t('promotions') || 'Promotions', icon: Percent, highlight: true, badge: 'HOT' },
+                  { path: '/shop?sort=popular', label: t('bestsellers') || 'Meilleures ventes', icon: TrendingUp },
+                  { path: '/shop?filter=new', label: t('newArrivals') || 'Nouveautés', icon: Sparkles },
+                  { path: '/wishlist', label: t('wishlist') || 'Favoris', icon: Heart },
+                ].map((item) => (
+                  <button
+                    key={item.path}
+                    onClick={() => { navigate(item.path); setIsMobileMenuOpen(false); setMobileCatsOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${item.active
+                      ? 'bg-[var(--yp-blue-50)] text-[var(--yp-blue)]'
+                      : item.highlight
+                        ? 'text-[var(--yp-red)] hover:bg-[var(--yp-red-50)]'
+                        : 'text-[var(--yp-dark)] hover:bg-[var(--yp-gray-200)]'
+                      }`}
+                  >
+                    <item.icon className="w-[18px] h-[18px] flex-shrink-0" style={{ color: item.active ? 'var(--yp-blue)' : item.highlight ? 'var(--yp-red)' : 'var(--yp-gray-600)' }} />
+                    <span className="flex-1 text-left">{item.label}</span>
+                    {item.badge && (
+                      <span className="text-[10px] font-bold bg-[var(--yp-red)] text-white px-1.5 py-0.5 rounded">
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                ))}
 
-              {/* ── Separator ── */}
-              <div className="mx-5 my-1">
-                <div className="h-px bg-[var(--yp-gray-300)]" />
-              </div>
-
-              {/* ── Catégories — Accordion ── */}
-              <div className="px-3 py-2">
+                {/* Categories — Collapsible */}
                 <button
                   onClick={() => setMobileCatsOpen(!mobileCatsOpen)}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-[var(--yp-gray-200)] transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-[var(--yp-dark)] hover:bg-[var(--yp-gray-200)] transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[var(--yp-blue-50)] flex items-center justify-center">
-                      <Grid3X3 className="w-[18px] h-[18px] text-[var(--yp-blue)]" />
-                    </div>
-                    <span className="text-sm font-semibold text-[var(--yp-dark)]">{t('categories') || 'Catégories'}</span>
-                  </div>
-                  <ChevronDown className={`w-4 h-4 text-[var(--yp-gray-500)] transition-transform duration-300 ${mobileCatsOpen ? 'rotate-180' : ''}`} />
+                  <Grid3X3 className="w-[18px] h-[18px] text-[var(--yp-gray-600)] flex-shrink-0" />
+                  <span className="flex-1 text-left">{t('categories') || 'Catégories'}</span>
+                  <ChevronDown className={`w-4 h-4 text-[var(--yp-gray-400)] transition-transform duration-200 ${mobileCatsOpen ? 'rotate-180' : ''}`} />
                 </button>
 
-                {/* Categories list */}
-                <div className={`overflow-hidden transition-all duration-300 ease-out ${mobileCatsOpen ? 'max-h-[500px] opacity-100 mt-1' : 'max-h-0 opacity-0'
-                  }`}>
-                  <div className="pl-4 pr-2 space-y-0.5 pb-1">
+                {/* Sub-categories */}
+                <div className={`overflow-hidden transition-all duration-250 ease-out ${mobileCatsOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <div className="ml-10 mr-2 py-1 space-y-0.5">
                     {categories.map((cat) => {
                       const CatIcon = categoryIconMap[cat.icon] || Smartphone;
                       return (
                         <button
                           key={cat.id}
                           onClick={() => { navigate(`/shop?category=${cat.slug}`); setIsMobileMenuOpen(false); setMobileCatsOpen(false); }}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[var(--yp-gray-700)] hover:bg-[var(--yp-blue-50)] hover:text-[var(--yp-blue)] transition-all duration-200 active:scale-[0.98]"
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[var(--yp-gray-700)] hover:bg-[var(--yp-blue-50)] hover:text-[var(--yp-blue)] transition-colors"
                         >
-                          <div className="w-8 h-8 rounded-lg bg-[var(--yp-gray-200)] flex items-center justify-center flex-shrink-0">
-                            <CatIcon className="w-4 h-4 text-[var(--yp-gray-600)]" />
-                          </div>
-                          <span className="flex-1 text-left font-medium">{i18n.language === 'ar' ? cat.nameAr : cat.name}</span>
-                          <ChevronRight className="w-3.5 h-3.5 text-[var(--yp-gray-400)]" />
+                          <CatIcon className="w-4 h-4 text-[var(--yp-gray-500)] flex-shrink-0" />
+                          <span className="flex-1 text-left">{i18n.language === 'ar' ? cat.nameAr : cat.name}</span>
                         </button>
                       );
                     })}
-                    {/* View all */}
                     <button
                       onClick={() => { navigate('/shop'); setIsMobileMenuOpen(false); setMobileCatsOpen(false); }}
-                      className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-[var(--yp-blue)] hover:bg-[var(--yp-blue-50)] transition-colors mt-1"
+                      className="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-[var(--yp-blue)] hover:bg-[var(--yp-blue-50)] transition-colors"
                     >
-                      {t('seeAll') || 'Voir tout'}
-                      <ChevronRight className="w-4 h-4" />
+                      {t('seeAll') || 'Voir tout'} →
                     </button>
                   </div>
                 </div>
-              </div>
+              </nav>
 
-              {/* ── Separator ── */}
-              <div className="mx-5 my-1">
-                <div className="h-px bg-[var(--yp-gray-300)]" />
-              </div>
+              {/* Separator */}
+              <div className="mx-5 my-2"><div className="h-px bg-[var(--yp-gray-300)]" /></div>
 
-              {/* ── Services ── */}
-              <div className="px-3 py-2">
-                <p className="px-4 pb-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--yp-gray-500)]">{t('services') || 'Services'}</p>
-                <nav className="space-y-0.5">
-                  {/* Services List */}
-                  {[
-                    { path: '/faq', label: t('faq') || 'FAQ', icon: CircleHelp },
-                    { path: '/shipping', label: t('deliveryInfo') || 'Livraison', icon: Truck },
-                  ].map(item => (
-                    <button
-                      key={item.path}
-                      onClick={() => { navigate(item.path); setIsMobileMenuOpen(false); setMobileCatsOpen(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-200)] font-medium transition-all duration-200 active:scale-[0.98]"
-                    >
-                      <item.icon className="w-[18px] h-[18px] text-[var(--yp-gray-500)]" />
-                      <span className="flex-1 text-left">{item.label}</span>
-                    </button>
-                  ))}
-
-                  {/* WhatsApp Contact — Highlighted */}
+              {/* ZONE 2 — Services */}
+              <div className="px-2 py-1">
+                <p className="px-4 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--yp-gray-500)]">Services</p>
+                {[
+                  { path: '/faq', label: t('faq') || 'FAQ', icon: CircleHelp, action: 'navigate' as const },
+                  { path: '/shipping', label: t('deliveryInfo') || 'Livraison', icon: Truck, action: 'navigate' as const },
+                ].map(item => (
                   <button
-                    onClick={() => {
-                      const cleanPhone = phone.replace(/[^\d]/g, '');
-                      window.open(`https://wa.me/${cleanPhone}?text=` + encodeURIComponent('Bonjour, je suis intéressé par vos produits.'), '_blank');
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-[var(--yp-whatsapp-dark)] hover:bg-emerald-50 transition-all duration-200 active:scale-[0.98]"
+                    key={item.path}
+                    onClick={() => { navigate(item.path); setIsMobileMenuOpen(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-200)] font-medium transition-colors"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-[var(--yp-whatsapp)]/10 flex items-center justify-center">
-                      <MessageCircle className="w-[18px] h-[18px] text-[var(--yp-whatsapp)]" />
-                    </div>
-                    <span className="flex-1 text-left">Contact WhatsApp</span>
-                    <span className="text-[10px] font-semibold bg-[var(--yp-whatsapp)]/10 text-[var(--yp-whatsapp-dark)] px-2 py-0.5 rounded-md">En ligne</span>
+                    <item.icon className="w-[18px] h-[18px] text-[var(--yp-gray-500)] flex-shrink-0" />
+                    <span className="flex-1 text-left">{item.label}</span>
                   </button>
-                </nav>
+                ))}
+                {/* WhatsApp — Simple line */}
+                <button
+                  onClick={() => {
+                    const cleanPhone = phone.replace(/[^\d]/g, '');
+                    window.open(`https://wa.me/${cleanPhone}?text=` + encodeURIComponent('Bonjour, je suis intéressé par vos produits.'), '_blank');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-[var(--yp-whatsapp-dark)] hover:bg-emerald-50 transition-colors"
+                >
+                  <MessageCircle className="w-[18px] h-[18px] text-[var(--yp-whatsapp)] flex-shrink-0" />
+                  <span className="flex-1 text-left">Contact WhatsApp</span>
+                  <span className="text-[10px] text-[var(--yp-whatsapp-dark)] font-medium">En ligne</span>
+                </button>
               </div>
             </div>
 
-            {/* ═══ FOOTER ═══ */}
-            <div className="border-t border-[var(--yp-gray-300)] bg-[var(--yp-gray-100)] px-5 py-4 space-y-3">
-              {/* Language toggle */}
+            {/* ── FOOTER — Compact ── */}
+            <div className="border-t border-[var(--yp-gray-300)] px-4 py-3 space-y-1.5 bg-[var(--yp-gray-100)]">
               <button
-                onClick={() => { toggleLanguage(); }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white text-sm text-[var(--yp-gray-700)] font-medium transition-colors"
+                onClick={toggleLanguage}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white text-sm text-[var(--yp-gray-700)] font-medium transition-colors"
               >
                 <Globe className="w-4 h-4 text-[var(--yp-gray-500)]" />
                 <span>{language === 'fr' ? 'العربية' : 'Français'}</span>
               </button>
-
-              {/* Info strip */}
-              <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-[var(--yp-gray-300)]">
-                <Truck className="w-4 h-4 text-[var(--yp-blue)] flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-semibold text-[var(--yp-dark)] truncate">{t('deliveryAllMorocco') || 'Livraison partout au Maroc'}</p>
-                  <p className="text-[10px] text-[var(--yp-gray-600)]">{t('cashOnDelivery') || 'Paiement à la livraison'}</p>
-                </div>
-              </div>
-
-              {/* Phone */}
               <a
                 href={`tel:${phone.replace(/[^\d+]/g, '')}`}
-                className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white text-sm text-[var(--yp-gray-600)] transition-colors"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white text-sm text-[var(--yp-gray-600)] transition-colors"
               >
                 <Phone className="w-4 h-4" />
                 <span className="text-xs">{phone}</span>

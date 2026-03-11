@@ -15,6 +15,31 @@ model Category {
   image    String    @default("")
   slug     String    @unique
   products Product[]
+  attributes CategoryAttribute[]
+}
+
+model GlobalAttribute {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  name      String
+  nameAr    String   @default("")
+  isMulti   Boolean  @default(true)
+  sortOrder Int      @default(0)
+  values    GlobalAttributeValue[]
+  categoryLinks CategoryAttribute[]
+}
+
+model GlobalAttributeValue {
+  id          Int            @id @default(autoincrement())
+  attribute   GlobalAttribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  attributeId Int
+  value       String
+  valueAr     String         @default("")
+  sortOrder   Int            @default(0)
+  categoryValueLinks CategoryAttributeValue[]
+
+  @@unique([attributeId, value])
+  @@index([attributeId])
 }
 
 model Product {
@@ -28,7 +53,7 @@ model Product {
   badge         String?
   rating        Float       @default(0)
   reviews       Int         @default(0)
-  categorySlug  String      @default("")
+  categorySlug  String?
   category      Category?   @relation(fields: [categorySlug], references: [slug])
   description   String      @default("")
   descriptionAr String      @default("")
@@ -40,29 +65,70 @@ model Product {
   variants      Json        @default("[]")
   isPopular     Boolean     @default(false)
   isNew         Boolean     @default(false)
+  isBestSeller  Boolean     @default(false)
+  isFeatured    Boolean     @default(false)
+  status        String      @default("published")
+  publishedAt   DateTime?
+  sortOrder     Int         @default(0)
+  viewsCount    Int         @default(0)
+  cartAddCount  Int         @default(0)
   salesCount    Int         @default(0)
   stock         Int         @default(0)
+  cardZoom      Float       @default(1.0)
+  cardFocalX    Float       @default(50)
+  cardFocalY    Float       @default(50)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   orderItems    OrderItem[]
+  attributeValues ProductAttributeValue[]
 }
 
-model Customer {
-  id          Int      @id @default(autoincrement())
-  name        String
-  phone       String   @default("")
-  email       String   @default("")
-  city        String   @default("")
-  totalOrders Int      @default(0)
-  totalSpent  Float    @default(0)
-  createdAt   DateTime @default(now())
-  orders      Order[]
+model CategoryAttribute {
+  id        Int      @id @default(autoincrement())
+  category  Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
+  globalAttribute GlobalAttribute? @relation(fields: [globalAttributeId], references: [id], onDelete: SetNull)
+  globalAttributeId Int?
+  code      String
+  name      String
+  nameAr    String   @default("")
+  isMulti   Boolean  @default(true)
+  sortOrder Int      @default(0)
+  values    CategoryAttributeValue[]
+
+  @@unique([categoryId, code])
+  @@index([categoryId])
+  @@index([globalAttributeId])
+}
+
+model CategoryAttributeValue {
+  id          Int              @id @default(autoincrement())
+  attribute   CategoryAttribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  attributeId Int
+  globalValue GlobalAttributeValue? @relation(fields: [globalValueId], references: [id], onDelete: SetNull)
+  globalValueId Int?
+  value       String
+  valueAr     String           @default("")
+  sortOrder   Int              @default(0)
+  productLinks ProductAttributeValue[]
+
+  @@unique([attributeId, value])
+  @@index([attributeId])
+  @@index([globalValueId])
+}
+
+model ProductAttributeValue {
+  product   Product               @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  attributeValue CategoryAttributeValue @relation(fields: [attributeValueId], references: [id], onDelete: Cascade)
+  attributeValueId Int
+
+  @@id([productId, attributeValueId])
+  @@index([attributeValueId])
 }
 
 model Order {
   id           String      @id @default(uuid())
-  customer     Customer?   @relation(fields: [customerId], references: [id])
-  customerId   Int?
   customerName String      @default("")
   phone        String      @default("")
   city         String      @default("")
@@ -105,14 +171,19 @@ model PromoCode {
 
 model StoreSettings {
   id               Int      @id @default(1)
-  storeName        String   @default("YouShop")
+  storeName        String   @default("YOUPOSH")
   phone            String   @default("+212 6XX XXX XXX")
   email            String   @default("contact@youposh.ma")
   currency         String   @default("MAD")
-  shippingFee      Float    @default(30)
+  brandPrimary     String   @default("#2563EB")
+  brandSecondary   String   @default("#DC2626")
+  shippingFeeLocal    Float    @default(20)
+  shippingFeeNational Float    @default(35)
   watermarkEnabled Boolean  @default(true)
   watermarkOpacity Int      @default(20)
   watermarkSize    Int      @default(30)
+  watermarkPosX    Float    @default(50)
+  watermarkPosY    Float    @default(50)
   updatedAt        DateTime @updatedAt
 }
 

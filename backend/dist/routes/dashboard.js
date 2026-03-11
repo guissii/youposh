@@ -16,10 +16,9 @@ const prisma = new client_1.PrismaClient();
 // GET dashboard stats
 router.get('/stats', (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const [totalOrders, totalProducts, totalCustomers, orders] = yield Promise.all([
+        const [totalOrders, totalProducts, orders] = yield Promise.all([
             prisma.order.count(),
             prisma.product.count(),
-            prisma.customer.count(),
             prisma.order.findMany({ select: { total: true, status: true } }),
         ]);
         const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
@@ -35,7 +34,6 @@ router.get('/stats', (_req, res) => __awaiter(void 0, void 0, void 0, function* 
             completedOrders,
             cancelledOrders,
             totalProducts,
-            totalCustomers,
         });
     }
     catch (error) {
@@ -51,7 +49,6 @@ router.get('/recent-orders', (_req, res) => __awaiter(void 0, void 0, void 0, fu
             orderBy: { createdAt: 'desc' },
             include: {
                 items: { include: { product: true } },
-                customer: true,
             },
         });
         res.json(orders);

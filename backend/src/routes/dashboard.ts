@@ -7,10 +7,9 @@ const prisma = new PrismaClient();
 // GET dashboard stats
 router.get('/stats', async (_req, res) => {
     try {
-        const [totalOrders, totalProducts, totalCustomers, orders] = await Promise.all([
+        const [totalOrders, totalProducts, orders] = await Promise.all([
             prisma.order.count(),
             prisma.product.count(),
-            prisma.customer.count(),
             prisma.order.findMany({ select: { total: true, status: true } }),
         ]);
 
@@ -28,7 +27,6 @@ router.get('/stats', async (_req, res) => {
             completedOrders,
             cancelledOrders,
             totalProducts,
-            totalCustomers,
         });
     } catch (error) {
         console.error('Error fetching dashboard stats:', error);
@@ -44,7 +42,6 @@ router.get('/recent-orders', async (_req, res) => {
             orderBy: { createdAt: 'desc' },
             include: {
                 items: { include: { product: true } },
-                customer: true,
             },
         });
         res.json(orders);

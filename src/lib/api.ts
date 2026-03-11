@@ -21,7 +21,6 @@ export interface DashboardStats {
     completedOrders: number;
     cancelledOrders: number;
     totalProducts: number;
-    totalCustomers: number;
 }
 
 export const fetchDashboardStats = () => apiFetch<DashboardStats>('/dashboard/stats');
@@ -58,6 +57,11 @@ export const updateCategory = (id: number, data: any) =>
     apiFetch<any>(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const deleteCategory = (id: number) =>
     apiFetch<any>(`/categories/${id}`, { method: 'DELETE' });
+
+// ─── Attribute Library ─────────────────────────────────────────
+export const fetchAttributeLibrary = () => apiFetch<any[]>('/attribute-library');
+export const createAttributeLibraryItem = (data: any) =>
+    apiFetch<any>('/attribute-library', { method: 'POST', body: JSON.stringify(data) });
 export const uploadCategoryImage = async (file: File, watermarkOpacity?: number, watermarkSize?: number) => {
     const formData = new FormData();
     formData.append('image', file);
@@ -75,13 +79,9 @@ export const uploadCategoryImage = async (file: File, watermarkOpacity?: number,
     return res.json();
 };
 
-export const uploadProductImage = async (file: File, watermarkOpacity?: number, watermarkSize?: number) => {
+export const uploadProductImage = async (file: File) => {
     const formData = new FormData();
     formData.append('image', file);
-    if (watermarkOpacity && watermarkOpacity > 0) {
-        formData.append('watermarkOpacity', String(watermarkOpacity));
-        formData.append('watermarkSize', String(watermarkSize || 30));
-    }
     const res = await fetch(`${API_BASE}/upload/product`, {
         method: 'POST',
         body: formData,
@@ -92,13 +92,6 @@ export const uploadProductImage = async (file: File, watermarkOpacity?: number, 
     return res.json();
 };
 
-// ─── Customers ─────────────────────────────────────────────────
-export const fetchCustomers = (params?: string) =>
-    apiFetch<any[]>(`/customers${params ? `?${params}` : ''}`);
-export const fetchCustomer = (id: number) => apiFetch<any>(`/customers/${id}`);
-export const deleteCustomer = (id: number) =>
-    apiFetch<any>(`/customers/${id}`, { method: 'DELETE' });
-
 // ─── Promo Codes ───────────────────────────────────────────────
 export const fetchPromoCodes = () => apiFetch<any[]>('/promo-codes');
 export const createPromoCode = (data: any) =>
@@ -107,8 +100,14 @@ export const updatePromoCode = (id: number, data: any) =>
     apiFetch<any>(`/promo-codes/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const deletePromoCode = (id: number) =>
     apiFetch<any>(`/promo-codes/${id}`, { method: 'DELETE' });
-export const validatePromoCode = (code: string, orderTotal: number) =>
-    apiFetch<any>('/promo-codes/validate', { method: 'POST', body: JSON.stringify({ code, orderTotal }) });
+export const validatePromoCode = (code: string, orderTotal?: number) =>
+    apiFetch<any>(
+        '/promo-codes/validate',
+        {
+            method: 'POST',
+            body: JSON.stringify(typeof orderTotal === 'number' ? { code, orderTotal } : { code }),
+        }
+    );
 
 // ─── Settings ──────────────────────────────────────────────────
 export const fetchStoreSettingsAPI = () => apiFetch<any>('/settings/store');
@@ -118,3 +117,18 @@ export const updateStoreSettingsAPI = (data: any) =>
 export const fetchHeroSettingsAPI = () => apiFetch<any>('/settings/hero');
 export const updateHeroSettingsAPI = (data: any) =>
     apiFetch<any>('/settings/hero', { method: 'POST', body: JSON.stringify(data) });
+
+// ─── Watermark helpers ─────────────────────────────────────────
+export const setWatermarkStatusAPI = async (enabled: boolean) => {
+    try {
+        return await apiFetch<any>('/settings/watermark/status', {
+            method: 'PATCH',
+            body: JSON.stringify({ isEnabled: enabled }),
+        });
+    } catch {
+        return apiFetch<any>('/settings/store', {
+            method: 'POST',
+            body: JSON.stringify({ watermarkEnabled: enabled }),
+        });
+    }
+};

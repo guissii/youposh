@@ -42,6 +42,9 @@ export const products: Product[] = [
     cartAddCount: 380,
     publishedAt: '2025-11-15T10:00:00Z',
     sortOrder: 1,
+    cardZoom: 1.0,
+    cardFocalX: 50,
+    cardFocalY: 50,
   },
   {
     id: 2,
@@ -72,6 +75,9 @@ export const products: Product[] = [
     cartAddCount: 520,
     publishedAt: '2025-10-20T10:00:00Z',
     sortOrder: 2,
+    cardZoom: 1.0,
+    cardFocalX: 50,
+    cardFocalY: 50,
   },
   {
     id: 3,
@@ -102,6 +108,9 @@ export const products: Product[] = [
     cartAddCount: 210,
     publishedAt: '2025-12-05T10:00:00Z',
     sortOrder: 5,
+    cardZoom: 1.0,
+    cardFocalX: 50,
+    cardFocalY: 50,
   },
   {
     id: 4,
@@ -132,6 +141,9 @@ export const products: Product[] = [
     cartAddCount: 95,
     publishedAt: '2026-02-20T10:00:00Z',
     sortOrder: 10,
+    cardZoom: 1.0,
+    cardFocalX: 50,
+    cardFocalY: 50,
   },
   {
     id: 5,
@@ -162,6 +174,9 @@ export const products: Product[] = [
     cartAddCount: 180,
     publishedAt: '2025-11-10T10:00:00Z',
     sortOrder: 6,
+    cardZoom: 1.0,
+    cardFocalX: 50,
+    cardFocalY: 50,
   },
   {
     id: 6,
@@ -192,6 +207,9 @@ export const products: Product[] = [
     cartAddCount: 420,
     publishedAt: '2025-09-01T10:00:00Z',
     sortOrder: 3,
+    cardZoom: 1.0,
+    cardFocalX: 50,
+    cardFocalY: 50,
   },
   {
     id: 7,
@@ -222,6 +240,9 @@ export const products: Product[] = [
     cartAddCount: 130,
     publishedAt: '2026-02-25T10:00:00Z',
     sortOrder: 11,
+    cardZoom: 1.0,
+    cardFocalX: 50,
+    cardFocalY: 50,
   },
   {
     id: 8,
@@ -252,6 +273,9 @@ export const products: Product[] = [
     cartAddCount: 85,
     publishedAt: '2026-03-01T10:00:00Z',
     sortOrder: 12,
+    cardZoom: 1.0,
+    cardFocalX: 50,
+    cardFocalY: 50,
   },
   {
     id: 9,
@@ -282,6 +306,9 @@ export const products: Product[] = [
     cartAddCount: 350,
     publishedAt: '2026-02-10T10:00:00Z',
     sortOrder: 4,
+    cardZoom: 1.0,
+    cardFocalX: 50,
+    cardFocalY: 50,
   },
   {
     id: 10,
@@ -312,6 +339,9 @@ export const products: Product[] = [
     cartAddCount: 290,
     publishedAt: '2025-10-01T10:00:00Z',
     sortOrder: 7,
+    cardZoom: 1.0,
+    cardFocalX: 50,
+    cardFocalY: 50,
   },
   {
     id: 11,
@@ -342,6 +372,9 @@ export const products: Product[] = [
     cartAddCount: 60,
     publishedAt: '2026-02-28T10:00:00Z',
     sortOrder: 13,
+    cardZoom: 1.0,
+    cardFocalX: 50,
+    cardFocalY: 50,
   },
   {
     id: 12,
@@ -372,6 +405,9 @@ export const products: Product[] = [
     cartAddCount: 230,
     publishedAt: '2025-12-15T10:00:00Z',
     sortOrder: 8,
+    cardZoom: 1.0,
+    cardFocalX: 50,
+    cardFocalY: 50,
   }
 ];
 
