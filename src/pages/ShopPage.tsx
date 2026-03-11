@@ -415,7 +415,7 @@ export default function ShopPage() {
             className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
             onClick={() => setIsFilterOpen(false)}
           />
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] overflow-auto shadow-2xl animate-slide-up">
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85dvh] overflow-auto shadow-2xl animate-slide-up">
             {/* Handle */}
             <div className="sticky top-0 bg-white rounded-t-2xl z-10 pt-3 pb-2 px-5 border-b border-[var(--yp-gray-300)]">
               <div className="w-8 h-1 bg-[var(--yp-gray-400)] rounded-full mx-auto mb-2.5" />

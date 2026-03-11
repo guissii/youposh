@@ -73,7 +73,7 @@ export default function HomePage() {
         {/* ══════════════════════════════════════════════
             HERO — Full-bleed immersive video background
             ══════════════════════════════════════════════ */}
-        <section className="relative min-h-[55vh] sm:min-h-[65vh] lg:min-h-[80vh] flex items-center overflow-hidden bg-black">
+        <section className="relative min-h-[80dvh] sm:min-h-[70vh] lg:min-h-[80vh] flex items-center overflow-hidden bg-black">
           {/* Premium gradient background */}
           <div
             className="absolute inset-0 w-full h-full"

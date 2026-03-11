@@ -95,21 +95,21 @@ export default function ProductCard({
 
         <div className="flex-1 min-w-0 flex flex-col justify-between">
           <div>
-            <p className="text-xs text-gray-400 mb-1">{brandName}</p>
-            <h3 className="text-sm font-semibold text-[#111] line-clamp-2">
+            <p className="text-[10px] text-gray-400 mb-1 uppercase tracking-wider">{brandName}</p>
+            <h3 className="text-sm font-bold text-[#111] line-clamp-2 leading-snug">
               {name}
             </h3>
           </div>
-          <div className="flex items-center justify-between mt-3">
-            <span className="text-sm font-bold text-[#111]">
+          <div className="flex items-center justify-between mt-3 gap-2">
+            <span className="text-base font-extrabold text-[#111]">
               {product.price} dh
             </span>
             <button
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              className={`px-2.5 py-1.5 rounded-full text-[11px] font-semibold transition-colors ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-blue)] text-white hover:bg-[var(--yp-blue-dark)]'}`}
+              className={`px-3 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wide transition-colors ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-blue)] text-white hover:bg-[var(--yp-blue-dark)]'}`}
             >
-              {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('addToCart') || 'Ajouter au panier')}
+              {isOutOfStock ? (t('outOfStock') || 'Rupture') : (t('addToCart') || 'Ajouter')}
             </button>
           </div>
         </div>
@@ -173,19 +173,19 @@ export default function ProductCard({
         </div>
 
         {/* Product info */}
-        <div className="px-3 pt-2 pb-1 flex-1 flex flex-col">
-          <p className="text-[9px] xs:text-[10px] font-semibold uppercase tracking-[0.08em] text-[#888]">
+        <div className="px-3 pt-3 pb-2 flex-1 flex flex-col">
+          <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[#888] mb-1">
             {typeof product.category === 'string' ? product.category : (product.category as any)?.name || brandName}
           </p>
-          <h3 className="mt-0.5 text-xs xs:text-[13px] sm:text-[14px] font-bold leading-tight text-[#1a1a1a] line-clamp-2">
+          <h3 className="text-sm sm:text-[15px] font-bold leading-snug text-[#1a1a1a] line-clamp-2 mb-2">
             {name}
           </h3>
-          <div className="mt-auto pt-1 flex items-baseline gap-1.5 flex-wrap">
-            <span className="text-sm xs:text-[16px] font-extrabold text-[#1a1a1a]">
+          <div className="mt-auto flex items-baseline gap-2 flex-wrap">
+            <span className="text-base sm:text-lg font-extrabold text-[#1a1a1a]">
               {product.price} dh
             </span>
             {product.originalPrice && (
-              <span className="text-[10px] xs:text-[11px] text-[#aaa] line-through">
+              <span className="text-xs text-[#aaa] line-through">
                 {product.originalPrice} dh
               </span>
             )}
@@ -193,17 +193,17 @@ export default function ProductCard({
         </div>
 
         {/* Bottom actions */}
-        <div className="px-3 pb-2.5 pt-1 flex items-stretch gap-1.5">
+        <div className="px-3 pb-3 pt-1 flex items-stretch gap-2">
           <button
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className={`flex-1 h-[30px] rounded-xl text-[10px] font-bold uppercase tracking-[0.06em] transition-all duration-200 active:scale-[0.98] ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-blue)] text-white hover:bg-[var(--yp-blue-dark)]'}`}
+            className={`flex-1 h-9 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-blue)] text-white hover:bg-[var(--yp-blue-dark)]'}`}
           >
-            {isOutOfStock ? compactOutLabel : (t('addToCart') || 'Ajouter au panier')}
+            {isOutOfStock ? compactOutLabel : (t('addToCart') || 'Ajouter')}
           </button>
           <button
             onClick={handleWishlistToggle}
-            className={`w-[34px] h-[34px] rounded-xl flex items-center justify-center transition-all duration-200 border-2 ${isFavorite
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 border-2 ${isFavorite
               ? 'bg-red-50 border-[#D92C2C]'
               : 'bg-white border-[#E8E8E8] hover:border-[#D92C2C]'
               }`}
@@ -322,21 +322,21 @@ export default function ProductCard({
       )}
 
       {/* ── Product info ── */}
-      <div className="px-2.5 sm:px-3 pt-2 pb-1 flex-1 flex flex-col">
-        <p className="text-[9px] xs:text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.08em] text-[#888]">
+      <div className="px-3 pt-3 pb-2 flex-1 flex flex-col">
+        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[#888] mb-1">
           {typeof product.category === 'string' ? product.category : (product.category as any)?.name || brandName}
         </p>
 
-        <h3 className="mt-1 text-xs xs:text-[13px] sm:text-[16px] font-bold leading-tight text-[#1a1a1a] line-clamp-2">
+        <h3 className="text-sm sm:text-[15px] font-bold leading-snug text-[#1a1a1a] line-clamp-2 mb-2">
           {name}
         </h3>
 
-        <div className="mt-auto pt-1.5 flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
-          <span className="text-sm xs:text-[15px] sm:text-[18px] font-extrabold text-[#1a1a1a]">
+        <div className="mt-auto flex items-baseline gap-2 flex-wrap">
+          <span className="text-base sm:text-lg font-extrabold text-[#1a1a1a]">
             {product.price} dh
           </span>
           {product.originalPrice && (
-            <span className="text-[10px] sm:text-[13px] text-[#aaa] line-through">
+            <span className="text-xs text-[#aaa] line-through">
               {product.originalPrice} dh
             </span>
           )}
@@ -344,17 +344,17 @@ export default function ProductCard({
       </div>
 
       {/* ── Bottom actions ── */}
-      <div className="px-2.5 sm:px-3 pb-2.5 sm:pb-3 pt-1 flex items-stretch gap-1.5 sm:gap-2">
+      <div className="px-3 pb-3 pt-1 flex items-stretch gap-2">
         <button
           onClick={handleAddToCart}
           disabled={isOutOfStock}
-          className={`flex-1 h-[32px] sm:h-[34px] rounded-lg sm:rounded-xl text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.06em] transition-all duration-200 active:scale-[0.98] ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-blue)] text-white hover:bg-[var(--yp-blue-dark)]'}`}
+          className={`flex-1 h-9 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-blue)] text-white hover:bg-[var(--yp-blue-dark)]'}`}
         >
-          {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('addToCart') || 'Ajouter au panier')}
+          {isOutOfStock ? (t('outOfStock') || 'Rupture') : (t('addToCart') || 'Ajouter')}
         </button>
         <button
           onClick={handleWishlistToggle}
-          className={`w-[34px] h-[34px] sm:w-[38px] sm:h-[38px] rounded-lg sm:rounded-xl flex items-center justify-center transition-all duration-200 border-2 ${isFavorite
+          className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 border-2 ${isFavorite
             ? 'bg-red-50 border-[#D92C2C]'
             : 'bg-white border-[#E8E8E8] hover:border-[#D92C2C]'
             }`}

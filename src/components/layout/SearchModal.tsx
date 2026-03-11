@@ -93,7 +93,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
           </div>
 
           {/* Results or Suggestions */}
-          <div className="mt-4 max-h-[70vh] overflow-y-auto">
+          <div className="mt-4 max-h-[70dvh] overflow-y-auto">
             {query.length >= 2 ? (
               results.length > 0 ? (
                 <div className="space-y-2">
