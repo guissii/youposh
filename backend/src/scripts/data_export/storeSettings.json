@@ -1,0 +1,19 @@
+[
+  {
+    "id": 1,
+    "storeName": "YOUPOSH",
+    "phone": "+212 690-93909",
+    "email": "contact@youposh.ma",
+    "currency": "MAD",
+    "brandPrimary": "#2563EB",
+    "brandSecondary": "#DC2626",
+    "shippingFeeLocal": 20,
+    "shippingFeeNational": 35,
+    "watermarkEnabled": false,
+    "watermarkOpacity": 100,
+    "watermarkSize": 49,
+    "watermarkPosX": 50,
+    "watermarkPosY": 91,
+    "updatedAt": "2026-03-11T07:43:09.426Z"
+  }
+]

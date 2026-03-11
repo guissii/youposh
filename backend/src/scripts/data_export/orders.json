@@ -1,0 +1,221 @@
+[
+  {
+    "id": "3368720f-83f8-4c89-b83b-e8029f8ba739",
+    "customerName": "Ahmed Benali",
+    "phone": "+212 612 345 678",
+    "city": "Casablanca",
+    "address": "12 Rue Hassan II, Casablanca",
+    "notes": null,
+    "total": 478,
+    "status": "completed",
+    "promoCode": null,
+    "discount": 0,
+    "createdAt": "2026-03-05T12:03:08.969Z",
+    "updatedAt": "2026-03-05T12:03:08.969Z",
+    "items": [
+      {
+        "id": 1,
+        "orderId": "3368720f-83f8-4c89-b83b-e8029f8ba739",
+        "productId": 1,
+        "quantity": 1,
+        "price": 299
+      },
+      {
+        "id": 2,
+        "orderId": "3368720f-83f8-4c89-b83b-e8029f8ba739",
+        "productId": 5,
+        "quantity": 1,
+        "price": 179
+      }
+    ]
+  },
+  {
+    "id": "a6038fb8-7b5d-4e2e-90bf-3299fd547af9",
+    "customerName": "Fatima Zahra",
+    "phone": "+212 661 234 567",
+    "city": "Rabat",
+    "address": "45 Av Mohammed V, Rabat",
+    "notes": null,
+    "total": 478,
+    "status": "processing",
+    "promoCode": null,
+    "discount": 0,
+    "createdAt": "2026-03-05T12:03:08.976Z",
+    "updatedAt": "2026-03-05T12:03:08.976Z",
+    "items": [
+      {
+        "id": 3,
+        "orderId": "a6038fb8-7b5d-4e2e-90bf-3299fd547af9",
+        "productId": 2,
+        "quantity": 1,
+        "price": 399
+      },
+      {
+        "id": 4,
+        "orderId": "a6038fb8-7b5d-4e2e-90bf-3299fd547af9",
+        "productId": 10,
+        "quantity": 1,
+        "price": 59
+      }
+    ]
+  },
+  {
+    "id": "c6ac450e-10f3-4c25-8584-4dbc3707b039",
+    "customerName": "Youssef El Amrani",
+    "phone": "+212 655 876 543",
+    "city": "Marrakech",
+    "address": "8 Derb Jdid, Marrakech",
+    "notes": null,
+    "total": 399,
+    "status": "processing",
+    "promoCode": null,
+    "discount": 0,
+    "createdAt": "2026-03-05T12:03:08.978Z",
+    "updatedAt": "2026-03-07T23:46:42.424Z",
+    "items": [
+      {
+        "id": 5,
+        "orderId": "c6ac450e-10f3-4c25-8584-4dbc3707b039",
+        "productId": 2,
+        "quantity": 1,
+        "price": 399
+      }
+    ]
+  },
+  {
+    "id": "b776e75c-8d74-4f84-8644-b810c1a2d4af",
+    "customerName": "Ahmed Benali",
+    "phone": "+212 612 345 678",
+    "city": "Casablanca",
+    "address": "12 Rue Hassan II",
+    "notes": null,
+    "total": 249,
+    "status": "cancelled",
+    "promoCode": "BIENVENUE10",
+    "discount": 27.67,
+    "createdAt": "2026-03-05T12:03:08.982Z",
+    "updatedAt": "2026-03-08T01:44:50.514Z",
+    "items": [
+      {
+        "id": 6,
+        "orderId": "b776e75c-8d74-4f84-8644-b810c1a2d4af",
+        "productId": 7,
+        "quantity": 1,
+        "price": 249
+      }
+    ]
+  },
+  {
+    "id": "150214d6-a06a-474c-ac62-849607d36256",
+    "customerName": "MR GUISSI MOHAMMED",
+    "phone": "+212649878763",
+    "city": "fes",
+    "address": "fes",
+    "notes": "mmmmmmmm",
+    "total": 218,
+    "status": "processing",
+    "promoCode": null,
+    "discount": 0,
+    "createdAt": "2026-03-10T07:48:11.383Z",
+    "updatedAt": "2026-03-10T08:13:39.544Z",
+    "items": [
+      {
+        "id": 7,
+        "orderId": "150214d6-a06a-474c-ac62-849607d36256",
+        "productId": 17,
+        "quantity": 1,
+        "price": 99
+      },
+      {
+        "id": 8,
+        "orderId": "150214d6-a06a-474c-ac62-849607d36256",
+        "productId": 12,
+        "quantity": 1,
+        "price": 119
+      }
+    ]
+  },
+  {
+    "id": "7394ff3a-8f47-4cf3-a67f-488a235c6285",
+    "customerName": "MR GUISSI MOHAMMED",
+    "phone": "0649878763",
+    "city": "fes",
+    "address": "fes",
+    "notes": "",
+    "total": 30,
+    "status": "pending",
+    "promoCode": null,
+    "discount": 0,
+    "createdAt": "2026-03-10T13:11:56.498Z",
+    "updatedAt": "2026-03-10T13:11:56.498Z",
+    "items": [
+      {
+        "id": 9,
+        "orderId": "7394ff3a-8f47-4cf3-a67f-488a235c6285",
+        "productId": 18,
+        "quantity": 1,
+        "price": 30
+      }
+    ]
+  },
+  {
+    "id": "12aff3eb-ae0d-470b-a4ca-e358faec2bfa",
+    "customerName": "MR GUISSI MOHAMMED",
+    "phone": "0649878763",
+    "city": "fes",
+    "address": "fes",
+    "notes": "",
+    "total": 30,
+    "status": "pending",
+    "promoCode": null,
+    "discount": 0,
+    "createdAt": "2026-03-10T13:12:26.975Z",
+    "updatedAt": "2026-03-10T13:12:26.975Z",
+    "items": [
+      {
+        "id": 10,
+        "orderId": "12aff3eb-ae0d-470b-a4ca-e358faec2bfa",
+        "productId": 18,
+        "quantity": 1,
+        "price": 30
+      }
+    ]
+  },
+  {
+    "id": "47a8ce4f-b151-44d7-a487-f5432f4f7da7",
+    "customerName": "MR GUISSI MOHAMMED",
+    "phone": "+212649878763",
+    "city": "fes",
+    "address": "fes",
+    "notes": "",
+    "total": 516,
+    "status": "processing",
+    "promoCode": null,
+    "discount": 0,
+    "createdAt": "2026-03-10T13:17:26.568Z",
+    "updatedAt": "2026-03-10T13:18:56.773Z",
+    "items": [
+      {
+        "id": 11,
+        "orderId": "47a8ce4f-b151-44d7-a487-f5432f4f7da7",
+        "productId": 18,
+        "quantity": 2,
+        "price": 30
+      },
+      {
+        "id": 12,
+        "orderId": "47a8ce4f-b151-44d7-a487-f5432f4f7da7",
+        "productId": 17,
+        "quantity": 2,
+        "price": 99
+      },
+      {
+        "id": 13,
+        "orderId": "47a8ce4f-b151-44d7-a487-f5432f4f7da7",
+        "productId": 4,
+        "quantity": 2,
+        "price": 129
+      }
+    ]
+  }
+]

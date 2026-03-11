@@ -1,16 +1,16 @@
 {
     "version": 2,
-    "buildCommand": "npm run build",
+    "buildCommand": "cd backend && npm install && npx prisma generate && npm run build && cd .. && npm run build",
     "outputDirectory": "dist",
     "functions": {
-        "api/index.ts": {
-            "includeFiles": "backend/**"
+        "api/index.js": {
+            "includeFiles": "backend/dist/**,backend/node_modules/.prisma/**,backend/node_modules/@prisma/**,backend/prisma/**"
         }
     },
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "/api/index.ts"
+            "destination": "/api/index.js"
         },
         {
             "source": "/(.*)",

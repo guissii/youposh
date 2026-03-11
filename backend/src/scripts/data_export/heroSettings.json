@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "isEnabled": true,
+    "badgeText": "Une marque marocaine pensée pour votre quotidien",
+    "title": "Des produits tendance pour votre quotidien",
+    "subtitle": "Des accessoires et produits utiles sélectionnés pour vous, partout au Maroc.",
+    "slogan": "UNE MARQUE MAROCAINE",
+    "primaryCtaText": "Explorer la boutique",
+    "primaryCtaLink": "/shop",
+    "secondaryCtaText": "Voir les promotions",
+    "secondaryCtaLink": "/shop?filter=promo",
+    "videoEnabled": true,
+    "videoUrl": "/videos/hero-video.mp4",
+    "videoPosterUrl": "",
+    "videoAutoplay": true,
+    "videoMuted": true,
+    "videoLoop": true,
+    "showOnMobile": true,
+    "overlayOpacity": 0,
+    "updatedAt": "2026-03-11T05:52:03.427Z"
+  }
+]

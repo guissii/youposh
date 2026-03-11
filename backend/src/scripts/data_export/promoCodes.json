@@ -1,0 +1,47 @@
+[
+  {
+    "id": 2,
+    "code": "SUMMER25",
+    "description": "Soldes été -25%",
+    "discountType": "percentage",
+    "discountValue": 25,
+    "minOrder": 200,
+    "maxUses": 100,
+    "usedCount": 0,
+    "isActive": true,
+    "startDate": "2026-03-05T12:03:08.956Z",
+    "endDate": "2026-09-01T00:00:00.000Z",
+    "createdAt": "2026-03-05T12:03:08.956Z",
+    "updatedAt": "2026-03-05T12:03:08.956Z"
+  },
+  {
+    "id": 3,
+    "code": "LIVGRATUITE",
+    "description": "Livraison gratuite (réduction 30 MAD)",
+    "discountType": "fixed",
+    "discountValue": 30,
+    "minOrder": 150,
+    "maxUses": 0,
+    "usedCount": 0,
+    "isActive": true,
+    "startDate": "2026-03-05T12:03:08.956Z",
+    "endDate": null,
+    "createdAt": "2026-03-05T12:03:08.956Z",
+    "updatedAt": "2026-03-05T12:03:08.956Z"
+  },
+  {
+    "id": 1,
+    "code": "BIENVENUE10",
+    "description": "10% de réduction pour les nouveaux clients",
+    "discountType": "percentage",
+    "discountValue": 10,
+    "minOrder": 100,
+    "maxUses": 500,
+    "usedCount": 0,
+    "isActive": true,
+    "startDate": "2026-03-05T12:03:08.956Z",
+    "endDate": null,
+    "createdAt": "2026-03-05T12:03:08.956Z",
+    "updatedAt": "2026-03-08T01:54:30.280Z"
+  }
+]

@@ -1,0 +1,773 @@
+[
+  {
+    "id": 3,
+    "name": "PowerBank 20000mAh",
+    "nameAr": "باور بانك 20000mAh",
+    "price": 149,
+    "originalPrice": 250,
+    "image": "/images/products/powerbank.jpg",
+    "images": [
+      "/images/products/powerbank.jpg"
+    ],
+    "badge": "promo",
+    "rating": 4.6,
+    "reviews": 189,
+    "categorySlug": "electronique",
+    "description": "Batterie externe ultra-capacité avec charge rapide 65W.",
+    "descriptionAr": "بطارية خارجية عالية السعة مع شحن سريع 65 واط.",
+    "inStock": true,
+    "isVisible": false,
+    "sku": "PWR-20K-003",
+    "tags": [
+      "powerbank",
+      "chargeur",
+      "portable"
+    ],
+    "features": [
+      "20000mAh",
+      "Charge rapide 65W",
+      "3 ports USB",
+      "Écran LED"
+    ],
+    "variants": [],
+    "isPopular": true,
+    "isNew": false,
+    "isBestSeller": false,
+    "isFeatured": false,
+    "status": "published",
+    "publishedAt": null,
+    "sortOrder": 0,
+    "viewsCount": 0,
+    "cartAddCount": 0,
+    "salesCount": 890,
+    "stock": 78,
+    "cardZoom": 1,
+    "cardFocalX": 50,
+    "cardFocalY": 50,
+    "createdAt": "2026-03-05T12:03:08.937Z",
+    "updatedAt": "2026-03-10T11:49:00.091Z",
+    "attributeValues": []
+  },
+  {
+    "id": 6,
+    "name": "Support Téléphone Voiture",
+    "nameAr": "حامل هاتف للسيارة",
+    "price": 79,
+    "originalPrice": 129,
+    "image": "/images/products/car-mount.jpg",
+    "images": [
+      "/images/products/car-mount.jpg"
+    ],
+    "badge": "bestseller",
+    "rating": 4.4,
+    "reviews": 567,
+    "categorySlug": "auto",
+    "description": "Support universel avec ventouse puissante et rotation 360°.",
+    "descriptionAr": "حامل عالمي مع كوب شفط قوي ودوران 360 درجة.",
+    "inStock": true,
+    "isVisible": false,
+    "sku": "CAR-SUP-006",
+    "tags": [
+      "auto",
+      "support",
+      "telephone"
+    ],
+    "features": [
+      "Rotation 360°",
+      "Ventouse puissante",
+      "Universel",
+      "Facile installer"
+    ],
+    "variants": [],
+    "isPopular": true,
+    "isNew": false,
+    "isBestSeller": false,
+    "isFeatured": false,
+    "status": "published",
+    "publishedAt": null,
+    "sortOrder": 0,
+    "viewsCount": 0,
+    "cartAddCount": 0,
+    "salesCount": 1500,
+    "stock": 120,
+    "cardZoom": 1,
+    "cardFocalX": 50,
+    "cardFocalY": 50,
+    "createdAt": "2026-03-05T12:03:08.942Z",
+    "updatedAt": "2026-03-10T11:45:40.211Z",
+    "attributeValues": []
+  },
+  {
+    "id": 11,
+    "name": "Récepteur Bluetooth 5.0",
+    "nameAr": "مستقبل بلوتوث 5.0",
+    "price": 89,
+    "originalPrice": 149,
+    "image": "/images/products/bt-receiver.jpg",
+    "images": [
+      "/images/products/bt-receiver.jpg"
+    ],
+    "badge": "new",
+    "rating": 4.4,
+    "reviews": 156,
+    "categorySlug": "electronique",
+    "description": "Adaptateur audio Bluetooth pour voiture et chaîne HiFi.",
+    "descriptionAr": "محول صوت بلوتوث للسيارة ونظام الصوت HiFi.",
+    "inStock": true,
+    "isVisible": true,
+    "sku": "BT-REC-011",
+    "tags": [
+      "bluetooth",
+      "audio",
+      "voiture"
+    ],
+    "features": [
+      "Bluetooth 5.0",
+      "Autonomie 10h",
+      "Micro intégré",
+      "Facile utiliser"
+    ],
+    "variants": [],
+    "isPopular": false,
+    "isNew": true,
+    "isBestSeller": false,
+    "isFeatured": false,
+    "status": "published",
+    "publishedAt": null,
+    "sortOrder": 0,
+    "viewsCount": 0,
+    "cartAddCount": 0,
+    "salesCount": 280,
+    "stock": 70,
+    "cardZoom": 1,
+    "cardFocalX": 50,
+    "cardFocalY": 50,
+    "createdAt": "2026-03-05T12:03:08.952Z",
+    "updatedAt": "2026-03-11T06:51:51.158Z",
+    "attributeValues": []
+  },
+  {
+    "id": 10,
+    "name": "Support Téléphone Pliable",
+    "nameAr": "حامل هاتف قابل للطي",
+    "price": 59,
+    "originalPrice": 99,
+    "image": "/images/products/foldable-stand.jpg",
+    "images": [
+      "/images/products/foldable-stand.jpg"
+    ],
+    "badge": "promo",
+    "rating": 4.5,
+    "reviews": 678,
+    "categorySlug": "electronique",
+    "description": "Support aluminium pliable, angle réglable, compact.",
+    "descriptionAr": "حامل ألومنيوم قابل للطي، زاوية قابلة للتعديل، مضغوط.",
+    "inStock": true,
+    "isVisible": false,
+    "sku": "STAND-FLD-010",
+    "tags": [
+      "support",
+      "telephone",
+      "bureau"
+    ],
+    "features": [
+      "Aluminium",
+      "Angle réglable",
+      "Pliable",
+      "Universel"
+    ],
+    "variants": [
+      {
+        "name": "Couleur",
+        "nameAr": "اللون",
+        "options": [
+          "Argent",
+          "Noir",
+          "Or"
+        ]
+      }
+    ],
+    "isPopular": true,
+    "isNew": false,
+    "isBestSeller": false,
+    "isFeatured": false,
+    "status": "published",
+    "publishedAt": null,
+    "sortOrder": 0,
+    "viewsCount": 0,
+    "cartAddCount": 0,
+    "salesCount": 1100,
+    "stock": 90,
+    "cardZoom": 1,
+    "cardFocalX": 50,
+    "cardFocalY": 50,
+    "createdAt": "2026-03-05T12:03:08.950Z",
+    "updatedAt": "2026-03-10T11:45:42.774Z",
+    "attributeValues": []
+  },
+  {
+    "id": 9,
+    "name": "Projecteur Étoiles",
+    "nameAr": "جهاز عرض النجوم",
+    "price": 199,
+    "originalPrice": 349,
+    "image": "/images/products/night-light.jpg",
+    "images": [
+      "/images/products/night-light.jpg"
+    ],
+    "badge": "new",
+    "rating": 4.9,
+    "reviews": 412,
+    "categorySlug": "maison",
+    "description": "Projecteur ciel étoilé avec télécommande, musique, minuterie.",
+    "descriptionAr": "جهاز عرض السماء المرصعة بالنجوم مع ريموت كنترول، موسيقى، مؤقت.",
+    "inStock": true,
+    "isVisible": false,
+    "sku": "PROJ-STAR-009",
+    "tags": [
+      "deco",
+      "lumiere",
+      "maison"
+    ],
+    "features": [
+      "16 couleurs",
+      "Télécommande",
+      "Bluetooth",
+      "Minuterie"
+    ],
+    "variants": [],
+    "isPopular": true,
+    "isNew": true,
+    "isBestSeller": false,
+    "isFeatured": false,
+    "status": "published",
+    "publishedAt": null,
+    "sortOrder": 0,
+    "viewsCount": 0,
+    "cartAddCount": 0,
+    "salesCount": 920,
+    "stock": 25,
+    "cardZoom": 1,
+    "cardFocalX": 50,
+    "cardFocalY": 50,
+    "createdAt": "2026-03-05T12:03:08.948Z",
+    "updatedAt": "2026-03-10T11:48:56.311Z",
+    "attributeValues": []
+  },
+  {
+    "id": 12,
+    "name": "Chargeur Sans Fil",
+    "nameAr": "شاحن لاسلكي",
+    "price": 119,
+    "originalPrice": 199,
+    "image": "/images/products/phonestand.jpg",
+    "images": [
+      "/images/products/phonestand.jpg"
+    ],
+    "badge": "promo",
+    "rating": 4.7,
+    "reviews": 334,
+    "categorySlug": "electronique",
+    "description": "Chargeur induction rapide 15W avec LED, compatible iPhone/Samsung.",
+    "descriptionAr": "شحن استقراء سريع 15 واط مع LED، متوافق مع iPhone/Samsung.",
+    "inStock": true,
+    "isVisible": true,
+    "sku": "CHG-WL-012",
+    "tags": [
+      "chargeur",
+      "sans-fil",
+      "induction"
+    ],
+    "features": [
+      "15W rapide",
+      "LED indicateur",
+      "Protection surchauffe",
+      "Universel"
+    ],
+    "variants": [
+      {
+        "name": "Couleur",
+        "nameAr": "اللون",
+        "options": [
+          "Blanc",
+          "Noir"
+        ]
+      }
+    ],
+    "isPopular": true,
+    "isNew": false,
+    "isBestSeller": false,
+    "isFeatured": false,
+    "status": "published",
+    "publishedAt": null,
+    "sortOrder": 0,
+    "viewsCount": 0,
+    "cartAddCount": 0,
+    "salesCount": 851,
+    "stock": 49,
+    "cardZoom": 1,
+    "cardFocalX": 50,
+    "cardFocalY": 50,
+    "createdAt": "2026-03-05T12:03:08.953Z",
+    "updatedAt": "2026-03-11T07:33:19.906Z",
+    "attributeValues": []
+  },
+  {
+    "id": 5,
+    "name": "Enceinte Bluetooth",
+    "nameAr": "سماعة بلوتوث",
+    "price": 179,
+    "originalPrice": 299,
+    "image": "/images/products/speaker.jpg",
+    "images": [
+      "/images/products/speaker.jpg"
+    ],
+    "badge": "promo",
+    "rating": 4.5,
+    "reviews": 234,
+    "categorySlug": "electronique",
+    "description": "Enceinte portable waterproof avec basses puissantes.",
+    "descriptionAr": "سماعة محمولة مقاومة للماء مع جهير قوي.",
+    "inStock": true,
+    "isVisible": true,
+    "sku": "SPK-BT-005",
+    "tags": [
+      "enceinte",
+      "audio",
+      "portable"
+    ],
+    "features": [
+      "Waterproof IPX7",
+      "20h autonomie",
+      "Basses puissantes",
+      "Micro intégré"
+    ],
+    "variants": [
+      {
+        "name": "Couleur",
+        "nameAr": "اللون",
+        "options": [
+          "Noir",
+          "Rouge",
+          "Bleu"
+        ]
+      }
+    ],
+    "isPopular": true,
+    "isNew": false,
+    "isBestSeller": false,
+    "isFeatured": false,
+    "status": "published",
+    "publishedAt": null,
+    "sortOrder": 0,
+    "viewsCount": 0,
+    "cartAddCount": 0,
+    "salesCount": 780,
+    "stock": 40,
+    "cardZoom": 1,
+    "cardFocalX": 50,
+    "cardFocalY": 50,
+    "createdAt": "2026-03-05T12:03:08.940Z",
+    "updatedAt": "2026-03-11T07:33:18.245Z",
+    "attributeValues": []
+  },
+  {
+    "id": 1,
+    "name": "Écouteurs Bluetooth ANC",
+    "nameAr": "سماعات بلوتوث ANC",
+    "price": 299,
+    "originalPrice": 450,
+    "image": "/images/products/headphones.jpg",
+    "images": [
+      "/images/products/headphones.jpg",
+      "/images/products/headphones.jpg",
+      "/images/products/headphones.jpg"
+    ],
+    "badge": "promo",
+    "rating": 4.8,
+    "reviews": 328,
+    "categorySlug": "electronique",
+    "description": "Écouteurs sans fil avec réduction active du bruit. Autonomie 30h, son haute qualité.",
+    "descriptionAr": "سماعات لاسلكية مع إلغاء الضوضاء النشط. بطارية 30 ساعة، صوت عالي الجودة.",
+    "inStock": true,
+    "isVisible": false,
+    "sku": "ECO-BT-001",
+    "tags": [
+      "audio",
+      "bluetooth",
+      "sans-fil"
+    ],
+    "features": [
+      "Réduction bruit ANC",
+      "30h autonomie",
+      "Bluetooth 5.3",
+      "Charge rapide"
+    ],
+    "variants": [
+      {
+        "name": "Couleur",
+        "nameAr": "اللون",
+        "options": [
+          "Noir",
+          "Blanc",
+          "Bleu"
+        ]
+      }
+    ],
+    "isPopular": false,
+    "isNew": false,
+    "isBestSeller": false,
+    "isFeatured": false,
+    "status": "published",
+    "publishedAt": "2026-03-10T00:00:00.000Z",
+    "sortOrder": 0,
+    "viewsCount": 0,
+    "cartAddCount": 0,
+    "salesCount": 1250,
+    "stock": 45,
+    "cardZoom": 0.95,
+    "cardFocalX": 42,
+    "cardFocalY": 9,
+    "createdAt": "2026-03-05T12:03:08.928Z",
+    "updatedAt": "2026-03-10T14:27:40.919Z",
+    "attributeValues": []
+  },
+  {
+    "id": 4,
+    "name": "Lampe LED Bureau",
+    "nameAr": "مصباح LED مكتبي",
+    "price": 129,
+    "originalPrice": 199,
+    "image": "/images/products/desklamp.jpg",
+    "images": [
+      "/images/products/desklamp.jpg"
+    ],
+    "badge": "new",
+    "rating": 4.7,
+    "reviews": 145,
+    "categorySlug": "maison",
+    "description": "Lampe de bureau LED avec variateur, port USB, protection yeux.",
+    "descriptionAr": "مصباح مكتبي LED مع خافت، منفذ USB، حماية العيون.",
+    "inStock": true,
+    "isVisible": true,
+    "sku": "LAMP-LED-004",
+    "tags": [
+      "lampe",
+      "bureau",
+      "maison"
+    ],
+    "features": [
+      "5 modes lumière",
+      "Protection yeux",
+      "Port USB",
+      "Flexible"
+    ],
+    "variants": [
+      {
+        "name": "Couleur",
+        "nameAr": "اللون",
+        "options": [
+          "Blanc",
+          "Noir"
+        ]
+      }
+    ],
+    "isPopular": false,
+    "isNew": true,
+    "isBestSeller": false,
+    "isFeatured": false,
+    "status": "published",
+    "publishedAt": null,
+    "sortOrder": 0,
+    "viewsCount": 0,
+    "cartAddCount": 0,
+    "salesCount": 322,
+    "stock": 53,
+    "cardZoom": 1,
+    "cardFocalX": 50,
+    "cardFocalY": 50,
+    "createdAt": "2026-03-05T12:03:08.939Z",
+    "updatedAt": "2026-03-11T06:51:53.760Z",
+    "attributeValues": []
+  },
+  {
+    "id": 8,
+    "name": "Souris Ergonomique",
+    "nameAr": "فأرة مريحة",
+    "price": 99,
+    "originalPrice": 159,
+    "image": "/images/products/mouse.jpg",
+    "images": [
+      "/images/products/mouse.jpg"
+    ],
+    "badge": "new",
+    "rating": 4.6,
+    "reviews": 289,
+    "categorySlug": "electronique",
+    "description": "Souris sans fil verticale, confort maximale, réduction douleurs.",
+    "descriptionAr": "فأرة لاسلكية عمودية، راحة قصوى، تقليل الآلام.",
+    "inStock": true,
+    "isVisible": true,
+    "sku": "MOUSE-ERG-008",
+    "tags": [
+      "souris",
+      "ergonomique",
+      "bureau"
+    ],
+    "features": [
+      "Design vertical",
+      "Sans fil 2.4G",
+      "2400 DPI",
+      "Confort max"
+    ],
+    "variants": [
+      {
+        "name": "Couleur",
+        "nameAr": "اللون",
+        "options": [
+          "Noir",
+          "Gris"
+        ]
+      }
+    ],
+    "isPopular": false,
+    "isNew": true,
+    "isBestSeller": false,
+    "isFeatured": false,
+    "status": "published",
+    "publishedAt": null,
+    "sortOrder": 0,
+    "viewsCount": 0,
+    "cartAddCount": 0,
+    "salesCount": 380,
+    "stock": 65,
+    "cardZoom": 1,
+    "cardFocalX": 50,
+    "cardFocalY": 50,
+    "createdAt": "2026-03-05T12:03:08.946Z",
+    "updatedAt": "2026-03-11T07:33:16.035Z",
+    "attributeValues": []
+  },
+  {
+    "id": 18,
+    "name": "Manches de protection UV lavande pour femme",
+    "nameAr": "أكمام حماية من الشمس باللون البنفسجي للنساء",
+    "price": 30,
+    "originalPrice": 50,
+    "image": "/uploads/products/product-1773126263801-764618302.jpeg",
+    "images": [
+      "/uploads/products/product-1773126263712-382313158.jpeg",
+      "/uploads/products/product-1773126263857-385077566.jpeg"
+    ],
+    "badge": null,
+    "rating": 0,
+    "reviews": 0,
+    "categorySlug": "mode",
+    "description": "Manches de protection UV élégantes et confortables pour femme, idéales pour la conduite, les sorties en extérieur, le sport et les journées ensoleillées. Tissu doux, léger et extensible pour un maintien agréable tout au long de la journée.",
+    "descriptionAr": "",
+    "inStock": true,
+    "isVisible": true,
+    "sku": "",
+    "tags": [
+      "taille"
+    ],
+    "features": [
+      "manches uv",
+      "protection solaire",
+      "femme",
+      "accessoires",
+      "été",
+      "conduite",
+      "manches lavande",
+      "mode femme"
+    ],
+    "variants": [],
+    "isPopular": false,
+    "isNew": false,
+    "isBestSeller": false,
+    "isFeatured": false,
+    "status": "published",
+    "publishedAt": "2026-03-10T00:00:00.000Z",
+    "sortOrder": 0,
+    "viewsCount": 0,
+    "cartAddCount": 0,
+    "salesCount": 4,
+    "stock": 46,
+    "cardZoom": 0.95,
+    "cardFocalX": 50,
+    "cardFocalY": 50,
+    "createdAt": "2026-03-10T06:52:29.020Z",
+    "updatedAt": "2026-03-10T18:14:24.614Z",
+    "attributeValues": []
+  },
+  {
+    "id": 7,
+    "name": "USB-C Hub 7-en-1",
+    "nameAr": "موزع USB-C 7 في 1",
+    "price": 249,
+    "originalPrice": 399,
+    "image": "/images/products/usbhub.jpg",
+    "images": [
+      "/images/products/usbhub.jpg"
+    ],
+    "badge": "promo",
+    "rating": 4.7,
+    "reviews": 178,
+    "categorySlug": "electronique",
+    "description": "Hub multiport avec HDMI 4K, USB 3.0, SD, charge 100W.",
+    "descriptionAr": "موزع متعدد المنافذ مع HDMI 4K، USB 3.0، SD، شحن 100 واط.",
+    "inStock": true,
+    "isVisible": true,
+    "sku": "HUB-7IN1-007",
+    "tags": [
+      "usb",
+      "hub",
+      "informatique"
+    ],
+    "features": [
+      "HDMI 4K",
+      "3x USB 3.0",
+      "Lecteur SD",
+      "Charge 100W"
+    ],
+    "variants": [
+      {
+        "name": "Couleur",
+        "nameAr": "اللون",
+        "options": [
+          "Gris",
+          "Argent"
+        ]
+      }
+    ],
+    "isPopular": false,
+    "isNew": true,
+    "isBestSeller": false,
+    "isFeatured": false,
+    "status": "published",
+    "publishedAt": null,
+    "sortOrder": 0,
+    "viewsCount": 0,
+    "cartAddCount": 0,
+    "salesCount": 450,
+    "stock": 30,
+    "cardZoom": 1,
+    "cardFocalX": 50,
+    "cardFocalY": 50,
+    "createdAt": "2026-03-05T12:03:08.944Z",
+    "updatedAt": "2026-03-11T07:33:17.111Z",
+    "attributeValues": []
+  },
+  {
+    "id": 2,
+    "name": "Smartwatch Pro",
+    "nameAr": "ساعة ذكية برو",
+    "price": 399,
+    "originalPrice": 599,
+    "image": "/images/products/smartwatch.jpg",
+    "images": [],
+    "badge": "bestseller",
+    "rating": 4.9,
+    "reviews": 512,
+    "categorySlug": "electronique",
+    "description": "Montre connectée avec GPS, cardio, suivi sommeil. Écran AMOLED.",
+    "descriptionAr": "ساعة ذكية مع GPS، معدل ضربات القلب، تتبع النوم. شاشة AMOLED.",
+    "inStock": true,
+    "isVisible": false,
+    "sku": "WATCH-PRO-002",
+    "tags": [
+      "smartwatch",
+      "fitness",
+      "sante"
+    ],
+    "features": [
+      "GPS intégré",
+      "Cardio 24/7",
+      "Étanche 50m",
+      "100+ sports"
+    ],
+    "variants": [
+      {
+        "name": "Couleur",
+        "nameAr": "اللون",
+        "options": [
+          "Noir",
+          "Rose",
+          "Argent"
+        ]
+      }
+    ],
+    "isPopular": true,
+    "isNew": false,
+    "isBestSeller": false,
+    "isFeatured": false,
+    "status": "published",
+    "publishedAt": "2026-03-10T00:00:00.000Z",
+    "sortOrder": 0,
+    "viewsCount": 0,
+    "cartAddCount": 0,
+    "salesCount": 2100,
+    "stock": 32,
+    "cardZoom": 1.3,
+    "cardFocalX": 50,
+    "cardFocalY": 50,
+    "createdAt": "2026-03-05T12:03:08.936Z",
+    "updatedAt": "2026-03-10T11:45:37.873Z",
+    "attributeValues": []
+  },
+  {
+    "id": 17,
+    "name": "Test Product 12345",
+    "nameAr": "",
+    "price": 99,
+    "originalPrice": null,
+    "image": "",
+    "images": [],
+    "badge": null,
+    "rating": 0,
+    "reviews": 0,
+    "categorySlug": "electronique",
+    "description": "Ceci est un produit de test pour v",
+    "descriptionAr": "",
+    "inStock": true,
+    "isVisible": true,
+    "sku": "TEST-12345",
+    "tags": [],
+    "features": [],
+    "variants": [
+      {
+        "name": "Pointure",
+        "nameAr": "المقاس",
+        "options": [
+          "36",
+          {
+            "stock": 0,
+            "value": "37"
+          },
+          "38",
+          "39",
+          "40",
+          "41",
+          "42"
+        ]
+      }
+    ],
+    "isPopular": false,
+    "isNew": true,
+    "isBestSeller": false,
+    "isFeatured": false,
+    "status": "published",
+    "publishedAt": "2026-03-10T00:00:00.000Z",
+    "sortOrder": 0,
+    "viewsCount": 0,
+    "cartAddCount": 0,
+    "salesCount": 3,
+    "stock": 47,
+    "cardZoom": 1,
+    "cardFocalX": 50,
+    "cardFocalY": 50,
+    "createdAt": "2026-03-10T06:48:11.104Z",
+    "updatedAt": "2026-03-10T17:36:22.654Z",
+    "attributeValues": []
+  }
+]

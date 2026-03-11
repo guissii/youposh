@@ -1,0 +1,475 @@
+[
+  {
+    "id": 1,
+    "code": "size",
+    "name": "Taille",
+    "nameAr": "المقاس",
+    "isMulti": true,
+    "sortOrder": 0,
+    "values": [
+      {
+        "id": 1,
+        "attributeId": 1,
+        "value": "XS",
+        "valueAr": "",
+        "sortOrder": 0
+      },
+      {
+        "id": 2,
+        "attributeId": 1,
+        "value": "S",
+        "valueAr": "",
+        "sortOrder": 1
+      },
+      {
+        "id": 3,
+        "attributeId": 1,
+        "value": "M",
+        "valueAr": "",
+        "sortOrder": 2
+      },
+      {
+        "id": 4,
+        "attributeId": 1,
+        "value": "L",
+        "valueAr": "",
+        "sortOrder": 3
+      },
+      {
+        "id": 5,
+        "attributeId": 1,
+        "value": "XL",
+        "valueAr": "",
+        "sortOrder": 4
+      },
+      {
+        "id": 6,
+        "attributeId": 1,
+        "value": "XXL",
+        "valueAr": "",
+        "sortOrder": 5
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "code": "color",
+    "name": "Couleur",
+    "nameAr": "اللون",
+    "isMulti": true,
+    "sortOrder": 1,
+    "values": [
+      {
+        "id": 7,
+        "attributeId": 2,
+        "value": "Noir",
+        "valueAr": "",
+        "sortOrder": 0
+      },
+      {
+        "id": 8,
+        "attributeId": 2,
+        "value": "Blanc",
+        "valueAr": "",
+        "sortOrder": 1
+      },
+      {
+        "id": 9,
+        "attributeId": 2,
+        "value": "Bleu",
+        "valueAr": "",
+        "sortOrder": 2
+      },
+      {
+        "id": 10,
+        "attributeId": 2,
+        "value": "Rouge",
+        "valueAr": "",
+        "sortOrder": 3
+      },
+      {
+        "id": 11,
+        "attributeId": 2,
+        "value": "Vert",
+        "valueAr": "",
+        "sortOrder": 4
+      },
+      {
+        "id": 12,
+        "attributeId": 2,
+        "value": "Beige",
+        "valueAr": "",
+        "sortOrder": 5
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "code": "shoe_size",
+    "name": "Pointure",
+    "nameAr": "المقاس",
+    "isMulti": true,
+    "sortOrder": 2,
+    "values": [
+      {
+        "id": 13,
+        "attributeId": 3,
+        "value": "36",
+        "valueAr": "",
+        "sortOrder": 0
+      },
+      {
+        "id": 14,
+        "attributeId": 3,
+        "value": "37",
+        "valueAr": "",
+        "sortOrder": 1
+      },
+      {
+        "id": 15,
+        "attributeId": 3,
+        "value": "38",
+        "valueAr": "",
+        "sortOrder": 2
+      },
+      {
+        "id": 16,
+        "attributeId": 3,
+        "value": "39",
+        "valueAr": "",
+        "sortOrder": 3
+      },
+      {
+        "id": 17,
+        "attributeId": 3,
+        "value": "40",
+        "valueAr": "",
+        "sortOrder": 4
+      },
+      {
+        "id": 18,
+        "attributeId": 3,
+        "value": "41",
+        "valueAr": "",
+        "sortOrder": 5
+      },
+      {
+        "id": 19,
+        "attributeId": 3,
+        "value": "42",
+        "valueAr": "",
+        "sortOrder": 6
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "code": "capacity",
+    "name": "Capacité",
+    "nameAr": "السعة",
+    "isMulti": true,
+    "sortOrder": 3,
+    "values": [
+      {
+        "id": 20,
+        "attributeId": 4,
+        "value": "64GB",
+        "valueAr": "",
+        "sortOrder": 0
+      },
+      {
+        "id": 21,
+        "attributeId": 4,
+        "value": "128GB",
+        "valueAr": "",
+        "sortOrder": 1
+      },
+      {
+        "id": 22,
+        "attributeId": 4,
+        "value": "256GB",
+        "valueAr": "",
+        "sortOrder": 2
+      },
+      {
+        "id": 23,
+        "attributeId": 4,
+        "value": "512GB",
+        "valueAr": "",
+        "sortOrder": 3
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "code": "ram",
+    "name": "RAM",
+    "nameAr": "الذاكرة",
+    "isMulti": true,
+    "sortOrder": 4,
+    "values": [
+      {
+        "id": 24,
+        "attributeId": 5,
+        "value": "4GB",
+        "valueAr": "",
+        "sortOrder": 0
+      },
+      {
+        "id": 25,
+        "attributeId": 5,
+        "value": "8GB",
+        "valueAr": "",
+        "sortOrder": 1
+      },
+      {
+        "id": 26,
+        "attributeId": 5,
+        "value": "16GB",
+        "valueAr": "",
+        "sortOrder": 2
+      },
+      {
+        "id": 27,
+        "attributeId": 5,
+        "value": "32GB",
+        "valueAr": "",
+        "sortOrder": 3
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "code": "storage",
+    "name": "Stockage",
+    "nameAr": "التخزين",
+    "isMulti": true,
+    "sortOrder": 5,
+    "values": [
+      {
+        "id": 28,
+        "attributeId": 6,
+        "value": "64GB",
+        "valueAr": "",
+        "sortOrder": 0
+      },
+      {
+        "id": 29,
+        "attributeId": 6,
+        "value": "128GB",
+        "valueAr": "",
+        "sortOrder": 1
+      },
+      {
+        "id": 30,
+        "attributeId": 6,
+        "value": "256GB",
+        "valueAr": "",
+        "sortOrder": 2
+      },
+      {
+        "id": 31,
+        "attributeId": 6,
+        "value": "512GB",
+        "valueAr": "",
+        "sortOrder": 3
+      },
+      {
+        "id": 32,
+        "attributeId": 6,
+        "value": "1TB",
+        "valueAr": "",
+        "sortOrder": 4
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "code": "material",
+    "name": "Matière",
+    "nameAr": "الخامة",
+    "isMulti": true,
+    "sortOrder": 6,
+    "values": [
+      {
+        "id": 33,
+        "attributeId": 7,
+        "value": "Coton",
+        "valueAr": "",
+        "sortOrder": 0
+      },
+      {
+        "id": 34,
+        "attributeId": 7,
+        "value": "Polyester",
+        "valueAr": "",
+        "sortOrder": 1
+      },
+      {
+        "id": 35,
+        "attributeId": 7,
+        "value": "Cuir",
+        "valueAr": "",
+        "sortOrder": 2
+      },
+      {
+        "id": 36,
+        "attributeId": 7,
+        "value": "Similicuir",
+        "valueAr": "",
+        "sortOrder": 3
+      },
+      {
+        "id": 37,
+        "attributeId": 7,
+        "value": "Métal",
+        "valueAr": "",
+        "sortOrder": 4
+      },
+      {
+        "id": 38,
+        "attributeId": 7,
+        "value": "Plastique",
+        "valueAr": "",
+        "sortOrder": 5
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "code": "connectivity",
+    "name": "Connectivité",
+    "nameAr": "الاتصال",
+    "isMulti": true,
+    "sortOrder": 7,
+    "values": [
+      {
+        "id": 39,
+        "attributeId": 8,
+        "value": "Bluetooth",
+        "valueAr": "",
+        "sortOrder": 0
+      },
+      {
+        "id": 40,
+        "attributeId": 8,
+        "value": "Wi‑Fi",
+        "valueAr": "",
+        "sortOrder": 1
+      },
+      {
+        "id": 41,
+        "attributeId": 8,
+        "value": "USB‑C",
+        "valueAr": "",
+        "sortOrder": 2
+      },
+      {
+        "id": 42,
+        "attributeId": 8,
+        "value": "NFC",
+        "valueAr": "",
+        "sortOrder": 3
+      },
+      {
+        "id": 43,
+        "attributeId": 8,
+        "value": "4G",
+        "valueAr": "",
+        "sortOrder": 4
+      },
+      {
+        "id": 44,
+        "attributeId": 8,
+        "value": "5G",
+        "valueAr": "",
+        "sortOrder": 5
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "code": "gender",
+    "name": "Genre",
+    "nameAr": "الجنس",
+    "isMulti": true,
+    "sortOrder": 8,
+    "values": [
+      {
+        "id": 45,
+        "attributeId": 9,
+        "value": "Homme",
+        "valueAr": "",
+        "sortOrder": 0
+      },
+      {
+        "id": 46,
+        "attributeId": 9,
+        "value": "Femme",
+        "valueAr": "",
+        "sortOrder": 1
+      },
+      {
+        "id": 47,
+        "attributeId": 9,
+        "value": "Mixte",
+        "valueAr": "",
+        "sortOrder": 2
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "code": "model",
+    "name": "Modèle",
+    "nameAr": "الموديل",
+    "isMulti": true,
+    "sortOrder": 9,
+    "values": []
+  },
+  {
+    "id": 11,
+    "code": "length",
+    "name": "Longueur",
+    "nameAr": "الطول",
+    "isMulti": true,
+    "sortOrder": 10,
+    "values": []
+  },
+  {
+    "id": 12,
+    "code": "width",
+    "name": "Largeur",
+    "nameAr": "العرض",
+    "isMulti": true,
+    "sortOrder": 11,
+    "values": []
+  },
+  {
+    "id": 13,
+    "code": "height",
+    "name": "Hauteur",
+    "nameAr": "الارتفاع",
+    "isMulti": true,
+    "sortOrder": 12,
+    "values": []
+  },
+  {
+    "id": 14,
+    "code": "weight",
+    "name": "Poids",
+    "nameAr": "الوزن",
+    "isMulti": true,
+    "sortOrder": 13,
+    "values": []
+  },
+  {
+    "id": 15,
+    "code": "volume",
+    "name": "Volume",
+    "nameAr": "الحجم",
+    "isMulti": true,
+    "sortOrder": 14,
+    "values": []
+  }
+]

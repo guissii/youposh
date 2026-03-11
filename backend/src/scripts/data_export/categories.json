@@ -1,0 +1,66 @@
+[
+  {
+    "id": 2,
+    "name": "Maison & Cuisine",
+    "nameAr": "منزل ومطبخ",
+    "icon": "Home",
+    "image": "/images/categories/home.jpg",
+    "slug": "maison"
+  },
+  {
+    "id": 3,
+    "name": "Beauté & Bien-être",
+    "nameAr": "جمال وعناية",
+    "icon": "Sparkles",
+    "image": "/images/categories/beauty.jpg",
+    "slug": "beaute"
+  },
+  {
+    "id": 4,
+    "name": "Mode & Accessoires",
+    "nameAr": "أزياء وإكسسوارات",
+    "icon": "Shirt",
+    "image": "/images/categories/fashion.jpg",
+    "slug": "mode"
+  },
+  {
+    "id": 5,
+    "name": "Auto & Moto",
+    "nameAr": "سيارات ودراجات",
+    "icon": "Car",
+    "image": "/images/categories/electronics.jpg",
+    "slug": "auto"
+  },
+  {
+    "id": 6,
+    "name": "Gaming",
+    "nameAr": "ألعاب",
+    "icon": "Gamepad2",
+    "image": "/images/categories/electronics.jpg",
+    "slug": "gaming"
+  },
+  {
+    "id": 8,
+    "name": "Enfants & Jouets",
+    "nameAr": "أطفال وألعاب",
+    "icon": "Baby",
+    "image": "/images/categories/fashion.jpg",
+    "slug": "jouets"
+  },
+  {
+    "id": 1,
+    "name": "Électronique ",
+    "nameAr": "إلكترونيات",
+    "icon": "Smartphone",
+    "image": "/images/categories/electronics.jpg",
+    "slug": "electronique"
+  },
+  {
+    "id": 7,
+    "name": "PACK",
+    "nameAr": "هدايا",
+    "icon": "Gift",
+    "image": "/images/categories/fashion.jpg",
+    "slug": "cadeaux"
+  }
+]
