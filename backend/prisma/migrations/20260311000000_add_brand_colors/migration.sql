@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "StoreSettings" ADD COLUMN     "brandColorYou" TEXT NOT NULL DEFAULT '#2563EB',
+ADD COLUMN     "brandColorPosh" TEXT NOT NULL DEFAULT '#DC2626',
+ADD COLUMN     "brandColorCart" TEXT NOT NULL DEFAULT '#2563EB';
