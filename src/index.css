@@ -27,16 +27,23 @@
     --ring: 217 91% 53%;
     --radius: 0.75rem;
 
-    /* Brand Colors — YouPosh */
-    --yp-blue: #00B0EB; /* Updated from user request */
-    --yp-blue-dark: #0099CC; /* Slightly darker for hover */
-    --yp-blue-light: #4DCDFA;
-    --yp-blue-50: #E6F7FD;
-    --yp-blue-100: #B3E7FA;
-    --yp-blue-rgb: 0 176 235;
-    
-    --yp-red: #DC2626; /* Keep original red unless specified otherwise, user mentioned "POSH" red */
-    --yp-red-dark: #B91C1C;
+    /* Brand Colors — YouPosh Official Palette */
+    /* Primary Brand Colors (Text / Main Branding) */
+    --yp-blue: #2563EB;
+    --yp-red: #DC2626;
+
+    /* Secondary Brand Colors (Pictogram / Accents) */
+    --yp-blue-alt: #01B3EA;
+    --yp-red-alt: #FE0E25;
+
+    /* Derived Shades for UI States (Hover, Light Backgrounds) */
+    --yp-blue-dark: #1D4ED8; /* Slightly darker for hover */
+    --yp-blue-light: #60A5FA;
+    --yp-blue-50: #EFF6FF;
+    --yp-blue-100: #DBEAFE;
+    --yp-blue-rgb: 37 99 235;
+
+    --yp-red-dark: #B91C1C; /* Slightly darker for hover */
     --yp-red-light: #EF4444;
     --yp-red-50: #FEF2F2;
     --yp-red-rgb: 220 38 38;

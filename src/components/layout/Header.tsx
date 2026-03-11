@@ -119,6 +119,7 @@ export default function Header() {
                   <span style={{ color: 'var(--yp-red)' }}>POSH</span>
                 </span>
               </div>
+
             </button>
 
             {/* Right — Actions */}

@@ -196,12 +196,12 @@ export default function ShopPage() {
             <div className="flex items-center justify-between gap-2 py-3 border-t border-[var(--yp-gray-100)]">
               {/* Filter Button (Mobile) */}
               <button
-                onClick={() => setIsFilterOpen(true)}
-                className="lg:hidden flex items-center gap-2 px-4 py-2.5 border border-[#E2E8F0] rounded-xl text-[13px] font-bold text-[#1A1D38] bg-white shadow-sm hover:border-[#00B0EB] transition-colors"
-              >
-                <SlidersHorizontal className="w-4 h-4 text-[#00B0EB]" />
-                {t('filters')}
-              </button>
+                  onClick={() => setIsFilterOpen(true)}
+                  className="lg:hidden flex items-center gap-2 px-4 py-2.5 border border-[#E2E8F0] rounded-xl text-[13px] font-bold text-[#1A1D38] bg-white shadow-sm hover:border-[var(--yp-blue)] transition-colors"
+                >
+                  <SlidersHorizontal className="w-4 h-4 text-[var(--yp-blue)]" />
+                  {t('filters')}
+                </button>
 
               {/* Sort & View */}
               <div className="flex items-center gap-2">
