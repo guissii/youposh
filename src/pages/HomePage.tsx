@@ -34,7 +34,6 @@ export default function HomePage() {
 
   const flashRef = useScrollReveal();
   const bestsellersRef = useScrollReveal();
-  const trustBadgesRef = useScrollReveal();
   const exclusivesRef = useScrollReveal();
   const discoverRef = useScrollReveal();
 
@@ -369,28 +368,6 @@ export default function HomePage() {
 
         {/* Sections produits supprimées pour page épurée */}
 
-        {/* ══════════════════════════════════════════════
-            TRUST BADGES — Bottom advantage cards
-            ══════════════════════════════════════════════ */}
-        <section className="py-4 sm:py-8" ref={trustBadgesRef}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-              {[
-                { icon: Truck, title: 'Livraison rapide', desc: '24-72h partout au Maroc', color: 'var(--yp-blue)' },
-                { icon: CreditCard, title: 'Paiement à la livraison', desc: 'Payez à la réception', color: 'var(--yp-dark)' },
-                { icon: Percent, title: 'Meilleurs prix', desc: 'Qualité au meilleur prix', color: 'var(--yp-red)' },
-              ].map((item, i) => (
-                <div key={i} className={`reveal reveal-delay-${i + 1} bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-5 text-center border border-[var(--yp-gray-300)] hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 group`}>
-                  <div className="w-8 h-8 sm:w-12 sm:h-12 bg-[var(--yp-gray-200)] rounded-lg sm:rounded-2xl flex items-center justify-center mx-auto mb-1.5 sm:mb-3 group-hover:scale-110 transition-transform">
-                    <item.icon className="w-3.5 h-3.5 sm:w-6 sm:h-6" style={{ color: item.color }} />
-                  </div>
-                  <h3 className="font-semibold text-[var(--yp-dark)] text-[11px] sm:text-sm mb-0.5 sm:mb-1">{item.title}</h3>
-                  <p className="text-[10px] sm:text-xs text-[var(--yp-gray-600)] leading-relaxed hidden sm:block">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* ══════════════════════════════════════════════
             DEUX CATÉGORIES PRINCIPALES - Section Premium
