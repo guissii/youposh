@@ -1,35 +1,30 @@
 import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const router = Router();
 
-// ─── Ensure upload directories exist ────────────────────────────
-const categoryDir = path.join(__dirname, '../../uploads/categories');
-const productDir = path.join(__dirname, '../../uploads/products');
-if (!fs.existsSync(categoryDir)) fs.mkdirSync(categoryDir, { recursive: true });
-if (!fs.existsSync(productDir)) fs.mkdirSync(productDir, { recursive: true });
+// ─── Initialize Supabase Client ──────────────────────────────
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
 
-// ─── Multer config for categories ───────────────────────────────
-const categoryStorage = multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, categoryDir),
-    filename: (_req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname);
-        cb(null, `category-${uniqueSuffix}${ext}`);
+if (!supabaseUrl || !supabaseServiceKey) {
+    console.warn('⚠️ Supabase credentials missing. Uploads will fail.');
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+        persistSession: false,
+        autoRefreshToken: false,
     }
 });
 
-// ─── Multer config for products ─────────────────────────────────
-const productStorage = multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, productDir),
-    filename: (_req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname);
-        cb(null, `product-${uniqueSuffix}${ext}`);
-    }
-});
+// ─── Multer config (Memory Storage) ─────────────────────────────
+const storage = multer.memoryStorage();
 
 const imageFilter = (_req: any, file: any, cb: any) => {
     if (file.mimetype.startsWith('image/')) {
@@ -39,35 +34,60 @@ const imageFilter = (_req: any, file: any, cb: any) => {
     }
 };
 
-const uploadCategory = multer({ storage: categoryStorage, limits: { fileSize: 5 * 1024 * 1024 }, fileFilter: imageFilter });
-const uploadProduct = multer({ storage: productStorage, limits: { fileSize: 5 * 1024 * 1024 }, fileFilter: imageFilter });
+const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 }, fileFilter: imageFilter });
+
+// Generic upload function to Supabase
+async function uploadToSupabase(file: Express.Multer.File, folder: string): Promise<string> {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    const filename = `${folder}/${folder.slice(0, -1)}-${uniqueSuffix}${ext}`;
+
+    const { data, error } = await supabase
+        .storage
+        .from('uploads')
+        .upload(filename, file.buffer, {
+            contentType: file.mimetype,
+            upsert: false
+        });
+
+    if (error) {
+        throw error;
+    }
+
+    const { data: publicUrlData } = supabase
+        .storage
+        .from('uploads')
+        .getPublicUrl(filename);
+
+    return publicUrlData.publicUrl;
+}
 
 // ─── POST /upload/category ──────────────────────────────────────
-router.post('/category', uploadCategory.single('image'), async (req, res) => {
+router.post('/category', upload.single('image'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No image uploaded' });
         }
 
-        const imageUrl = `/uploads/categories/${req.file.filename}`;
-        res.json({ url: imageUrl });
+        const publicUrl = await uploadToSupabase(req.file, 'categories');
+        res.json({ url: publicUrl });
     } catch (error) {
-        console.error('Error uploading category image:', error);
+        console.error('Error uploading category image to Supabase:', error);
         res.status(500).json({ error: 'Failed to upload image' });
     }
 });
 
 // ─── POST /upload/product ───────────────────────────────────────
-router.post('/product', uploadProduct.single('image'), async (req, res) => {
+router.post('/product', upload.single('image'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No image uploaded' });
         }
 
-        const imageUrl = `/uploads/products/${req.file.filename}`;
-        res.json({ url: imageUrl });
+        const publicUrl = await uploadToSupabase(req.file, 'products');
+        res.json({ url: publicUrl });
     } catch (error) {
-        console.error('Error uploading product image:', error);
+        console.error('Error uploading product image to Supabase:', error);
         res.status(500).json({ error: 'Failed to upload image' });
     }
 });
