@@ -69,7 +69,7 @@ export default function HomePage() {
           <div
             className="absolute inset-0 w-full h-full"
             style={{
-              background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 30%, #2563eb 60%, #1e40af 100%)',
+              background: 'linear-gradient(135deg, var(--yp-dark) 0%, var(--yp-blue-dark) 100%)',
             }}
           />
 

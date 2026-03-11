@@ -114,13 +114,9 @@ export default function Header() {
               <div className="flex items-baseline">
                 <span
                   className="font-bold text-lg xs:text-xl sm:text-2xl tracking-tight font-heading"
-                  style={{
-                    background: 'linear-gradient(90deg, var(--yp-blue), var(--yp-red))',
-                    WebkitBackgroundClip: 'text',
-                    color: 'transparent',
-                  }}
                 >
-                  {storeSettings.storeName}
+                  <span style={{ color: 'var(--yp-blue)' }}>YOU</span>
+                  <span style={{ color: 'var(--yp-red)' }}>POSH</span>
                 </span>
               </div>
             </button>
