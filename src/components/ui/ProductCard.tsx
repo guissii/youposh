@@ -246,8 +246,8 @@ export default function ProductCard({
           </span>
         )}
 
-        {/* Details CTA */}
-        <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        {/* Details CTA - Desktop only */}
+        <div className="hidden lg:flex absolute inset-0 z-20 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="bg-white/95 backdrop-blur-sm text-[#111] px-5 py-2.5 rounded-full font-bold text-[12px] uppercase tracking-wider shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
             Voir détails
           </div>
