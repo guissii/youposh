@@ -112,7 +112,7 @@ export const validatePromoCode = (code: string, orderTotal?: number) =>
 // ─── Settings ──────────────────────────────────────────────────
 export const fetchStoreSettingsAPI = () => apiFetch<any>('/settings/store');
 export const updateStoreSettingsAPI = (data: any) =>
-    apiFetch<any>('/settings/store', { method: 'POST', body: JSON.stringify(data) });
+    apiFetch<any>('/settings/store', { method: 'PUT', body: JSON.stringify(data) });
 
 export const fetchHeroSettingsAPI = () => apiFetch<any>('/settings/hero');
 export const updateHeroSettingsAPI = (data: any) =>

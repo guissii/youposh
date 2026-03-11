@@ -14,7 +14,7 @@ import {
   fetchOrders, updateOrderStatus, deleteOrder,
   fetchCategories, deleteCategory,
   fetchPromoCodes, deletePromoCode,
-  type DashboardStats, setWatermarkStatusAPI
+  type DashboardStats, setWatermarkStatusAPI, updateStoreSettingsAPI
 } from '@/lib/api';
 import {
   ConfirmModal,
@@ -28,7 +28,7 @@ import { ProductFormModal } from '@/components/admin/ProductFormModal';
 import { PromoFormModal } from '@/components/admin/PromoFormModal';
 import { CategoryFormModal } from '@/components/admin/CategoryFormModal';
 import { loadHeroSettings, saveHeroSettings, type HeroSettings } from '@/data/heroSettings';
-import { loadStoreSettings, saveStoreSettings } from '@/data/storeSettings';
+import { loadStoreSettings } from '@/data/storeSettings';
 import { getImageUrl } from '@/lib/utils';
 import * as XLSX from 'xlsx';
 
@@ -588,12 +588,13 @@ const AdminPage = () => {
 
   const handleStoreSave = async () => {
     try {
-      await saveStoreSettings(storeForm);
+      await updateStoreSettingsAPI(storeForm);
       setStoreSaved(true);
       toast.success('Paramètres enregistrés');
       setTimeout(() => setStoreSaved(false), 2000);
-    } catch (e) {
-      toast.error('Erreur lors de la sauvegarde');
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e.message || 'Erreur lors de la sauvegarde');
     }
   };
 
