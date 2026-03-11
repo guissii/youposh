@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { X, Save, FolderOpen, Upload, Image as ImageIcon, Plus } from 'lucide-react';
 import { createAttributeLibraryItem, createCategory, fetchAttributeLibrary, updateCategory, uploadCategoryImage } from '@/lib/api';
 import { loadStoreSettings } from '@/data/storeSettings';
@@ -114,7 +115,10 @@ export const CategoryFormModal = ({ category, onClose, onSave }: Props) => {
             if (isEdit) await updateCategory(category.id, data);
             else await createCategory(data);
             onSave();
-        } catch (error) { console.error('Error saving category:', error); }
+        } catch (error: any) {
+            console.error('Error saving category:', error);
+            toast.error(error.message || "Erreur lors de l'enregistrement de la catégorie");
+        }
         finally { setSaving(false); }
     };
 

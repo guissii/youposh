@@ -130,11 +130,30 @@ const AdminPage = () => {
   const handleDelete = async () => {
     if (!deleteConfirm) return;
     try {
-      if (deleteConfirm.type === 'product') { await deleteProduct(deleteConfirm.id); loadProducts(); }
-      else if (deleteConfirm.type === 'order') { await deleteOrder(deleteConfirm.id); loadOrders(); }
-      else if (deleteConfirm.type === 'category') { await deleteCategory(deleteConfirm.id); loadCategories(); }
-      else if (deleteConfirm.type === 'promo') { await deletePromoCode(deleteConfirm.id); loadPromoCodes(); }
-    } catch (e) { console.error(e); }
+      if (deleteConfirm.type === 'product') {
+        await deleteProduct(deleteConfirm.id);
+        toast.success('Produit supprimé avec succès');
+        loadProducts();
+      }
+      else if (deleteConfirm.type === 'order') {
+        await deleteOrder(deleteConfirm.id);
+        toast.success('Commande supprimée avec succès');
+        loadOrders();
+      }
+      else if (deleteConfirm.type === 'category') {
+        await deleteCategory(deleteConfirm.id);
+        toast.success('Catégorie supprimée avec succès');
+        loadCategories();
+      }
+      else if (deleteConfirm.type === 'promo') {
+        await deletePromoCode(deleteConfirm.id);
+        toast.success('Code promo supprimé avec succès');
+        loadPromoCodes();
+      }
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e.message || 'Erreur lors de la suppression');
+    }
     setDeleteConfirm(null);
   };
 

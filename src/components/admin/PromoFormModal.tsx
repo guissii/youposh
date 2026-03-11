@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { X, Save, Ticket } from 'lucide-react';
 import { createPromoCode, updatePromoCode } from '@/lib/api';
 
@@ -37,7 +38,10 @@ export const PromoFormModal = ({ promo, onClose, onSave }: Props) => {
             if (isEdit) await updatePromoCode(promo.id, data);
             else await createPromoCode(data);
             onSave();
-        } catch (error) { console.error('Error saving promo:', error); }
+        } catch (error: any) {
+            console.error('Error saving promo:', error);
+            toast.error(error.message || "Erreur lors de l'enregistrement du code promo");
+        }
         finally { setSaving(false); }
     };
 

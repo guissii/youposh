@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { X, Save, Eye, TrendingUp, ShoppingCart, BarChart3, Plus, Upload, Loader2, Star } from 'lucide-react';
 import { createProduct, updateProduct, fetchCategories, fetchAttributeLibrary, uploadProductImage } from '@/lib/api';
 import { loadStoreSettings } from '@/data/storeSettings';
@@ -229,7 +230,10 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
             if (isEdit) await updateProduct(product.id, data);
             else await createProduct(data);
             onSave();
-        } catch (error) { console.error('Error saving product:', error); }
+        } catch (error: any) {
+            console.error('Error saving product:', error);
+            toast.error(error.message || "Erreur lors de l'enregistrement du produit");
+        }
         finally { setSaving(false); }
     };
 
