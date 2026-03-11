@@ -58,6 +58,10 @@ const resources = {
       tryDifferentFilters: 'Essayez d\'autres filtres',
       productNotFound: 'Produit non trouvé',
       backToHome: 'Retour à l\'accueil',
+      promotionsTitle: 'Produits en promotion',
+      promoSubtitle: 'Découvrez nos meilleures offres du moment',
+      newSubtitle: 'Les derniers produits ajoutés à notre catalogue',
+      bestsellerSubtitle: 'Les produits les plus appréciés par nos clients',
 
       // Filters
       filters: 'Filtres',
@@ -251,6 +255,10 @@ const resources = {
       tryDifferentFilters: 'جرّب فيلتر آخر',
       productNotFound: 'المنتوج ما لقيناهش',
       backToHome: 'رجع للرئيسية',
+      promotionsTitle: 'منتوجات فيهم تخفيض',
+      promoSubtitle: 'شوف أحسن العروض ديالنا',
+      newSubtitle: 'آخر المنتوجات لي زدناهم',
+      bestsellerSubtitle: 'المنتوجات لي عجبو الناس بزاف',
 
       // Filters
       filters: 'الفيلتر',
