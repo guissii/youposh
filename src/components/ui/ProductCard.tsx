@@ -107,7 +107,7 @@ export default function ProductCard({
             <button
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              className={`px-3 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wide transition-colors ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-blue)] text-white hover:bg-[var(--yp-blue-dark)]'}`}
+              className={`px-3 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wide transition-colors ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-color-cart)] text-white hover:opacity-90'}`}
             >
               {isOutOfStock ? (t('outOfStock') || 'Rupture') : (t('addToCart') || 'Ajouter')}
             </button>
@@ -197,7 +197,7 @@ export default function ProductCard({
           <button
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className={`flex-1 h-9 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-blue)] text-white hover:bg-[var(--yp-blue-dark)]'}`}
+            className={`flex-1 h-9 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-color-cart)] text-white hover:opacity-90'}`}
           >
             {isOutOfStock ? compactOutLabel : (t('addToCart') || 'Ajouter')}
           </button>
@@ -348,7 +348,7 @@ export default function ProductCard({
         <button
           onClick={handleAddToCart}
           disabled={isOutOfStock}
-          className={`flex-1 h-9 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-blue)] text-white hover:bg-[var(--yp-blue-dark)]'}`}
+          className={`flex-1 h-9 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-color-cart)] text-white hover:opacity-90'}`}
         >
           {isOutOfStock ? (t('outOfStock') || 'Rupture') : (t('addToCart') || 'Ajouter')}
         </button>

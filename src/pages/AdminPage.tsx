@@ -607,14 +607,35 @@ const AdminPage = () => {
           <div><label className="block text-sm font-medium text-[#666] mb-1">Email de contact</label><input type="email" value={storeForm.email} onChange={e => setStoreForm((f: any) => ({ ...f, email: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" placeholder="contact@youposh.ma" /></div>
           <div><label className="block text-sm font-medium text-[#666] mb-1">Devise</label><input type="text" value={storeForm.currency} onChange={e => setStoreForm((f: any) => ({ ...f, currency: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" placeholder="MAD" /></div>
           <div>
-            <label className="block text-sm font-medium text-[#666] mb-1">Couleur principale (logo)</label>
+            <label className="block text-sm font-medium text-[#666] mb-1">Couleur "YOU" (Logo)</label>
+            <div className="flex items-center gap-2">
+              <input type="color" value={storeForm.brandColorYou || '#2563EB'} onChange={e => setStoreForm((f: any) => ({ ...f, brandColorYou: e.target.value }))} className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white" />
+              <input type="text" value={storeForm.brandColorYou || ''} onChange={e => setStoreForm((f: any) => ({ ...f, brandColorYou: e.target.value }))} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" placeholder="#2563EB" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#666] mb-1">Couleur "POSH" (Logo)</label>
+            <div className="flex items-center gap-2">
+              <input type="color" value={storeForm.brandColorPosh || '#DC2626'} onChange={e => setStoreForm((f: any) => ({ ...f, brandColorPosh: e.target.value }))} className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white" />
+              <input type="text" value={storeForm.brandColorPosh || ''} onChange={e => setStoreForm((f: any) => ({ ...f, brandColorPosh: e.target.value }))} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" placeholder="#DC2626" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#666] mb-1">Couleur "Ajouter au panier"</label>
+            <div className="flex items-center gap-2">
+              <input type="color" value={storeForm.brandColorCart || '#2563EB'} onChange={e => setStoreForm((f: any) => ({ ...f, brandColorCart: e.target.value }))} className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white" />
+              <input type="text" value={storeForm.brandColorCart || ''} onChange={e => setStoreForm((f: any) => ({ ...f, brandColorCart: e.target.value }))} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" placeholder="#2563EB" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#666] mb-1">Couleur principale (Globale)</label>
             <div className="flex items-center gap-2">
               <input type="color" value={storeForm.brandPrimary || '#2563EB'} onChange={e => setStoreForm((f: any) => ({ ...f, brandPrimary: e.target.value }))} className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white" />
               <input type="text" value={storeForm.brandPrimary || ''} onChange={e => setStoreForm((f: any) => ({ ...f, brandPrimary: e.target.value }))} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" placeholder="#2563EB" />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#666] mb-1">Couleur secondaire (logo)</label>
+            <label className="block text-sm font-medium text-[#666] mb-1">Couleur secondaire (Globale)</label>
             <div className="flex items-center gap-2">
               <input type="color" value={storeForm.brandSecondary || '#DC2626'} onChange={e => setStoreForm((f: any) => ({ ...f, brandSecondary: e.target.value }))} className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white" />
               <input type="text" value={storeForm.brandSecondary || ''} onChange={e => setStoreForm((f: any) => ({ ...f, brandSecondary: e.target.value }))} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" placeholder="#DC2626" />

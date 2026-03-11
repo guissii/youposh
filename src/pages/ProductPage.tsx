@@ -490,7 +490,7 @@ export default function ProductPage() {
                   <button
                     onClick={() => setShowOrderForm(true)}
                     disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
-                    className="w-full bg-[var(--yp-blue)] hover:bg-[var(--yp-blue-dark)] text-white py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2.5 transition-all shadow-lg shadow-[var(--yp-blue)]/20 active:scale-[0.98]"
+                    className="w-full bg-[var(--yp-color-cart)] text-white hover:opacity-90 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2.5 transition-all shadow-lg shadow-[var(--yp-blue)]/20 active:scale-[0.98]"
                   >
                     {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('continueOrder') || 'Continuer la commande')}
                     {!isOutOfStock && <ArrowRight className="w-5 h-5" />}
@@ -501,7 +501,7 @@ export default function ProductPage() {
                     <button
                       onClick={handleAddToCart}
                       disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
-                      className="bg-[var(--yp-blue)] hover:bg-[var(--yp-blue-dark)] text-white py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors text-xs shadow-sm hover:shadow-md active:scale-95"
+                      className="bg-[var(--yp-color-cart)] text-white hover:opacity-90 py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors text-xs shadow-sm hover:shadow-md active:scale-95"
                     >
                       <ShoppingCart className="w-4 h-4" />
                       {t('addToCart')}

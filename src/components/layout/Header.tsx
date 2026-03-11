@@ -115,8 +115,8 @@ export default function Header() {
                 <span
                   className="font-bold text-lg xs:text-xl sm:text-2xl tracking-tight font-heading"
                 >
-                  <span style={{ color: 'var(--yp-blue)' }}>YOU</span>
-                  <span style={{ color: 'var(--yp-red)' }}>POSH</span>
+                  <span style={{ color: 'var(--yp-color-you)' }}>YOU</span>
+                  <span style={{ color: 'var(--yp-color-posh)' }}>POSH</span>
                 </span>
               </div>
 

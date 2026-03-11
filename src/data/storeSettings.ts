@@ -5,6 +5,9 @@ export interface StoreSettings {
     currency: string;
     brandPrimary: string;
     brandSecondary: string;
+    brandColorYou: string;
+    brandColorPosh: string;
+    brandColorCart: string;
     shippingFeeLocal: number;
     shippingFeeNational: number;
     watermarkEnabled: boolean;
@@ -21,6 +24,9 @@ export const defaultStoreSettings: StoreSettings = {
     currency: 'MAD',
     brandPrimary: '#2563EB',
     brandSecondary: '#DC2626',
+    brandColorYou: '#2563EB',
+    brandColorPosh: '#DC2626',
+    brandColorCart: '#2563EB',
     shippingFeeLocal: 20,
     shippingFeeNational: 35,
     watermarkEnabled: true,
@@ -87,9 +93,13 @@ function applyBrandTheme(settings: StoreSettings) {
 
     const primary = settings.brandPrimary || defaultStoreSettings.brandPrimary;
     const secondary = settings.brandSecondary || defaultStoreSettings.brandSecondary;
+    const colorYou = settings.brandColorYou || primary;
+    const colorPosh = settings.brandColorPosh || secondary;
+    const colorCart = settings.brandColorCart || primary;
 
     const primaryRgb = hexToRgb(primary);
     const secondaryRgb = hexToRgb(secondary);
+    const cartRgb = hexToRgb(colorCart);
 
     root.style.setProperty('--yp-blue', primary);
     root.style.setProperty('--yp-blue-dark', shade(primary, -0.18));
@@ -103,6 +113,12 @@ function applyBrandTheme(settings: StoreSettings) {
     root.style.setProperty('--yp-red-light', shade(secondary, 0.12));
     root.style.setProperty('--yp-red-50', mix('#FFFFFF', secondary, 0.08));
     if (secondaryRgb) root.style.setProperty('--yp-red-rgb', `${secondaryRgb.r} ${secondaryRgb.g} ${secondaryRgb.b}`);
+
+    // New specific colors
+    root.style.setProperty('--yp-color-you', colorYou);
+    root.style.setProperty('--yp-color-posh', colorPosh);
+    root.style.setProperty('--yp-color-cart', colorCart);
+    if (cartRgb) root.style.setProperty('--yp-cart-rgb', `${cartRgb.r} ${cartRgb.g} ${cartRgb.b}`);
 }
 
 // We export this for places that need it synchronously,
