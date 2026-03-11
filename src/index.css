@@ -27,11 +27,10 @@
     --ring: 217 91% 53%;
     --radius: 0.75rem;
 
-    /* Brand Colors — YouPosh Official Palette (Darker version per user request) */
+    /* Brand Colors — YouPosh Official Palette */
     /* Primary Brand Colors (Text / Main Branding) */
-    --yp-blue: rgb(#00b2ea); /* Very Dark Blue (Blue-950) for "YOU" */
-     /* Very Dark Blue (Blue-950) for "YOU" */
-    --yp-red: (#fd0e24);  /* Very Dark Red (Red-800) for "POSH" */
+    --yp-blue: #00b2ea; /* Blue for "YOU" */
+    --yp-red: #fd0e24;  /* Red for "POSH" */
 
     /* Secondary Brand Colors (Pictogram / Accents) */
     --yp-blue-alt: #01B3EA;
