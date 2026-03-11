@@ -38,7 +38,10 @@ export default function HomePage() {
 
   const categoriesRef = useScrollReveal();
   const flashRef = useScrollReveal();
-  const trustRef = useScrollReveal();
+  const bestsellersRef = useScrollReveal();
+  const trustBadgesRef = useScrollReveal();
+  const exclusivesRef = useScrollReveal();
+  const discoverRef = useScrollReveal();
 
   const [categories, setCategories] = useState<any[]>([]);
   const [promoProducts, setPromoProducts] = useState<any[]>([]);
@@ -374,7 +377,7 @@ export default function HomePage() {
         {/* ══════════════════════════════════════════════
             BESTSELLERS
             ══════════════════════════════════════════════ */}
-        <section className="py-4 sm:py-6" ref={trustRef}>
+        <section className="py-4 sm:py-6" ref={bestsellersRef}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 reveal">
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div className="flex items-center gap-2.5 sm:gap-3">
@@ -409,9 +412,9 @@ export default function HomePage() {
         {/* ══════════════════════════════════════════════
             TRUST BADGES — Bottom advantage cards
             ══════════════════════════════════════════════ */}
-        <section className="py-4 sm:py-8" ref={trustRef}>
+        <section className="py-4 sm:py-8" ref={trustBadgesRef}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 xs:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
               {[
                 { icon: Truck, title: 'Livraison rapide', desc: '24-72h partout au Maroc', color: 'var(--yp-blue)' },
                 { icon: CreditCard, title: 'Paiement à la livraison', desc: 'Payez à la réception', color: 'var(--yp-dark)' },
@@ -434,7 +437,7 @@ export default function HomePage() {
             ══════════════════════════════════════════════ */}
 
         {/* Section 1: Exclusivités YOUPOSH */}
-        <section className="py-5 sm:py-8 reveal">
+        <section className="py-5 sm:py-8 reveal" ref={exclusivesRef}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div className="flex items-center gap-2.5 sm:gap-3">
@@ -471,7 +474,7 @@ export default function HomePage() {
         {/* ══════════════════════════════════════════════
             DISCOVER MORE — Bottom CTA
             ══════════════════════════════════════════════ */}
-        <section className="py-6 sm:py-12 reveal">
+        <section className="py-6 sm:py-12 reveal" ref={discoverRef}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="border-t border-[var(--yp-gray-300)]" />
             <div className="pt-6 sm:pt-10 pb-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-5">
