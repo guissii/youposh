@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -15,7 +15,7 @@ import Footer from '@/components/layout/Footer';
 import CartDrawer from '@/components/layout/CartDrawer';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { loadHeroSettings } from '@/data/heroSettings';
-import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
+
 import { useStore } from '@/contexts/StoreContext';
 
 
@@ -28,9 +28,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const isAr = i18n.language === 'ar';
   const heroSettings = loadHeroSettings();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(heroSettings.videoAutoplay);
-  const [isMuted, setIsMuted] = useState(heroSettings.videoMuted);
+
   const { promoCode, promoStatus, promoMessage, applyPromoCode, removePromoCode } = useStore();
   const [promoInput, setPromoInput] = useState(promoCode || '');
 
@@ -73,61 +71,13 @@ export default function HomePage() {
             HERO — Full-bleed immersive video background
             ══════════════════════════════════════════════ */}
         <section className="relative min-h-[85vh] sm:min-h-[70vh] lg:min-h-[80vh] flex items-center overflow-hidden bg-black">
-          {/* Video / Poster background */}
-          {heroSettings.videoEnabled ? (
-            <video
-              ref={videoRef}
-              src={heroSettings.videoUrl}
-              autoPlay={heroSettings.videoAutoplay}
-              muted={isMuted}
-              loop={heroSettings.videoLoop}
-              playsInline
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ filter: 'brightness(1.1) contrast(1.06) saturate(0.92)' }}
-            />
-          ) : (
-            <div
-              className="absolute inset-0 w-full h-full"
-              style={{
-                background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 30%, #2563eb 60%, #1e40af 100%)',
-              }}
-            />
-          )}
-
-          {/* Dark overlay — opacity controlled by admin */}
+          {/* Premium gradient background */}
           <div
-            className="absolute inset-0 bg-black"
-            style={{ opacity: (heroSettings.overlayOpacity / 100) * 0.55 }}
+            className="absolute inset-0 w-full h-full"
+            style={{
+              background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 30%, #2563eb 60%, #1e40af 100%)',
+            }}
           />
-
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/5" />
-
-          {/* Video controls — top right */}
-          {heroSettings.videoEnabled && (
-            <div className="absolute top-4 right-4 flex gap-2 z-20">
-              <button
-                onClick={() => {
-                  if (videoRef.current) {
-                    if (isPlaying) videoRef.current.pause();
-                    else videoRef.current.play();
-                    setIsPlaying(!isPlaying);
-                  }
-                }}
-                className="w-8 h-8 bg-black/35 rounded-full flex items-center justify-center text-white/90 hover:bg-black/45 transition-colors"
-              >
-                {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-              </button>
-              <button
-                onClick={() => {
-                  if (videoRef.current) videoRef.current.muted = !isMuted;
-                  setIsMuted(!isMuted);
-                }}
-                className="w-8 h-8 bg-black/35 rounded-full flex items-center justify-center text-white/90 hover:bg-black/45 transition-colors"
-              >
-                {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-              </button>
-            </div>
-          )}
 
           {/* Content — superimposed over video */}
           <div className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 py-16 sm:py-20 text-center">
