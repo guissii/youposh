@@ -278,7 +278,7 @@ export default function ProductPage() {
       <main className="pb-20">
         {/* Breadcrumb */}
         <div className="bg-white border-b border-[var(--yp-gray-300)]">
-          <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <button
               onClick={() => navigate(-1)}
               className="flex items-center gap-2 text-[var(--yp-gray-600)] hover:text-[var(--yp-blue)] transition-colors"
@@ -291,7 +291,7 @@ export default function ProductPage() {
 
         {/* Product Details */}
         <section className={`py-4 sm:py-8 transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="max-w-7xl mx-auto px-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-6 lg:gap-10">
 
               {/* ═══ Bloc 1 — Image Gallery ═══ */}
@@ -542,7 +542,7 @@ export default function ProductPage() {
 
         {/* Tabs */}
         <section className="py-6 border-t bg-white">
-          <div className="max-w-7xl mx-auto px-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex gap-6 border-b border-[var(--yp-gray-300)] overflow-x-auto">
               {(['description', 'specs', 'reviews'] as const).map((tab) => (
                 <button
@@ -637,12 +637,12 @@ export default function ProductPage() {
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <section className="py-8">
-            <div className="max-w-7xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <h2 className="text-xl font-bold text-[var(--yp-dark)] mb-6 flex items-center gap-2 font-heading">
                 <ChevronRight className="w-5 h-5 text-[var(--yp-blue)]" />
                 {t('relatedProducts')}
               </h2>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
                 {relatedProducts.map(p => (
                   <ProductCard key={p.id} product={p} />
                 ))}

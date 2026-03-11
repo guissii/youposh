@@ -92,6 +92,14 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Ensure touch targets are at least 44x44px for accessibility on mobile */
+  button,
+  a,
+  input,
+  select {
+    @apply min-h-[44px] sm:min-h-0;
+  }
+
   h1,
   h2,
   h3,
@@ -248,6 +256,16 @@
 
   .animate-whatsapp-pulse {
     animation: whatsapp-pulse 2s ease-in-out infinite;
+  }
+
+  /* Hide scrollbar for horizontal scroll containers */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
 

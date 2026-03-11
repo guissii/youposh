@@ -143,7 +143,7 @@ export default function ShopPage() {
       <main className="pb-20">
         {/* ═══ Page Header ═══ */}
         <div className="bg-white border-b border-[var(--yp-gray-300)]">
-          <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-0.5">
@@ -164,7 +164,7 @@ export default function ShopPage() {
 
         {/* ═══ Controls Bar — sticky ═══ */}
         <div className="bg-white border-b border-[var(--yp-gray-300)] sticky top-[60px] sm:top-[72px] z-30">
-          <div className="max-w-7xl mx-auto px-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Mobile category pills — horizontal scroll */}
             <div className="lg:hidden -mx-4 px-4 py-2.5 overflow-x-auto scrollbar-hide border-b border-[var(--yp-gray-300)]">
               <div className="flex gap-2">
@@ -275,7 +275,7 @@ export default function ShopPage() {
         </div>
 
         {/* ═══ Content area ═══ */}
-        <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="flex gap-8">
             {/* ── Sidebar Filters (Desktop) — Premium style ── */}
             <aside className="hidden lg:block w-60 flex-shrink-0">
@@ -386,8 +386,8 @@ export default function ShopPage() {
                   <p className="text-sm text-[var(--yp-gray-600)]">{t('tryDifferentFilters')}</p>
                 </div>
               ) : (
-                <div className={`grid gap-3 sm:gap-4 ${viewMode === 'grid'
-                  ? 'grid-cols-2 lg:grid-cols-3'
+                <div className={`grid gap-3 sm:gap-4 lg:gap-6 ${viewMode === 'grid'
+                  ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4'
                   : 'grid-cols-1'
                   }`}>
                   {products.map(product => (

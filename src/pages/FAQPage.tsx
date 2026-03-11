@@ -112,7 +112,7 @@ export default function FAQPage() {
             <main className="pb-20">
                 {/* Hero */}
                 <section className="bg-gradient-to-b from-white via-[#F8FAFC] to-[var(--yp-gray-100)]">
-                    <div className="max-w-3xl mx-auto px-4 py-10 sm:py-14 text-center">
+                    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 text-center">
                         <div className="inline-flex items-center gap-2 bg-[var(--yp-blue-50)] text-[var(--yp-blue)] px-4 py-2 rounded-full text-sm font-medium border border-[var(--yp-blue)]/10 mb-5">
                             <HelpCircle className="w-4 h-4" />
                             Centre d'aide
@@ -127,7 +127,7 @@ export default function FAQPage() {
                 </section>
 
                 {/* Category Filter */}
-                <section className="max-w-3xl mx-auto px-4 -mt-2 mb-6">
+                <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 -mt-2 mb-6">
                     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                         {categoriesList.map(cat => (
                             <button
@@ -145,7 +145,7 @@ export default function FAQPage() {
                 </section>
 
                 {/* FAQ Accordion */}
-                <section className="max-w-3xl mx-auto px-4">
+                <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="space-y-3">
                         {filtered.map((item) => {
                             const realIndex = faqData.indexOf(item);
@@ -189,7 +189,7 @@ export default function FAQPage() {
                 </section>
 
                 {/* Contact CTA */}
-                <section className="max-w-3xl mx-auto px-4 mt-10">
+                <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
                     <div className="bg-gradient-to-br from-[var(--yp-dark)] to-[var(--yp-gray-900)] rounded-2xl p-7 sm:p-10 text-center text-white relative overflow-hidden">
                         <div className="absolute top-4 left-4 w-20 h-20 border border-white/5 rounded-full" />
                         <div className="absolute bottom-4 right-4 w-28 h-28 border border-white/5 rounded-full" />

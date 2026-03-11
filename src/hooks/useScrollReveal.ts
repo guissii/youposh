@@ -12,6 +12,19 @@ export function useScrollReveal() {
         const node = ref.current;
         if (!node) return;
 
+        const revealNow = () => {
+            if (node.classList.contains('reveal')) {
+                node.classList.add('revealed');
+            }
+            const revealElements = node.querySelectorAll('.reveal');
+            revealElements.forEach((el) => el.classList.add('revealed'));
+        };
+
+        if (typeof IntersectionObserver === 'undefined') {
+            revealNow();
+            return;
+        }
+
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {

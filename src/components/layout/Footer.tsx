@@ -49,7 +49,7 @@ export default function Footer() {
 
       {/* ── Reassurance — Compact 2×2 grid on mobile ── */}
       <div className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 py-5 sm:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
           <div className="grid grid-cols-3 gap-3 sm:gap-6">
             {[
               { icon: Truck, title: t('deliveryAllMorocco') || 'Livraison Maroc', color: 'var(--yp-blue)' },
@@ -72,7 +72,7 @@ export default function Footer() {
 
       {/* ── Newsletter — Ultra compact on mobile, hidden or minimal ── */}
       <div className="border-b border-white/10 hidden sm:block">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/5 rounded-2xl p-5">
             <div>
               <h3 className="font-heading font-bold text-base">{t('stayUpdated') || 'Restez informé'}</h3>
@@ -93,7 +93,7 @@ export default function Footer() {
       </div>
 
       {/* ── Main Footer ── */}
-      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
 
         {/* Top row: Brand + Contact — always visible */}
         <div className="flex flex-col sm:flex-row sm:gap-10 mb-6 sm:mb-10">

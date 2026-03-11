@@ -64,7 +64,7 @@ export default function ShippingPage() {
             <main className="pb-20">
                 {/* Hero */}
                 <section className="bg-gradient-to-b from-white via-[#F8FAFC] to-[var(--yp-gray-100)]">
-                    <div className="max-w-3xl mx-auto px-4 py-10 sm:py-14 text-center">
+                    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 text-center">
                         <div className="inline-flex items-center gap-2 bg-[var(--yp-blue-50)] text-[var(--yp-blue)] px-4 py-2 rounded-full text-sm font-medium border border-[var(--yp-blue)]/10 mb-5">
                             <Truck className="w-4 h-4" />
                             Informations livraison
@@ -79,7 +79,7 @@ export default function ShippingPage() {
                 </section>
 
                 {/* Key advantages */}
-                <section className="max-w-4xl mx-auto px-4 -mt-2 mb-8">
+                <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-2 mb-8">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                         {[
                             { icon: Truck, title: 'Livraison rapide', desc: '24-72h selon la ville', color: 'var(--yp-blue)' },
@@ -99,7 +99,7 @@ export default function ShippingPage() {
                 </section>
 
                 {/* How it works */}
-                <section className="max-w-3xl mx-auto px-4 mb-10">
+                <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
                     <h2 className="text-xl sm:text-2xl font-bold text-[var(--yp-dark)] font-heading mb-6 text-center">
                         Comment ça marche ?
                     </h2>
@@ -124,7 +124,7 @@ export default function ShippingPage() {
                 </section>
 
                 {/* City pricing table */}
-                <section className="max-w-3xl mx-auto px-4 mb-10">
+                <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
                     <h2 className="text-xl sm:text-2xl font-bold text-[var(--yp-dark)] font-heading mb-2 text-center">
                         Tarifs et délais par ville
                     </h2>
@@ -164,7 +164,7 @@ export default function ShippingPage() {
                 </section>
 
                 {/* Important notes */}
-                <section className="max-w-3xl mx-auto px-4 mb-10">
+                <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
                     <div className="bg-[var(--yp-blue-50)] border border-[var(--yp-blue)]/10 rounded-2xl p-5 sm:p-6">
                         <h3 className="font-semibold text-[var(--yp-dark)] mb-3 flex items-center gap-2">
                             <Shield className="w-5 h-5 text-[var(--yp-blue)]" />
@@ -188,7 +188,7 @@ export default function ShippingPage() {
                 </section>
 
                 {/* CTA */}
-                <section className="max-w-3xl mx-auto px-4">
+                <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="bg-gradient-to-br from-[var(--yp-dark)] to-[var(--yp-gray-900)] rounded-2xl p-7 sm:p-10 text-center text-white relative overflow-hidden">
                         <div className="absolute top-4 left-4 w-20 h-20 border border-white/5 rounded-full" />
                         <div className="relative z-10">

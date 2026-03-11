@@ -48,25 +48,25 @@ export default function Header() {
   return (
     <>
       {/* Top Bar — Premium dark bar with blue accent */}
-      <div className="bg-[var(--yp-dark)] text-white text-xs py-2.5 px-4 border-b border-white/5">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <MapPin className="w-3.5 h-3.5 text-[var(--yp-blue-light)]" />
-            <span className="hidden sm:inline text-gray-300">{t('deliveryAllMorocco')}</span>
-            <span className="sm:hidden text-gray-300">{t('deliveryShort')}</span>
+      <div className="bg-[var(--yp-dark)] text-white text-xs py-2 px-4 sm:py-2.5 sm:px-6 lg:px-8 border-b border-white/5">
+        <div className="max-w-7xl mx-auto flex justify-between items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[var(--yp-blue-light)] shrink-0" />
+            <span className="hidden sm:inline text-gray-300 truncate">{t('deliveryAllMorocco')}</span>
+            <span className="sm:hidden text-gray-300 text-[10px] truncate">{t('deliveryShort')}</span>
           </div>
-          <div className="flex items-center gap-4">
-            <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className="flex items-center gap-1.5 text-gray-300 hover:text-[var(--yp-blue-light)] transition-colors">
-              <Phone className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{phone}</span>
+          <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
+            <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className="flex items-center gap-1 sm:gap-1.5 text-gray-300 hover:text-[var(--yp-blue-light)] transition-colors">
+              <Phone className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+              <span className="hidden xs:inline text-[10px] sm:text-xs">{phone}</span>
             </a>
             <div className="w-px h-3 bg-white/20" />
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 text-gray-300 hover:text-[var(--yp-blue-light)] transition-colors"
+              className="flex items-center gap-1 sm:gap-1.5 text-gray-300 hover:text-[var(--yp-blue-light)] transition-colors"
             >
-              <Globe className="w-3.5 h-3.5" />
-              <span className="font-medium">{language === 'fr' ? 'العربية' : 'FR'}</span>
+              <Globe className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+              <span className="font-medium text-[10px] sm:text-xs">{language === 'fr' ? 'العربية' : 'FR'}</span>
             </button>
           </div>
         </div>
@@ -75,25 +75,25 @@ export default function Header() {
       {/* Main Header — Glass effect on scroll */}
       <header
         className={`sticky top-0 z-40 transition-all duration-500 ${isScrolled
-          ? 'glass shadow-lg border-b border-white/10'
+          ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200'
           : 'bg-white'
           }`}
       >
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-16 sm:h-[72px]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-[60px] sm:h-[72px]">
             {/* Left — Menu / Back */}
-            <div className="flex items-center gap-2 min-w-[80px]">
+            <div className="flex items-center gap-1 sm:gap-2 min-w-[60px] sm:min-w-[80px]">
               {!isHome ? (
                 <button
                   onClick={() => navigate(-1)}
-                  className="p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl transition-colors"
+                  className="p-2 sm:p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl transition-colors"
                 >
                   <ArrowLeft className="w-5 h-5 text-[var(--yp-dark)]" />
                 </button>
               ) : (
                 <button
                   onClick={() => setIsMobileMenuOpen(true)}
-                  className="lg:hidden p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl transition-colors"
+                  className="lg:hidden p-2 sm:p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl transition-colors"
                 >
                   <Menu className="w-5 h-5 text-[var(--yp-dark)]" />
                 </button>
@@ -103,17 +103,17 @@ export default function Header() {
             {/* Center — Logo + Brand */}
             <button
               onClick={() => navigate('/')}
-              className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 group"
+              className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 sm:gap-2 group"
               dir="ltr"
             >
               <img
                 src="/images/categories/logo final.png"
                 alt={storeSettings.storeName}
-                className="h-10 sm:h-12 w-auto object-contain group-hover:scale-105 transition-transform"
+                className="h-8 xs:h-9 sm:h-12 w-auto object-contain group-hover:scale-105 transition-transform"
               />
               <div className="flex items-baseline">
                 <span
-                  className="font-bold text-xl sm:text-2xl tracking-tight font-heading"
+                  className="font-bold text-lg xs:text-xl sm:text-2xl tracking-tight font-heading"
                   style={{
                     background: 'linear-gradient(90deg, var(--yp-blue), var(--yp-red))',
                     WebkitBackgroundClip: 'text',
@@ -126,10 +126,10 @@ export default function Header() {
             </button>
 
             {/* Right — Actions */}
-            <div className="flex items-center gap-1 sm:gap-2 min-w-[80px] justify-end">
+            <div className="flex items-center gap-0.5 sm:gap-2 min-w-[60px] sm:min-w-[80px] justify-end">
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl transition-colors"
+                className="p-2 sm:p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl transition-colors"
                 aria-label={t('search')}
               >
                 <Search className="w-5 h-5 text-[var(--yp-dark)]" />
@@ -144,11 +144,11 @@ export default function Header() {
 
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl relative transition-colors"
+                className="p-2 sm:p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl relative transition-colors"
               >
                 <ShoppingBag className="w-5 h-5 text-[var(--yp-dark)]" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-[var(--yp-red)] text-white text-[10px] rounded-full flex items-center justify-center font-bold shadow-sm animate-scale-in">
+                  <span className="absolute top-1 right-1 sm:-top-0.5 sm:-right-0.5 w-4 h-4 sm:w-5 sm:h-5 bg-[var(--yp-red)] text-white text-[9px] sm:text-[10px] rounded-full flex items-center justify-center font-bold shadow-sm animate-scale-in">
                     {cartCount > 9 ? '9+' : cartCount}
                   </span>
                 )}

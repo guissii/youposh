@@ -123,10 +123,10 @@ export default function ProductCard({
     return (
       <div
         onClick={handleNavigate}
-        className="product-card group w-full bg-white rounded-[16px] overflow-hidden border border-[#E8E8E8] shadow-[0_2px_12px_rgba(0,0,0,0.06)] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)]"
+        className="product-card group w-full bg-white rounded-[16px] overflow-hidden border border-[#E8E8E8] shadow-[0_2px_12px_rgba(0,0,0,0.06)] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] flex flex-col"
       >
         {/* Image area */}
-        <div className="relative bg-[#F5F5F5] h-[150px] sm:h-[180px] overflow-hidden">
+        <div className="relative bg-[#F5F5F5] aspect-[4/5] w-full overflow-hidden shrink-0">
           {/* Badge */}
           {(badge || discount > 0) && (
             <span className={`absolute top-2.5 left-2.5 z-10 inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-wide shadow-sm border border-black/5 bg-white/90 ${badge === 'new'
@@ -173,19 +173,19 @@ export default function ProductCard({
         </div>
 
         {/* Product info */}
-        <div className="px-3 pt-2 pb-1">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#888]">
+        <div className="px-3 pt-2 pb-1 flex-1 flex flex-col">
+          <p className="text-[9px] xs:text-[10px] font-semibold uppercase tracking-[0.08em] text-[#888]">
             {typeof product.category === 'string' ? product.category : (product.category as any)?.name || brandName}
           </p>
-          <h3 className="mt-0.5 text-[13px] sm:text-[14px] font-bold leading-tight text-[#1a1a1a] line-clamp-2">
+          <h3 className="mt-0.5 text-xs xs:text-[13px] sm:text-[14px] font-bold leading-tight text-[#1a1a1a] line-clamp-2">
             {name}
           </h3>
-          <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="text-[16px] font-extrabold text-[#1a1a1a]">
+          <div className="mt-auto pt-1 flex items-baseline gap-1.5 flex-wrap">
+            <span className="text-sm xs:text-[16px] font-extrabold text-[#1a1a1a]">
               {product.price} dh
             </span>
             {product.originalPrice && (
-              <span className="text-[11px] text-[#aaa] line-through">
+              <span className="text-[10px] xs:text-[11px] text-[#aaa] line-through">
                 {product.originalPrice} dh
               </span>
             )}
@@ -223,13 +223,13 @@ export default function ProductCard({
   return (
     <div
       onClick={handleNavigate}
-      className="product-card group w-full max-w-[320px] bg-white rounded-[16px] overflow-hidden border border-[#E8E8E8] shadow-[0_2px_12px_rgba(0,0,0,0.06)] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)]"
+      className="product-card group w-full bg-white rounded-[16px] overflow-hidden border border-[#E8E8E8] shadow-[0_2px_12px_rgba(0,0,0,0.06)] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] flex flex-col"
     >
       {/* ── Image area ── */}
-      <div className="relative bg-[#F5F5F5] h-[150px] sm:h-[200px] flex items-center justify-center overflow-hidden">
+      <div className="relative bg-[#F5F5F5] aspect-[4/5] w-full flex items-center justify-center overflow-hidden shrink-0">
         {/* Badge */}
         {(badge || discount > 0) && (
-          <span className="absolute top-3 left-3 z-10 inline-flex items-center rounded-md px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide bg-[#D92C2C] text-white shadow-md">
+          <span className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 inline-flex items-center rounded-md px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide bg-[#D92C2C] text-white shadow-md">
             {badge === 'promo'
               ? `${discount}% OFF`
               : badge === 'new'
@@ -241,7 +241,7 @@ export default function ProductCard({
         )}
 
         {isOutOfStock && (
-          <span className="absolute top-3 right-3 z-10 inline-flex items-center rounded-md px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide bg-[#DC2626] text-white shadow-md">
+          <span className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 inline-flex items-center rounded-md px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide bg-[#DC2626] text-white shadow-md">
             {t('outOfStock') || 'Rupture de stock'}
           </span>
         )}
@@ -322,21 +322,21 @@ export default function ProductCard({
       )}
 
       {/* ── Product info ── */}
-      <div className="px-3 pt-2 pb-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#888]">
+      <div className="px-2.5 sm:px-3 pt-2 pb-1 flex-1 flex flex-col">
+        <p className="text-[9px] xs:text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.08em] text-[#888]">
           {typeof product.category === 'string' ? product.category : (product.category as any)?.name || brandName}
         </p>
 
-        <h3 className="mt-1 text-[15px] sm:text-[16px] font-bold leading-tight text-[#1a1a1a] line-clamp-2">
+        <h3 className="mt-1 text-xs xs:text-[13px] sm:text-[16px] font-bold leading-tight text-[#1a1a1a] line-clamp-2">
           {name}
         </h3>
 
-        <div className="mt-1 flex items-baseline gap-2">
-          <span className="text-[18px] font-extrabold text-[#1a1a1a]">
+        <div className="mt-auto pt-1.5 flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
+          <span className="text-sm xs:text-[15px] sm:text-[18px] font-extrabold text-[#1a1a1a]">
             {product.price} dh
           </span>
           {product.originalPrice && (
-            <span className="text-[13px] text-[#aaa] line-through">
+            <span className="text-[10px] sm:text-[13px] text-[#aaa] line-through">
               {product.originalPrice} dh
             </span>
           )}
@@ -344,17 +344,17 @@ export default function ProductCard({
       </div>
 
       {/* ── Bottom actions ── */}
-      <div className="px-3 pb-3 pt-1 flex items-stretch gap-2">
+      <div className="px-2.5 sm:px-3 pb-2.5 sm:pb-3 pt-1 flex items-stretch gap-1.5 sm:gap-2">
         <button
           onClick={handleAddToCart}
           disabled={isOutOfStock}
-          className={`flex-1 h-[34px] rounded-xl text-[11px] font-bold uppercase tracking-[0.06em] transition-all duration-200 active:scale-[0.98] ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-blue)] text-white hover:bg-[var(--yp-blue-dark)]'}`}
+          className={`flex-1 h-[32px] sm:h-[34px] rounded-lg sm:rounded-xl text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.06em] transition-all duration-200 active:scale-[0.98] ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-blue)] text-white hover:bg-[var(--yp-blue-dark)]'}`}
         >
           {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('addToCart') || 'Ajouter au panier')}
         </button>
         <button
           onClick={handleWishlistToggle}
-          className={`w-[38px] h-[38px] rounded-xl flex items-center justify-center transition-all duration-200 border-2 ${isFavorite
+          className={`w-[34px] h-[34px] sm:w-[38px] sm:h-[38px] rounded-lg sm:rounded-xl flex items-center justify-center transition-all duration-200 border-2 ${isFavorite
             ? 'bg-red-50 border-[#D92C2C]'
             : 'bg-white border-[#E8E8E8] hover:border-[#D92C2C]'
             }`}
