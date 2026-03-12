@@ -87,6 +87,7 @@ export default function ProductCard({
             <img
               src={getImageUrl(product.image)}
               alt={name}
+              loading="lazy"
               className="w-full h-full object-cover"
               onError={() => setImgError(true)}
             />
@@ -158,6 +159,7 @@ export default function ProductCard({
             <img
               src={getImageUrl(activeImage)}
               alt={name}
+              loading="lazy"
               className={`w-full h-full object-cover transition-transform duration-500 hover:scale-105 ${isOutOfStock ? 'grayscale' : ''}`}
               style={{
                 objectPosition: `${product.cardFocalX ?? 50}% ${product.cardFocalY ?? 50}%`,
@@ -280,6 +282,7 @@ export default function ProductCard({
           <img
             src={getImageUrl(activeImage)}
             alt={name}
+            loading="lazy"
             className={`w-full h-full object-cover transition-transform duration-500 hover:scale-105 ${isOutOfStock ? 'grayscale' : ''}`}
             style={{
               objectPosition: `${product.cardFocalX ?? 50}% ${product.cardFocalY ?? 50}%`,
@@ -309,6 +312,7 @@ export default function ProductCard({
               <img
                 src={getImageUrl(img)}
                 alt={`${name} ${i + 1}`}
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
             </button>
