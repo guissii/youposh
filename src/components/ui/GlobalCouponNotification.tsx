@@ -48,9 +48,15 @@ export function GlobalCouponNotification() {
         try {
           prods = await fetchTopProducts();
         } catch (e) {
-          // Fallback if API fails
           console.warn('Failed to fetch products for coupon, using fallback');
-          prods = []; 
+        }
+
+        // If no products returned (API error or empty DB), use high-quality mock images
+        if (!Array.isArray(prods) || prods.length === 0) {
+          prods = [
+            { id: 9991, image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=100&q=80' },
+            { id: 9992, image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=100&q=80' }
+          ];
         }
         
         // Shuffle array to show different products
