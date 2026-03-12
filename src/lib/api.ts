@@ -84,7 +84,8 @@ export const uploadCategoryImage = async (file: File, watermarkOpacity?: number,
         body: formData,
     });
     if (!res.ok) {
-        throw new Error('Failed to upload image');
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.message || 'Failed to upload image');
     }
     return res.json();
 };
@@ -97,7 +98,8 @@ export const uploadProductImage = async (file: File) => {
         body: formData,
     });
     if (!res.ok) {
-        throw new Error('Failed to upload product image');
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.message || 'Failed to upload product image');
     }
     return res.json();
 };
