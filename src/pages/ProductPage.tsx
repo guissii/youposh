@@ -425,11 +425,6 @@ export default function ProductPage() {
                   )}
                 </div>
 
-                {/* Short description — benefit phrase */}
-                <p className="text-[var(--yp-gray-600)] leading-relaxed">
-                  {isAr ? product.descriptionAr : product.description}
-                </p>
-
                 {/* ═══ Bloc 3 — Options (Color / Size / Quantity) ═══ */}
                 {product.variants?.map((variant: any) => (
                   <div key={variant.name}>
