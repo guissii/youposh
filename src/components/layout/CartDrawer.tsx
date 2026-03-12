@@ -324,7 +324,7 @@ Merci !`;
                     alt={i18n.language === 'ar' ? item.product.nameAr : item.product.name}
                     effect="blur"
                     className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                    wrapperClassName="w-20 h-20 flex-shrink-0"
+                    wrapperClassName="w-20 h-20 flex-shrink-0 block"
                   />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-[#333] line-clamp-2 text-sm">
