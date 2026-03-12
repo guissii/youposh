@@ -116,7 +116,7 @@ export default function Footer() {
               <a href={`mailto:${storeSettings.email}`} className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors" dir="ltr">
                 <Mail className="w-3.5 h-3.5" /> {storeSettings.email}
               </a>
-              <a href="https://maps.app.goo.gl/x4Ksr4TRyLTyn3k78" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors" dir="ltr">
+              <a href="https://www.google.com/maps/place/YOUPOSH/@34.0223818,-5.0576576,17z/data=!3m1!4b1!4m6!3m5!1s0xd9f8b598bc0fc2d:0x5dc7d5969d47c9b9!8m2!3d34.0223818!4d-5.0550827!16s%2Fg%2F11m63brcry?entry=ttu&g_ep=EgoyMDI2MDMxMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors" dir="ltr">
                 <MapPin className="w-3.5 h-3.5" /> Fès
               </a>
             </div>
@@ -124,7 +124,7 @@ export default function Footer() {
             {/* Embedded Google Map */}
             <div className="mt-4 rounded-xl overflow-hidden w-full max-w-xs sm:max-w-sm border border-white/10">
               <iframe
-                src="https://maps.google.com/maps?q=Fès,+Morocco&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                src="https://maps.google.com/maps?q=34.0223818,-5.0550827&t=&z=17&ie=UTF8&iwloc=&output=embed"
                 width="100%"
                 height="120"
                 style={{ border: 0 }}
@@ -194,9 +194,9 @@ export default function Footer() {
             {/* Social */}
             <div className="flex items-center gap-2">
               {[
-                { icon: Instagram, href: '#', hoverColor: 'hover:bg-gradient-to-br hover:from-purple-500 hover:to-pink-500' },
+                { icon: Instagram, href: 'https://www.instagram.com/youposh_officiel?igsh=ODZtdWJleWRhNDg5', hoverColor: 'hover:bg-gradient-to-br hover:from-purple-500 hover:to-pink-500' },
                 { icon: Facebook, href: '#', hoverColor: 'hover:bg-[var(--yp-blue)]' },
-                { icon: MessageCircle, href: '#', hoverColor: 'hover:bg-[var(--yp-whatsapp)]' },
+                { icon: MessageCircle, href: `https://wa.me/212690939090`, hoverColor: 'hover:bg-[var(--yp-whatsapp)]' },
               ].map((social, i) => (
                 <a
                   key={i}
