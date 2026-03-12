@@ -37,7 +37,7 @@ export default function HomePage() {
       try {
         // Fetch data in parallel with limits to optimize performance
         const [promos, popular, latest] = await Promise.all([
-          fetchProducts('badge=promo&limit=8'),
+          fetchProducts('limit=12'),
           fetchProducts('sort=popular&limit=8'),
           fetchProducts('sort=newest&limit=8'),
         ]);
