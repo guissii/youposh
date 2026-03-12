@@ -17,6 +17,7 @@ import { useStoreSettings } from '@/data/storeSettings';
 import { getImageUrl } from '@/lib/utils';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
+import PremiumLoader from '@/components/ui/PremiumLoader';
 
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
@@ -104,18 +105,18 @@ export default function ProductPage() {
             console.error('Failed to fetch category products', err);
           }
         }
-        
+
         // If we have fewer than 4 products, fetch more (e.g. popular or latest)
         if (rel.length < 4) {
-           try {
-             const allProducts = await fetchProducts(); // Defaults to latest or generic list
-             const others = allProducts.filter((r: any) => r.id !== normalized.id && !rel.find(existing => existing.id === r.id));
-             rel = [...rel, ...others];
-           } catch (err) {
-             console.error('Failed to fetch backup products', err);
-           }
+          try {
+            const allProducts = await fetchProducts(); // Defaults to latest or generic list
+            const others = allProducts.filter((r: any) => r.id !== normalized.id && !rel.find(existing => existing.id === r.id));
+            rel = [...rel, ...others];
+          } catch (err) {
+            console.error('Failed to fetch backup products', err);
+          }
         }
-        
+
         setRelatedProducts(rel.slice(0, 4));
       } catch (error) {
         console.error('Failed to fetch product', error);
@@ -166,13 +167,7 @@ export default function ProductPage() {
 
   if (!product) {
     if (isLoadingProduct) {
-      return (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center text-[var(--yp-gray-600)]">
-            {t('loading') || 'Chargement...'}
-          </div>
-        </div>
-      );
+      return <PremiumLoader />;
     }
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -557,24 +552,24 @@ export default function ProductPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h3 className="text-xl font-bold text-[var(--yp-dark)] mb-6 font-heading">{t('reviews') || 'Avis Clients'}</h3>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-               {[
-                 { name: "Salma B.", text: "J'étais sceptique au début mais franchement la qualité est top. Ça change la vie pour le rangement !" },
-                 { name: "Mohammed A.", text: "Reçu en 24h à Casa, super bien emballé. Le produit est conforme, je vais en recommander." },
-                 { name: "Houda T.", text: "Rien à dire, service client réactif et produit solide. C'est exactement ce qu'il me fallait." },
-                 { name: "Yassine K.", text: "Très satisfait de mon achat. Le rapport qualité/prix est imbattable sur le marché." }
-               ].map((review, i) => (
-                 <div key={i} className="bg-[var(--yp-gray-50)] rounded-xl p-4 border border-[var(--yp-gray-200)]">
-                    <div className="flex items-center justify-between mb-2">
-                       <span className="font-bold text-sm text-[var(--yp-dark)]">{review.name}</span>
-                       <div className="flex gap-0.5">
-                          {[...Array(5)].map((_, j) => (
-                             <Star key={j} className="w-3 h-3 fill-[var(--yp-star)] text-[var(--yp-star)]" />
-                          ))}
-                       </div>
+              {[
+                { name: "Salma B.", text: "J'étais sceptique au début mais franchement la qualité est top. Ça change la vie pour le rangement !" },
+                { name: "Mohammed A.", text: "Reçu en 24h à Casa, super bien emballé. Le produit est conforme, je vais en recommander." },
+                { name: "Houda T.", text: "Rien à dire, service client réactif et produit solide. C'est exactement ce qu'il me fallait." },
+                { name: "Yassine K.", text: "Très satisfait de mon achat. Le rapport qualité/prix est imbattable sur le marché." }
+              ].map((review, i) => (
+                <div key={i} className="bg-[var(--yp-gray-50)] rounded-xl p-4 border border-[var(--yp-gray-200)]">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-bold text-sm text-[var(--yp-dark)]">{review.name}</span>
+                    <div className="flex gap-0.5">
+                      {[...Array(5)].map((_, j) => (
+                        <Star key={j} className="w-3 h-3 fill-[var(--yp-star)] text-[var(--yp-star)]" />
+                      ))}
                     </div>
-                    <p className="text-sm text-[var(--yp-gray-600)] italic">"{review.text}"</p>
-                 </div>
-               ))}
+                  </div>
+                  <p className="text-sm text-[var(--yp-gray-600)] italic">"{review.text}"</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>

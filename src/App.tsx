@@ -8,6 +8,7 @@ import { StoreProvider } from '@/contexts/StoreContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { GlobalCouponNotification } from '@/components/ui/GlobalCouponNotification';
+import PremiumLoader from '@/components/ui/PremiumLoader';
 
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('@/pages/HomePage'));
@@ -18,11 +19,7 @@ const FAQPage = lazy(() => import('@/pages/FAQPage'));
 const ShippingPage = lazy(() => import('@/pages/ShippingPage'));
 
 // Loading component
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--yp-blue)]"></div>
-  </div>
-);
+const PageLoader = () => <PremiumLoader />;
 
 function App() {
   return (
