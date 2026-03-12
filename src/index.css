@@ -105,6 +105,7 @@
     -webkit-tap-highlight-color: transparent;
     -webkit-text-size-adjust: 100%;
     touch-action: manipulation;
+    overflow-x: hidden;
   }
 
   body {
@@ -112,6 +113,8 @@
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    width: 100%;
   }
 
   /* Ensure touch targets are at least 44x44px for accessibility on mobile */
