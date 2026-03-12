@@ -5,7 +5,7 @@ import {
   LayoutDashboard, ShoppingBag, Package, Settings,
   LogOut, Search, Bell, DollarSign, Clock, CheckCircle,
   Eye, EyeOff, Plus, Pencil, Trash2, X,
-  TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Image, Check
+  TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Image, Check, Stamp
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -32,7 +32,7 @@ import { loadStoreSettings, saveStoreSettings } from '@/data/storeSettings';
 import { getImageUrl } from '@/lib/utils';
 import * as XLSX from 'xlsx';
 
-type TabId = 'dashboard' | 'orders' | 'products' | 'categories' | 'promos' | 'hero' | 'settings';
+type TabId = 'dashboard' | 'orders' | 'products' | 'categories' | 'promos' | 'hero' | 'watermark' | 'settings';
 
 const AdminPage = () => {
   const { t } = useTranslation();
@@ -584,6 +584,216 @@ const AdminPage = () => {
   );
 
 
+  // ─── Watermark ──────────────────────────────────────────────
+  const renderWatermark = () => (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 max-w-4xl mx-auto">
+      <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+        <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+          <Stamp className="w-5 h-5 text-indigo-600" />
+        </div>
+        <div>
+          <h3 className="font-bold text-[#333] text-lg">Watermark (Protection des images)</h3>
+          <p className="text-sm text-[#999]">Ajoutez automatiquement un logo sur toutes vos photos produits.</p>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-8">
+        {/* Controls */}
+        <div className="space-y-6">
+          <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div className={`w-12 h-6 rounded-full p-1 transition-colors ${storeForm.watermarkEnabled ? 'bg-[var(--yp-blue)]' : 'bg-gray-300'}`}>
+                <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${storeForm.watermarkEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
+              </div>
+              <input
+                type="checkbox"
+                checked={!!storeForm.watermarkEnabled}
+                onChange={e => setStoreForm((f: any) => ({ ...f, watermarkEnabled: e.target.checked }))}
+                className="hidden"
+              />
+              <div>
+                <span className="font-semibold text-[#333] block">Activer le watermark</span>
+                <span className="text-xs text-[#666]">Appliquer sur toutes les images du site</span>
+              </div>
+            </label>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between mb-2">
+                <label className="text-sm font-medium text-[#666]">Opacité</label>
+                <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded text-[#333]">{storeForm.watermarkOpacity}%</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={storeForm.watermarkOpacity ?? 20}
+                onChange={e => setStoreForm((f: any) => ({ ...f, watermarkOpacity: Number(e.target.value) }))}
+                className="w-full accent-[var(--yp-blue)] h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between mb-2">
+                <label className="text-sm font-medium text-[#666]">Taille</label>
+                <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded text-[#333]">{storeForm.watermarkSize}%</span>
+              </div>
+              <input
+                type="range"
+                min={10}
+                max={100}
+                value={storeForm.watermarkSize ?? 30}
+                onChange={e => setStoreForm((f: any) => ({ ...f, watermarkSize: Number(e.target.value) }))}
+                className="w-full accent-[var(--yp-blue)] h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="flex justify-between mb-2">
+                  <label className="text-sm font-medium text-[#666]">Position X</label>
+                  <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded text-[#333]">{storeForm.watermarkPosX}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={storeForm.watermarkPosX ?? 50}
+                  onChange={e => setStoreForm((f: any) => ({ ...f, watermarkPosX: Number(e.target.value) }))}
+                  className="w-full accent-[var(--yp-blue)] h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+              </div>
+              <div>
+                <div className="flex justify-between mb-2">
+                  <label className="text-sm font-medium text-[#666]">Position Y</label>
+                  <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded text-[#333]">{storeForm.watermarkPosY}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={storeForm.watermarkPosY ?? 50}
+                  onChange={e => setStoreForm((f: any) => ({ ...f, watermarkPosY: Number(e.target.value) }))}
+                  className="w-full accent-[var(--yp-blue)] h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-gray-100">
+            <p className="text-xs text-gray-500 mb-3 flex items-center gap-1">
+              <CheckCircle className="w-3 h-3 text-green-500" />
+              Modifications instantanées (Overlay non destructif)
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={async () => {
+                  try {
+                    await setWatermarkStatusAPI(true);
+                    setStoreForm((f: any) => ({ ...f, watermarkEnabled: true }));
+                    toast.success('Watermark activé partout !');
+                  } catch {
+                    toast.error('Erreur activation');
+                  }
+                }}
+                className="flex-1 py-2.5 bg-gray-50 text-gray-700 border border-gray-200 rounded-xl text-sm font-medium hover:bg-gray-100 hover:border-gray-300 transition-all"
+              >
+                Tout activer
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await setWatermarkStatusAPI(false);
+                    setStoreForm((f: any) => ({ ...f, watermarkEnabled: false }));
+                    toast.success('Watermark désactivé partout !');
+                  } catch {
+                    toast.error('Erreur désactivation');
+                  }
+                }}
+                className="flex-1 py-2.5 bg-gray-50 text-gray-700 border border-gray-200 rounded-xl text-sm font-medium hover:bg-gray-100 hover:border-gray-300 transition-all"
+              >
+                Tout désactiver
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Preview */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm font-semibold text-[#333]">Aperçu en direct</p>
+            <span className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Glisser pour déplacer</span>
+          </div>
+          
+          <div
+            className="relative w-full aspect-square bg-gray-100 rounded-2xl overflow-hidden select-none border border-gray-200 shadow-inner group cursor-crosshair"
+            onMouseDown={(e) => {
+              const container = e.currentTarget as HTMLDivElement;
+              const onMove = (ev: MouseEvent) => {
+                const rect = container.getBoundingClientRect();
+                const x = Math.max(0, Math.min(100, ((ev.clientX - rect.left) / rect.width) * 100));
+                const y = Math.max(0, Math.min(100, ((ev.clientY - rect.top) / rect.height) * 100));
+                setStoreForm((f: any) => ({ ...f, watermarkPosX: Math.round(x), watermarkPosY: Math.round(y) }));
+              };
+              const onUp = () => {
+                window.removeEventListener('mousemove', onMove);
+                window.removeEventListener('mouseup', onUp);
+              };
+              window.addEventListener('mousemove', onMove);
+              window.addEventListener('mouseup', onUp);
+            }}
+          >
+            <img
+              src="/images/products/headphones.jpg"
+              alt="Preview"
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+            />
+            
+            {/* Grid lines for alignment help */}
+            <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute top-1/2 left-0 right-0 h-px bg-white/30 border-t border-dashed border-gray-400/50"></div>
+              <div className="absolute left-1/2 top-0 bottom-0 w-px bg-white/30 border-l border-dashed border-gray-400/50"></div>
+            </div>
+
+            {storeForm.watermarkEnabled && (
+              <img
+                src="/images/finalwatermak.png"
+                alt="Watermark"
+                className="absolute pointer-events-none drop-shadow-lg transition-all duration-75 ease-out"
+                style={{
+                  width: `${storeForm.watermarkSize ?? 30}%`,
+                  opacity: (storeForm.watermarkOpacity ?? 20) / 100,
+                  left: `${storeForm.watermarkPosX ?? 50}%`,
+                  top: `${storeForm.watermarkPosY ?? 50}%`,
+                  transform: 'translate(-50%, -50%)',
+                  mixBlendMode: 'multiply' // Better blending
+                }}
+              />
+            )}
+            
+            {!storeForm.watermarkEnabled && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/5 backdrop-blur-[1px]">
+                <div className="bg-white/90 px-4 py-2 rounded-lg shadow-sm text-xs font-medium text-gray-500 flex items-center gap-2">
+                  <EyeOff className="w-3 h-3" />
+                  Watermark désactivé
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="mt-6 flex justify-end">
+            <button onClick={handleStoreSave} className="px-8 py-3 bg-[var(--yp-blue)] text-white rounded-xl hover:bg-[var(--yp-blue-dark)] font-semibold flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all active:scale-95">
+              {storeSaved ? <Check className="w-5 h-5" /> : <Save className="w-5 h-5" />}
+              {storeSaved ? 'Enregistré !' : 'Enregistrer les modifications'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   // ─── Settings ───────────────────────────────────────────────
   const [storeForm, setStoreForm] = useState(loadStoreSettings());
   const [storeSaved, setStoreSaved] = useState(false);
@@ -658,155 +868,6 @@ const AdminPage = () => {
         <h3 className="font-semibold text-[#333] mb-2">Base de données</h3>
         <p className="text-sm text-[#999] mb-3">PostgreSQL connecté via Prisma</p>
         <div className="flex items-center gap-2"><div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /><span className="text-sm text-green-600 font-medium">Connecté</span></div>
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h3 className="font-semibold text-[#333] mb-4">Watermark (Protection des images)</h3>
-        <p className="text-sm text-[#999] mb-4">Configurez le filigrane qui s'affichera sur vos produits. L'image utilisée est <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">/images/finalwatermak.png</code>.</p>
-        
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Controls */}
-          <div className="space-y-4">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={!!storeForm.watermarkEnabled}
-                onChange={e => setStoreForm((f: any) => ({ ...f, watermarkEnabled: e.target.checked }))}
-                className="w-4 h-4 rounded border-gray-300 text-[var(--yp-blue)] focus:ring-[var(--yp-blue)]"
-              />
-              <span className="text-sm text-[#666]">Activer le watermark</span>
-            </label>
-            <div>
-              <label className="block text-sm font-medium text-[#666] mb-1">Opacité ({storeForm.watermarkOpacity}%)</label>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={storeForm.watermarkOpacity ?? 20}
-                onChange={e => setStoreForm((f: any) => ({ ...f, watermarkOpacity: Number(e.target.value) }))}
-                className="w-full"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#666] mb-1">Taille ({storeForm.watermarkSize}%)</label>
-              <input
-                type="range"
-                min={10}
-                max={80}
-                value={storeForm.watermarkSize ?? 30}
-                onChange={e => setStoreForm((f: any) => ({ ...f, watermarkSize: Number(e.target.value) }))}
-                className="w-full"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-[#666] mb-1">Position X ({storeForm.watermarkPosX}%)</label>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={storeForm.watermarkPosX ?? 50}
-                  onChange={e => setStoreForm((f: any) => ({ ...f, watermarkPosX: Number(e.target.value) }))}
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#666] mb-1">Position Y ({storeForm.watermarkPosY}%)</label>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={storeForm.watermarkPosY ?? 50}
-                  onChange={e => setStoreForm((f: any) => ({ ...f, watermarkPosY: Number(e.target.value) }))}
-                  className="w-full"
-                />
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
-              <button
-                onClick={async () => {
-                  try {
-                    await setWatermarkStatusAPI(true);
-                    setStoreForm((f: any) => ({ ...f, watermarkEnabled: true }));
-                    toast.success('Watermark activé pour le site');
-                  } catch {
-                    toast.error('Impossible d’activer le watermark');
-                  }
-                }}
-                className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm hover:bg-gray-50"
-              >
-                Activer globalement
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    await setWatermarkStatusAPI(false);
-                    setStoreForm((f: any) => ({ ...f, watermarkEnabled: false }));
-                    toast.success('Watermark désactivé pour le site');
-                  } catch {
-                    toast.error('Impossible de désactiver le watermark');
-                  }
-                }}
-                className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm hover:bg-gray-50"
-              >
-                Désactiver globalement
-              </button>
-            </div>
-          </div>
-          {/* Preview — draggable */}
-          <div>
-            <p className="text-sm text-[#666] mb-2">Prévisualisation (glisser pour déplacer)</p>
-            <div
-              className="relative w-full aspect-square bg-[var(--yp-gray-200)] rounded-2xl overflow-hidden select-none border border-gray-200 shadow-inner"
-              onMouseDown={(e) => {
-                const container = e.currentTarget as HTMLDivElement;
-                const onMove = (ev: MouseEvent) => {
-                  const rect = container.getBoundingClientRect();
-                  const x = Math.max(0, Math.min(100, ((ev.clientX - rect.left) / rect.width) * 100));
-                  const y = Math.max(0, Math.min(100, ((ev.clientY - rect.top) / rect.height) * 100));
-                  setStoreForm((f: any) => ({ ...f, watermarkPosX: Math.round(x), watermarkPosY: Math.round(y) }));
-                };
-                const onUp = () => {
-                  window.removeEventListener('mousemove', onMove);
-                  window.removeEventListener('mouseup', onUp);
-                };
-                window.addEventListener('mousemove', onMove);
-                window.addEventListener('mouseup', onUp);
-              }}
-            >
-              <img
-                src="/images/products/headphones.jpg"
-                alt="Preview"
-                className="absolute inset-0 w-full h-full object-cover"
-                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-              />
-              {storeForm.watermarkEnabled && (
-                <img
-                  src="/images/finalwatermak.png"
-                  alt="Watermark"
-                  className="absolute pointer-events-none drop-shadow-md"
-                  style={{
-                    width: `${storeForm.watermarkSize ?? 30}%`,
-                    opacity: (storeForm.watermarkOpacity ?? 20) / 100,
-                    left: `${storeForm.watermarkPosX ?? 50}%`,
-                    top: `${storeForm.watermarkPosY ?? 50}%`,
-                    transform: 'translate(-50%, -50%)'
-                  }}
-                />
-              )}
-            </div>
-            <div className="mt-2 text-xs text-center text-gray-500">
-              Astuce : Vous pouvez aussi déplacer le watermark directement sur l'image ci-dessus.
-            </div>
-          </div>
-        </div>
-        
-        <div className="flex flex-wrap gap-3 mt-6 pt-4 border-t border-gray-100">
-          <button onClick={handleStoreSave} className="px-6 py-2.5 bg-[var(--yp-blue)] text-white rounded-xl hover:bg-[var(--yp-blue-dark)] font-medium flex items-center gap-2 transition-colors">
-            {storeSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-            {storeSaved ? 'Enregistré' : 'Enregistrer les réglages'}
-          </button>
-        </div>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -1011,10 +1072,11 @@ const AdminPage = () => {
     { id: 'categories', label: 'Catégories', icon: FolderOpen },
     { id: 'promos', label: 'Codes Promo', icon: Ticket },
     { id: 'hero', label: 'Hero Section', icon: Image },
+    { id: 'watermark', label: 'Watermark', icon: Stamp },
     { id: 'settings', label: t('settings'), icon: Settings },
   ];
 
-  const tabTitles: Record<TabId, string> = { dashboard: t('dashboard'), orders: t('orders'), products: t('products'), categories: 'Catégories', promos: 'Codes Promo', hero: 'Hero Section', settings: t('settings') };
+  const tabTitles: Record<TabId, string> = { dashboard: t('dashboard'), orders: t('orders'), products: t('products'), categories: 'Catégories', promos: 'Codes Promo', hero: 'Hero Section', watermark: 'Watermark', settings: t('settings') };
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex">
@@ -1053,9 +1115,10 @@ const AdminPage = () => {
           {activeTab === 'categories' && renderCategories()}
           {activeTab === 'promos' && renderPromoCodes()}
           {activeTab === 'hero' && renderHero()}
-          {activeTab === 'settings' && renderSettings()}
-        </div>
-      </main>
+      {activeTab === 'watermark' && renderWatermark()}
+      {activeTab === 'settings' && renderSettings()}
+    </div>
+  </main>
 
       {activeTab === 'products' && productModal.open && <ProductFormModal product={productModal.product} onClose={() => setProductModal({ open: false })} onSave={() => { setProductModal({ open: false }); loadProducts(); toast.success('Produit enregistré avec succès'); }} />}
       {productModal.open && activeTab !== 'products' && <ProductFormModal product={productModal.product} onClose={() => setProductModal({ open: false })} onSave={() => { setProductModal({ open: false }); loadProducts(); toast.success('Produit enregistré avec succès'); }} />}
