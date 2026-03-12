@@ -23,14 +23,31 @@ router.get('/store', async (req, res) => {
 router.post('/store', async (req, res) => {
     try {
         const data = req.body;
-        // Ensure ID is not updated
+        // Ensure ID and updatedAt are not updated
         delete data.id;
         delete data.updatedAt;
 
+        // Clean up data to remove any fields not in the schema (Prisma strict mode fix)
+        // We only allow fields that exist in our schema to be passed to update/create
+        const allowedFields = [
+            'storeName', 'phone', 'email', 'currency',
+            'brandPrimary', 'brandSecondary',
+            'brandColorYou', 'brandColorPosh', 'brandColorCart',
+            'shippingFeeLocal', 'shippingFeeNational',
+            'watermarkEnabled', 'watermarkOpacity', 'watermarkSize', 'watermarkPosX', 'watermarkPosY'
+        ];
+
+        const cleanData: any = {};
+        for (const key of Object.keys(data)) {
+            if (allowedFields.includes(key)) {
+                cleanData[key] = data[key];
+            }
+        }
+
         const settings = await prisma.storeSettings.upsert({
             where: { id: 1 },
-            update: data,
-            create: { id: 1, ...data },
+            update: cleanData,
+            create: { id: 1, ...cleanData },
         });
         res.json(settings);
     } catch (error) {

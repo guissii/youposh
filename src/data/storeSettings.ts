@@ -147,7 +147,22 @@ export async function fetchStoreSettingsGlobal(): Promise<StoreSettings> {
 
 export async function saveStoreSettings(settings: Partial<StoreSettings>): Promise<StoreSettings> {
     try {
-        const updated = await updateStoreSettingsAPI(settings);
+        // Clean data before sending
+        const allowedFields = [
+            'storeName', 'phone', 'email', 'currency',
+            'brandPrimary', 'brandSecondary',
+            'brandColorYou', 'brandColorPosh', 'brandColorCart',
+            'shippingFeeLocal', 'shippingFeeNational',
+            'watermarkEnabled', 'watermarkOpacity', 'watermarkSize', 'watermarkPosX', 'watermarkPosY'
+        ];
+        const cleanSettings: any = {};
+        for (const key of Object.keys(settings)) {
+            if (allowedFields.includes(key)) {
+                cleanSettings[key] = (settings as any)[key];
+            }
+        }
+
+        const updated = await updateStoreSettingsAPI(cleanSettings);
         cachedStoreSettings = { ...defaultStoreSettings, ...updated };
         applyBrandTheme(cachedStoreSettings as StoreSettings);
         window.dispatchEvent(new CustomEvent(UPDATE_EVENT, { detail: cachedStoreSettings }));
