@@ -174,9 +174,9 @@ export default function ShopPage() {
               <div className="flex items-center gap-2.5 snap-x">
                 <button
                   onClick={() => updateParams({ category: undefined })}
-                  className={`snap-start px-5 py-2.5 rounded-full text-[13px] font-bold whitespace-nowrap transition-all border shadow-sm ${!categoryParam
-                    ? 'bg-[#1A1D38] text-white border-[#1A1D38]'
-                    : 'bg-white text-[#475569] border-[#E2E8F0] hover:border-[#CBD5E1]'
+                  className={`flex-shrink-0 snap-start px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all border shadow-sm ${!categoryParam
+                    ? 'bg-[var(--yp-dark)] text-white border-[var(--yp-dark)]'
+                    : 'bg-white text-[var(--yp-gray-700)] border-[var(--yp-gray-300)] hover:border-[var(--yp-blue)]'
                     }`}
                 >
                   {t('all')}
@@ -185,9 +185,9 @@ export default function ShopPage() {
                   <button
                     key={cat.id}
                     onClick={() => updateParams({ category: cat.slug })}
-                    className={`snap-start px-5 py-2.5 rounded-full text-[13px] font-bold whitespace-nowrap transition-all border shadow-sm ${categoryParam === cat.slug
-                      ? 'bg-[#1A1D38] text-white border-[#1A1D38]'
-                      : 'bg-white text-[#475569] border-[#E2E8F0] hover:border-[#CBD5E1]'
+                    className={`flex-shrink-0 snap-start px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all border shadow-sm ${categoryParam === cat.slug
+                      ? 'bg-[var(--yp-dark)] text-white border-[var(--yp-dark)]'
+                      : 'bg-white text-[var(--yp-gray-700)] border-[var(--yp-gray-300)] hover:border-[var(--yp-blue)]'
                       }`}
                   >
                     {isAr ? cat.nameAr : cat.name}
@@ -200,12 +200,12 @@ export default function ShopPage() {
             <div className="flex items-center justify-between gap-2 py-3 border-t border-[var(--yp-gray-100)]">
               {/* Filter Button (Mobile) */}
               <button
-                  onClick={() => setIsFilterOpen(true)}
-                  className="lg:hidden flex items-center gap-2 px-4 py-2.5 border border-[#E2E8F0] rounded-xl text-[13px] font-bold text-[#1A1D38] bg-white shadow-sm hover:border-[var(--yp-blue)] transition-colors"
-                >
-                  <SlidersHorizontal className="w-4 h-4 text-[var(--yp-blue)]" />
-                  {t('filters')}
-                </button>
+                onClick={() => setIsFilterOpen(true)}
+                className="lg:hidden flex items-center gap-2 px-4 py-2.5 border border-[#E2E8F0] rounded-xl text-[13px] font-bold text-[#1A1D38] bg-white shadow-sm hover:border-[var(--yp-blue)] transition-colors"
+              >
+                <SlidersHorizontal className="w-4 h-4 text-[var(--yp-blue)]" />
+                {t('filters')}
+              </button>
 
               {/* Sort & View */}
               <div className="flex items-center gap-2">
@@ -358,7 +358,7 @@ export default function ShopPage() {
             <div className="flex-1 min-w-0">
               {loading ? (
                 <div className="flex justify-center items-center py-32">
-                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--yp-blue)]"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--yp-blue)]"></div>
                 </div>
               ) : products.length === 0 ? (
                 <div className="text-center py-20">
