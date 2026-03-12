@@ -37,20 +37,22 @@ const imageFilter = (_req: any, file: any, cb: any) => {
 const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 }, fileFilter: imageFilter });
 
 // Generic upload function to Supabase
-async function uploadToSupabase(file: Express.Multer.File, folder: string): Promise<string> {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    const filename = `${folder}/${folder.slice(0, -1)}-${uniqueSuffix}${ext}`;
+const uploadToSupabase = async (file: Express.Multer.File, folder: string) => {
+    // Sanitize filename to remove special chars
+    const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E5)}`;
+    const filename = `${folder}/${uniqueSuffix}-${originalName}`;
 
     const { data, error } = await supabase
         .storage
         .from('uploads')
         .upload(filename, file.buffer, {
             contentType: file.mimetype,
-            upsert: false
+            upsert: true // Allow overwriting if conflict
         });
 
     if (error) {
+        console.error("Supabase Storage Error:", error);
         throw error;
     }
 
@@ -86,9 +88,9 @@ router.post('/product', upload.single('image'), async (req, res) => {
 
         const publicUrl = await uploadToSupabase(req.file, 'products');
         res.json({ url: publicUrl });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error uploading product image to Supabase:', error);
-        res.status(500).json({ error: 'Failed to upload image' });
+        res.status(500).json({ error: `Failed to upload image: ${error.message || error}` });
     }
 });
 
