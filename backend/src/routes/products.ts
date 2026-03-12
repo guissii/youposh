@@ -248,6 +248,7 @@ router.get('/:id', async (req, res) => {
 // POST create product
 router.post('/', async (req, res) => {
     try {
+        console.log('Creating product with body:', req.body);
         const {
             badge,
             isNew,
@@ -308,9 +309,9 @@ router.post('/', async (req, res) => {
             },
         });
         res.status(201).json(product);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error creating product:', error);
-        res.status(500).json({ error: 'Failed to create product' });
+        res.status(500).json({ error: `Failed to create product: ${error.message || error}` });
     }
 });
 
@@ -399,6 +400,25 @@ router.delete('/:id', async (req, res) => {
         res.json({ message: 'Product deleted successfully' });
     } catch (error: any) {
         console.error('Error deleting product:', error);
+        
+        // Handle Foreign Key Constraint (P2003) - Product used in Orders
+        if (error.code === 'P2003') {
+            try {
+                // Soft delete / Archive instead
+                await prisma.product.update({
+                    where: { id: parseInt(req.params.id) },
+                    data: {
+                        status: 'archived',
+                        isVisible: false,
+                        inStock: false
+                    }
+                });
+                return res.json({ message: 'Produit archivé (car présent dans des commandes existantes)' });
+            } catch (archiveError) {
+                return res.status(500).json({ error: 'Failed to archive product' });
+            }
+        }
+
         res.status(500).json({ error: `Failed to delete product: ${error.message || error}` });
     }
 });
