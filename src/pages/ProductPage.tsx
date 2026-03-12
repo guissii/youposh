@@ -743,24 +743,11 @@ export default function ProductPage() {
                     />
                     <button
                       type="button"
-                      onClick={async () => {
+                      onClick={() => {
                         const code = String(promoInput ?? '').trim();
                         if (!code) return;
-                        setPromoStatus('loading');
-                        setPromoMessage('');
-                        setPromoDiscount(0);
-                        applyPromoCode(code, { silent: true });
-                        try {
-                          const res: any = await validatePromoCode(code, subtotal);
-                          setPromoDiscount(typeof res?.discount === 'number' ? res.discount : 0);
-                          setPromoStatus('applied');
-                          setPromoMessage(typeof res?.message === 'string' ? res.message : '');
-                        } catch (e) {
-                          const msg = e instanceof Error ? e.message : 'Code promo invalide';
-                          setPromoDiscount(0);
-                          setPromoStatus('error');
-                          setPromoMessage(msg);
-                        }
+                        // Update global store; the useEffect below will trigger local validation
+                        applyPromoCode(code, { silent: false });
                       }}
                       disabled={promoStatus === 'loading'}
                       className={`px-4 py-3 rounded-xl font-bold text-sm ${promoStatus === 'loading'
