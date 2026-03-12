@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '@/contexts/StoreContext';
-import { fetchTopProducts } from '@/lib/api';
+import { fetchProducts } from '@/lib/api';
 import { X, Tag, ArrowLeft } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { getImageUrl } from '@/lib/utils';
@@ -15,36 +15,30 @@ export function GlobalCouponNotification() {
   const location = useLocation();
 
   useEffect(() => {
-    // Only show on shop/product/home pages, not admin
     if (location.pathname.startsWith('/admin')) {
       setIsVisible(false);
       return;
     }
 
-    // Check if already dismissed for this specific route
     const dismissKey = `yp_dismissed_coupon_${location.pathname}`;
-    const dismissedOnRoute = sessionStorage.getItem(dismissKey);
-    if (dismissedOnRoute) {
-      return;
-    }
+    if (sessionStorage.getItem(dismissKey)) return;
 
-    // Check if already applied a promo
     if (promoCode && promoStatus === 'applied') {
       setIsVisible(false);
       return;
     }
 
-    // Fetch products for thumbnails
     const loadData = async () => {
       try {
-        const prods = await fetchTopProducts();
-        const shuffled = prods.sort(() => 0.5 - Math.random());
-        setProducts(shuffled.slice(0, 2));
-        // Show after a delay
-        setTimeout(() => setIsVisible(true), 2000);
+        const prods = await fetchProducts('sort=popular');
+        if (Array.isArray(prods) && prods.length > 0) {
+          const shuffled = [...prods].sort(() => 0.5 - Math.random());
+          setProducts(shuffled.slice(0, 2));
+        }
       } catch (err) {
-        console.error('Failed to load coupon notification data', err);
+        console.warn('Coupon notification: could not load products', err);
       }
+      setTimeout(() => setIsVisible(true), 2500);
     };
 
     loadData();
@@ -62,7 +56,7 @@ export function GlobalCouponNotification() {
       setIsCartOpen(true);
       setIsVisible(false);
     } catch {
-      // error handled by applyPromoCode
+      // handled by applyPromoCode
     } finally {
       setIsApplying(false);
     }
@@ -78,7 +72,6 @@ export function GlobalCouponNotification() {
   return (
     <div className="fixed bottom-6 right-4 sm:right-6 z-[100] max-w-[320px] w-[calc(100%-32px)] animate-in slide-in-from-right-10 fade-in duration-700">
       <div className="bg-[#1A1A1A] text-white rounded-2xl shadow-2xl overflow-hidden relative border border-gray-800/50">
-        {/* Close button */}
         <button
           onClick={handleDismiss}
           className="absolute top-2.5 right-2.5 p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all z-10"
@@ -87,7 +80,6 @@ export function GlobalCouponNotification() {
         </button>
 
         <div className="p-4 sm:p-5">
-          {/* Arabic marketing message */}
           <div className="flex items-center gap-2 mb-3 pr-6">
             <Tag className="w-5 h-5 text-[var(--yp-color-posh)] flex-shrink-0" />
             <p className="font-bold text-base sm:text-lg leading-snug" dir="rtl">
@@ -99,25 +91,25 @@ export function GlobalCouponNotification() {
             أدخل كود الخصم ديالك واستمتع بالعروض الحصرية 🔥
           </p>
 
-          {/* Product thumbnails */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex -space-x-3">
-              {products.map((p, i) => (
-                <div key={p.id} className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl border-[3px] border-[#1A1A1A] overflow-hidden bg-white shadow-lg relative`} style={{ zIndex: 10 - i }}>
-                  <img
-                    src={getImageUrl(p.image)}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
+          {products.length > 0 && (
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex -space-x-3">
+                {products.map((p, i) => (
+                  <div key={p.id} className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border-[3px] border-[#1A1A1A] overflow-hidden bg-white shadow-lg relative" style={{ zIndex: 10 - i }}>
+                    <img
+                      src={getImageUrl(p.image)}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+              <p className="text-gray-500 text-[11px] leading-snug" dir="rtl">
+                خصومات على منتجات مختارة
+              </p>
             </div>
-            <p className="text-gray-500 text-[11px] leading-snug">
-              خصومات على منتجات مختارة
-            </p>
-          </div>
+          )}
 
-          {/* Coupon input + apply button */}
           <div className="flex gap-2">
             <input
               type="text"
