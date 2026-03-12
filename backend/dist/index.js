@@ -35,6 +35,11 @@ app.use('/api/dashboard', dashboard_1.default);
 app.use('/api/promo-codes', promoCodes_1.default);
 app.use('/api/upload', upload_1.default);
 app.use('/api/settings', settings_1.default);
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+// Only listen when running locally (not on Vercel)
+if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+        console.log(`Version: ${new Date().toISOString()} - Supabase Upload Fix Applied`);
+    });
+}
+exports.default = app;

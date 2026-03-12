@@ -62,13 +62,22 @@ function computeBadge(p) {
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const { category, badge, search, sort, inStock, all, av } = req.query;
+        const { category, badge, search, sort, inStock, all, av, limit } = req.query;
+        // Check if "all" is true OR if the request comes from the admin panel (implied by logic)
+        // But to be safe, let's trust the "all" parameter more.
         const showAll = all === 'true';
         // By default, only show visible products, unless "all=true" is passed (e.g. by admin)
         const where = {};
         if (!showAll) {
-            where.isVisible = true;
+            // Fix: Check for both 'published' status AND isVisible flag
             where.status = 'published';
+            where.isVisible = true;
+        }
+        else {
+            // Admin wants to see everything, but maybe not archived ones by default?
+            // Let's allow fetching everything except hard-deleted (which don't exist).
+            // If admin wants to see archived, they can filter by status if we implement it.
+            // For now, "all=true" returns EVERYTHING including drafts and archived.
         }
         if (category)
             where.categorySlug = category;
@@ -91,7 +100,7 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             ];
         }
         const sortKey = (_a = sort) !== null && _a !== void 0 ? _a : 'popular';
-        let orderBy = [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }];
+        let orderBy = [{ sortOrder: 'desc' }, { salesCount: 'desc' }]; // Default sort now respects manual sortOrder
         if (sortKey === 'newest')
             orderBy = [{ publishedAt: 'desc' }, { createdAt: 'desc' }];
         if (sortKey === 'price-asc')
@@ -99,10 +108,13 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (sortKey === 'price-desc')
             orderBy = [{ price: 'desc' }];
         if (sortKey === 'bestsellers')
-            orderBy = [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }];
+            orderBy = [{ salesCount: 'desc' }, { viewsCount: 'desc' }];
+        if (sortKey === 'popular')
+            orderBy = [{ sortOrder: 'desc' }, { salesCount: 'desc' }, { viewsCount: 'desc' }];
         const products = yield prisma.product.findMany({
             where,
             orderBy,
+            take: limit ? parseInt(limit) : undefined,
             include: {
                 category: true,
                 attributeValues: {
@@ -247,9 +259,10 @@ router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 }));
 // POST create product
 router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _a, _b, _c;
     try {
-        const _b = (_a = req.body) !== null && _a !== void 0 ? _a : {}, { badge, isNew, isPopular, isBestSeller, isFeatured, attributeValueIds } = _b, rest = __rest(_b, ["badge", "isNew", "isPopular", "isBestSeller", "isFeatured", "attributeValueIds"]);
+        console.log('Creating product with body:', req.body);
+        const _d = (_a = req.body) !== null && _a !== void 0 ? _a : {}, { badge, isNew, isPopular, isBestSeller, isFeatured, attributeValueIds, category } = _d, rest = __rest(_d, ["badge", "isNew", "isPopular", "isBestSeller", "isFeatured", "attributeValueIds", "category"]);
         const data = Object.assign({}, rest);
         if (data.categorySlug === "") {
             delete data.categorySlug;
@@ -258,7 +271,33 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             ? attributeValueIds.map((n) => parseInt(String(n))).filter((n) => Number.isFinite(n))
             : [];
         const product = yield prisma.product.create({
-            data: Object.assign(Object.assign({}, data), (ids.length ? { attributeValues: { create: ids.map((attributeValueId) => ({ attributeValueId })) } } : {})),
+            data: {
+                name: data.name,
+                nameAr: data.nameAr || '',
+                description: data.description || '',
+                descriptionAr: data.descriptionAr || '',
+                price: parseFloat(data.price),
+                originalPrice: data.originalPrice ? parseFloat(data.originalPrice) : null,
+                stock: parseInt(data.stock),
+                sku: data.sku || '',
+                image: data.image || '',
+                images: data.images || [],
+                categorySlug: data.categorySlug || null,
+                status: data.status || 'published',
+                isVisible: (_b = data.isVisible) !== null && _b !== void 0 ? _b : true,
+                inStock: (_c = data.inStock) !== null && _c !== void 0 ? _c : true,
+                tags: Array.isArray(data.tags) ? data.tags : [],
+                features: Array.isArray(data.features) ? data.features : [],
+                variants: Array.isArray(data.variants) ? data.variants : [],
+                sortOrder: data.sortOrder ? parseInt(String(data.sortOrder)) : 0,
+                cardZoom: data.cardZoom ? parseFloat(String(data.cardZoom)) : 1.0,
+                cardFocalX: data.cardFocalX ? parseFloat(String(data.cardFocalX)) : 50.0,
+                cardFocalY: data.cardFocalY ? parseFloat(String(data.cardFocalY)) : 50.0,
+                publishedAt: data.publishedAt ? new Date(data.publishedAt) : new Date(),
+                attributeValues: {
+                    create: ids.map((id) => ({ attributeValueId: id }))
+                }
+            },
             include: {
                 category: true,
                 attributeValues: {
@@ -274,7 +313,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     catch (error) {
         console.error('Error creating product:', error);
-        res.status(500).json({ error: 'Failed to create product' });
+        res.status(500).json({ error: `Failed to create product: ${error.message || error}` });
     }
 }));
 // PUT update product
@@ -328,14 +367,44 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 // DELETE product
 router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const productId = parseInt(req.params.id);
+        if (isNaN(productId)) {
+            return res.status(400).json({ error: 'Invalid product ID' });
+        }
+        // Check if product exists first
+        const product = yield prisma.product.findUnique({ where: { id: productId } });
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+        // Delete dependencies first (e.g. attribute values) if cascade delete is not set in DB
+        yield prisma.productAttributeValue.deleteMany({ where: { productId } });
+        // Now delete the product
         yield prisma.product.delete({
-            where: { id: parseInt(req.params.id) },
+            where: { id: productId },
         });
-        res.json({ message: 'Product deleted' });
+        res.json({ message: 'Product deleted successfully' });
     }
     catch (error) {
         console.error('Error deleting product:', error);
-        res.status(500).json({ error: 'Failed to delete product' });
+        // Handle Foreign Key Constraint (P2003) - Product used in Orders
+        if (error.code === 'P2003') {
+            try {
+                // Soft delete / Archive instead
+                yield prisma.product.update({
+                    where: { id: parseInt(req.params.id) },
+                    data: {
+                        status: 'archived',
+                        isVisible: false,
+                        inStock: false
+                    }
+                });
+                return res.json({ message: 'Produit archivé (car présent dans des commandes existantes)' });
+            }
+            catch (archiveError) {
+                return res.status(500).json({ error: 'Failed to archive product' });
+            }
+        }
+        res.status(500).json({ error: `Failed to delete product: ${error.message || error}` });
     }
 }));
 exports.default = router;

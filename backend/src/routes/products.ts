@@ -38,7 +38,7 @@ function computeBadge(p: any): 'promo' | 'bestseller' | 'new' | undefined {
 // GET all products with optional filters
 router.get('/', async (req, res) => {
     try {
-        const { category, badge, search, sort, inStock, all, av } = req.query;
+        const { category, badge, search, sort, inStock, all, av, limit } = req.query;
         // Check if "all" is true OR if the request comes from the admin panel (implied by logic)
         // But to be safe, let's trust the "all" parameter more.
         const showAll = all === 'true';
@@ -78,7 +78,7 @@ router.get('/', async (req, res) => {
 
         const sortKey = (sort as string | undefined) ?? 'popular';
         let orderBy: any = [{ sortOrder: 'desc' }, { salesCount: 'desc' }]; // Default sort now respects manual sortOrder
-        
+
         if (sortKey === 'newest') orderBy = [{ publishedAt: 'desc' }, { createdAt: 'desc' }];
         if (sortKey === 'price-asc') orderBy = [{ price: 'asc' }];
         if (sortKey === 'price-desc') orderBy = [{ price: 'desc' }];
@@ -402,16 +402,16 @@ router.delete('/:id', async (req, res) => {
 
         // Delete dependencies first (e.g. attribute values) if cascade delete is not set in DB
         await prisma.productAttributeValue.deleteMany({ where: { productId } });
-        
+
         // Now delete the product
         await prisma.product.delete({
             where: { id: productId },
         });
-        
+
         res.json({ message: 'Product deleted successfully' });
     } catch (error: any) {
         console.error('Error deleting product:', error);
-        
+
         // Handle Foreign Key Constraint (P2003) - Product used in Orders
         if (error.code === 'P2003') {
             try {
