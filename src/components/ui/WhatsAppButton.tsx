@@ -171,7 +171,6 @@ export default function WhatsAppButton({
         </div>
         <div className="flex flex-col items-start leading-none">
           <span className="text-[13px] font-bold uppercase tracking-wide">Panier</span>
-          <span className="text-[10px] opacity-90 font-medium">Livraison gratuite</span>
         </div>
       </button>
     );

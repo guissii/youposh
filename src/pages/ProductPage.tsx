@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft, Heart, Star, Plus, Minus, MessageCircle,
-  ShoppingCart, Truck, RefreshCw, Shield, Check, ChevronRight,
+  ShoppingCart, Truck, Shield, Check, ChevronRight,
   X, ArrowRight, User, Phone, MapPin, FileText, Package, Ticket, ImageOff
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
@@ -503,7 +503,7 @@ export default function ProductPage() {
                   <button
                     onClick={() => setShowOrderForm(true)}
                     disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
-                    className="w-full bg-[var(--yp-color-cart)] text-white hover:opacity-90 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2.5 transition-all shadow-lg shadow-[var(--yp-blue)]/20 active:scale-[0.98]"
+                    className="w-full bg-[var(--yp-color-cart)] text-white hover:opacity-90 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2.5 transition-all shadow-lg shadow-[var(--yp-color-cart)]/20 active:scale-[0.98]"
                   >
                     {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('continueOrder') || 'Continuer la commande')}
                     {!isOutOfStock && <ArrowRight className="w-5 h-5" />}
@@ -533,11 +533,10 @@ export default function ProductPage() {
                 </div>
 
                 {/* Trust badges */}
-                <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[var(--yp-gray-300)]">
+                <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[var(--yp-gray-300)]">
                   {[
-                    { icon: Truck, text: t('freeDelivery'), color: 'var(--yp-blue)' },
-                    { icon: RefreshCw, text: t('7daysExchange'), color: 'var(--yp-blue)' },
-                    { icon: Shield, text: t('warranty'), color: 'var(--yp-blue)' },
+                    { icon: Truck, text: t('freeDelivery') || 'Livraison gratuite', color: 'var(--yp-blue)' },
+                    { icon: Shield, text: t('warranty') || 'Garantie', color: 'var(--yp-blue)' },
                   ].map((item, i) => (
                     <div key={i} className="text-center">
                       <item.icon className="w-5 h-5 mx-auto mb-1" style={{ color: item.color }} />
