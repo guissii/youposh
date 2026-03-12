@@ -15,12 +15,13 @@ export interface StoreSettings {
     watermarkSize: number;
     watermarkPosX: number;
     watermarkPosY: number;
+    activeGlobalCoupon?: string; // Code promo à afficher globalement
 }
 
 export const defaultStoreSettings: StoreSettings = {
     storeName: 'YOUPOSH',
-    phone: '+212600000000',
-    email: 'contact@youposh.ma',
+    phone: '++212 690-939090',
+    email: 'youposh.ys@gmail.com',
     currency: 'MAD',
     brandPrimary: '#2563EB',
     brandSecondary: '#DC2626',
@@ -34,6 +35,7 @@ export const defaultStoreSettings: StoreSettings = {
     watermarkSize: 30,
     watermarkPosX: 50,
     watermarkPosY: 50,
+    activeGlobalCoupon: '',
 };
 
 import { useState, useEffect } from 'react';
@@ -153,7 +155,8 @@ export async function saveStoreSettings(settings: Partial<StoreSettings>): Promi
             'brandPrimary', 'brandSecondary',
             'brandColorYou', 'brandColorPosh', 'brandColorCart',
             'shippingFeeLocal', 'shippingFeeNational',
-            'watermarkEnabled', 'watermarkOpacity', 'watermarkSize', 'watermarkPosX', 'watermarkPosY'
+            'watermarkEnabled', 'watermarkOpacity', 'watermarkSize', 'watermarkPosX', 'watermarkPosY',
+            'activeGlobalCoupon'
         ];
         const cleanSettings: any = {};
         for (const key of Object.keys(settings)) {

@@ -104,7 +104,7 @@ const AdminPage = () => {
     if (activeTab === 'products') loadProducts();
     if (activeTab === 'orders') loadOrders();
     if (activeTab === 'categories') loadCategories();
-    if (activeTab === 'promos') loadPromoCodes();
+    if (activeTab === 'promos' || activeTab === 'settings') loadPromoCodes();
   }, [activeTab]);
 
   useEffect(() => {
@@ -656,6 +656,35 @@ const AdminPage = () => {
         <h3 className="font-semibold text-[#333] mb-2">Base de données</h3>
         <p className="text-sm text-[#999] mb-3">PostgreSQL connecté via Prisma</p>
         <div className="flex items-center gap-2"><div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /><span className="text-sm text-green-600 font-medium">Connecté</span></div>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 className="font-semibold text-[#333] mb-4">Coupon Global (Pop-up)</h3>
+        <p className="text-sm text-[#666] mb-4">Sélectionnez un code promo à afficher sous forme de pop-up sur le site pour tous les visiteurs.</p>
+        <div className="max-w-md">
+          <label className="block text-sm font-medium text-[#666] mb-1">Code Promo Actif</label>
+          <select
+            value={storeForm.activeGlobalCoupon || ''}
+            onChange={e => setStoreForm((f: any) => ({ ...f, activeGlobalCoupon: e.target.value }))}
+            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
+          >
+            <option value="">Aucun coupon actif</option>
+            {promoCodes.filter(p => p.isActive).map(p => (
+              <option key={p.id} value={p.code}>
+                {p.code} ({p.discountType === 'percentage' ? `-${p.discountValue}%` : `-${p.discountValue} MAD`})
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-[#999] mt-2">
+            Le coupon s'affichera sur les pages produits et la boutique. Les clients ne peuvent utiliser qu'un seul code promo à la fois.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3 mt-4">
+          <button onClick={handleStoreSave} className="px-6 py-2.5 bg-[var(--yp-blue)] text-white rounded-xl hover:bg-[var(--yp-blue-dark)] font-medium flex items-center gap-2 transition-colors">
+            {storeSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {storeSaved ? 'Enregistré' : 'Enregistrer'}
+          </button>
+        </div>
       </div>
     </div>
   );

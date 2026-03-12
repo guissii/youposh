@@ -7,6 +7,7 @@ import './App.css';
 import { StoreProvider } from '@/contexts/StoreContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { GlobalCouponNotification } from '@/components/ui/GlobalCouponNotification';
 
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('@/pages/HomePage'));
@@ -39,6 +40,7 @@ function App() {
             }}
           />
           <ErrorBoundary>
+            <GlobalCouponNotification />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<HomePage />} />
