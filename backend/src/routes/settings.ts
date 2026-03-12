@@ -50,9 +50,10 @@ router.post('/store', async (req, res) => {
             create: { id: 1, ...cleanData },
         });
         res.json(settings);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error updating store settings:', error);
-        res.status(500).json({ error: 'Failed to update store settings' });
+        // Return the specific error message to help debugging
+        res.status(500).json({ error: `Save failed: ${error.message || error}` });
     }
 });
 
