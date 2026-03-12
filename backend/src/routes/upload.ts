@@ -20,6 +20,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
         persistSession: false,
         autoRefreshToken: false,
+        detectSessionInUrl: false
     }
 });
 
@@ -41,12 +42,13 @@ const uploadToSupabase = async (file: Express.Multer.File, folder: string) => {
     // Sanitize filename to remove special chars
     const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E5)}`;
-    const filename = `${folder}/${uniqueSuffix}-${originalName}`;
+    // REMOVED FOLDER PREFIX FROM FILENAME to avoid "products/products/..."
+    const filename = `${uniqueSuffix}-${originalName}`;
 
     const { data, error } = await supabase
         .storage
         .from('uploads')
-        .upload(filename, file.buffer, {
+        .upload(`${folder}/${filename}`, file.buffer, {
             contentType: file.mimetype,
             upsert: true // Allow overwriting if conflict
         });
@@ -59,7 +61,7 @@ const uploadToSupabase = async (file: Express.Multer.File, folder: string) => {
     const { data: publicUrlData } = supabase
         .storage
         .from('uploads')
-        .getPublicUrl(filename);
+        .getPublicUrl(`${folder}/${filename}`);
 
     return publicUrlData.publicUrl;
 }
