@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useStoreSettings } from '@/data/storeSettings';
 import { useStore } from '@/contexts/StoreContext';
-import { validatePromoCode, fetchTopProducts } from '@/lib/api';
-import { X } from 'lucide-react';
+import { fetchTopProducts } from '@/lib/api';
+import { X, Tag, ArrowLeft } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { getImageUrl } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export function GlobalCouponNotification() {
-  const settings = useStoreSettings();
-  const { applyPromoCode, promoCode, setIsCartOpen } = useStore();
+  const { applyPromoCode, promoCode, promoStatus, setIsCartOpen } = useStore();
   const [isVisible, setIsVisible] = useState(false);
-  const [promoDetails, setPromoDetails] = useState<any>(null);
   const [products, setProducts] = useState<any[]>([]);
+  const [couponInput, setCouponInput] = useState('');
+  const [isApplying, setIsApplying] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -21,102 +21,126 @@ export function GlobalCouponNotification() {
       return;
     }
 
-    const code = settings.activeGlobalCoupon;
-    if (!code) {
-      setIsVisible(false);
-      return;
-    }
-
-    // Check if already dismissed for this specific route (so it reappears on navigation)
-    // "Dynamic" behavior: User wants it to appear when browsing different products
-    const dismissedOnRoute = sessionStorage.getItem(`yp_dismissed_coupon_${code}_${location.pathname}`);
+    // Check if already dismissed for this specific route
+    const dismissKey = `yp_dismissed_coupon_${location.pathname}`;
+    const dismissedOnRoute = sessionStorage.getItem(dismissKey);
     if (dismissedOnRoute) {
       return;
     }
 
-    // Check if already applied
-    if (promoCode === code) {
+    // Check if already applied a promo
+    if (promoCode && promoStatus === 'applied') {
       setIsVisible(false);
       return;
     }
 
-    // Fetch details and products
+    // Fetch products for thumbnails
     const loadData = async () => {
       try {
-        // Fetch products for thumbnails - randomized for dynamic feel
         const prods = await fetchTopProducts();
-        // Shuffle array to show different products
         const shuffled = prods.sort(() => 0.5 - Math.random());
         setProducts(shuffled.slice(0, 2));
-
-        // Validate to get details
-        const res = await validatePromoCode(code, 99999);
-        setPromoDetails(res);
-        
-        // Show after a delay (scroll/interaction simulation)
+        // Show after a delay
         setTimeout(() => setIsVisible(true), 2000);
       } catch (err) {
-        console.error('Failed to load global coupon details', err);
+        console.error('Failed to load coupon notification data', err);
       }
     };
 
     loadData();
-  }, [settings.activeGlobalCoupon, promoCode, location.pathname]);
+  }, [promoCode, promoStatus, location.pathname]);
 
   const handleApply = async () => {
-    if (settings.activeGlobalCoupon) {
-      await applyPromoCode(settings.activeGlobalCoupon);
+    const code = couponInput.trim();
+    if (!code) {
+      toast.error('أدخل كود الكوبون');
+      return;
+    }
+    setIsApplying(true);
+    try {
+      await applyPromoCode(code);
       setIsCartOpen(true);
       setIsVisible(false);
+    } catch {
+      // error handled by applyPromoCode
+    } finally {
+      setIsApplying(false);
     }
   };
 
   const handleDismiss = () => {
     setIsVisible(false);
-    if (settings.activeGlobalCoupon) {
-      // Only dismiss for CURRENT route/page
-      sessionStorage.setItem(`yp_dismissed_coupon_${settings.activeGlobalCoupon}_${location.pathname}`, 'true');
-    }
+    sessionStorage.setItem(`yp_dismissed_coupon_${location.pathname}`, 'true');
   };
 
-  if (!isVisible || !promoDetails) return null;
+  if (!isVisible) return null;
 
   return (
-    <div className="fixed top-1/2 -translate-y-1/2 right-4 sm:right-8 z-[100] max-w-[340px] w-[calc(100%-32px)] animate-in slide-in-from-right-10 fade-in duration-700">
-      <div className="bg-[#1A1A1A] text-white rounded-2xl shadow-2xl overflow-hidden relative border border-gray-800/50 backdrop-blur-sm">
+    <div className="fixed bottom-6 right-4 sm:right-6 z-[100] max-w-[320px] w-[calc(100%-32px)] animate-in slide-in-from-right-10 fade-in duration-700">
+      <div className="bg-[#1A1A1A] text-white rounded-2xl shadow-2xl overflow-hidden relative border border-gray-800/50">
         {/* Close button */}
-        <button 
+        <button
           onClick={handleDismiss}
-          className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all z-10"
+          className="absolute top-2.5 right-2.5 p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all z-10"
         >
           <X className="w-4 h-4" />
         </button>
 
         <div className="p-4 sm:p-5">
-          <p className="font-medium text-sm sm:text-base pr-6 mb-4 leading-relaxed">
-            Votre coupon de <span className="text-[var(--yp-color-posh)] font-bold text-lg">{promoDetails.discountValue} {promoDetails.discountType === 'percentage' ? '%' : 'MAD'}</span> vous attend
+          {/* Arabic marketing message */}
+          <div className="flex items-center gap-2 mb-3 pr-6">
+            <Tag className="w-5 h-5 text-[var(--yp-color-posh)] flex-shrink-0" />
+            <p className="font-bold text-base sm:text-lg leading-snug" dir="rtl">
+              🎁 عندك كوبون؟ دخلو هنا واستافد!
+            </p>
+          </div>
+
+          <p className="text-gray-400 text-xs mb-4" dir="rtl">
+            أدخل كود الخصم ديالك واستمتع بالعروض الحصرية 🔥
           </p>
 
-          <div className="flex items-center gap-4">
-            {/* Product Thumbnails */}
-            <div className="flex -space-x-4">
+          {/* Product thumbnails */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex -space-x-3">
               {products.map((p, i) => (
-                <div key={p.id} className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl border-[3px] border-[#1A1A1A] overflow-hidden bg-white shadow-lg relative z-${10-i}`}>
-                  <img 
-                    src={getImageUrl(p.image)} 
-                    alt="" 
+                <div key={p.id} className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl border-[3px] border-[#1A1A1A] overflow-hidden bg-white shadow-lg relative`} style={{ zIndex: 10 - i }}>
+                  <img
+                    src={getImageUrl(p.image)}
+                    alt=""
                     className="w-full h-full object-cover"
                   />
                 </div>
               ))}
             </div>
+            <p className="text-gray-500 text-[11px] leading-snug">
+              خصومات على منتجات مختارة
+            </p>
+          </div>
 
-            {/* CTA Button */}
+          {/* Coupon input + apply button */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={couponInput}
+              onChange={e => setCouponInput(e.target.value.toUpperCase())}
+              onKeyDown={e => e.key === 'Enter' && handleApply()}
+              placeholder="أدخل الكوبون هنا..."
+              dir="rtl"
+              className="flex-1 bg-white/10 border border-white/20 text-white placeholder-gray-500 text-sm font-medium px-3 py-2.5 rounded-xl focus:outline-none focus:border-[var(--yp-color-posh)] focus:ring-1 focus:ring-[var(--yp-color-posh)]/30 transition-all"
+            />
             <button
               onClick={handleApply}
-              className="flex-1 bg-[var(--yp-color-posh)] hover:opacity-90 text-white text-sm font-bold py-3 px-4 rounded-xl transition-all shadow-lg shadow-[var(--yp-color-posh)]/20 active:scale-95 whitespace-nowrap"
+              disabled={isApplying || !couponInput.trim()}
+              className="bg-[var(--yp-color-posh)] hover:opacity-90 disabled:opacity-50 text-white text-sm font-bold py-2.5 px-4 rounded-xl transition-all shadow-lg shadow-[var(--yp-color-posh)]/20 active:scale-95 whitespace-nowrap flex items-center gap-1.5"
             >
-              Aller au panier
+              {isApplying ? (
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  تطبيق
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                </>
+              )}
             </button>
           </div>
         </div>
