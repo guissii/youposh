@@ -377,13 +377,29 @@ router.put('/:id', async (req, res) => {
 // DELETE product
 router.delete('/:id', async (req, res) => {
     try {
+        const productId = parseInt(req.params.id);
+        if (isNaN(productId)) {
+            return res.status(400).json({ error: 'Invalid product ID' });
+        }
+
+        // Check if product exists first
+        const product = await prisma.product.findUnique({ where: { id: productId } });
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        // Delete dependencies first (e.g. attribute values) if cascade delete is not set in DB
+        await prisma.productAttributeValue.deleteMany({ where: { productId } });
+        
+        // Now delete the product
         await prisma.product.delete({
-            where: { id: parseInt(req.params.id) },
+            where: { id: productId },
         });
-        res.json({ message: 'Product deleted' });
-    } catch (error) {
+        
+        res.json({ message: 'Product deleted successfully' });
+    } catch (error: any) {
         console.error('Error deleting product:', error);
-        res.status(500).json({ error: 'Failed to delete product' });
+        res.status(500).json({ error: `Failed to delete product: ${error.message || error}` });
     }
 });
 
