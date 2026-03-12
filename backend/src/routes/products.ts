@@ -255,6 +255,7 @@ router.post('/', async (req, res) => {
             isBestSeller,
             isFeatured,
             attributeValueIds,
+            category,
             ...rest
         } = req.body ?? {};
 
@@ -269,8 +270,31 @@ router.post('/', async (req, res) => {
 
         const product = await prisma.product.create({
             data: {
-                ...data,
-                ...(ids.length ? { attributeValues: { create: ids.map((attributeValueId: number) => ({ attributeValueId })) } } : {}),
+                name: data.name,
+                nameAr: data.nameAr || '',
+                description: data.description || '',
+                descriptionAr: data.descriptionAr || '',
+                price: parseFloat(data.price),
+                originalPrice: data.originalPrice ? parseFloat(data.originalPrice) : null,
+                stock: parseInt(data.stock),
+                sku: data.sku || '',
+                image: data.image || '',
+                images: data.images || [],
+                categorySlug: data.categorySlug || null,
+                status: data.status || 'published',
+                isVisible: data.isVisible ?? true,
+                inStock: data.inStock ?? true,
+                tags: Array.isArray(data.tags) ? data.tags : [],
+                features: Array.isArray(data.features) ? data.features : [],
+                variants: Array.isArray(data.variants) ? data.variants : [],
+                sortOrder: data.sortOrder ? parseInt(String(data.sortOrder)) : 0,
+                cardZoom: data.cardZoom ? parseFloat(String(data.cardZoom)) : 1.0,
+                cardFocalX: data.cardFocalX ? parseFloat(String(data.cardFocalX)) : 50.0,
+                cardFocalY: data.cardFocalY ? parseFloat(String(data.cardFocalY)) : 50.0,
+                publishedAt: data.publishedAt ? new Date(data.publishedAt) : new Date(),
+                attributeValues: {
+                    create: ids.map((id: number) => ({ attributeValueId: id }))
+                }
             },
             include: {
                 category: true,

@@ -43,7 +43,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
         cardFocalY: product?.cardFocalY ?? 50,
     });
     const [saving, setSaving] = useState(false);
-    const [uploading] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [applyWatermark, setApplyWatermark] = useState<boolean>(true);
     const [watermarkPos, setWatermarkPos] = useState({ x: 50, y: 50 });
@@ -148,18 +148,23 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
         }
     };
 
-    const handleLocalImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleLocalImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.length) return;
         const newFiles = Array.from(e.target.files);
+        setUploading(true);
 
-        const newPreviews = newFiles.map(file => ({
-            url: URL.createObjectURL(file),
-            file,
-            isExisting: false
-        }));
-        setPreviewImages(prev => [...prev, ...newPreviews]);
-
-        if (fileInputRef.current) fileInputRef.current.value = '';
+        try {
+            // Fix: Actually map correctly without Promise.all since we are not async uploading yet
+            const newPreviews = newFiles.map(file => ({
+                url: URL.createObjectURL(file),
+                file,
+                isExisting: false
+            }));
+            setPreviewImages(prev => [...prev, ...newPreviews]);
+        } finally {
+            setUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
     };
 
     const removeImage = (index: number) => {
