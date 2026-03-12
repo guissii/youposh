@@ -67,7 +67,13 @@ const AdminPage = () => {
   // ─── Loaders ────────────────────────────────────────────────
   const loadDashboard = useCallback(async () => {
     setLoading(true);
-    try { const [s, ro, tp] = await Promise.all([fetchDashboardStats(), fetchRecentOrders(), fetchTopProducts()]); setStats(s); setRecentOrders(ro); setTopProducts(tp); } catch (e) { console.error(e); }
+    try { 
+      const [s, ro, tp] = await Promise.all([fetchDashboardStats(), fetchRecentOrders(), fetchTopProducts()]); 
+      setStats(s); setRecentOrders(ro); setTopProducts(tp); 
+    } catch (e) { 
+      console.error(e); 
+      toast.error('Erreur chargement dashboard: Vérifiez la connexion serveur');
+    }
     setLoading(false);
   }, []);
 
@@ -76,25 +82,40 @@ const AdminPage = () => {
     try {
       const query = searchQuery ? `search=${encodeURIComponent(searchQuery)}&all=true` : 'all=true';
       setProducts(await fetchProducts(query));
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error(e);
+      toast.error('Erreur chargement produits');
+    }
     setLoading(false);
   }, [searchQuery]);
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
-    try { const p = new URLSearchParams(); if (statusFilter) p.set('status', statusFilter); if (searchQuery) p.set('search', searchQuery); setOrders(await fetchOrders(p.toString())); } catch (e) { console.error(e); }
+    try { 
+      const p = new URLSearchParams(); if (statusFilter) p.set('status', statusFilter); if (searchQuery) p.set('search', searchQuery); 
+      setOrders(await fetchOrders(p.toString())); 
+    } catch (e) { 
+      console.error(e);
+      toast.error('Erreur chargement commandes');
+    }
     setLoading(false);
   }, [statusFilter, searchQuery]);
 
   const loadCategories = useCallback(async () => {
     setLoading(true);
-    try { setCategories(await fetchCategories()); } catch (e) { console.error(e); }
+    try { setCategories(await fetchCategories()); } catch (e) { 
+      console.error(e);
+      toast.error('Erreur chargement catégories');
+    }
     setLoading(false);
   }, []);
 
   const loadPromoCodes = useCallback(async () => {
     setLoading(true);
-    try { setPromoCodes(await fetchPromoCodes()); } catch (e) { console.error(e); }
+    try { setPromoCodes(await fetchPromoCodes()); } catch (e) { 
+      console.error(e);
+      toast.error('Erreur chargement codes promo');
+    }
     setLoading(false);
   }, []);
 

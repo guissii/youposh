@@ -31,10 +31,12 @@ export default function HomePage() {
   const [promoProducts, setPromoProducts] = useState<any[]>([]);
   const [bestsellers, setBestsellers] = useState<any[]>([]);
   const [newArrivals, setNewArrivals] = useState<any[]>([]);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
       try {
+        setLoadingError(null);
         // Fetch data in parallel
         const [promos, popular, latest] = await Promise.all([
           fetchProducts('badge=promo'),
@@ -48,10 +50,31 @@ export default function HomePage() {
         setNewArrivals(latest.filter((p: any) => p.isVisible !== false).slice(0, 4));
       } catch (error) {
         console.error("Erreur chargement page accueil:", error);
+        setLoadingError("Impossible de charger les produits. Vérifiez votre connexion ou réessayez plus tard.");
       }
     }
     loadData();
   }, []);
+
+  if (loadingError) {
+     return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--yp-gray-100)] p-4 text-center">
+           <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">
+              <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                 <span className="text-2xl">⚠️</span>
+              </div>
+              <h2 className="text-xl font-bold text-gray-800 mb-2">Erreur de chargement</h2>
+              <p className="text-gray-600 mb-6">{loadingError}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="bg-[var(--yp-blue)] text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity"
+              >
+                 Réessayer
+              </button>
+           </div>
+        </div>
+     );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--yp-gray-100)]">
