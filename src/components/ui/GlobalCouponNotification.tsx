@@ -82,7 +82,7 @@ export function GlobalCouponNotification() {
   if (!isVisible || !promoDetails) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-[100] max-w-[340px] w-[calc(100%-32px)] animate-in slide-in-from-bottom-10 fade-in duration-700">
+    <div className="fixed top-1/2 -translate-y-1/2 right-4 sm:right-8 z-[100] max-w-[340px] w-[calc(100%-32px)] animate-in slide-in-from-right-10 fade-in duration-700">
       <div className="bg-[#1A1A1A] text-white rounded-2xl shadow-2xl overflow-hidden relative border border-gray-800/50 backdrop-blur-sm">
         {/* Close button */}
         <button 
