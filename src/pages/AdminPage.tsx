@@ -386,46 +386,185 @@ const AdminPage = () => {
 
   const renderOrders = () => {
     const visibleOrders = getVisibleOrders();
-    return <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-      <div className="p-5 border-b flex items-center justify-between flex-wrap gap-4">
-        <h3 className="font-semibold text-[#333]">Commandes ({visibleOrders.length})</h3>
-        <div className="flex gap-3">
-          <div className="relative"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Rechercher..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)]" /></div>
-          <div className="relative"><select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)] appearance-none pr-8 bg-white"><option value="">Commande: Tous</option><option value="pending">Commande: En attente</option><option value="processing">Commande: En cours de traitement</option><option value="shipped">Commande: Confirmée</option><option value="delivered">Commande: Terminée</option><option value="cancelled">Commande: Annulée</option></select><ChevronDown className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 text-[#999] pointer-events-none" /></div>
-          <div className="relative"><select value={deliveryStatusFilter} onChange={e => setDeliveryStatusFilter(e.target.value)} className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)] appearance-none pr-8 bg-white"><option value="">Livraison: Tous</option><option value="not_shipped">Livraison: Non expédiée</option><option value="prepared">Livraison: Préparée</option><option value="shipped">Livraison: Expédiée</option><option value="delivered">Livraison: Livrée</option><option value="returned">Livraison: Retour</option></select><ChevronDown className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 text-[#999] pointer-events-none" /></div>
-          <button onClick={() => setExportModal(true)} className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 flex items-center gap-2 shadow-sm whitespace-nowrap"><Save className="w-4 h-4" /> Export Excel</button>
+    return (
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 flex flex-col h-[calc(100vh-140px)] overflow-hidden">
+        {/* Header Section */}
+        <div className="p-6 border-b border-gray-100 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 shrink-0 bg-white z-10">
+          <div>
+            <h3 className="text-xl font-bold text-[#1a1a1a] flex items-center gap-2">
+              Commandes
+              <span className="bg-blue-50 text-blue-600 text-xs py-1 px-2.5 rounded-full font-semibold">
+                {visibleOrders.length}
+              </span>
+            </h3>
+            <p className="text-sm text-gray-500 mt-1">Gérez et suivez les commandes de votre boutique</p>
+          </div>
+
+          {/* Filters & Actions */}
+          <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            <div className="relative flex-grow sm:flex-grow-0 min-w-[200px]">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="N°, Nom, Téléphone..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-[var(--yp-blue)] transition-all bg-gray-50/50 hover:bg-white"
+              />
+            </div>
+
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-blue-100 appearance-none pr-9 bg-gray-50/50 hover:bg-white transition-all font-medium text-gray-700"
+              >
+                <option value="">Status: Tous</option>
+                <option value="pending">En attente</option>
+                <option value="processing">En traitement</option>
+                <option value="shipped">Confirmée</option>
+                <option value="delivered">Terminée</option>
+                <option value="cancelled">Annulée</option>
+              </select>
+              <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            </div>
+
+            <div className="relative">
+              <select
+                value={deliveryStatusFilter}
+                onChange={e => setDeliveryStatusFilter(e.target.value)}
+                className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-blue-100 appearance-none pr-9 bg-gray-50/50 hover:bg-white transition-all font-medium text-gray-700"
+              >
+                <option value="">Livraison: Tous</option>
+                <option value="not_shipped">Non expédiée</option>
+                <option value="prepared">Préparée</option>
+                <option value="shipped">Expédiée</option>
+                <option value="delivered">Livrée</option>
+                <option value="returned">Retour</option>
+              </select>
+              <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            </div>
+
+            <button
+              onClick={() => setExportModal(true)}
+              className="px-4 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-sm font-bold hover:bg-emerald-100 hover:border-emerald-300 flex items-center gap-2 transition-all shadow-sm whitespace-nowrap"
+            >
+              <Save className="w-4 h-4" />
+              Export Excel
+            </button>
+          </div>
+        </div>
+
+        {/* Table Content */}
+        <div className="flex-1 overflow-x-auto overflow-y-auto no-scrollbar relative bg-gray-50/30">
+          <table className="w-full text-left border-collapse min-w-[1000px]">
+            <thead className="bg-white sticky top-0 z-20 shadow-sm border-b border-gray-100">
+              <tr>
+                {['ID', 'Date', 'Client', 'Contact', 'Livraison', 'Total', 'Statut', 'Actions'].map(h => (
+                  <th key={h} className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 bg-white">
+              {visibleOrders.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="py-20 text-center">
+                    <div className="flex flex-col items-center justify-center text-gray-400">
+                      <Search className="w-12 h-12 mb-3 text-gray-200" />
+                      <p className="text-lg font-medium text-gray-600">Aucune commande trouvée</p>
+                      <p className="text-sm">Essayez de modifier vos filtres ou termes de recherche.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+              {visibleOrders.map(o => (
+                <tr key={o.id} className="hover:bg-blue-50/30 transition-colors group">
+                  <td className="px-6 py-4">
+                    <span className="font-mono text-xs font-medium text-gray-400 bg-gray-50 p-1.5 rounded-md border border-gray-100" title={o.id}>
+                      #{o.id.slice(0, 6)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-gray-900">{new Date(o.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>
+                      <span className="text-xs text-gray-500">{new Date(o.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm shrink-0">
+                        {o.customerName ? o.customerName.charAt(0).toUpperCase() : '?'}
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-900 text-sm max-w-[150px] truncate" title={o.customerName}>{o.customerName}</p>
+                        <p className="text-xs text-gray-500">{o.items?.length || 0} article(s)</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm font-medium text-gray-700 font-mono tracking-tight">{o.phone}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-gray-800">{o.city}</span>
+                      <span className="text-xs text-gray-500 max-w-[180px] truncate" title={o.address}>{o.address || 'Aucune adresse'}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="font-black text-[var(--yp-blue)] text-base whitespace-nowrap">
+                      {o.total.toFixed(2)} MAD
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col gap-2 items-start">
+                      <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wide uppercase border ${getOrderStatusColor(o.status)}`}>
+                        {getOrderStatusLabel(o.status)}
+                      </span>
+                      <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wide uppercase border ${getDeliveryStatusColor(getDeliveryStatusFromOrderStatus(o.status))}`}>
+                        {getDeliveryStatusLabel(getDeliveryStatusFromOrderStatus(o.status))}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => setOrderDetail(o)}
+                        className="p-2 bg-gray-50 hover:bg-blue-100 rounded-xl text-gray-500 hover:text-blue-700 transition-colors border border-gray-100 hover:border-blue-200 shadow-sm"
+                        title="Détails"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+
+                      {o.status === 'pending' && (
+                        <button
+                          onClick={() => handleStatusChange(o.id, 'processing')}
+                          className="p-2 bg-green-50 hover:bg-green-100 rounded-xl text-green-600 hover:text-green-700 transition-colors border border-green-100 hover:border-green-300 shadow-sm"
+                          title="Accepter la commande"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => setDeleteConfirm({ type: 'order', id: o.id })}
+                        className="p-2 bg-red-50 hover:bg-red-100 rounded-xl text-red-500 hover:text-red-700 transition-colors border border-red-100 hover:border-red-300 shadow-sm"
+                        title="Supprimer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50/80"><tr>{['ID', 'Date', 'Client', 'Téléphone', 'Ville', 'Adresse', 'Articles', 'Total', 'Statut commande', 'Statut livraison', 'Actions'].map(h => <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-[#999] uppercase tracking-wider">{h}</th>)}</tr></thead>
-          <tbody className="divide-y">
-            {visibleOrders.length === 0 && <tr><td colSpan={11} className="px-5 py-12 text-center text-[#999]">Aucune commande trouvée</td></tr>}
-            {visibleOrders.map(o => (
-              <tr key={o.id} className="hover:bg-gray-50/50 transition-colors">
-                <td className="px-5 py-4 font-mono text-xs text-[#666]" title={o.id}>{o.id.slice(0, 8)}...</td>
-                <td className="px-5 py-4 text-sm text-[#666]">{new Date(o.createdAt).toLocaleDateString('fr-FR')}</td>
-                <td className="px-5 py-4 font-medium text-[#333] text-sm">{o.customerName}</td>
-                <td className="px-5 py-4 text-sm text-[#666]">{o.phone}</td>
-                <td className="px-5 py-4 text-sm text-[#666]">{o.city}</td>
-                <td className="px-5 py-4 text-sm text-[#666] max-w-[200px] truncate" title={o.address}>{o.address || '—'}</td>
-                <td className="px-5 py-4 text-sm text-[#666]">{o.items?.length || 0}</td>
-                <td className="px-5 py-4 font-semibold text-[var(--yp-blue)] text-sm">{o.total.toFixed(2)} MAD</td>
-                <td className="px-5 py-4"><span className={`px-3 py-1 rounded-full text-xs font-medium ${getOrderStatusColor(o.status)}`}>{getOrderStatusLabel(o.status)}</span></td>
-                <td className="px-5 py-4"><span className={`px-3 py-1 rounded-full text-xs font-medium ${getDeliveryStatusColor(getDeliveryStatusFromOrderStatus(o.status))}`}>{getDeliveryStatusLabel(getDeliveryStatusFromOrderStatus(o.status))}</span></td>
-                <td className="px-5 py-4">
-                  <div className="flex gap-1">
-                    <button onClick={() => setOrderDetail(o)} className="p-2 hover:bg-blue-50 rounded-lg text-[#666] hover:text-blue-600" title="Détails"><Eye className="w-4 h-4" /></button>
-                    {o.status === 'pending' && <button onClick={() => handleStatusChange(o.id, 'processing')} className="p-2 hover:bg-green-50 rounded-lg text-[#666] hover:text-green-600" title="Accepter"><CheckCircle className="w-4 h-4" /></button>}
-                    <button onClick={() => setDeleteConfirm({ type: 'order', id: o.id })} className="p-2 hover:bg-red-50 rounded-lg text-[#666] hover:text-red-500" title="Supprimer"><Trash2 className="w-4 h-4" /></button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>;
+    );
   };
 
   const renderProducts = () => {
