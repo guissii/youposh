@@ -188,6 +188,7 @@ model StoreSettings {
   watermarkSize    Int      @default(30)
   watermarkPosX    Float    @default(50)
   watermarkPosY    Float    @default(50)
+  activeGlobalCoupon String  @default("")
   updatedAt        DateTime @updatedAt
 }
 
