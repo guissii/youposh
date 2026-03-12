@@ -7,6 +7,8 @@ import type { Product } from '@/types';
 import { computeBadge } from '@/lib/productLogic';
 import { getImageUrl } from '@/lib/utils';
 import { useStoreSettings } from '@/data/storeSettings';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
 
 interface ProductCardProps {
   product: Product;
@@ -84,12 +86,13 @@ export default function ProductCard({
           {imgError ? (
             <ImageFallback />
           ) : (
-            <img
+            <LazyLoadImage
               src={getImageUrl(product.image)}
               alt={name}
-              loading="lazy"
+              effect="blur"
               className="w-full h-full object-cover"
               onError={() => setImgError(true)}
+              wrapperClassName="w-full h-full"
             />
           )}
         </div>
@@ -156,10 +159,11 @@ export default function ProductCard({
           {imgError || !activeImage ? (
             <ImageFallback />
           ) : (
-            <img
+            <LazyLoadImage
               src={getImageUrl(activeImage)}
               alt={name}
-              loading="lazy"
+              effect="blur"
+              wrapperClassName="w-full h-full"
               className={`w-full h-full object-cover transition-transform duration-500 hover:scale-105 ${isOutOfStock ? 'grayscale' : ''}`}
               style={{
                 objectPosition: `${product.cardFocalX ?? 50}% ${product.cardFocalY ?? 50}%`,
@@ -279,10 +283,11 @@ export default function ProductCard({
         {imgError || !activeImage ? (
           <ImageFallback />
         ) : (
-          <img
+          <LazyLoadImage
             src={getImageUrl(activeImage)}
             alt={name}
-            loading="lazy"
+            effect="blur"
+            wrapperClassName="w-full h-full flex items-center justify-center"
             className={`w-full h-full object-cover transition-transform duration-500 hover:scale-105 ${isOutOfStock ? 'grayscale' : ''}`}
             style={{
               objectPosition: `${product.cardFocalX ?? 50}% ${product.cardFocalY ?? 50}%`,

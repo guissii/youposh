@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Search, X, ArrowRight, Clock, TrendingUp } from 'lucide-react';
 import { fetchProducts } from '@/lib/api';
 import { getImageUrl } from '@/lib/utils';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -107,11 +109,13 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       }}
                       className="w-full flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors"
                     >
-                      <img
-                        src={getImageUrl(product.image)}
-                        alt={i18n.language === 'ar' ? product.nameAr : product.name}
-                        className="w-16 h-16 object-cover rounded-lg"
-                      />
+                      <LazyLoadImage
+                      src={getImageUrl(product.image)}
+                      alt={i18n.language === 'ar' ? product.nameAr : product.name}
+                      effect="blur"
+                      className="w-16 h-16 object-cover rounded-lg"
+                      wrapperClassName="w-16 h-16 block shrink-0"
+                    />
                       <div className="flex-1 text-left">
                         <p className="font-medium text-[#333]">
                           {i18n.language === 'ar' ? product.nameAr : product.name}

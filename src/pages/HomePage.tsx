@@ -29,17 +29,23 @@ export default function HomePage() {
   const discoverRef = useScrollReveal();
 
   const [promoProducts, setPromoProducts] = useState<any[]>([]);
+  const [bestsellers, setBestsellers] = useState<any[]>([]);
+  const [newArrivals, setNewArrivals] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadData() {
       try {
-        // On effectue toutes les requêtes en parallèle vers l'API Backend
-        const [promos] = await Promise.all([
+        // Fetch data in parallel
+        const [promos, popular, latest] = await Promise.all([
           fetchProducts('badge=promo'),
+          fetchProducts('sort=popular'),
+          fetchProducts('sort=newest'),
         ]);
 
-        // fallback filtering - Limiter à 6 produits maximum pour l'affichage
-        setPromoProducts(promos.filter((p: any) => p.isVisible !== false && p.originalPrice > p.price).slice(0, 6));
+        // Filter and set state
+        setPromoProducts(promos.filter((p: any) => p.isVisible !== false).slice(0, 6));
+        setBestsellers(popular.filter((p: any) => p.isVisible !== false).slice(0, 4));
+        setNewArrivals(latest.filter((p: any) => p.isVisible !== false).slice(0, 4));
       } catch (error) {
         console.error("Erreur chargement page accueil:", error);
       }
@@ -276,7 +282,7 @@ export default function HomePage() {
               </button>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
-              {promoProducts.slice(0, 4).map(product => (
+              {bestsellers.map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
@@ -318,7 +324,7 @@ export default function HomePage() {
 
             {/* Grille 2x2 pour mobile et desktop */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
-              {promoProducts.slice(0, 4).map(product => (
+              {newArrivals.map(product => (
                 <ProductCard key={product.id} product={product} variant="compact" />
               ))}
             </div>

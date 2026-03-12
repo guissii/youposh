@@ -8,6 +8,8 @@ import { toast } from 'sonner';
 import { useStoreSettings } from '@/data/storeSettings';
 import { getImageUrl } from '@/lib/utils';
 import { createOrder } from '@/lib/api';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
 
 export default function CartDrawer() {
   const { t, i18n } = useTranslation();
@@ -317,10 +319,12 @@ Merci !`;
             <div className="space-y-4">
               {cart.map((item) => (
                 <div key={`${item.product.id}-${item.variant || ''}`} className="flex gap-3 bg-gray-50 rounded-xl p-3">
-                  <img
+                  <LazyLoadImage
                     src={getImageUrl(item.product.image)}
                     alt={i18n.language === 'ar' ? item.product.nameAr : item.product.name}
+                    effect="blur"
                     className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                    wrapperClassName="w-20 h-20 flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-[#333] line-clamp-2 text-sm">

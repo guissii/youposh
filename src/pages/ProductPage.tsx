@@ -15,6 +15,8 @@ import CartDrawer from '@/components/layout/CartDrawer';
 import WhatsAppButton, { generateOrderWhatsAppMessage } from '@/components/ui/WhatsAppButton';
 import { useStoreSettings } from '@/data/storeSettings';
 import { getImageUrl } from '@/lib/utils';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
 
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
@@ -297,10 +299,12 @@ export default function ProductPage() {
               {/* ═══ Bloc 1 — Image Gallery ═══ */}
               <div className="space-y-4">
                 <div className="relative aspect-square bg-white rounded-2xl overflow-hidden shadow-card">
-                  <img
+                  <LazyLoadImage
                     src={`${getImageUrl(galleryImages[selectedImage])}?v=wmki`}
                     alt={isAr ? product.nameAr : product.name}
+                    effect="blur"
                     className="w-full h-full object-cover"
+                    wrapperClassName="w-full h-full block"
                   />
                   <button
                     onClick={() => setIsZoomOpen(true)}
@@ -356,7 +360,13 @@ export default function ProductPage() {
                       className={`w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === i ? 'border-[var(--yp-blue)] shadow-md' : 'border-transparent hover:border-[var(--yp-gray-400)]'
                         }`}
                     >
-                      <img src={`${getImageUrl(img)}?v=wmki`} alt="" className="w-full h-full object-cover" />
+                      <LazyLoadImage
+                        src={`${getImageUrl(img)}?v=wmki`}
+                        alt=""
+                        effect="blur"
+                        className="w-full h-full object-cover"
+                        wrapperClassName="w-full h-full block"
+                      />
                     </button>
                   ))}
                 </div>
