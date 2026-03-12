@@ -83,7 +83,7 @@ export default function CartDrawer() {
 
     // 2) Open WhatsApp
     const itemsList = cart.map(item =>
-      `- ${item.product.name} x${item.quantity} = ${item.product.price * item.quantity} dh`
+      `- ${item.product.name} x${item.quantity} = ${item.product.price * item.quantity} dh\n  🔗 ${window.location.origin}/product/${item.product.id}`
     ).join('\n');
 
     const message = `Bonjour, je souhaite commander :
