@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { MessageCircle, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { MessageCircle, X, ShoppingCart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Product, CartItem } from '@/types';
+import { useStore } from '@/contexts/StoreContext';
 
 interface WhatsAppButtonProps {
   product?: Product;
@@ -105,10 +106,25 @@ export default function WhatsAppButton({
   customMessage
 }: WhatsAppButtonProps) {
   const { t } = useTranslation();
-  const [isMinimized, setIsMinimized] = useState(false);
   const { phone } = useStoreSettings();
+  const { cartCount, setIsCartOpen } = useStore();
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // Trigger animation when cart count changes
+  useEffect(() => {
+    if (cartCount > 0) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => setIsAnimating(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [cartCount]);
 
   const handleClick = () => {
+    if (variant === 'floating') {
+      setIsCartOpen(true);
+      return;
+    }
+
     let message = '';
 
     if (customMessage) {
@@ -135,47 +151,29 @@ export default function WhatsAppButton({
     small: 'bg-[var(--yp-whatsapp)] hover:bg-[var(--yp-whatsapp-dark)] text-white px-4 py-2.5 rounded-xl text-sm shadow-md'
   };
 
-  // ═══ FLOATING VARIANT — Smart dismiss/minimize ═══
+  // ═══ FLOATING VARIANT — Replaced with Sticky Cart Button ═══
   if (variant === 'floating') {
-    // Minimized state — small discreet icon
-    if (isMinimized) {
-      return (
-        <button
-          onClick={() => setIsMinimized(false)}
-          className="fixed bottom-6 right-6 z-50 w-10 h-10 bg-[var(--yp-whatsapp)] hover:bg-[var(--yp-whatsapp-dark)] text-white rounded-full shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center animate-scale-in"
-          aria-label="Ouvrir WhatsApp"
-          title={t('needHelp') || 'Besoin d\'aide ?'}
-        >
-          <MessageCircle className="w-4 h-4" />
-        </button>
-      );
-    }
-
-    // Full state — large button with dismiss X
     return (
-      <div className="fixed bottom-6 right-6 z-50 animate-scale-in">
-        {/* Dismiss X button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsMinimized(true);
-          }}
-          className="absolute -top-2 -right-2 z-10 w-6 h-6 bg-[var(--yp-gray-800)] hover:bg-[var(--yp-dark)] text-white rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110"
-          aria-label="Réduire WhatsApp"
-        >
-          <X className="w-3 h-3" />
-        </button>
-
-        {/* Main WhatsApp button */}
-        <button
-          onClick={handleClick}
-          className="bg-[var(--yp-whatsapp)] hover:bg-[var(--yp-whatsapp-dark)] text-white w-14 h-14 rounded-full shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center animate-whatsapp-pulse"
-          aria-label="Contacter sur WhatsApp"
-          title={t('needHelp') || 'Besoin d\'aide ?'}
-        >
-          <MessageCircle className="w-6 h-6" />
-        </button>
-      </div>
+      <button
+        onClick={handleClick}
+        className="fixed bottom-4 right-4 z-50 flex items-center gap-3 bg-[#00A884] hover:bg-[#008f6f] text-white pl-2 pr-5 py-2 rounded-full shadow-2xl hover:shadow-[0_8px_30px_rgba(0,168,132,0.4)] active:scale-95 transition-all duration-300 group animate-scale-in"
+        aria-label="Ouvrir le panier"
+      >
+        <div className="relative">
+          <div className="bg-white text-[#00A884] w-10 h-10 rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+            <ShoppingCart className={`w-5 h-5 ${isAnimating ? 'animate-bounce' : ''}`} />
+          </div>
+          {cartCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-[#00A884] shadow-sm animate-scale-in">
+              {cartCount}
+            </span>
+          )}
+        </div>
+        <div className="flex flex-col items-start leading-none">
+          <span className="text-[13px] font-bold uppercase tracking-wide">Panier</span>
+          <span className="text-[10px] opacity-90 font-medium">Livraison gratuite</span>
+        </div>
+      </button>
     );
   }
 
