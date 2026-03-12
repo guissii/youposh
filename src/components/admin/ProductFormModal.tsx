@@ -580,6 +580,13 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                         <textarea rows={2} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className={inputClass + " resize-none"} />
                     </div>
 
+                    <div className="flex items-center justify-between mb-1">
+                        <label className="block text-sm font-medium text-[#666]">Description (AR) - Affichée si langue arabe sélectionnée</label>
+                    </div>
+                    <div>
+                        <textarea rows={2} dir="rtl" value={form.descriptionAr} onChange={e => setForm(f => ({ ...f, descriptionAr: e.target.value }))} className={inputClass + " resize-none"} />
+                    </div>
+
                     {/* Tags Prédéfinis */}
                     <div>
                         <label className="block text-sm font-medium text-[#666] mb-2">Tags (Sélectionnez pour ajouter)</label>
