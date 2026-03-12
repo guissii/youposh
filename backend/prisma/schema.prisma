@@ -173,7 +173,7 @@ model PromoCode {
 model StoreSettings {
   id               Int      @id @default(1)
   storeName        String   @default("YOUPOSH")
-  phone            String   @default("+212 6XX XXX XXX")
+  phone            String   @default("+212600000000")
   email            String   @default("contact@youposh.ma")
   currency         String   @default("MAD")
   brandPrimary     String   @default("#2563EB")
