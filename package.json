@@ -7,8 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "postinstall": "prisma generate --schema=./backend/prisma/schema.prisma"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",

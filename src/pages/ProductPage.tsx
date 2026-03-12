@@ -69,11 +69,6 @@ export default function ProductPage() {
         setIsLoadingProduct(true);
         setProductLoadError('');
         const p = await fetchProduct(Number(id));
-        
-        if (!p) {
-           throw new Error("Product not found");
-        }
-
         const normalized = {
           ...p,
           images: Array.isArray(p?.images) ? p.images : [],

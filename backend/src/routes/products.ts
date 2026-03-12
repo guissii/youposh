@@ -88,6 +88,7 @@ router.get('/', async (req, res) => {
         const products = await prisma.product.findMany({
             where,
             orderBy,
+            take: limit ? parseInt(limit as string) : undefined,
             include: {
                 category: true,
                 attributeValues: {

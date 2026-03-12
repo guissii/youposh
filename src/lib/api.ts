@@ -1,74 +1,23 @@
-import { MOCK_PRODUCTS, MOCK_CATEGORIES, MOCK_ORDERS, MOCK_PROMO_CODES, MOCK_DASHBOARD_STATS } from './mockData';
-
 const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
 
-console.log(`[API] Base URL configured: ${API_BASE}`);
-
-// Helper to simulate network delay for mock data
-const mockDelay = () => new Promise(resolve => setTimeout(resolve, 800));
-
 async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    try {
-        const res = await fetch(`${API_BASE}${endpoint}`, {
-            headers: { 'Content-Type': 'application/json' },
-            ...options,
-        });
-        if (!res.ok) {
-            // Try to parse JSON error first
-            let errorMessage = `API error ${res.status}`;
-            try {
-                const errorData = await res.json();
-                errorMessage = errorData.error || errorData.message || errorMessage;
-            } catch {
-                // If JSON parsing fails, use status text
-                errorMessage = res.statusText || errorMessage;
-            }
-            throw new Error(errorMessage);
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+        headers: { 'Content-Type': 'application/json' },
+        ...options,
+    });
+    if (!res.ok) {
+        // Try to parse JSON error first
+        let errorMessage = `API error ${res.status}`;
+        try {
+            const errorData = await res.json();
+            errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch {
+            // If JSON parsing fails, use status text
+            errorMessage = res.statusText || errorMessage;
         }
-        return res.json();
-    } catch (error) {
-        console.error(`[API] Fetch error for ${endpoint}:`, error);
-        console.warn(`[API] Switching to MOCK DATA for ${endpoint} due to error.`);
-        
-        // ─── MOCK DATA FALLBACK ───
-        await mockDelay();
-        
-        if (endpoint.includes('/products')) {
-            // Basic filtering for mock products
-            let result = [...MOCK_PRODUCTS];
-            if (endpoint.includes('badge=promo')) result = result.filter(p => p.originalPrice && p.originalPrice > p.price);
-            else if (endpoint.includes('sort=popular')) result = result.sort((a, b) => b.salesCount - a.salesCount);
-            else if (endpoint.includes('sort=newest')) result = result.filter(p => p.isNew);
-            else if (endpoint.includes('/')) {
-                // Fetch single product
-                const id = Number(endpoint.split('/').pop());
-                const product = MOCK_PRODUCTS.find(p => p.id === id);
-                if (product) return product as unknown as T;
-            }
-            return result as unknown as T;
-        }
-        
-        if (endpoint.includes('/categories')) return MOCK_CATEGORIES as unknown as T;
-        if (endpoint.includes('/dashboard/stats')) return MOCK_DASHBOARD_STATS as unknown as T;
-        if (endpoint.includes('/dashboard/recent-orders')) return MOCK_ORDERS as unknown as T;
-        if (endpoint.includes('/dashboard/top-products')) return MOCK_PRODUCTS.slice(0, 5) as unknown as T;
-        if (endpoint.includes('/orders')) return MOCK_ORDERS as unknown as T;
-        
-        if (endpoint.includes('/promo-codes/validate')) {
-             // Mock validation
-             const body = options?.body ? JSON.parse(options.body as string) : {};
-             const code = MOCK_PROMO_CODES.find(c => c.code === body.code && c.isActive);
-             if (code) return { discount: code.discountValue, discountType: code.discountType, message: "Code appliqué !" } as unknown as T;
-             throw new Error("Code promo invalide (Mock)");
-        }
-        
-        if (endpoint.includes('/promo-codes')) return MOCK_PROMO_CODES as unknown as T;
-
-        if (endpoint.includes('/settings/store')) return { activeGlobalCoupon: 'WELCOME10' } as unknown as T;
-
-        // If no mock handler matches, rethrow the original error
-        throw error;
+        throw new Error(errorMessage);
     }
+    return res.json();
 }
 
 // ─── Dashboard ─────────────────────────────────────────────────

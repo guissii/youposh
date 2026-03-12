@@ -36,6 +36,7 @@ export default function ShopPage() {
 
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const selectedCategory = categoryParam ? categories.find(c => c.slug === categoryParam) : undefined;
   const categoryAttributes = Array.isArray(selectedCategory?.attributes) ? selectedCategory.attributes : [];
 
@@ -70,9 +71,12 @@ export default function ShopPage() {
         if (selectedAvIds.length) queryParams.set('av', selectedAvIds.join(','));
 
         const data = await fetchProducts(queryParams.toString());
-        setProducts(data);
+        setProducts(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Failed to load products', err);
+        setProducts([]);
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
@@ -352,7 +356,11 @@ export default function ShopPage() {
 
             {/* ── Products Grid ── */}
             <div className="flex-1 min-w-0">
-              {products.length === 0 ? (
+              {loading ? (
+                <div className="flex justify-center items-center py-32">
+                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--yp-blue)]"></div>
+                </div>
+              ) : products.length === 0 ? (
                 <div className="text-center py-20">
                   <div className="w-20 h-20 bg-[var(--yp-gray-200)] rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Package className="w-8 h-8 text-[var(--yp-gray-400)]" />
