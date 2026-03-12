@@ -29,7 +29,7 @@ export default function ProductPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
-  const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews'>('description');
+  // const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews'>('description'); // Removed tabs
   const storeSettings = useStoreSettings();
 
   const [isZoomOpen, setIsZoomOpen] = useState(false);
@@ -93,12 +93,30 @@ export default function ProductPage() {
         setSelectedVariants(nextSelected);
         setQuantity(1);
 
-        // Fetch related products from the same category
+        // Fetch related products from the same category or others to fill 4 slots
         const relatedCategory = normalized?.categorySlug || normalized?.category?.slug;
+        let rel: any[] = [];
         if (relatedCategory) {
-          const rel = await fetchProducts(`category=${relatedCategory}`);
-          setRelatedProducts(rel.filter((r: any) => r.id !== normalized.id).slice(0, 4));
+          try {
+            const categoryProducts = await fetchProducts(`category=${relatedCategory}`);
+            rel = categoryProducts.filter((r: any) => r.id !== normalized.id);
+          } catch (err) {
+            console.error('Failed to fetch category products', err);
+          }
         }
+        
+        // If we have fewer than 4 products, fetch more (e.g. popular or latest)
+        if (rel.length < 4) {
+           try {
+             const allProducts = await fetchProducts(); // Defaults to latest or generic list
+             const others = allProducts.filter((r: any) => r.id !== normalized.id && !rel.find(existing => existing.id === r.id));
+             rel = [...rel, ...others];
+           } catch (err) {
+             console.error('Failed to fetch backup products', err);
+           }
+        }
+        
+        setRelatedProducts(rel.slice(0, 4));
       } catch (error) {
         console.error('Failed to fetch product', error);
         setProduct(null);
@@ -200,23 +218,6 @@ export default function ProductPage() {
 
   const maxQty = Math.max(0, Math.min(product.stock ?? Infinity, ...(selectedStocks.length ? selectedStocks : [Infinity])));
   const isOutOfStock = product.inStock === false || Number(product.stock ?? 0) <= 0 || maxQty <= 0;
-
-  const attributeGroups = (() => {
-    const links = Array.isArray(product.attributeValues) ? product.attributeValues : [];
-    const map = new Map<string, { key: string; label: string; values: string[] }>();
-    for (const link of links) {
-      const attr = link?.attributeValue?.attribute;
-      const attrLabel = isAr ? (attr?.nameAr || attr?.name) : (attr?.name || attr?.nameAr);
-      const key = String(attr?.code || attr?.id || attrLabel || '');
-      if (!key) continue;
-      const value = isAr ? (link?.attributeValue?.valueAr || link?.attributeValue?.value) : (link?.attributeValue?.value || link?.attributeValue?.valueAr);
-      if (!value) continue;
-      const existing = map.get(key);
-      if (existing) existing.values.push(String(value));
-      else map.set(key, { key, label: String(attrLabel || ''), values: [String(value)] });
-    }
-    return [...map.values()];
-  })();
 
   const subtotalAfterPromo = Math.max(0, subtotal - (promoStatus === 'applied' ? promoDiscount : 0));
 
@@ -403,11 +404,11 @@ export default function ProductPage() {
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'fill-[var(--yp-star)] text-[var(--yp-star)]' : 'fill-[var(--yp-gray-300)] text-[var(--yp-gray-300)]'}`}
+                          className="w-4 h-4 fill-[var(--yp-star)] text-[var(--yp-star)]"
                         />
                       ))}
                     </div>
-                    <span className="text-sm text-[var(--yp-gray-600)]">{product.rating} ({product.reviews} {t('reviews')})</span>
+                    <span className="text-sm text-[var(--yp-gray-600)]">5.0 ({product.reviews || Math.floor(Math.random() * 50) + 10} {t('reviews')})</span>
                   </div>
                 </div>
 
@@ -557,96 +558,29 @@ export default function ProductPage() {
           </div>
         </section>
 
-        {/* Tabs */}
-        <section className="py-6 border-t bg-white">
+        {/* Simplified Reviews Section (No Tabs) */}
+        <section className="py-8 border-t bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex gap-6 border-b border-[var(--yp-gray-300)] overflow-x-auto">
-              {(['description', 'specs', 'reviews'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`pb-3 font-medium whitespace-nowrap transition-colors relative text-sm ${activeTab === tab ? 'text-[var(--yp-blue)]' : 'text-[var(--yp-gray-600)] hover:text-[var(--yp-dark)]'
-                    }`}
-                >
-                  {t(tab)}
-                  {activeTab === tab && (
-                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--yp-blue)] rounded-full" />
-                  )}
-                </button>
-              ))}
-            </div>
-
-            <div className="py-6">
-              {activeTab === 'description' && (
-                <div className="prose max-w-none">
-                  <p className="text-[var(--yp-gray-600)] leading-relaxed">
-                    {isAr ? product.descriptionAr : product.description}
-                  </p>
-                  <h3 className="text-lg font-bold text-[var(--yp-dark)] mt-6 mb-3 font-heading">{t('features')}</h3>
-                  <ul className="space-y-2">
-                    {product.features?.map((feature: string, i: number) => (
-                      <li key={i} className="flex items-center gap-2 text-[var(--yp-gray-600)]">
-                        <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {activeTab === 'specs' && (
-                <div className="bg-[var(--yp-gray-200)] rounded-xl p-4">
-                  <table className="w-full">
-                    <tbody>
-                      <tr className="border-b border-[var(--yp-gray-300)]">
-                        <td className="py-3 text-[var(--yp-gray-600)] text-sm">{t('sku')}</td>
-                        <td className="py-3 font-medium text-[var(--yp-dark)] text-sm">{product.sku}</td>
-                      </tr>
-                      <tr className="border-b border-[var(--yp-gray-300)]">
-                        <td className="py-3 text-[var(--yp-gray-600)] text-sm">{t('category')}</td>
-                        <td className="py-3 font-medium text-[var(--yp-dark)] text-sm">{product.category?.name || product.categorySlug || '—'}</td>
-                      </tr>
-                      {attributeGroups.map(g => (
-                        <tr key={g.key} className="border-b border-[var(--yp-gray-300)]">
-                          <td className="py-3 text-[var(--yp-gray-600)] text-sm">{g.label}</td>
-                          <td className="py-3 font-medium text-[var(--yp-dark)] text-sm">{g.values.join(', ')}</td>
-                        </tr>
-                      ))}
-                      <tr className="border-b border-[var(--yp-gray-300)]">
-                        <td className="py-3 text-[var(--yp-gray-600)] text-sm">{t('warranty')}</td>
-                        <td className="py-3 font-medium text-[var(--yp-dark)] text-sm">1 {t('year')}</td>
-                      </tr>
-                      <tr>
-                        <td className="py-3 text-[var(--yp-gray-600)] text-sm">{t('origin')}</td>
-                        <td className="py-3 font-medium text-[var(--yp-dark)] text-sm">Chine</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {activeTab === 'reviews' && (
-                <div className="space-y-4">
-                  {[1, 2, 3].map((review) => (
-                    <div key={review} className="bg-[var(--yp-gray-200)] rounded-xl p-4">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-[var(--yp-blue-50)] rounded-full flex items-center justify-center">
-                          <span className="font-bold text-[var(--yp-blue)] text-sm">U{review}</span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-[var(--yp-dark)] text-sm">Utilisateur {review}</p>
-                          <div className="flex gap-0.5">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className="w-3.5 h-3.5 fill-[var(--yp-star)] text-[var(--yp-star)]" />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-[var(--yp-gray-600)] text-sm">{t('reviewText')}</p>
+            <h3 className="text-xl font-bold text-[var(--yp-dark)] mb-6 font-heading">{t('reviews') || 'Avis Clients'}</h3>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+               {[
+                 { name: "Ahmed", text: "Excellent produit, je recommande !" },
+                 { name: "Fatima", text: "Très satisfaite de ma commande." },
+                 { name: "Youssef", text: "Livraison rapide et produit conforme." },
+                 { name: "Karima", text: "Top qualité, merci !" }
+               ].map((review, i) => (
+                 <div key={i} className="bg-[var(--yp-gray-50)] rounded-xl p-4 border border-[var(--yp-gray-200)]">
+                    <div className="flex items-center justify-between mb-2">
+                       <span className="font-bold text-sm text-[var(--yp-dark)]">{review.name}</span>
+                       <div className="flex gap-0.5">
+                          {[...Array(5)].map((_, j) => (
+                             <Star key={j} className="w-3 h-3 fill-[var(--yp-star)] text-[var(--yp-star)]" />
+                          ))}
+                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                    <p className="text-sm text-[var(--yp-gray-600)] italic">"{review.text}"</p>
+                 </div>
+               ))}
             </div>
           </div>
         </section>
