@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, ImageOff } from 'lucide-react';
+import { Heart, ImageOff, Flame, Sparkles, TrendingUp } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
 import { useTranslation } from 'react-i18next';
 import type { Product } from '@/types';
@@ -131,22 +131,30 @@ export default function ProductCard({
       >
         {/* Image area */}
         <div className="relative bg-[#F5F5F5] aspect-[4/5] w-full overflow-hidden shrink-0">
-          {/* Badge */}
+          {/* Animated Arabic Badge */}
           {(badge || discount > 0) && (
-            <span className={`absolute top-2.5 left-2.5 z-10 inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-wide shadow-sm border border-black/5 bg-white/90 ${badge === 'new'
-              ? 'text-[var(--yp-blue)]'
-              : badge === 'bestseller'
-                ? 'text-[var(--yp-dark)]'
-                : 'text-[var(--yp-red)]'
-              }`}>
-              {badge === 'promo'
-                ? `${discount}% OFF`
-                : badge === 'new'
-                  ? 'New'
-                  : badge === 'bestseller'
-                    ? 'Best Seller'
-                    : `${discount}% OFF`}
-            </span>
+            <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1.5 align-start">
+              {badge === 'promo' || discount > 0 ? (
+                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide shadow-md border border-orange-200 bg-gradient-to-r from-orange-500 to-red-500 text-white animate-pulse">
+                  <Flame className="w-3 h-3 text-yellow-200" fill="currentColor" />
+                  خصم {discount}%
+                </span>
+              ) : null}
+
+              {badge === 'new' && (
+                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide shadow-md border border-blue-200 bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
+                  <Sparkles className="w-3 h-3 text-cyan-100" />
+                  جديد
+                </span>
+              )}
+
+              {badge === 'bestseller' && (
+                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide shadow-md border border-amber-200 bg-gradient-to-r from-amber-400 to-orange-400 text-amber-950">
+                  <TrendingUp className="w-3 h-3" />
+                  الأكثر مبيعاً
+                </span>
+              )}
+            </div>
           )}
 
           {isOutOfStock && (
@@ -233,17 +241,30 @@ export default function ProductCard({
     >
       {/* ── Image area ── */}
       <div className="relative bg-[#F5F5F5] aspect-[4/5] w-full flex items-center justify-center overflow-hidden shrink-0">
-        {/* Badge */}
+        {/* Animated Arabic Badge */}
         {(badge || discount > 0) && (
-          <span className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 inline-flex items-center rounded-md px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wide bg-[#D92C2C] text-white shadow-md">
-            {badge === 'promo'
-              ? `${discount}% OFF`
-              : badge === 'new'
-                ? 'New'
-                : badge === 'bestseller'
-                  ? 'Best Seller'
-                  : `${discount}% OFF`}
-          </span>
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 flex flex-col gap-1.5 align-start">
+            {badge === 'promo' || discount > 0 ? (
+              <span className="inline-flex items-center gap-1 rounded-md px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold tracking-wide shadow-[0_2px_10px_rgba(239,68,68,0.3)] border border-orange-200/50 bg-gradient-to-r from-orange-500 to-red-600 text-white animate-pulse">
+                <Flame className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-200" fill="currentColor" />
+                خصم {discount}%
+              </span>
+            ) : null}
+
+            {badge === 'new' && (
+              <span className="inline-flex items-center gap-1 rounded-md px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold tracking-wide shadow-[0_2px_10px_rgba(59,130,246,0.3)] border border-blue-200/50 bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-100" />
+                جديد
+              </span>
+            )}
+
+            {badge === 'bestseller' && (
+              <span className="inline-flex items-center gap-1 rounded-md px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-bold tracking-wide shadow-[0_2px_10px_rgba(245,158,11,0.3)] border border-amber-200/50 bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-950">
+                <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                الأكثر مبيعاً
+              </span>
+            )}
+          </div>
         )}
 
         {isOutOfStock && (
