@@ -9,21 +9,34 @@ dotenv.config();
 const router = Router();
 
 // ─── Initialize Supabase Client ──────────────────────────────
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.SUPABASE_URL;
+// FORCE USE OF SERVICE ROLE KEY FOR UPLOADS
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseServiceKey) {
-    console.warn('⚠️ Supabase credentials missing. Uploads will fail.');
+    console.error('❌ CRITICAL ERROR: Supabase credentials missing in .env');
+    console.error(`   SUPABASE_URL: ${supabaseUrl ? 'Set' : 'Missing'}`);
+    console.error(`   SUPABASE_SERVICE_ROLE_KEY: ${supabaseServiceKey ? 'Set' : 'Missing'}`);
 } else {
-    console.log(`✅ Supabase initialized with URL: ${supabaseUrl}`);
-    console.log(`🔑 Using key starting with: ${supabaseServiceKey.substring(0, 10)}... (isServiceRole: ${!!process.env.SUPABASE_SERVICE_ROLE_KEY})`);
+    console.log(`✅ Supabase initialized for uploads`);
+    console.log(`   URL: ${supabaseUrl}`);
+    // Log first few chars to verify it's the right key (service_role usually starts similarly but check length)
+    console.log(`   Key: ${supabaseServiceKey.substring(0, 10)}... (Length: ${supabaseServiceKey.length})`);
 }
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+// Create a client specifically for uploads with admin privileges
+// We use the Service Role Key to bypass RLS policies
+const supabase = createClient(supabaseUrl || '', supabaseServiceKey || '', {
     auth: {
         persistSession: false,
         autoRefreshToken: false,
         detectSessionInUrl: false
+    },
+    global: {
+        headers: {
+            // Force Authorization header to be the service role key
+            Authorization: `Bearer ${supabaseServiceKey}`
+        }
     }
 });
 
@@ -40,65 +53,42 @@ const imageFilter = (_req: any, file: any, cb: any) => {
 
 const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 }, fileFilter: imageFilter });
 
-// Generic upload function to Supabase
-const uploadToSupabaseRetry = async (file: Express.Multer.File, folder: string, filename: string) => {
-    console.log(`🔄 Retrying upload for ${filename}...`);
-    const { data, error } = await supabase
-        .storage
-        .from('uploads')
-        .upload(`${folder}/${filename}`, file.buffer, {
-            contentType: file.mimetype,
-            upsert: false
-        });
-
-    if (error) {
-        console.error("Supabase Storage Retry Error:", error);
-        throw error;
-    }
-
-    const { data: publicUrlData } = supabase
-        .storage
-        .from('uploads')
-        .getPublicUrl(`${folder}/${filename}`);
-
-    return publicUrlData.publicUrl;
-}
-
 const uploadToSupabase = async (file: Express.Multer.File, folder: string) => {
     // Sanitize filename to remove special chars
     const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E5)}`;
-    // REMOVED FOLDER PREFIX FROM FILENAME to avoid "products/products/..."
     const filename = `${uniqueSuffix}-${originalName}`;
 
     console.log(`📤 Uploading ${filename} to ${folder}...`);
 
-    // Upload with standard options, removing upsert to check if that's the issue
-    // or try catch specific error
-    const { data, error } = await supabase
-        .storage
-        .from('uploads')
-        .upload(`${folder}/${filename}`, file.buffer, {
-            contentType: file.mimetype,
-            upsert: false 
-        });
+    try {
+        const { data, error } = await supabase
+            .storage
+            .from('uploads')
+            .upload(`${folder}/${filename}`, file.buffer, {
+                contentType: file.mimetype,
+                upsert: true 
+            });
 
-    if (error) {
-        console.error("Supabase Storage Error:", error);
-        // If error is "The resource already exists", try with a new name
-        if (error.message.includes("The resource already exists")) {
-             const newFilename = `${uniqueSuffix}-v2-${originalName}`;
-             return await uploadToSupabaseRetry(file, folder, newFilename);
+        if (error) {
+            console.error("❌ Supabase Storage Error:", error);
+            console.error("   Error Message:", error.message);
+            console.error("   Error Details:", JSON.stringify(error));
+            throw error;
         }
-        throw error;
+
+        const { data: publicUrlData } = supabase
+            .storage
+            .from('uploads')
+            .getPublicUrl(`${folder}/${filename}`);
+        
+        console.log(`✅ Upload successful: ${publicUrlData.publicUrl}`);
+        return publicUrlData.publicUrl;
+
+    } catch (err: any) {
+        console.error("❌ Unexpected error during upload:", err);
+        throw err;
     }
-
-    const { data: publicUrlData } = supabase
-        .storage
-        .from('uploads')
-        .getPublicUrl(`${folder}/${filename}`);
-
-    return publicUrlData.publicUrl;
 }
 
 // ─── POST /upload/category ──────────────────────────────────────
