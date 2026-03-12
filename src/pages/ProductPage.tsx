@@ -558,10 +558,10 @@ export default function ProductPage() {
             <h3 className="text-xl font-bold text-[var(--yp-dark)] mb-6 font-heading">{t('reviews') || 'Avis Clients'}</h3>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                {[
-                 { name: "Ahmed", text: "Excellent produit, je recommande !" },
-                 { name: "Fatima", text: "Très satisfaite de ma commande." },
-                 { name: "Youssef", text: "Livraison rapide et produit conforme." },
-                 { name: "Karima", text: "Top qualité, merci !" }
+                 { name: "Salma B.", text: "J'étais sceptique au début mais franchement la qualité est top. Ça change la vie pour le rangement !" },
+                 { name: "Mohammed A.", text: "Reçu en 24h à Casa, super bien emballé. Le produit est conforme, je vais en recommander." },
+                 { name: "Houda T.", text: "Rien à dire, service client réactif et produit solide. C'est exactement ce qu'il me fallait." },
+                 { name: "Yassine K.", text: "Très satisfait de mon achat. Le rapport qualité/prix est imbattable sur le marché." }
                ].map((review, i) => (
                  <div key={i} className="bg-[var(--yp-gray-50)] rounded-xl p-4 border border-[var(--yp-gray-200)]">
                     <div className="flex items-center justify-between mb-2">
