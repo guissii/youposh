@@ -42,6 +42,7 @@ app.use('/api/settings', settingsRoutes);
 if (!process.env.VERCEL) {
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
+        console.log(`Version: ${new Date().toISOString()} - Supabase Upload Fix Applied`);
     });
 }
 
