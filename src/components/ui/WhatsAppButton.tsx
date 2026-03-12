@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MessageCircle, X, ShoppingCart } from 'lucide-react';
+import { MessageCircle, ShoppingCart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Product, CartItem } from '@/types';
 import { useStore } from '@/contexts/StoreContext';
