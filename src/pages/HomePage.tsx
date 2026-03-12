@@ -241,26 +241,30 @@ export default function HomePage() {
 
 
         {/* ══════════════════════════════════════════════
-            FLASH SALES — Contained red card avec design 3D premium
+            FLASH SALES — Red Gradient 3D Premium Card
             ══════════════════════════════════════════════ */}
-        <section className="py-4 sm:py-6" ref={flashRef}>
+        <section className="py-4 sm:py-8" ref={flashRef}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 reveal">
-            <div className="rounded-2xl overflow-hidden border border-[var(--yp-gray-300)] bg-white">
-              <div className="p-3 sm:p-6 lg:p-8">
+            <div className="rounded-3xl overflow-hidden bg-gradient-to-br from-[var(--yp-red)] to-[#991B1B] shadow-2xl shadow-[var(--yp-red)]/20 border border-white/10 relative">
+              {/* Decorative background elements for 3D effect */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-2xl -ml-10 -mb-10 pointer-events-none"></div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                  <div className="flex items-center gap-2.5 sm:gap-3">
-                    <div className="w-9 h-9 sm:w-12 sm:h-12 shrink-0 bg-[var(--yp-red)] rounded-lg sm:rounded-xl flex items-center justify-center">
-                      <Flame className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
+              <div className="p-4 sm:p-8 relative z-10">
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 mb-6">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 shrink-0 bg-white rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                      <Flame className="w-5 h-5 sm:w-7 sm:h-7 text-[var(--yp-red)] fill-[var(--yp-red)]" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className="inline-flex rounded-full h-1.5 w-1.5 bg-[var(--yp-red)]" />
-                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-[var(--yp-red)]">
-                          Offre Flash
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="inline-flex rounded-full h-1.5 w-1.5 bg-white animate-pulse" />
+                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/90">
+                          Offre Limitée
                         </span>
                       </div>
-                      <h2 className="text-[18px] sm:text-[28px] font-extrabold font-heading text-[var(--yp-dark)] leading-none tracking-tight">
+                      <h2 className="text-xl sm:text-3xl font-extrabold font-heading text-white leading-none tracking-tight drop-shadow-sm">
                         Ventes Flash
                       </h2>
                     </div>
@@ -268,34 +272,40 @@ export default function HomePage() {
 
                   <button
                     onClick={() => navigate('/shop?filter=promo')}
-                    className="group w-full sm:w-auto text-[12px] sm:text-sm font-bold flex justify-center items-center gap-2 bg-[var(--yp-red-50)] text-[var(--yp-red)] hover:bg-[var(--yp-red)] hover:text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-colors duration-300"
+                    className="group w-full sm:w-auto text-xs sm:text-sm font-bold flex justify-center items-center gap-2 bg-white text-[var(--yp-red)] hover:bg-white/90 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl shadow-lg transition-all duration-300 active:scale-95"
                   >
                     Voir Toutes les Offres
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </button>
                 </div>
 
-                <div className="mt-4 sm:mt-6">
+                <div className="mt-2 sm:mt-4">
                   {promoProducts.length === 0 ? (
-                    <div className="bg-white/60 rounded-2xl border border-[var(--yp-gray-300)] p-4 text-center">
-                      <p className="text-sm font-semibold text-[var(--yp-dark)]">Aucune offre flash pour le moment</p>
-                      <p className="text-xs text-[var(--yp-gray-600)] mt-1">Revenez bientôt, de nouvelles promos arrivent.</p>
+                    <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-8 text-center">
+                      <p className="text-base font-semibold text-white">Aucune offre flash pour le moment</p>
+                      <p className="text-sm text-white/70 mt-1">Revenez bientôt, de nouvelles promos arrivent.</p>
                     </div>
                   ) : (
                     <>
-                      <div className="sm:hidden -mx-4 px-4 overflow-x-auto scrollbar-hide">
-                        <div className="flex gap-3 pb-1 snap-x snap-mandatory">
+                      {/* Mobile Horizontal Scroll */}
+                      <div className="sm:hidden -mx-4 px-4 overflow-x-auto scrollbar-hide pb-4">
+                        <div className="flex gap-3 snap-x snap-mandatory">
                           {promoProducts.map(product => (
-                            <div key={product.id} className="snap-start shrink-0 w-[calc((100%-12px)/2)]">
-                              <ProductCard product={product} variant="compact" />
+                            <div key={product.id} className="snap-start shrink-0 w-[160px]">
+                              <div className="bg-white rounded-2xl overflow-hidden shadow-lg h-full transform transition-transform hover:scale-[1.02]">
+                                <ProductCard product={product} variant="compact" />
+                              </div>
                             </div>
                           ))}
                         </div>
                       </div>
 
-                      <div className="hidden sm:grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-                        {promoProducts.map(product => (
-                          <ProductCard key={product.id} product={product} variant="compact" />
+                      {/* Desktop Grid */}
+                      <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+                        {promoProducts.slice(0, 4).map(product => (
+                          <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                            <ProductCard product={product} variant="compact" />
+                          </div>
                         ))}
                       </div>
                     </>
