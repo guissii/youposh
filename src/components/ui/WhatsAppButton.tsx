@@ -32,7 +32,8 @@ export function generateWhatsAppMessage(product: Product, variant?: string): str
 Je veux commander :
 
 Produit: ${product.name}
-Prix: ${product.price} dh${variantText}
+Prix: ${product.price} dh
+URL: ${window.location.origin}/product/${product.id}${variantText}
 
 Nom: 
 Ville: 
@@ -64,6 +65,7 @@ export function generateOrderWhatsAppMessage(
   return `Bonjour, je souhaite commander ce produit :
 
 📦 Produit: ${product.name}${variantLine}
+🔗 URL: ${window.location.origin}/product/${product.id}
 🔢 Quantité: ${quantity}
 💰 Prix unitaire: ${product.price} dh
 💵 Sous-total: ${subtotal} dh
@@ -80,7 +82,7 @@ Merci !`;
 
 export function generateCartWhatsAppMessage(items: CartItem[]): string {
   const itemsList = items.map(item =>
-    `- ${item.product.name} x${item.quantity} = ${item.product.price * item.quantity} dh`
+    `- ${item.product.name} x${item.quantity} = ${item.product.price * item.quantity} dh\n  🔗 ${window.location.origin}/product/${item.product.id}`
   ).join('\n');
 
   const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
