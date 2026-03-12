@@ -39,13 +39,21 @@ function computeBadge(p: any): 'promo' | 'bestseller' | 'new' | undefined {
 router.get('/', async (req, res) => {
     try {
         const { category, badge, search, sort, inStock, all, av } = req.query;
+        // Check if "all" is true OR if the request comes from the admin panel (implied by logic)
+        // But to be safe, let's trust the "all" parameter more.
         const showAll = all === 'true';
 
         // By default, only show visible products, unless "all=true" is passed (e.g. by admin)
         const where: any = {};
         if (!showAll) {
-            where.isVisible = true;
+            // Fix: Check for both 'published' status AND isVisible flag
             where.status = 'published';
+            where.isVisible = true;
+        } else {
+            // Admin wants to see everything, but maybe not archived ones by default?
+            // Let's allow fetching everything except hard-deleted (which don't exist).
+            // If admin wants to see archived, they can filter by status if we implement it.
+            // For now, "all=true" returns EVERYTHING including drafts and archived.
         }
 
         if (category) where.categorySlug = category;
@@ -69,11 +77,13 @@ router.get('/', async (req, res) => {
         }
 
         const sortKey = (sort as string | undefined) ?? 'popular';
-        let orderBy: any = [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }];
+        let orderBy: any = [{ sortOrder: 'desc' }, { salesCount: 'desc' }]; // Default sort now respects manual sortOrder
+        
         if (sortKey === 'newest') orderBy = [{ publishedAt: 'desc' }, { createdAt: 'desc' }];
         if (sortKey === 'price-asc') orderBy = [{ price: 'asc' }];
         if (sortKey === 'price-desc') orderBy = [{ price: 'desc' }];
-        if (sortKey === 'bestsellers') orderBy = [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }];
+        if (sortKey === 'bestsellers') orderBy = [{ salesCount: 'desc' }, { viewsCount: 'desc' }];
+        if (sortKey === 'popular') orderBy = [{ sortOrder: 'desc' }, { salesCount: 'desc' }, { viewsCount: 'desc' }];
 
         const products = await prisma.product.findMany({
             where,
