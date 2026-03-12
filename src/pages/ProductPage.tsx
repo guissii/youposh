@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft, Heart, Star, Plus, Minus, MessageCircle,
   ShoppingCart, Truck, RefreshCw, Shield, Check, ChevronRight,
-  X, ArrowRight, User, Phone, MapPin, FileText, Package, Ticket
+  X, ArrowRight, User, Phone, MapPin, FileText, Package, Ticket, ImageOff
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
 import { fetchProduct, fetchProducts, createOrder, validatePromoCode } from '@/lib/api';
@@ -33,7 +33,6 @@ export default function ProductPage() {
   const storeSettings = useStoreSettings();
 
   const [isZoomOpen, setIsZoomOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
 
   // Multi-step checkout state
   const [showOrderForm, setShowOrderForm] = useState(false);
@@ -56,7 +55,6 @@ export default function ProductPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setIsVisible(true);
     setShowOrderForm(false);
     setCustomerName('');
     setCustomerPhone('');
@@ -292,26 +290,35 @@ export default function ProductPage() {
         </div>
 
         {/* Product Details */}
-        <section className={`py-4 sm:py-8 transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <section className="py-4 sm:py-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-6 lg:gap-10">
 
               {/* ═══ Bloc 1 — Image Gallery ═══ */}
               <div className="space-y-4">
-                <div className="relative aspect-square bg-white rounded-2xl overflow-hidden shadow-card">
-                  <LazyLoadImage
-                    src={`${getImageUrl(galleryImages[selectedImage])}?v=wmki`}
-                    alt={isAr ? product.nameAr : product.name}
-                    effect="blur"
-                    className="w-full h-full object-cover"
-                    wrapperClassName="w-full h-full block"
-                  />
-                  <button
-                    onClick={() => setIsZoomOpen(true)}
-                    className="absolute bottom-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg text-sm font-bold text-[var(--yp-dark)] hover:bg-white transition-colors z-20"
-                  >
-                    +{galleryImages.length}
-                  </button>
+                <div className="relative aspect-square bg-white rounded-2xl overflow-hidden shadow-card flex items-center justify-center bg-gray-100">
+                  {galleryImages[selectedImage] ? (
+                    <LazyLoadImage
+                      src={`${getImageUrl(galleryImages[selectedImage])}?v=wmki`}
+                      alt={isAr ? product.nameAr : product.name}
+                      effect="blur"
+                      className="w-full h-full object-cover"
+                      wrapperClassName="w-full h-full block"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center text-gray-400">
+                      <ImageOff className="w-12 h-12 mb-2" />
+                      <span className="text-sm">Aucune image</span>
+                    </div>
+                  )}
+                  {galleryImages.length > 0 && (
+                    <button
+                      onClick={() => setIsZoomOpen(true)}
+                      className="absolute bottom-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg text-sm font-bold text-[var(--yp-dark)] hover:bg-white transition-colors z-20"
+                    >
+                      +{galleryImages.length}
+                    </button>
+                  )}
 
                   {/* CSS Watermark Layer */}
                   {storeSettings.watermarkEnabled && (
