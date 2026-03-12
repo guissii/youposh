@@ -7,6 +7,7 @@ module.exports = {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         heading: ['Manrope', 'Poppins', 'Inter', 'sans-serif'],
+        arabic: ['Cairo', 'Tajawal', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -14,6 +15,11 @@ module.exports = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        /* Moroccan Decor Palette */
+        'deco-orange': '#F15A29',
+        'deco-mint': '#0A8C7F',
+        'deco-gold': '#D4AF37',
+        'deco-blue': '#1E3A8A',
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",

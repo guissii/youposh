@@ -4,18 +4,16 @@ import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   Flame, TrendingUp, Percent, Sparkles,
-  Ticket
 } from 'lucide-react';
 import { fetchProducts } from '@/lib/api';
 import ProductCard from '@/components/ui/ProductCard';
 import WhatsAppButton from '@/components/ui/WhatsAppButton';
+import PromoCodeSection from '@/components/ui/PromoCodeSection';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import CartDrawer from '@/components/layout/CartDrawer';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { loadHeroSettings } from '@/data/heroSettings';
-
-import { useStore } from '@/contexts/StoreContext';
 
 
 
@@ -24,13 +22,6 @@ export default function HomePage() {
   const navigate = useNavigate();
   const isAr = i18n.language === 'ar';
   const heroSettings = loadHeroSettings();
-
-  const { promoCode, promoStatus, promoMessage, applyPromoCode, removePromoCode } = useStore();
-  const [promoInput, setPromoInput] = useState(promoCode || '');
-
-  useEffect(() => {
-    setPromoInput(promoCode || '');
-  }, [promoCode]);
 
   const flashRef = useScrollReveal();
   const bestsellersRef = useScrollReveal();
@@ -131,64 +122,9 @@ export default function HomePage() {
 
 
         {/* ══════════════════════════════════════════════
-            PROMO CODE ENTRY — visible dès l’arrivée
+            PROMO CODE ENTRY — 3D Moroccan Style
             ══════════════════════════════════════════════ */}
-        <section className="py-4 sm:py-7">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="rounded-2xl bg-gradient-to-r from-[var(--yp-blue)] to-indigo-600 p-[1px] shadow-card">
-              <div className="bg-white rounded-2xl p-3 sm:p-5 flex flex-col gap-3 sm:gap-4">
-                <div className="flex items-start gap-2.5 sm:gap-3">
-                  <div className="hidden sm:flex w-11 h-11 rounded-2xl bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-blue-dark)] items-center justify-center flex-shrink-0 shadow-lg">
-                    <Ticket className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-sm sm:text-base font-bold bg-gradient-to-r from-[var(--yp-dark)] to-[var(--yp-blue)] bg-clip-text text-transparent">
-                      Profitez d'un avantage exclusif
-                    </p>
-                    <p className="text-xs sm:text-sm text-[var(--yp-gray-600)] leading-relaxed">
-                      Saisissez votre code promo et bénéficiez d'une remise immédiate sur vos achats
-                    </p>
-                    {promoMessage && (
-                      <p className={`text-xs sm:text-sm mt-1 ${promoStatus === 'error' ? 'text-red-500' : 'text-emerald-600'}`}>
-                        {promoMessage}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2 sm:items-center">
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <input
-                      value={promoInput}
-                      onChange={(e) => setPromoInput(e.target.value)}
-                      placeholder="Saisissez votre code"
-                      className="w-full sm:w-56 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)] text-sm"
-                    />
-                    <button
-                      onClick={() => applyPromoCode(promoInput)}
-                      disabled={promoStatus === 'loading'}
-                      className={`w-full sm:w-auto px-5 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap ${promoStatus === 'loading'
-                        ? 'bg-gray-200 text-gray-400'
-                        : 'bg-[var(--yp-blue)] text-white hover:opacity-95'
-                        }`}
-                    >
-                      Appliquer
-                    </button>
-                  </div>
-
-                  {promoCode && promoStatus !== 'idle' && (
-                    <button
-                      onClick={() => { removePromoCode(); setPromoInput(''); }}
-                      className="text-xs font-semibold text-red-500 hover:underline text-left sm:text-right"
-                    >
-                      Supprimer le code
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <PromoCodeSection />
 
         {/* ══════════════════════════════════════════════
             QUICK HIGHLIGHTS — 3 blocks: Promos / Nouveautés / Best-sellers
