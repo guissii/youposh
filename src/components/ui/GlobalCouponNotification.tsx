@@ -27,9 +27,10 @@ export function GlobalCouponNotification() {
       return;
     }
 
-    // Check if already dismissed in session
-    const dismissed = sessionStorage.getItem(`yp_dismissed_coupon_${code}`);
-    if (dismissed) {
+    // Check if already dismissed for this specific route (so it reappears on navigation)
+    // "Dynamic" behavior: User wants it to appear when browsing different products
+    const dismissedOnRoute = sessionStorage.getItem(`yp_dismissed_coupon_${code}_${location.pathname}`);
+    if (dismissedOnRoute) {
       return;
     }
 
@@ -42,16 +43,18 @@ export function GlobalCouponNotification() {
     // Fetch details and products
     const loadData = async () => {
       try {
-        // Fetch products for thumbnails
+        // Fetch products for thumbnails - randomized for dynamic feel
         const prods = await fetchTopProducts();
-        setProducts(prods.slice(0, 2));
+        // Shuffle array to show different products
+        const shuffled = prods.sort(() => 0.5 - Math.random());
+        setProducts(shuffled.slice(0, 2));
 
-        // Validate to get details (using a high amount to bypass min order check for display)
+        // Validate to get details
         const res = await validatePromoCode(code, 99999);
         setPromoDetails(res);
         
-        // Show after a small delay
-        setTimeout(() => setIsVisible(true), 1500);
+        // Show after a delay (scroll/interaction simulation)
+        setTimeout(() => setIsVisible(true), 2000);
       } catch (err) {
         console.error('Failed to load global coupon details', err);
       }
@@ -63,7 +66,7 @@ export function GlobalCouponNotification() {
   const handleApply = async () => {
     if (settings.activeGlobalCoupon) {
       await applyPromoCode(settings.activeGlobalCoupon);
-      setIsCartOpen(true); // Open cart to show it applied
+      setIsCartOpen(true);
       setIsVisible(false);
     }
   };
@@ -71,33 +74,34 @@ export function GlobalCouponNotification() {
   const handleDismiss = () => {
     setIsVisible(false);
     if (settings.activeGlobalCoupon) {
-      sessionStorage.setItem(`yp_dismissed_coupon_${settings.activeGlobalCoupon}`, 'true');
+      // Only dismiss for CURRENT route/page
+      sessionStorage.setItem(`yp_dismissed_coupon_${settings.activeGlobalCoupon}_${location.pathname}`, 'true');
     }
   };
 
   if (!isVisible || !promoDetails) return null;
 
   return (
-    <div className="fixed bottom-24 right-4 z-[40] max-w-[320px] w-full animate-in slide-in-from-bottom-5 fade-in duration-500">
-      <div className="bg-[#1A1A1A] text-white rounded-xl shadow-2xl overflow-hidden relative border border-gray-800">
+    <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-[100] max-w-[340px] w-[calc(100%-32px)] animate-in slide-in-from-bottom-10 fade-in duration-700">
+      <div className="bg-[#1A1A1A] text-white rounded-2xl shadow-2xl overflow-hidden relative border border-gray-800/50 backdrop-blur-sm">
         {/* Close button */}
         <button 
           onClick={handleDismiss}
-          className="absolute top-2 right-2 p-1 text-gray-400 hover:text-white transition-colors z-10"
+          className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all z-10"
         >
           <X className="w-4 h-4" />
         </button>
 
-        <div className="p-4">
-          <p className="font-medium text-sm pr-6 mb-3">
-            Votre coupon de <span className="text-[var(--yp-color-posh)] font-bold">{promoDetails.discountValue} {promoDetails.discountType === 'percentage' ? '%' : 'MAD'}</span> vous attend
+        <div className="p-4 sm:p-5">
+          <p className="font-medium text-sm sm:text-base pr-6 mb-4 leading-relaxed">
+            Votre coupon de <span className="text-[var(--yp-color-posh)] font-bold text-lg">{promoDetails.discountValue} {promoDetails.discountType === 'percentage' ? '%' : 'MAD'}</span> vous attend
           </p>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {/* Product Thumbnails */}
-            <div className="flex -space-x-3">
+            <div className="flex -space-x-4">
               {products.map((p, i) => (
-                <div key={p.id} className={`w-12 h-12 rounded-lg border-2 border-[#1A1A1A] overflow-hidden bg-white z-${10-i}`}>
+                <div key={p.id} className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl border-[3px] border-[#1A1A1A] overflow-hidden bg-white shadow-lg relative z-${10-i}`}>
                   <img 
                     src={getImageUrl(p.image)} 
                     alt="" 
@@ -110,7 +114,7 @@ export function GlobalCouponNotification() {
             {/* CTA Button */}
             <button
               onClick={handleApply}
-              className="flex-1 bg-[var(--yp-color-posh)] hover:opacity-90 text-white text-xs font-bold py-2.5 px-3 rounded-lg transition-all shadow-lg active:scale-95 whitespace-nowrap"
+              className="flex-1 bg-[var(--yp-color-posh)] hover:opacity-90 text-white text-sm font-bold py-3 px-4 rounded-xl transition-all shadow-lg shadow-[var(--yp-color-posh)]/20 active:scale-95 whitespace-nowrap"
             >
               Aller au panier
             </button>
