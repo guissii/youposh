@@ -1,13 +1,23 @@
 const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
 
+console.log('API_BASE configured as:', API_BASE);
+
 async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const res = await fetch(`${API_BASE}${endpoint}`, {
         headers: { 'Content-Type': 'application/json' },
         ...options,
     });
     if (!res.ok) {
-        const error = await res.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(error.error || `API error ${res.status}`);
+        // Try to parse JSON error first
+        let errorMessage = `API error ${res.status}`;
+        try {
+            const errorData = await res.json();
+            errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch {
+            // If JSON parsing fails, use status text
+            errorMessage = res.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
     }
     return res.json();
 }
