@@ -5,7 +5,8 @@ import {
   LayoutDashboard, ShoppingBag, Package, Settings,
   LogOut, Search, Bell, DollarSign, Clock, CheckCircle,
   Eye, EyeOff, Plus, Pencil, Trash2, X,
-  TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Image, Check, Stamp
+  TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Image, Check, Stamp,
+  Zap, Flame, Star
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -190,6 +191,22 @@ const AdminPage = () => {
       await updateProduct(id, { isVisible: !product.isVisible });
       loadProducts();
     } catch (e) { console.error(e); }
+  };
+
+  const toggleFlag = async (product: any, flag: string) => {
+    try {
+      const id = Number(product.id);
+      if (isNaN(id)) return;
+      await updateProduct(id, { [flag]: !product[flag] });
+      // Optimistic update or reload
+      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, [flag]: !p[flag] } : p));
+      // loadProducts(); // Optional if we want full sync
+      toast.success('Statut mis à jour');
+    } catch (e) { 
+        console.error(e);
+        toast.error("Erreur lors de la mise à jour");
+        loadProducts(); // Revert on error
+    }
   };
 
   const handleDelete = async () => {
@@ -555,12 +572,40 @@ const AdminPage = () => {
                   <td className="px-4 py-3"><span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${p.stock < 10 ? 'bg-red-100 text-red-600' : p.stock < 30 ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>{p.stock}</span></td>
                   <td className="px-4 py-3 text-sm text-[#666]"><div className="flex items-center gap-1"><TrendingUp className="w-3 h-3 text-green-500" />{p.salesCount}</div></td>
                   <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {p.originalPrice && p.originalPrice > p.price && <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-600">🏷 Promo</span>}
-                      {p.isNew && <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-600">✨ Nouveau</span>}
-                      {p.isBestSeller && <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-600">🔥 Best</span>}
-                      {p.isFeatured && <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-600">⭐ Mis en avant</span>}
-                      {!p.originalPrice && !p.isNew && !p.isBestSeller && !p.isFeatured && <span className="text-xs text-[#ccc]">—</span>}
+                    <div className="flex items-center gap-1">
+                      {/* Promo Badge (Read-only, derived) */}
+                      {p.originalPrice && p.originalPrice > p.price ? (
+                        <span className="px-1.5 py-1 rounded-md text-[10px] font-bold bg-red-100 text-red-600 border border-red-200" title="Promo (Prix barré)">
+                          SALE
+                        </span>
+                      ) : (
+                        <span className="w-8"></span> /* Spacer */
+                      )}
+
+                      {/* Interactive Toggles */}
+                      <button 
+                        onClick={() => toggleFlag(p, 'isNew')}
+                        className={`p-1.5 rounded-md transition-all border ${p.isNew ? 'bg-blue-100 text-blue-600 border-blue-200 shadow-sm' : 'bg-gray-50 text-gray-300 border-transparent hover:bg-gray-100 hover:text-gray-400'}`}
+                        title="Nouveau"
+                      >
+                        <Zap className="w-3.5 h-3.5 fill-current" />
+                      </button>
+
+                      <button 
+                        onClick={() => toggleFlag(p, 'isBestSeller')}
+                        className={`p-1.5 rounded-md transition-all border ${p.isBestSeller ? 'bg-purple-100 text-purple-600 border-purple-200 shadow-sm' : 'bg-gray-50 text-gray-300 border-transparent hover:bg-gray-100 hover:text-gray-400'}`}
+                        title="Best Seller"
+                      >
+                        <Flame className="w-3.5 h-3.5 fill-current" />
+                      </button>
+
+                      <button 
+                        onClick={() => toggleFlag(p, 'isFeatured')}
+                        className={`p-1.5 rounded-md transition-all border ${p.isFeatured ? 'bg-amber-100 text-amber-600 border-amber-200 shadow-sm' : 'bg-gray-50 text-gray-300 border-transparent hover:bg-gray-100 hover:text-gray-400'}`}
+                        title="Mis en avant"
+                      >
+                        <Star className="w-3.5 h-3.5 fill-current" />
+                      </button>
                     </div>
                   </td>
                   <td className="px-4 py-3">

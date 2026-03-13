@@ -226,11 +226,11 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                             .filter(Boolean),
                     }))
                     .filter((v: any) => String(v?.name || '').trim().length > 0 && (Array.isArray(v.options) ? v.options.length > 0 : true)),
-                // These are now handled by algorithm, forces to false
-                isFeatured: false,
-                isNew: false,
-                isBestSeller: false,
-                isPopular: false
+                // Marketing flags
+                isFeatured: form.isFeatured,
+                isNew: form.isNew,
+                isBestSeller: form.isBestSeller,
+                isPopular: form.isPopular
             };
             
             if (isEdit) {
@@ -872,6 +872,24 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                 <input type="checkbox" checked={form.isVisible} onChange={e => setForm(f => ({ ...f, isVisible: e.target.checked }))}
                                     className="w-4 h-4 rounded border-gray-300 text-[var(--yp-blue)] focus:ring-[var(--yp-blue)]" />
                                 <span className="text-sm text-[#666]">👁 Visible sur le site</span>
+                            </label>
+                            
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" checked={form.isNew} onChange={e => setForm(f => ({ ...f, isNew: e.target.checked }))}
+                                    className="w-4 h-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500" />
+                                <span className="text-sm text-[#666]">✨ Nouveau</span>
+                            </label>
+
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" checked={form.isBestSeller} onChange={e => setForm(f => ({ ...f, isBestSeller: e.target.checked }))}
+                                    className="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-500" />
+                                <span className="text-sm text-[#666]">🔥 Best Seller</span>
+                            </label>
+
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" checked={form.isFeatured} onChange={e => setForm(f => ({ ...f, isFeatured: e.target.checked }))}
+                                    className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-500" />
+                                <span className="text-sm text-[#666]">⭐ Mis en avant</span>
                             </label>
                         </div>
                     </div>
