@@ -142,3 +142,38 @@ export const setWatermarkStatusAPI = async (enabled: boolean) => {
         });
     }
 };
+
+// ─── Auth ──────────────────────────────────────────────────────
+export const login = async (email: string, password: string) => {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+    });
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Login failed');
+    }
+    return res.json();
+};
+
+export const register = async (data: any) => {
+    const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Registration failed');
+    }
+    return res.json();
+};
+
+export const getMe = async (token: string) => {
+    const res = await fetch(`${API_BASE}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error('Invalid token');
+    return res.json();
+};
