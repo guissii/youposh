@@ -5,7 +5,7 @@ import {
   LayoutDashboard, ShoppingBag, Package, Settings,
   LogOut, Search, Bell, DollarSign, Clock, CheckCircle,
   Eye, EyeOff, Plus, Pencil, Trash2, X,
-  TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Image, Check, Stamp,
+  TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Check, Stamp,
   Zap, Flame, Star
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -28,12 +28,11 @@ import {
 import { ProductFormModal } from '@/components/admin/ProductFormModal';
 import { PromoFormModal } from '@/components/admin/PromoFormModal';
 import { CategoryFormModal } from '@/components/admin/CategoryFormModal';
-import { loadHeroSettings, saveHeroSettings, fetchHeroSettingsGlobal, type HeroSettings } from '@/data/heroSettings';
 import { loadStoreSettings, saveStoreSettings, fetchStoreSettingsGlobal } from '@/data/storeSettings';
 import { getImageUrl } from '@/lib/utils';
 import * as XLSX from 'xlsx';
 
-type TabId = 'dashboard' | 'orders' | 'products' | 'categories' | 'promos' | 'hero' | 'watermark' | 'settings';
+type TabId = 'dashboard' | 'orders' | 'products' | 'categories' | 'promos' | 'watermark' | 'settings';
 
 const AdminPage = () => {
   const { t } = useTranslation();
@@ -162,9 +161,6 @@ const AdminPage = () => {
     if (activeTab === 'settings' || activeTab === 'watermark') {
       loadPromoCodes(); // For global coupon selector
       fetchStoreSettingsGlobal().then(setStoreForm);
-    }
-    if (activeTab === 'hero') {
-      fetchHeroSettingsGlobal().then(setHeroForm);
     }
   }, [activeTab]);
 
@@ -1017,128 +1013,6 @@ const AdminPage = () => {
     </div>
   );
 
-  // ─── Hero Section ──────────────────────────────────────────
-  const [heroForm, setHeroForm] = useState<HeroSettings>(loadHeroSettings());
-  const [heroSaved, setHeroSaved] = useState(false);
-
-  const handleHeroSave = async () => {
-    try {
-      await saveHeroSettings(heroForm);
-      setHeroSaved(true);
-      setTimeout(() => setHeroSaved(false), 2000);
-    } catch (e) {
-      toast.error('Erreur lors de la sauvegarde');
-    }
-  };
-
-  const heroInput = (label: string, key: keyof HeroSettings, type: string = 'text', placeholder = '') => (
-    <div>
-      <label className="block text-sm font-medium text-[#666] mb-1">{label}</label>
-      <input
-        type={type}
-        value={heroForm[key] as string}
-        onChange={e => setHeroForm(f => ({ ...f, [key]: e.target.value }))}
-        className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)] text-sm"
-        placeholder={placeholder}
-      />
-    </div>
-  );
-
-  const heroCheckbox = (label: string, key: keyof HeroSettings) => (
-    <label className="flex items-center gap-2 cursor-pointer">
-      <input
-        type="checkbox"
-        checked={heroForm[key] as boolean}
-        onChange={e => setHeroForm(f => ({ ...f, [key]: e.target.checked }))}
-        className="w-4 h-4 rounded border-gray-300 text-[var(--yp-blue)] focus:ring-[var(--yp-blue)]"
-      />
-      <span className="text-sm text-[#666]">{label}</span>
-    </label>
-  );
-
-  const renderHero = () => (
-    <div className="space-y-6">
-      {heroSaved && (
-        <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-xl text-sm flex items-center gap-2">
-          <CheckCircle className="w-4 h-4" /> Hero sauvegardé ! Rechargez la page d'accueil pour voir les changements.
-        </div>
-      )}
-
-      {/* Content */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h3 className="font-semibold text-[#333] mb-4 flex items-center gap-2"><Image className="w-5 h-5 text-[var(--yp-blue)]" /> Contenu Hero</h3>
-        <div className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            {heroInput('Badge', 'badgeText', 'text', 'Boutique N°1 au Maroc')}
-            {heroInput('Slogan de marque', 'slogan', 'text', 'Votre boutique tendance au Maroc')}
-          </div>
-          {heroInput('Titre principal', 'title', 'text', 'Des produits tendance...')}
-          <div>
-            <label className="block text-sm font-medium text-[#666] mb-1">Sous-titre</label>
-            <textarea
-              rows={2}
-              value={heroForm.subtitle}
-              onChange={e => setHeroForm(f => ({ ...f, subtitle: e.target.value }))}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)] text-sm resize-none"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* CTAs */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h3 className="font-semibold text-[#333] mb-4">Boutons d'action (CTA)</h3>
-        <div className="grid md:grid-cols-2 gap-4">
-          {heroInput('Texte bouton principal', 'primaryCtaText', 'text', 'Explorer la boutique')}
-          {heroInput('Lien bouton principal', 'primaryCtaLink', 'text', '/shop')}
-          {heroInput('Texte bouton secondaire', 'secondaryCtaText', 'text', 'Voir les promotions')}
-          {heroInput('Lien bouton secondaire', 'secondaryCtaLink', 'text', '/shop?filter=promo')}
-        </div>
-      </div>
-
-      {/* Video */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h3 className="font-semibold text-[#333] mb-4">Vidéo Hero</h3>
-        <div className="grid md:grid-cols-2 gap-4">
-          {heroInput('URL de la vidéo', 'videoUrl', 'text', '/videos/demo.mp4')}
-          {heroInput('Image poster (fallback)', 'videoPosterUrl', 'text', '/images/products/headphones.jpg')}
-        </div>
-        <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4">
-          {heroCheckbox('✅ Activer la vidéo', 'videoEnabled')}
-          {heroCheckbox('▶️ Autoplay', 'videoAutoplay')}
-          {heroCheckbox('🔇 Sourdine par défaut', 'videoMuted')}
-          {heroCheckbox('🔁 Boucle', 'videoLoop')}
-          {heroCheckbox('📱 Afficher sur mobile', 'showOnMobile')}
-        </div>
-        {/* Overlay opacity */}
-        <div className="mt-4">
-          <label className="block text-sm font-medium text-[#666] mb-1">Opacité overlay : {heroForm.overlayOpacity}%</label>
-          <input
-            type="range"
-            min={0} max={100} step={5}
-            value={heroForm.overlayOpacity}
-            onChange={e => setHeroForm(f => ({ ...f, overlayOpacity: Number(e.target.value) }))}
-            className="w-full accent-[var(--yp-blue)]"
-          />
-          <div className="flex justify-between text-[10px] text-[#999] mt-1"><span>Clair</span><span>Sombre</span></div>
-        </div>
-        {/* Preview */}
-        {heroForm.videoPosterUrl && (
-          <div className="mt-4">
-            <p className="text-xs text-[#999] mb-2">Aperçu poster :</p>
-            <div className="w-[120px] aspect-[9/16] rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
-              <img src={heroForm.videoPosterUrl} alt="Preview" className="w-full h-full object-cover" />
-            </div>
-          </div>
-        )}
-      </div>
-
-      <button onClick={handleHeroSave} className="px-6 py-3 bg-[var(--yp-blue)] text-white rounded-xl hover:bg-[var(--yp-blue-dark)] font-semibold flex items-center gap-2 shadow-sm">
-        <Save className="w-4 h-4" /> Sauvegarder le Hero
-      </button>
-    </div>
-  );
-
   // ─── Order Detail Modal ─────────────────────────────────────
   const renderOrderDetail = () => {
     if (!orderDetail) return null;
@@ -1187,12 +1061,11 @@ const AdminPage = () => {
     { id: 'products', label: t('products'), icon: Package },
     { id: 'categories', label: 'Catégories', icon: FolderOpen },
     { id: 'promos', label: 'Codes Promo', icon: Ticket },
-    { id: 'hero', label: 'Hero Section', icon: Image },
     { id: 'watermark', label: 'Watermark', icon: Stamp },
     { id: 'settings', label: t('settings'), icon: Settings },
   ];
 
-  const tabTitles: Record<TabId, string> = { dashboard: t('dashboard'), orders: t('orders'), products: t('products'), categories: 'Catégories', promos: 'Codes Promo', hero: 'Hero Section', watermark: 'Watermark', settings: t('settings') };
+  const tabTitles: Record<TabId, string> = { dashboard: t('dashboard'), orders: t('orders'), products: t('products'), categories: 'Catégories', promos: 'Codes Promo', watermark: 'Watermark', settings: t('settings') };
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex">
@@ -1230,7 +1103,6 @@ const AdminPage = () => {
           {activeTab === 'products' && renderProducts()}
           {activeTab === 'categories' && renderCategories()}
           {activeTab === 'promos' && renderPromoCodes()}
-          {activeTab === 'hero' && renderHero()}
       {activeTab === 'watermark' && renderWatermark()}
       {activeTab === 'settings' && renderSettings()}
     </div>
