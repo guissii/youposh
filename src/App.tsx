@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { Suspense, lazy } from 'react';
 import './i18n';
@@ -10,11 +10,14 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { GlobalCouponNotification } from '@/components/ui/GlobalCouponNotification';
 import PremiumLoader from '@/components/ui/PremiumLoader';
 
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('@/pages/HomePage'));
 const ShopPage = lazy(() => import('@/pages/ShopPage'));
 const ProductPage = lazy(() => import('@/pages/ProductPage'));
 const AdminPage = lazy(() => import('@/pages/AdminPage'));
+const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const FAQPage = lazy(() => import('@/pages/FAQPage'));
 const ShippingPage = lazy(() => import('@/pages/ShippingPage'));
 
@@ -48,7 +51,13 @@ function App() {
                 <Route path="/bestsellers" element={<ShopPage />} />
                 <Route path="/new" element={<ShopPage />} />
                 <Route path="/product/:id" element={<ProductPage />} />
-                <Route path="/admin" element={<AdminPage />} />
+                
+                {/* Admin Auth Routes */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<Navigate to="/login" replace />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/admin" element={<AdminPage />} />
+                </Route>
 
                 {/* Fallback routes */}
                 <Route path="/wishlist" element={<HomePage />} />
@@ -61,6 +70,9 @@ function App() {
                 <Route path="/contact" element={<HomePage />} />
                 <Route path="/terms" element={<HomePage />} />
                 <Route path="/privacy" element={<HomePage />} />
+                
+                {/* Catch all - Redirect to Home */}
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
           </ErrorBoundary>

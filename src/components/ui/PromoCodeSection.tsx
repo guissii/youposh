@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, ArrowLeft, Sparkles, Gift } from 'lucide-react';
+import { Check, ArrowLeft, Sparkles } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
 
 const PromoCodeSection = () => {
@@ -112,7 +112,7 @@ const PromoCodeSection = () => {
             >
               <div className="absolute inset-0 bg-deco-gold/20 rounded-full blur-2xl" />
               <div className="relative w-full h-full bg-gradient-to-br from-deco-orange to-deco-mint rounded-2xl shadow-lg flex items-center justify-center border border-white/20">
-                <Gift className="w-12 h-12 md:w-16 md:h-16 text-white drop-shadow-md" strokeWidth={1.5} />
+                <span className="text-5xl md:text-6xl drop-shadow-md filter grayscale-0">🎁</span>
                 {isHovered && (
                   <motion.div
                     className="absolute inset-0 rounded-2xl border-2 border-deco-gold opacity-50"
