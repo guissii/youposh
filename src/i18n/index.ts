@@ -253,7 +253,7 @@ const resources = {
       heroSlogan: 'يوبوش — علامة مغربية 100%',
       heroBadgeTitle: 'رقم 1 فالمغرب',
       heroTitle: 'YOUPOSH الجودة والضمان بأقل ثمن',
-      heroSubtitle: 'إكسسوارات عملية، جديدة، ومعزولة بعناية باش توصلك تال باب الدار فأي مدينة فالمغرب.',
+      heroSubtitle: 'إكسسوارات عملية، جديدة، ومعزولة بعناية باش توصلك تال باب الدار فأي مدينة فالمغرب',
       heroPrimaryCta: 'تصفح المتجر',
       heroSecondaryCta: 'شوف التخفيضات',
       specialOffer: 'عرض خاص',
