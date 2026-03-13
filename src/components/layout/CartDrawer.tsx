@@ -80,18 +80,18 @@ export default function CartDrawer() {
 
     // 2) Open WhatsApp
     const itemsList = cart.map(item =>
-      `- ${item.product.name} x${item.quantity} = ${item.product.price * item.quantity} dh\n  🔗 ${window.location.origin}/product/${item.product.id}`
+      `- ${item.product.name} x${item.quantity} = ${item.product.price * item.quantity} dh\n  URL: ${window.location.origin}/product/${item.product.id}`
     ).join('\n');
 
     const message = `Bonjour, je souhaite commander :
 
 ${itemsList}
 
-💵 Sous-total: ${cartTotal} dh
-${promoStatus === 'applied' && promoCode && promoDiscount > 0 ? `🎟️ Code promo (${promoCode}): -${promoDiscount} dh\n` : ''}🚚 Livraison: ${deliveryFee} dh
-💰 Total: ${grandTotal} dh
+Sous-total: ${cartTotal} dh
+${promoStatus === 'applied' && promoCode && promoDiscount > 0 ? `Code promo (${promoCode}): -${promoDiscount} dh\n` : ''}Livraison: ${deliveryFee} dh
+Total: ${grandTotal} dh
 
-👤 Mes informations :
+Mes informations :
 Nom: ${customerName}
 Téléphone: ${customerPhone}
 Ville: ${customerCity}
