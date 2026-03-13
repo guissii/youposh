@@ -202,9 +202,9 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                 ...form,
                 image: finalImageUrl,
                 images: finalImagesArray,
-                price: Number(form.price),
-                originalPrice: form.originalPrice ? Number(form.originalPrice) : null,
-                stock: Number(form.stock),
+                price: Math.max(0, Number(form.price)),
+                originalPrice: form.originalPrice ? Math.max(0, Number(form.originalPrice)) : null,
+                stock: Math.max(0, Number(form.stock)),
                 sortOrder: Number(form.sortOrder),
                 cardZoom: Number(form.cardZoom),
                 cardFocalX: Number(form.cardFocalX),
@@ -232,8 +232,14 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                 isBestSeller: false,
                 isPopular: false
             };
-            if (isEdit) await updateProduct(product.id, data);
-            else await createProduct(data);
+            
+            if (isEdit) {
+                const id = Number(product.id);
+                if (isNaN(id)) throw new Error("ID produit invalide");
+                await updateProduct(id, data);
+            } else {
+                await createProduct(data);
+            }
             onSave();
         } catch (error: any) {
             console.error('Error saving product:', error);

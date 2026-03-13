@@ -30,12 +30,12 @@ const resources = {
       deliveryTime: '24-48h',
 
       // Hero
-      heroSlogan: 'YOUPOSH — Marque 100% Marocaine',
+      heroSlogan: '100% web uniquement – sur notre site',
       heroBadgeTitle: 'N°1 au Maroc',
-      heroTitle: 'YOUPOSH Qualité et Garantie au meilleur prix',
-      heroSubtitle: 'Des accessoires pratiques, nouveaux et soigneusement sélectionnés pour arriver jusqu\'à votre porte partout au Maroc.',
-      heroPrimaryCta: 'Parcourir la boutique',
-      heroSecondaryCta: 'Voir les promotions',
+      heroTitle: 'YOUPOSH La qualité et la sincérité sont les piliers du succès',
+      heroSubtitle: 'Découvrez - un monde sans frontières. Notre site offre une expérience inoubliable. Haute qualité et concise.',
+      heroPrimaryCta: 'Voir les fonctionnalités %',
+      heroSecondaryCta: 'Télécharger le fichier',
       specialOffer: 'Offre spéciale',
       newCollection: 'Nouvelle collection',
       shopNow: 'Acheter maintenant',

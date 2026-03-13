@@ -184,14 +184,22 @@ const AdminPage = () => {
   );
 
   const toggleVisibility = async (product: any) => {
-    try { await updateProduct(product.id, { isVisible: !product.isVisible }); loadProducts(); } catch (e) { console.error(e); }
+    try {
+      const id = Number(product.id);
+      if (isNaN(id)) return;
+      await updateProduct(id, { isVisible: !product.isVisible });
+      loadProducts();
+    } catch (e) { console.error(e); }
   };
 
   const handleDelete = async () => {
     if (!deleteConfirm) return;
     try {
       if (deleteConfirm.type === 'product') {
-        await deleteProduct(deleteConfirm.id);
+        const id = Number(deleteConfirm.id);
+        if (isNaN(id)) throw new Error('ID produit invalide');
+        
+        await deleteProduct(id);
         toast.success('Produit supprimé avec succès');
         loadProducts();
       }
@@ -593,7 +601,10 @@ const AdminPage = () => {
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button onClick={() => setCategoryModal({ open: true, category: c })} className="p-1.5 hover:bg-blue-50 rounded-lg text-[#999] hover:text-blue-600"><Pencil className="w-3.5 h-3.5" /></button>
-                <button onClick={() => setDeleteConfirm({ type: 'category', id: c.id })} className="p-1.5 hover:bg-red-50 rounded-lg text-[#999] hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                <button onClick={() => {
+                  const id = Number(c.id);
+                  if (!isNaN(id)) setDeleteConfirm({ type: 'category', id });
+                }} className="p-1.5 hover:bg-red-50 rounded-lg text-[#999] hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
               </div>
             </div>
             <div className="flex items-center justify-between text-xs">

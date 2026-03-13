@@ -45,6 +45,8 @@ export const updateProduct = (id: number, data: any) =>
     apiFetch<any>(`/products/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const deleteProduct = (id: number) =>
     apiFetch<any>(`/products/${id}`, { method: 'DELETE' });
+export const deleteProductImage = (productId: number, imageId: string) =>
+    apiFetch<any>(`/products/${productId}/images/${imageId}`, { method: 'DELETE' });
 
 // ─── Orders ────────────────────────────────────────────────────
 export const fetchOrders = (params?: string) =>

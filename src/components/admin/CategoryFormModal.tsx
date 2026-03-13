@@ -112,7 +112,11 @@ export const CategoryFormModal = ({ category, onClose, onSave }: Props) => {
                 })).filter((a: any) => a.name.length > 0),
             };
 
-            if (isEdit) await updateCategory(category.id, data);
+            if (isEdit) {
+                const id = Number(category.id);
+                if (isNaN(id)) throw new Error("ID catégorie invalide");
+                await updateCategory(id, data);
+            }
             else await createCategory(data);
             onSave();
         } catch (error: any) {

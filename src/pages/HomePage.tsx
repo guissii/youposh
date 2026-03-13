@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
+  ArrowLeft, // Changed to ArrowLeft as requested
   ArrowRight,
   Flame, TrendingUp, Percent, Sparkles,
 } from 'lucide-react';
@@ -58,70 +59,70 @@ export default function HomePage() {
 
       <main className="pb-20">
         {/* ══════════════════════════════════════════════
-            HERO — Full-bleed immersive video background
+            HERO — Minimalist Blue Gradient Design
             ══════════════════════════════════════════════ */}
-        <section className="relative min-h-[80dvh] sm:min-h-[70vh] lg:min-h-[80vh] flex items-center overflow-hidden bg-black">
-          {/* Premium gradient background */}
-          <div
-            className="absolute inset-0 w-full h-full"
-            style={{
-              background: 'linear-gradient(135deg, #0F172A 0%, #1e3a5f 40%, var(--yp-blue) 100%)',
-            }}
-          />
+        <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-[#0f172a]">
+          {/* Smooth Blue Gradient Background */}
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-[#0f172a] via-[#1e3a8a] to-[#3b82f6]" />
+          
+          {/* Subtle noise/texture overlay for depth */}
+          <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
 
-          {/* Content — superimposed over gradient */}
-          <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-20 text-center">
-            <div className="max-w-3xl mx-auto">
-              {/* Slogan */}
-              <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.28em] text-white/80 font-semibold mb-3 sm:mb-4">
-                {t('heroSlogan')}
-              </p>
+          {/* Top Right Slogan */}
+          <div className="absolute top-6 right-6 sm:top-10 sm:right-10 z-20">
+            <p className="text-white/80 text-xs sm:text-sm font-medium tracking-wide border-b border-white/20 pb-1">
+              {t('heroSlogan')}
+            </p>
+          </div>
 
-              {/* Badge */}
-              <span className="inline-flex items-center gap-2 sm:gap-2.5 bg-white/10 text-white px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-sm font-semibold border border-white/15 mb-4 sm:mb-6">
-                <span className="inline-flex items-center justify-center w-[18px] h-[12px] rounded-sm overflow-hidden border border-white/25">
-                  <svg viewBox="0 0 18 12" className="w-full h-full">
-                    <rect x="0" y="0" width="18" height="12" fill="#c1272d" />
-                    <path
-                      d="M9 2.1 L10.4 6.1 L14.7 6.1 L11.2 8.5 L12.6 12.5 L9 10.1 L5.4 12.5 L6.8 8.5 L3.3 6.1 L7.6 6.1 Z"
-                      fill="none"
-                      stroke="#006233"
-                      strokeWidth="1.1"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+          {/* Content Container */}
+          <div className="relative z-10 w-full max-w-5xl mx-auto px-6 sm:px-8 text-center flex flex-col items-center">
+            
+            {/* Badge: "Favorite Room 1" / N°1 au Maroc */}
+            <div className="mb-8 animate-fade-in-up">
+              <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md text-white px-5 py-2 rounded-full text-sm font-semibold border border-white/20 shadow-lg hover:bg-white/15 transition-colors cursor-default">
+                <span className="flex items-center justify-center w-5 h-5 bg-white rounded-full text-[var(--yp-red)]">
+                   <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-red-600">
+                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                   </svg>
                 </span>
                 {t('heroBadgeTitle')}
               </span>
-
-              {/* Title */}
-              <h1 className="text-[22px] sm:text-4xl lg:text-6xl font-extrabold text-white leading-[1.15] font-heading max-w-4xl mx-auto mb-3 sm:mb-5">
-                {t('heroTitle')}
-              </h1>
-
-              {/* Subtitle */}
-              <p className="text-xs sm:text-base lg:text-lg text-white/75 max-w-2xl mx-auto leading-relaxed mb-5 sm:mb-8 font-medium">
-                {t('heroSubtitle')}
-              </p>
-
-              {/* CTA buttons */}
-              <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-2.5 sm:gap-3 px-4 sm:px-0">
-                <button
-                  onClick={() => navigate(heroSettings.primaryCtaLink)}
-                  className="bg-white hover:bg-white/90 text-[var(--yp-dark)] px-5 sm:px-7 py-3 sm:py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 text-[13px] sm:text-sm transition-all active:scale-[0.97]"
-                >
-                  {t('heroPrimaryCta')}
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => navigate(heroSettings.secondaryCtaLink)}
-                  className="bg-white/15 hover:bg-white/25 text-white px-5 sm:px-7 py-3 sm:py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 text-[13px] sm:text-sm transition-all border border-white/20"
-                >
-                  <Percent className="w-4 h-4" />
-                  {t('heroSecondaryCta')}
-                </button>
-              </div>
             </div>
+
+            {/* Main Title */}
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 drop-shadow-sm font-sans tracking-tight animate-fade-in-up delay-100">
+              YOUPOSH <br className="hidden sm:block" />
+              <span className="text-3xl sm:text-4xl lg:text-5xl font-normal block mt-4 text-blue-100">
+                {t('heroTitle').replace('YOUPOSH ', '')}
+              </span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-lg sm:text-xl text-blue-50/90 max-w-3xl mx-auto leading-relaxed mb-10 font-light animate-fade-in-up delay-200">
+              {t('heroSubtitle')}
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-5 w-full animate-fade-in-up delay-300">
+              {/* Primary: White with Blue text */}
+              <button
+                onClick={() => navigate(heroSettings.primaryCtaLink)}
+                className="group w-full sm:w-auto bg-white hover:bg-blue-50 text-blue-700 px-8 py-4 rounded-full font-bold text-base sm:text-lg shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                {t('heroPrimaryCta')}
+              </button>
+
+              {/* Secondary: Transparent Blue with White text */}
+              <button
+                onClick={() => navigate(heroSettings.secondaryCtaLink)}
+                className="group w-full sm:w-auto bg-blue-600/20 hover:bg-blue-600/30 text-white px-8 py-4 rounded-full font-medium text-base sm:text-lg border border-white/20 backdrop-blur-sm transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                {t('heroSecondaryCta')}
+              </button>
+            </div>
+
           </div>
         </section>
 
