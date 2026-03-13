@@ -7,6 +7,37 @@ const router = Router();
 
 const SHEETS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 
+function loadGooglePrivateKey(): string {
+  const base64 =
+    process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
+    process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64;
+
+  const raw =
+    process.env.GOOGLE_PRIVATE_KEY ||
+    process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
+
+  let key: string | undefined;
+  if (base64) {
+    key = Buffer.from(String(base64), 'base64').toString('utf8');
+  } else if (raw) {
+    key = String(raw);
+  }
+
+  if (!key) {
+    throw new Error(
+      'Missing env: GOOGLE_PRIVATE_KEY / GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY (or *_BASE64)'
+    );
+  }
+
+  return String(key)
+    .replace(/^\s*["']|["']\s*$/g, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .replace(/\\\\n/g, '\n')
+    .replace(/\\n/g, '\n')
+    .trim();
+}
+
 function getEnv(name: string): string {
   const v = process.env[name];
   if (!v) throw new Error(`Missing env: ${name}`);
@@ -16,14 +47,7 @@ function getEnv(name: string): string {
 async function getSheetsClient() {
   const spreadsheetId = getEnv('GOOGLE_SHEETS_SPREADSHEET_ID');
   const clientEmail = getEnv('GOOGLE_SERVICE_ACCOUNT_EMAIL');
-  const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
-  if (!privateKeyRaw) throw new Error('Missing env: GOOGLE_PRIVATE_KEY (or GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY)');
-  const privateKey = String(privateKeyRaw)
-    .replace(/^\s*["']|["']\s*$/g, '')
-    .replace(/\r\n/g, '\n')
-    .replace(/\r/g, '\n')
-    .replace(/\\n/g, '\n')
-    .trim();
+  const privateKey = loadGooglePrivateKey();
 
   const auth = new google.auth.JWT({
     email: clientEmail,
@@ -137,7 +161,11 @@ router.get('/sheets-health', async (_req, res) => {
   try {
     const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
     const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-    const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
+    const privateKeyRaw =
+      process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
+      process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64 ||
+      process.env.GOOGLE_PRIVATE_KEY ||
+      process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
 
     if (!spreadsheetId || !clientEmail || !privateKeyRaw) {
       return res.status(400).json({
@@ -147,6 +175,9 @@ router.get('/sheets-health', async (_req, res) => {
           hasSpreadsheetId: Boolean(spreadsheetId),
           hasClientEmail: Boolean(clientEmail),
           hasPrivateKey: Boolean(privateKeyRaw),
+          hasPrivateKeyBase64: Boolean(
+            process.env.GOOGLE_PRIVATE_KEY_BASE64 || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64
+          ),
         },
       });
     }
@@ -172,6 +203,12 @@ router.get('/sheets-health', async (_req, res) => {
       spreadsheetTitle: meta.data.properties?.title ?? null,
       tabs: (meta.data.sheets ?? []).map(s => s.properties?.title).filter(Boolean),
       writeTest: { sheet: testSheetTitle, cell: 'A1' },
+      env: {
+        hasPrivateKeyBase64: Boolean(
+          process.env.GOOGLE_PRIVATE_KEY_BASE64 || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64
+        ),
+        privateKeyLooksLikePem: String(loadGooglePrivateKey()).includes('BEGIN PRIVATE KEY'),
+      },
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

@@ -20,7 +20,28 @@ function warnSheetsEnvMissing() {
     if (didWarnSheetsEnvMissing)
         return;
     didWarnSheetsEnvMissing = true;
-    console.warn('Google Sheets sync skipped: missing env vars (GOOGLE_SHEETS_SPREADSHEET_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY or GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY)');
+    console.warn('Google Sheets sync skipped: missing env vars (GOOGLE_SHEETS_SPREADSHEET_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY / GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY or *_BASE64)');
+}
+function loadGooglePrivateKey() {
+    const base64 = process.env.GOOGLE_PRIVATE_KEY_BASE64 || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64;
+    const raw = process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
+    let key;
+    if (base64) {
+        key = Buffer.from(String(base64), 'base64').toString('utf8');
+    }
+    else if (raw) {
+        key = String(raw);
+    }
+    if (!key) {
+        throw new Error('Google Sheets env vars missing');
+    }
+    return String(key)
+        .replace(/^\s*["']|["']\s*$/g, '')
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .replace(/\\\\n/g, '\n')
+        .replace(/\\n/g, '\n')
+        .trim();
 }
 function getDeliveryStatusFromOrderStatus(status) {
     if (status === 'shipped')
@@ -33,16 +54,14 @@ function getSheetsClient() {
     return __awaiter(this, void 0, void 0, function* () {
         const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
         const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-        const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
+        const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
+            process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64 ||
+            process.env.GOOGLE_PRIVATE_KEY ||
+            process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
         if (!spreadsheetId || !clientEmail || !privateKeyRaw) {
             throw new Error('Google Sheets env vars missing');
         }
-        const privateKey = String(privateKeyRaw)
-            .replace(/^\s*["']|["']\s*$/g, '')
-            .replace(/\r\n/g, '\n')
-            .replace(/\r/g, '\n')
-            .replace(/\\n/g, '\n')
-            .trim();
+        const privateKey = loadGooglePrivateKey();
         const auth = new googleapis_1.google.auth.JWT({
             email: clientEmail,
             key: privateKey,
