@@ -27,8 +27,8 @@ import {
 import { ProductFormModal } from '@/components/admin/ProductFormModal';
 import { PromoFormModal } from '@/components/admin/PromoFormModal';
 import { CategoryFormModal } from '@/components/admin/CategoryFormModal';
-import { loadHeroSettings, saveHeroSettings, type HeroSettings } from '@/data/heroSettings';
-import { loadStoreSettings, saveStoreSettings } from '@/data/storeSettings';
+import { loadHeroSettings, saveHeroSettings, fetchHeroSettingsGlobal, type HeroSettings } from '@/data/heroSettings';
+import { loadStoreSettings, saveStoreSettings, fetchStoreSettingsGlobal } from '@/data/storeSettings';
 import { getImageUrl } from '@/lib/utils';
 import * as XLSX from 'xlsx';
 
@@ -67,7 +67,28 @@ const AdminPage = () => {
   // ─── Loaders ────────────────────────────────────────────────
   const loadDashboard = useCallback(async () => {
     setLoading(true);
-    try { const [s, ro, tp] = await Promise.all([fetchDashboardStats(), fetchRecentOrders(), fetchTopProducts()]); setStats(s); setRecentOrders(ro); setTopProducts(tp); } catch (e) { console.error(e); }
+    try {
+      const statsData = await fetchDashboardStats().catch(err => {
+        console.error("Failed to load stats", err);
+        return null;
+      });
+      if (statsData) setStats(statsData);
+
+      const recentOrdersData = await fetchRecentOrders().catch(err => {
+        console.error("Failed to load recent orders", err);
+        return [];
+      });
+      if (Array.isArray(recentOrdersData)) setRecentOrders(recentOrdersData);
+
+      const topProductsData = await fetchTopProducts().catch(err => {
+        console.error("Failed to load top products", err);
+        return [];
+      });
+      if (Array.isArray(topProductsData)) setTopProducts(topProductsData);
+    } catch (e) {
+      console.error(e);
+      toast.error("Erreur lors du chargement du tableau de bord");
+    }
     setLoading(false);
   }, []);
 
@@ -75,27 +96,57 @@ const AdminPage = () => {
     setLoading(true);
     try {
       const query = searchQuery ? `search=${encodeURIComponent(searchQuery)}&all=true` : 'all=true';
-      setProducts(await fetchProducts(query));
-    } catch (e) { console.error(e); }
+      const data = await fetchProducts(query);
+      setProducts(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error(e);
+      toast.error("Impossible de charger les produits");
+    }
     setLoading(false);
   }, [searchQuery]);
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
-    try { const p = new URLSearchParams(); if (statusFilter) p.set('status', statusFilter); if (searchQuery) p.set('search', searchQuery); setOrders(await fetchOrders(p.toString())); } catch (e) { console.error(e); }
+    try {
+      const p = new URLSearchParams();
+      if (statusFilter) p.set('status', statusFilter);
+      if (searchQuery) p.set('search', searchQuery);
+      const data = await fetchOrders(p.toString());
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error(e);
+      toast.error("Impossible de charger les commandes");
+    }
     setLoading(false);
   }, [statusFilter, searchQuery]);
 
   const loadCategories = useCallback(async () => {
     setLoading(true);
-    try { setCategories(await fetchCategories()); } catch (e) { console.error(e); }
+    try {
+      const data = await fetchCategories();
+      setCategories(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error(e);
+      toast.error("Impossible de charger les catégories");
+    }
     setLoading(false);
   }, []);
 
   const loadPromoCodes = useCallback(async () => {
     setLoading(true);
-    try { setPromoCodes(await fetchPromoCodes()); } catch (e) { console.error(e); }
+    try {
+      const data = await fetchPromoCodes();
+      setPromoCodes(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error(e);
+      toast.error("Impossible de charger les codes promo");
+    }
     setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    // Initial load for sidebar branding
+    fetchStoreSettingsGlobal().then(setStoreForm);
   }, []);
 
   useEffect(() => {
@@ -104,7 +155,16 @@ const AdminPage = () => {
     if (activeTab === 'products') loadProducts();
     if (activeTab === 'orders') loadOrders();
     if (activeTab === 'categories') loadCategories();
-    if (activeTab === 'promos' || activeTab === 'settings') loadPromoCodes();
+    if (activeTab === 'promos') loadPromoCodes();
+    
+    // Refresh settings when entering relevant tabs
+    if (activeTab === 'settings' || activeTab === 'watermark') {
+      loadPromoCodes(); // For global coupon selector
+      fetchStoreSettingsGlobal().then(setStoreForm);
+    }
+    if (activeTab === 'hero') {
+      fetchHeroSettingsGlobal().then(setHeroForm);
+    }
   }, [activeTab]);
 
   useEffect(() => {

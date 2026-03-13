@@ -18,9 +18,8 @@ import { loadHeroSettings } from '@/data/heroSettings';
 
 
 export default function HomePage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const isAr = i18n.language === 'ar';
   const heroSettings = loadHeroSettings();
 
   const flashRef = useScrollReveal();
@@ -75,7 +74,7 @@ export default function HomePage() {
             <div className="max-w-3xl mx-auto">
               {/* Slogan */}
               <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.28em] text-white/80 font-semibold mb-3 sm:mb-4">
-                {isAr ? 'علامة مغربية رائدة' : 'YOUPOSH — MARQUE MAROCAINE'}
+                {t('heroSlogan')}
               </p>
 
               {/* Badge */}
@@ -111,7 +110,7 @@ export default function HomePage() {
                   onClick={() => navigate(heroSettings.primaryCtaLink)}
                   className="bg-white hover:bg-white/90 text-[var(--yp-dark)] px-5 sm:px-7 py-3 sm:py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 text-[13px] sm:text-sm transition-all active:scale-[0.97]"
                 >
-                  {heroSettings.primaryCtaText}
+                  {t('heroPrimaryCta')}
                   <ArrowRight className="w-4 h-4" />
                 </button>
                 <button
@@ -119,7 +118,7 @@ export default function HomePage() {
                   className="bg-white/15 hover:bg-white/25 text-white px-5 sm:px-7 py-3 sm:py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 text-[13px] sm:text-sm transition-all border border-white/20"
                 >
                   <Percent className="w-4 h-4" />
-                  {heroSettings.secondaryCtaText}
+                  {t('heroSecondaryCta')}
                 </button>
               </div>
             </div>

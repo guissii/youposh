@@ -30,10 +30,12 @@ const resources = {
       deliveryTime: '24-48h',
 
       // Hero
-      heroSlogan: 'UNE MARQUE MAROCAINE',
+      heroSlogan: 'YOUPOSH — Marque 100% Marocaine',
       heroBadgeTitle: 'N°1 au Maroc',
-      heroTitle: 'Des produits tendance pour votre quotidien',
-      heroSubtitle: 'Des accessoires utiles, modernes et soigneusement sélectionnés pour vous, livrés partout au Maroc.',
+      heroTitle: 'YOUPOSH Qualité et Garantie au meilleur prix',
+      heroSubtitle: 'Des accessoires pratiques, nouveaux et soigneusement sélectionnés pour arriver jusqu\'à votre porte partout au Maroc.',
+      heroPrimaryCta: 'Parcourir la boutique',
+      heroSecondaryCta: 'Voir les promotions',
       specialOffer: 'Offre spéciale',
       newCollection: 'Nouvelle collection',
       shopNow: 'Acheter maintenant',
@@ -246,10 +248,12 @@ const resources = {
       deliveryTime: '24-48 ساعة',
 
       // Hero
-      heroSlogan: 'علامة تجارية مغربية',
-      heroBadgeTitle: 'رقم 1 في المغرب',
-      heroTitle: 'منتجات عصرية لحياتك اليومية',
-      heroSubtitle: 'إكسسوارات مفيدة ومختارة بعناية، مع توصيل لجميع أنحاء المغرب.',
+      heroSlogan: 'يوبوش — علامة مغربية 100%',
+      heroBadgeTitle: 'رقم 1 فالمغرب',
+      heroTitle: 'YOUPOSH الجودة والضمان بأقل ثمن',
+      heroSubtitle: 'إكسسوارات عملية، جديدة، ومعزولة بعناية باش توصلك تال باب الدار فأي مدينة فالمغرب.',
+      heroPrimaryCta: 'تصفح المتجر',
+      heroSecondaryCta: 'شوف التخفيضات',
       specialOffer: 'عرض خاص',
       newCollection: 'تشكيلة جديدة',
       shopNow: 'تسوق الآن',

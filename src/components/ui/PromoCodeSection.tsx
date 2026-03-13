@@ -164,7 +164,7 @@ const PromoCodeSection = () => {
                   whileTap={{ scale: 0.98 }}
                 >
                   <span className="relative z-10 flex items-center gap-2">
-                    تطبيق
+                    تأكيد
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 4, repeat: Infinity, ease: "linear" }}

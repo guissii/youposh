@@ -108,6 +108,43 @@
     overflow-x: hidden;
   }
 
+  /* Arabic Font Support */
+  html[lang="ar"] body {
+    font-family: 'Cairo', system-ui, sans-serif;
+  }
+
+  html[lang="ar"] h1,
+  html[lang="ar"] h2,
+  html[lang="ar"] h3,
+  html[lang="ar"] h4,
+  html[lang="ar"] h5,
+  html[lang="ar"] h6,
+  html[lang="ar"] .font-heading {
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+  }
+
+  /* French/Default Font Support */
+  html[lang="fr"] body,
+  html[lang="en"] body {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  html[lang="fr"] h1,
+  html[lang="fr"] h2,
+  html[lang="fr"] h3,
+  html[lang="fr"] h4,
+  html[lang="fr"] h5,
+  html[lang="fr"] h6,
+  html[lang="en"] h1,
+  html[lang="en"] h2,
+  html[lang="en"] h3,
+  html[lang="en"] h4,
+  html[lang="en"] h5,
+  html[lang="en"] h6 {
+    font-family: 'Poppins', 'Inter', sans-serif;
+  }
+
   body {
     @apply bg-[var(--yp-gray-100)] text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;
