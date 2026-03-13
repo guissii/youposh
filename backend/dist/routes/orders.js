@@ -15,13 +15,14 @@ const googleapis_1 = require("googleapis");
 const router = (0, express_1.Router)();
 const prisma = new client_1.PrismaClient();
 const SHEETS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
+let didWarnSheetsEnvMissing = false;
+function warnSheetsEnvMissing() {
+    if (didWarnSheetsEnvMissing)
+        return;
+    didWarnSheetsEnvMissing = true;
+    console.warn('Google Sheets sync skipped: missing env vars (GOOGLE_SHEETS_SPREADSHEET_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY or GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY)');
+}
 function getDeliveryStatusFromOrderStatus(status) {
-    if (status === 'cancelled')
-        return 'returned';
-    if (status === 'pending')
-        return 'not_shipped';
-    if (status === 'processing')
-        return 'prepared';
     if (status === 'shipped')
         return 'shipped';
     if (status === 'delivered' || status === 'completed')
@@ -32,11 +33,11 @@ function getSheetsClient() {
     return __awaiter(this, void 0, void 0, function* () {
         const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
         const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-        const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY;
+        const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
         if (!spreadsheetId || !clientEmail || !privateKeyRaw) {
             throw new Error('Google Sheets env vars missing');
         }
-        const privateKey = privateKeyRaw.replace(/\\n/g, '\n');
+        const privateKey = privateKeyRaw.replace(/\\n/g, '\n').trim();
         const auth = new googleapis_1.google.auth.JWT({
             email: clientEmail,
             key: privateKey,
@@ -48,65 +49,239 @@ function getSheetsClient() {
 }
 function ensureSheetTabExists(sheetTitle) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        var _a, _b, _c, _d, _e, _f, _g;
         const { sheets, spreadsheetId } = yield getSheetsClient();
         const meta = yield sheets.spreadsheets.get({
             spreadsheetId,
-            fields: 'sheets.properties.title',
+            fields: 'sheets.properties.title,sheets.properties.sheetId,developerMetadata(metadataKey,location)',
         });
-        const exists = ((_a = meta.data.sheets) !== null && _a !== void 0 ? _a : []).some(s => { var _a; return ((_a = s.properties) === null || _a === void 0 ? void 0 : _a.title) === sheetTitle; });
-        if (!exists) {
-            yield sheets.spreadsheets.batchUpdate({
-                spreadsheetId,
-                requestBody: { requests: [{ addSheet: { properties: { title: sheetTitle } } }] },
+        const existingSheet = ((_a = meta.data.sheets) !== null && _a !== void 0 ? _a : []).find(s => { var _a; return ((_a = s.properties) === null || _a === void 0 ? void 0 : _a.title) === sheetTitle; });
+        if (((_b = existingSheet === null || existingSheet === void 0 ? void 0 : existingSheet.properties) === null || _b === void 0 ? void 0 : _b.sheetId) != null) {
+            const sheetId = existingSheet.properties.sheetId;
+            const hasDeliveryFormatting = ((_c = meta.data.developerMetadata) !== null && _c !== void 0 ? _c : []).some((md) => {
+                var _a;
+                return (md === null || md === void 0 ? void 0 : md.metadataKey) === 'YOUPOSH_DELIVERY_V1' && ((_a = md === null || md === void 0 ? void 0 : md.location) === null || _a === void 0 ? void 0 : _a.sheetId) === sheetId;
             });
+            return { sheets, spreadsheetId, sheetId, hasDeliveryFormatting };
         }
-        return { sheets, spreadsheetId };
+        const created = yield sheets.spreadsheets.batchUpdate({
+            spreadsheetId,
+            requestBody: { requests: [{ addSheet: { properties: { title: sheetTitle } } }] },
+        });
+        const createdSheetId = (_g = (_f = (_e = (_d = created.data.replies) === null || _d === void 0 ? void 0 : _d[0]) === null || _e === void 0 ? void 0 : _e.addSheet) === null || _f === void 0 ? void 0 : _f.properties) === null || _g === void 0 ? void 0 : _g.sheetId;
+        if (createdSheetId == null) {
+            throw new Error(`Failed to create sheet tab "${sheetTitle}" (missing sheetId)`);
+        }
+        return { sheets, spreadsheetId, sheetId: createdSheetId, hasDeliveryFormatting: false };
     });
 }
-function ensureHeaderRow(sheets, spreadsheetId, sheetTitle) {
+function getExpectedSheetHeaders() {
+    return [
+        'ID commande',
+        'Date création',
+        'Nom client',
+        'Téléphone',
+        'Ville',
+        'Adresse',
+        'Produits',
+        'Quantité totale',
+        'Total',
+        'Statut commande',
+        'Statut livraison',
+        'Code promo',
+        'Remise',
+        'Remarque',
+        'Dernière mise à jour',
+    ];
+}
+function ensureSheetFormatting(sheets, spreadsheetId, sheetId, options) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        const headerRange = `'${sheetTitle}'!1:1`;
-        const existing = yield sheets.spreadsheets.values.get({ spreadsheetId, range: headerRange });
-        const hasHeader = Array.isArray(existing.data.values) && existing.data.values.length > 0 && ((_a = existing.data.values[0]) !== null && _a !== void 0 ? _a : []).length > 0;
-        if (hasHeader)
-            return;
-        const headers = [
-            'ID commande',
-            'Date création',
-            'Nom client',
-            'Téléphone',
-            'Ville',
-            'Adresse',
-            'Produits',
-            'Quantité totale',
-            'Total',
-            'Statut commande',
-            'Statut livraison',
-            'Code promo',
-            'Remise',
-            'Remarque',
-            'Dernière mise à jour',
+        const endRowIndex = 5000;
+        const endColumnIndex = 15;
+        const orderStatusValues = ['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
+        const deliveryStatusValues = ['not_shipped', 'shipped', 'delivered'];
+        const includeDeliveryConditionalFormatting = (options === null || options === void 0 ? void 0 : options.includeDeliveryConditionalFormatting) !== false;
+        const requests = [
+            {
+                updateSheetProperties: {
+                    properties: {
+                        sheetId,
+                        gridProperties: { frozenRowCount: 1 },
+                    },
+                    fields: 'gridProperties.frozenRowCount',
+                },
+            },
+            {
+                setBasicFilter: {
+                    filter: {
+                        range: {
+                            sheetId,
+                            startRowIndex: 0,
+                            endRowIndex,
+                            startColumnIndex: 0,
+                            endColumnIndex,
+                        },
+                    },
+                },
+            },
+            {
+                setDataValidation: {
+                    range: {
+                        sheetId,
+                        startRowIndex: 1,
+                        endRowIndex,
+                        startColumnIndex: 9,
+                        endColumnIndex: 10,
+                    },
+                    rule: {
+                        condition: {
+                            type: 'ONE_OF_LIST',
+                            values: orderStatusValues.map(v => ({ userEnteredValue: v })),
+                        },
+                        strict: true,
+                        showCustomUi: true,
+                    },
+                },
+            },
+            {
+                setDataValidation: {
+                    range: {
+                        sheetId,
+                        startRowIndex: 1,
+                        endRowIndex,
+                        startColumnIndex: 10,
+                        endColumnIndex: 11,
+                    },
+                    rule: {
+                        condition: {
+                            type: 'ONE_OF_LIST',
+                            values: deliveryStatusValues.map(v => ({ userEnteredValue: v })),
+                        },
+                        strict: true,
+                        showCustomUi: true,
+                    },
+                },
+            },
         ];
-        yield sheets.spreadsheets.values.update({
+        if (includeDeliveryConditionalFormatting) {
+            const deliveryRange = {
+                sheetId,
+                startRowIndex: 1,
+                endRowIndex,
+                startColumnIndex: 10,
+                endColumnIndex: 11,
+            };
+            requests.push({
+                addConditionalFormatRule: {
+                    index: 0,
+                    rule: {
+                        ranges: [deliveryRange],
+                        booleanRule: {
+                            condition: {
+                                type: 'TEXT_EQ',
+                                values: [{ userEnteredValue: 'not_shipped' }],
+                            },
+                            format: {
+                                backgroundColor: { red: 0.93, green: 0.94, blue: 0.96 },
+                                textFormat: { bold: true, foregroundColor: { red: 0.22, green: 0.25, blue: 0.32 } },
+                            },
+                        },
+                    },
+                },
+            }, {
+                addConditionalFormatRule: {
+                    index: 0,
+                    rule: {
+                        ranges: [deliveryRange],
+                        booleanRule: {
+                            condition: {
+                                type: 'TEXT_EQ',
+                                values: [{ userEnteredValue: 'shipped' }],
+                            },
+                            format: {
+                                backgroundColor: { red: 1.0, green: 0.93, blue: 0.78 },
+                                textFormat: { bold: true, foregroundColor: { red: 0.55, green: 0.35, blue: 0.0 } },
+                            },
+                        },
+                    },
+                },
+            }, {
+                addConditionalFormatRule: {
+                    index: 0,
+                    rule: {
+                        ranges: [deliveryRange],
+                        booleanRule: {
+                            condition: {
+                                type: 'TEXT_EQ',
+                                values: [{ userEnteredValue: 'delivered' }],
+                            },
+                            format: {
+                                backgroundColor: { red: 0.80, green: 0.95, blue: 0.86 },
+                                textFormat: { bold: true, foregroundColor: { red: 0.02, green: 0.39, blue: 0.19 } },
+                            },
+                        },
+                    },
+                },
+            }, {
+                createDeveloperMetadata: {
+                    developerMetadata: {
+                        metadataKey: 'YOUPOSH_DELIVERY_V1',
+                        metadataValue: '1',
+                        visibility: 'DOCUMENT',
+                        location: { sheetId },
+                    },
+                },
+            });
+        }
+        yield sheets.spreadsheets.batchUpdate({
             spreadsheetId,
-            range: `'${sheetTitle}'!A1`,
-            valueInputOption: 'RAW',
-            requestBody: { values: [headers] },
+            requestBody: {
+                requests,
+            },
         });
+    });
+}
+function ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetId, hasDeliveryFormatting) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a, _b;
+        const expectedHeaders = getExpectedSheetHeaders();
+        const headerRange = `'${sheetTitle}'!A1:O1`;
+        const existing = yield sheets.spreadsheets.values.get({ spreadsheetId, range: headerRange });
+        const currentHeaders = ((_b = (_a = existing.data.values) === null || _a === void 0 ? void 0 : _a[0]) !== null && _b !== void 0 ? _b : []);
+        const needsUpdate = currentHeaders.length < expectedHeaders.length ||
+            expectedHeaders.some((h, idx) => { var _a; return String((_a = currentHeaders[idx]) !== null && _a !== void 0 ? _a : '').trim() !== h; });
+        if (needsUpdate) {
+            yield sheets.spreadsheets.values.update({
+                spreadsheetId,
+                range: `'${sheetTitle}'!A1`,
+                valueInputOption: 'RAW',
+                requestBody: { values: [expectedHeaders] },
+            });
+        }
+        try {
+            yield ensureSheetFormatting(sheets, spreadsheetId, sheetId, {
+                includeDeliveryConditionalFormatting: !hasDeliveryFormatting,
+            });
+        }
+        catch (e) {
+            console.warn('Sheets formatting setup failed:', e instanceof Error ? e.message : String(e));
+        }
     });
 }
 function appendOrderToGoogleSheet(order) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
-        const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
-        if (!spreadsheetId)
+        if (!process.env.GOOGLE_SHEETS_SPREADSHEET_ID ||
+            !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
+            !(process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY)) {
+            warnSheetsEnvMissing();
             return;
+        }
+        const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
         const createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
         const sheetTitle = `Commandes_${createdAt.getFullYear()}_${String(createdAt.getMonth() + 1).padStart(2, '0')}`;
-        const { sheets } = yield ensureSheetTabExists(sheetTitle);
-        yield ensureHeaderRow(sheets, spreadsheetId, sheetTitle);
+        const { sheets, sheetId, hasDeliveryFormatting } = yield ensureSheetTabExists(sheetTitle);
+        yield ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetId, hasDeliveryFormatting);
         const items = (_a = order.items) !== null && _a !== void 0 ? _a : [];
         const productsLabel = items
             .map(it => {
@@ -141,6 +316,80 @@ function appendOrderToGoogleSheet(order) {
             insertDataOption: 'INSERT_ROWS',
             requestBody: { values: [row] },
         });
+    });
+}
+function updateOrderInGoogleSheet(order) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+        if (!process.env.GOOGLE_SHEETS_SPREADSHEET_ID ||
+            !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
+            !(process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY)) {
+            warnSheetsEnvMissing();
+            return;
+        }
+        const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+        const createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
+        const sheetTitle = `Commandes_${createdAt.getFullYear()}_${String(createdAt.getMonth() + 1).padStart(2, '0')}`;
+        const { sheets, sheetId, hasDeliveryFormatting } = yield ensureSheetTabExists(sheetTitle);
+        yield ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetId, hasDeliveryFormatting);
+        const colA = yield sheets.spreadsheets.values.get({
+            spreadsheetId,
+            range: `'${sheetTitle}'!A:A`,
+        });
+        const values = ((_a = colA.data.values) !== null && _a !== void 0 ? _a : []);
+        let rowIndex = -1;
+        for (let i = 0; i < values.length; i++) {
+            const v = (_b = values[i]) === null || _b === void 0 ? void 0 : _b[0];
+            if (String(v) === String(order.id)) {
+                rowIndex = i + 1;
+                break;
+            }
+        }
+        const items = (_c = order.items) !== null && _c !== void 0 ? _c : [];
+        const productsLabel = items
+            .map(it => {
+            var _a;
+            const name = ((_a = it.product) === null || _a === void 0 ? void 0 : _a.name) || `#${it.productId}`;
+            return `${it.quantity}x ${name}`;
+        })
+            .join(', ');
+        const qtyTotal = items.reduce((sum, it) => { var _a; return sum + Number((_a = it.quantity) !== null && _a !== void 0 ? _a : 0); }, 0);
+        const deliveryStatus = getDeliveryStatusFromOrderStatus(order.status);
+        const row = [
+            order.id,
+            createdAt.toISOString(),
+            (_d = order.customerName) !== null && _d !== void 0 ? _d : '',
+            (_e = order.phone) !== null && _e !== void 0 ? _e : '',
+            (_f = order.city) !== null && _f !== void 0 ? _f : '',
+            (_g = order.address) !== null && _g !== void 0 ? _g : '',
+            productsLabel,
+            qtyTotal,
+            (_h = order.total) !== null && _h !== void 0 ? _h : 0,
+            (_j = order.status) !== null && _j !== void 0 ? _j : '',
+            deliveryStatus,
+            (_k = order.promoCode) !== null && _k !== void 0 ? _k : '',
+            (_l = order.discount) !== null && _l !== void 0 ? _l : 0,
+            (_m = order.notes) !== null && _m !== void 0 ? _m : '',
+            new Date().toISOString(),
+        ];
+        if (rowIndex === -1) {
+            yield sheets.spreadsheets.values.append({
+                spreadsheetId,
+                range: `'${sheetTitle}'!A1`,
+                valueInputOption: 'RAW',
+                insertDataOption: 'INSERT_ROWS',
+                requestBody: { values: [row] },
+            });
+        }
+        else {
+            const endColLetter = 'O';
+            yield sheets.spreadsheets.values.update({
+                spreadsheetId,
+                range: `'${sheetTitle}'!A${rowIndex}:${endColLetter}${rowIndex}`,
+                valueInputOption: 'RAW',
+                requestBody: { values: [row] },
+            });
+        }
     });
 }
 function parseVariantSelection(label) {
@@ -407,6 +656,11 @@ router.put('/:id/status', (req, res) => __awaiter(void 0, void 0, void 0, functi
                 items: { include: { product: true } },
             },
         });
+        try {
+            yield updateOrderInGoogleSheet(order);
+        }
+        catch (e) {
+        }
         res.json(order);
     }
     catch (error) {

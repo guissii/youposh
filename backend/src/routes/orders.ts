@@ -26,11 +26,17 @@ type OrderForSheet = {
 };
 
 const SHEETS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
+let didWarnSheetsEnvMissing = false;
+
+function warnSheetsEnvMissing() {
+    if (didWarnSheetsEnvMissing) return;
+    didWarnSheetsEnvMissing = true;
+    console.warn(
+        'Google Sheets sync skipped: missing env vars (GOOGLE_SHEETS_SPREADSHEET_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY or GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY)'
+    );
+}
 
 function getDeliveryStatusFromOrderStatus(status: string) {
-    if (status === 'cancelled') return 'returned';
-    if (status === 'pending') return 'not_shipped';
-    if (status === 'processing') return 'prepared';
     if (status === 'shipped') return 'shipped';
     if (status === 'delivered' || status === 'completed') return 'delivered';
     return 'not_shipped';
@@ -39,13 +45,13 @@ function getDeliveryStatusFromOrderStatus(status: string) {
 async function getSheetsClient() {
     const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
     const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-    const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY;
+    const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
 
     if (!spreadsheetId || !clientEmail || !privateKeyRaw) {
         throw new Error('Google Sheets env vars missing');
     }
 
-    const privateKey = privateKeyRaw.replace(/\\n/g, '\n');
+    const privateKey = privateKeyRaw.replace(/\\n/g, '\n').trim();
     const auth = new google.auth.JWT({
         email: clientEmail,
         key: privateKey,
@@ -60,27 +66,33 @@ async function ensureSheetTabExists(sheetTitle: string) {
     const { sheets, spreadsheetId } = await getSheetsClient();
     const meta = await sheets.spreadsheets.get({
         spreadsheetId,
-        fields: 'sheets.properties.title',
+        fields: 'sheets.properties.title,sheets.properties.sheetId,developerMetadata(metadataKey,location)',
     });
 
-    const exists = (meta.data.sheets ?? []).some(s => s.properties?.title === sheetTitle);
-    if (!exists) {
-        await sheets.spreadsheets.batchUpdate({
-            spreadsheetId,
-            requestBody: { requests: [{ addSheet: { properties: { title: sheetTitle } } }] },
+    const existingSheet = (meta.data.sheets ?? []).find(s => s.properties?.title === sheetTitle);
+    if (existingSheet?.properties?.sheetId != null) {
+        const sheetId = existingSheet.properties.sheetId;
+        const hasDeliveryFormatting = (meta.data.developerMetadata ?? []).some((md: any) => {
+            return md?.metadataKey === 'YOUPOSH_DELIVERY_V1' && md?.location?.sheetId === sheetId;
         });
+        return { sheets, spreadsheetId, sheetId, hasDeliveryFormatting };
     }
 
-    return { sheets, spreadsheetId };
+    const created = await sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: { requests: [{ addSheet: { properties: { title: sheetTitle } } }] },
+    });
+
+    const createdSheetId = created.data.replies?.[0]?.addSheet?.properties?.sheetId;
+    if (createdSheetId == null) {
+        throw new Error(`Failed to create sheet tab "${sheetTitle}" (missing sheetId)`);
+    }
+
+    return { sheets, spreadsheetId, sheetId: createdSheetId, hasDeliveryFormatting: false };
 }
 
-async function ensureHeaderRow(sheets: any, spreadsheetId: string, sheetTitle: string) {
-    const headerRange = `'${sheetTitle}'!1:1`;
-    const existing = await sheets.spreadsheets.values.get({ spreadsheetId, range: headerRange });
-    const hasHeader = Array.isArray(existing.data.values) && existing.data.values.length > 0 && (existing.data.values[0] ?? []).length > 0;
-    if (hasHeader) return;
-
-    const headers = [
+function getExpectedSheetHeaders(): string[] {
+    return [
         'ID commande',
         'Date création',
         'Nom client',
@@ -97,24 +109,220 @@ async function ensureHeaderRow(sheets: any, spreadsheetId: string, sheetTitle: s
         'Remarque',
         'Dernière mise à jour',
     ];
+}
 
-    await sheets.spreadsheets.values.update({
+async function ensureSheetFormatting(
+    sheets: any,
+    spreadsheetId: string,
+    sheetId: number,
+    options?: { includeDeliveryConditionalFormatting?: boolean }
+) {
+    const endRowIndex = 5000;
+    const endColumnIndex = 15;
+
+    const orderStatusValues = ['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
+    const deliveryStatusValues = ['not_shipped', 'shipped', 'delivered'];
+
+    const includeDeliveryConditionalFormatting = options?.includeDeliveryConditionalFormatting !== false;
+
+    const requests: any[] = [
+        {
+            updateSheetProperties: {
+                properties: {
+                    sheetId,
+                    gridProperties: { frozenRowCount: 1 },
+                },
+                fields: 'gridProperties.frozenRowCount',
+            },
+        },
+        {
+            setBasicFilter: {
+                filter: {
+                    range: {
+                        sheetId,
+                        startRowIndex: 0,
+                        endRowIndex,
+                        startColumnIndex: 0,
+                        endColumnIndex,
+                    },
+                },
+            },
+        },
+        {
+            setDataValidation: {
+                range: {
+                    sheetId,
+                    startRowIndex: 1,
+                    endRowIndex,
+                    startColumnIndex: 9,
+                    endColumnIndex: 10,
+                },
+                rule: {
+                    condition: {
+                        type: 'ONE_OF_LIST',
+                        values: orderStatusValues.map(v => ({ userEnteredValue: v })),
+                    },
+                    strict: true,
+                    showCustomUi: true,
+                },
+            },
+        },
+        {
+            setDataValidation: {
+                range: {
+                    sheetId,
+                    startRowIndex: 1,
+                    endRowIndex,
+                    startColumnIndex: 10,
+                    endColumnIndex: 11,
+                },
+                rule: {
+                    condition: {
+                        type: 'ONE_OF_LIST',
+                        values: deliveryStatusValues.map(v => ({ userEnteredValue: v })),
+                    },
+                    strict: true,
+                    showCustomUi: true,
+                },
+            },
+        },
+    ];
+
+    if (includeDeliveryConditionalFormatting) {
+        const deliveryRange = {
+            sheetId,
+            startRowIndex: 1,
+            endRowIndex,
+            startColumnIndex: 10,
+            endColumnIndex: 11,
+        };
+
+        requests.push(
+            {
+                addConditionalFormatRule: {
+                    index: 0,
+                    rule: {
+                        ranges: [deliveryRange],
+                        booleanRule: {
+                            condition: {
+                                type: 'TEXT_EQ',
+                                values: [{ userEnteredValue: 'not_shipped' }],
+                            },
+                            format: {
+                                backgroundColor: { red: 0.93, green: 0.94, blue: 0.96 },
+                                textFormat: { bold: true, foregroundColor: { red: 0.22, green: 0.25, blue: 0.32 } },
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                addConditionalFormatRule: {
+                    index: 0,
+                    rule: {
+                        ranges: [deliveryRange],
+                        booleanRule: {
+                            condition: {
+                                type: 'TEXT_EQ',
+                                values: [{ userEnteredValue: 'shipped' }],
+                            },
+                            format: {
+                                backgroundColor: { red: 1.0, green: 0.93, blue: 0.78 },
+                                textFormat: { bold: true, foregroundColor: { red: 0.55, green: 0.35, blue: 0.0 } },
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                addConditionalFormatRule: {
+                    index: 0,
+                    rule: {
+                        ranges: [deliveryRange],
+                        booleanRule: {
+                            condition: {
+                                type: 'TEXT_EQ',
+                                values: [{ userEnteredValue: 'delivered' }],
+                            },
+                            format: {
+                                backgroundColor: { red: 0.80, green: 0.95, blue: 0.86 },
+                                textFormat: { bold: true, foregroundColor: { red: 0.02, green: 0.39, blue: 0.19 } },
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                createDeveloperMetadata: {
+                    developerMetadata: {
+                        metadataKey: 'YOUPOSH_DELIVERY_V1',
+                        metadataValue: '1',
+                        visibility: 'DOCUMENT',
+                        location: { sheetId },
+                    },
+                },
+            }
+        );
+    }
+
+    await sheets.spreadsheets.batchUpdate({
         spreadsheetId,
-        range: `'${sheetTitle}'!A1`,
-        valueInputOption: 'RAW',
-        requestBody: { values: [headers] },
+        requestBody: {
+            requests,
+        },
     });
 }
 
+async function ensureHeaderRow(
+    sheets: any,
+    spreadsheetId: string,
+    sheetTitle: string,
+    sheetId: number,
+    hasDeliveryFormatting: boolean
+) {
+    const expectedHeaders = getExpectedSheetHeaders();
+    const headerRange = `'${sheetTitle}'!A1:O1`;
+    const existing = await sheets.spreadsheets.values.get({ spreadsheetId, range: headerRange });
+
+    const currentHeaders = (existing.data.values?.[0] ?? []) as string[];
+    const needsUpdate =
+        currentHeaders.length < expectedHeaders.length ||
+        expectedHeaders.some((h, idx) => String(currentHeaders[idx] ?? '').trim() !== h);
+
+    if (needsUpdate) {
+        await sheets.spreadsheets.values.update({
+            spreadsheetId,
+            range: `'${sheetTitle}'!A1`,
+            valueInputOption: 'RAW',
+            requestBody: { values: [expectedHeaders] },
+        });
+    }
+
+    try {
+        await ensureSheetFormatting(sheets, spreadsheetId, sheetId, {
+            includeDeliveryConditionalFormatting: !hasDeliveryFormatting,
+        });
+    } catch (e) {
+        console.warn('Sheets formatting setup failed:', e instanceof Error ? e.message : String(e));
+    }
+}
+
 async function appendOrderToGoogleSheet(order: OrderForSheet) {
+    if (
+        !process.env.GOOGLE_SHEETS_SPREADSHEET_ID ||
+        !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
+        !(process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY)
+    ) {
+        warnSheetsEnvMissing();
+        return;
+    }
     const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
-    if (!spreadsheetId) return;
 
     const createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
     const sheetTitle = `Commandes_${createdAt.getFullYear()}_${String(createdAt.getMonth() + 1).padStart(2, '0')}`;
 
-    const { sheets } = await ensureSheetTabExists(sheetTitle);
-    await ensureHeaderRow(sheets, spreadsheetId, sheetTitle);
+    const { sheets, sheetId, hasDeliveryFormatting } = await ensureSheetTabExists(sheetTitle);
+    await ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetId, hasDeliveryFormatting);
 
     const items = order.items ?? [];
     const productsLabel = items
@@ -154,6 +362,77 @@ async function appendOrderToGoogleSheet(order: OrderForSheet) {
     });
 }
 
+async function updateOrderInGoogleSheet(order: OrderForSheet) {
+    if (
+        !process.env.GOOGLE_SHEETS_SPREADSHEET_ID ||
+        !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
+        !(process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY)
+    ) {
+        warnSheetsEnvMissing();
+        return;
+    }
+    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+    const createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
+    const sheetTitle = `Commandes_${createdAt.getFullYear()}_${String(createdAt.getMonth() + 1).padStart(2, '0')}`;
+    const { sheets, sheetId, hasDeliveryFormatting } = await ensureSheetTabExists(sheetTitle);
+    await ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetId, hasDeliveryFormatting);
+    const colA = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: `'${sheetTitle}'!A:A`,
+    });
+    const values = (colA.data.values ?? []) as any[][];
+    let rowIndex = -1;
+    for (let i = 0; i < values.length; i++) {
+        const v = values[i]?.[0];
+        if (String(v) === String(order.id)) {
+            rowIndex = i + 1;
+            break;
+        }
+    }
+    const items = order.items ?? [];
+    const productsLabel = items
+        .map(it => {
+            const name = it.product?.name || `#${it.productId}`;
+            return `${it.quantity}x ${name}`;
+        })
+        .join(', ');
+    const qtyTotal = items.reduce((sum, it) => sum + Number(it.quantity ?? 0), 0);
+    const deliveryStatus = getDeliveryStatusFromOrderStatus(order.status);
+    const row = [
+        order.id,
+        createdAt.toISOString(),
+        order.customerName ?? '',
+        order.phone ?? '',
+        order.city ?? '',
+        order.address ?? '',
+        productsLabel,
+        qtyTotal,
+        order.total ?? 0,
+        order.status ?? '',
+        deliveryStatus,
+        order.promoCode ?? '',
+        order.discount ?? 0,
+        order.notes ?? '',
+        new Date().toISOString(),
+    ];
+    if (rowIndex === -1) {
+        await sheets.spreadsheets.values.append({
+            spreadsheetId,
+            range: `'${sheetTitle}'!A1`,
+            valueInputOption: 'RAW',
+            insertDataOption: 'INSERT_ROWS',
+            requestBody: { values: [row] },
+        });
+    } else {
+        const endColLetter = 'O';
+        await sheets.spreadsheets.values.update({
+            spreadsheetId,
+            range: `'${sheetTitle}'!A${rowIndex}:${endColLetter}${rowIndex}`,
+            valueInputOption: 'RAW',
+            requestBody: { values: [row] },
+        });
+    }
+}
 function parseVariantSelection(label: any): Record<string, string> {
     if (typeof label !== 'string') return {};
     const parts = label.split('/').map(p => p.trim()).filter(Boolean);
@@ -431,6 +710,10 @@ router.put('/:id/status', async (req, res) => {
                 items: { include: { product: true } },
             },
         });
+        try {
+            await updateOrderInGoogleSheet(order as unknown as OrderForSheet);
+        } catch (e) {
+        }
         res.json(order);
     } catch (error) {
         console.error('Error updating order status:', error);

@@ -29,16 +29,11 @@ const ORDER_STATUS_MAP: Record<string, StatusMeta> = {
 
 const DELIVERY_STATUS_MAP: Record<string, StatusMeta> = {
     not_shipped: { label: 'Non expédiée', color: 'bg-gray-100 text-gray-700' },
-    prepared: { label: 'Préparée', color: 'bg-blue-100 text-blue-700' },
     shipped: { label: 'Expédiée', color: 'bg-amber-100 text-amber-700' },
     delivered: { label: 'Livrée', color: 'bg-emerald-100 text-emerald-700' },
-    returned: { label: 'Retour', color: 'bg-rose-100 text-rose-700' },
 };
 
 export const getDeliveryStatusFromOrderStatus = (status: string) => {
-    if (status === 'cancelled') return 'returned';
-    if (status === 'pending') return 'not_shipped';
-    if (status === 'processing') return 'prepared';
     if (status === 'shipped') return 'shipped';
     if (status === 'delivered' || status === 'completed') return 'delivered';
     return 'not_shipped';

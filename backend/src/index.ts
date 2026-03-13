@@ -13,6 +13,7 @@ import uploadRoutes from './routes/upload';
 import settingsRoutes from './routes/settings';
 import attributeLibraryRoutes from './routes/attributeLibrary';
 import authRoutes from './routes/auth';
+import syncRoutes from './routes/sync';
 import path from 'path';
 
 const app = express();
@@ -39,6 +40,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/promo-codes', promoCodeRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/sync', syncRoutes);
 
 // Only listen when running locally (not on Vercel)
 if (!process.env.VERCEL) {

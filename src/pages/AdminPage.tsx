@@ -162,14 +162,14 @@ const AdminPage = () => {
       loadPromoCodes(); // For global coupon selector
       fetchStoreSettingsGlobal().then(setStoreForm);
     }
-  }, [activeTab]);
+  }, [activeTab, loadCategories, loadDashboard, loadOrders, loadProducts, loadPromoCodes]);
 
   useEffect(() => {
     const t = setTimeout(() => {
       if (activeTab === 'products') loadProducts();
       if (activeTab === 'orders') loadOrders();
     }, 300); return () => clearTimeout(t);
-  }, [searchQuery, statusFilter]);
+  }, [activeTab, loadOrders, loadProducts, searchQuery, statusFilter]);
 
   const handleStatusChange = async (oid: string, status: string) => {
     try { await updateOrderStatus(oid, status); loadOrders(); if (orderDetail?.id === oid) setOrderDetail((p: any) => ({ ...p, status })); } catch (e) { console.error(e); }
@@ -381,10 +381,8 @@ const AdminPage = () => {
               >
                 <option value="">Livraison: Tous</option>
                 <option value="not_shipped">Non expédiée</option>
-                <option value="prepared">Préparée</option>
                 <option value="shipped">Expédiée</option>
                 <option value="delivered">Livrée</option>
-                <option value="returned">Retour</option>
               </select>
               <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             </div>
@@ -1043,10 +1041,8 @@ const AdminPage = () => {
             <div><p className="text-xs text-[#666] uppercase mb-2">Changer le statut livraison</p>
               <div className="flex flex-wrap gap-2">
                 <button onClick={() => handleStatusChange(o.id, 'pending')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${deliveryStatus === 'not_shipped' ? 'bg-[var(--yp-blue)] text-white' : 'bg-gray-100 text-[#666] hover:bg-[var(--yp-blue)]/10'}`}>Non expédiée</button>
-                <button onClick={() => handleStatusChange(o.id, 'processing')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${deliveryStatus === 'prepared' ? 'bg-[var(--yp-blue)] text-white' : 'bg-gray-100 text-[#666] hover:bg-[var(--yp-blue)]/10'}`}>Préparée</button>
                 <button onClick={() => handleStatusChange(o.id, 'shipped')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${deliveryStatus === 'shipped' ? 'bg-[var(--yp-blue)] text-white' : 'bg-gray-100 text-[#666] hover:bg-[var(--yp-blue)]/10'}`}>Expédiée</button>
                 <button onClick={() => handleStatusChange(o.id, 'delivered')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${deliveryStatus === 'delivered' ? 'bg-[var(--yp-blue)] text-white' : 'bg-gray-100 text-[#666] hover:bg-[var(--yp-blue)]/10'}`}>Livrée</button>
-                <button onClick={() => handleStatusChange(o.id, 'cancelled')} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${deliveryStatus === 'returned' ? 'bg-red-500 text-white' : 'bg-red-50 text-red-500 hover:bg-red-100'}`}>Retour</button>
               </div>
             </div>
           </div>

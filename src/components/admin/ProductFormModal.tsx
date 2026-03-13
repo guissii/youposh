@@ -68,7 +68,10 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
     }, []);
 
     const selectedCategory = categories.find(c => c.slug === form.categorySlug);
-    const categoryAttributes = Array.isArray(selectedCategory?.attributes) ? selectedCategory.attributes : [];
+    const categoryAttributes = useMemo(
+        () => (Array.isArray(selectedCategory?.attributes) ? selectedCategory.attributes : []),
+        [selectedCategory]
+    );
 
     const filteredVariantLibrary = useMemo(() => {
         const q = variantLibraryQuery.trim().toLowerCase();
@@ -99,7 +102,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
             ...f,
             attributeValueIds: Array.isArray(f.attributeValueIds) ? f.attributeValueIds.filter((id: number) => allowed.has(id)) : [],
         }));
-    }, [form.categorySlug, selectedCategory?.id]);
+    }, [categoryAttributes]);
 
     // Clean up local preview URLs when component unmounts or files change
     useEffect(() => {

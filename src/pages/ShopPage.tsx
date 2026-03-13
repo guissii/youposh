@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -25,9 +25,10 @@ export default function ShopPage() {
   const sortParam = (searchParams.get('sort') as SortOption) || 'popular';
   const filterParam = (searchParams.get('filter') as FilterOption) || 'all';
   const avParam = searchParams.get('av') || '';
-  const selectedAvIds = avParam
-    ? avParam.split(',').map(s => parseInt(s.trim())).filter(n => Number.isFinite(n))
-    : [];
+  const selectedAvIds = useMemo(() => {
+    if (!avParam) return [];
+    return avParam.split(',').map(s => parseInt(s.trim())).filter(n => Number.isFinite(n));
+  }, [avParam]);
 
   const isAr = i18n.language === 'ar';
   const isPromoPage = filterParam === 'promo';
@@ -38,7 +39,22 @@ export default function ShopPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const selectedCategory = categoryParam ? categories.find(c => c.slug === categoryParam) : undefined;
-  const categoryAttributes = Array.isArray(selectedCategory?.attributes) ? selectedCategory.attributes : [];
+  const categoryAttributes = useMemo(
+    () => (Array.isArray(selectedCategory?.attributes) ? selectedCategory.attributes : []),
+    [selectedCategory]
+  );
+
+  const updateParams = useCallback((updates: Record<string, string | undefined>) => {
+    const newParams = new URLSearchParams(searchParams);
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value) {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+    });
+    setSearchParams(newParams);
+  }, [searchParams, setSearchParams]);
 
   // Load categories once
   useEffect(() => {
@@ -56,7 +72,7 @@ export default function ShopPage() {
     if (next.length !== selectedAvIds.length) {
       updateParams({ av: next.length ? next.join(',') : undefined });
     }
-  }, [categoryParam, categories.length]);
+  }, [categoryParam, categoryAttributes, selectedAvIds, updateParams]);
 
   // Fetch products based on URL params
   useEffect(() => {
@@ -80,19 +96,7 @@ export default function ShopPage() {
       }
     };
     loadData();
-  }, [categoryParam, searchQuery, sortParam, filterParam, avParam]);
-
-  const updateParams = (updates: Record<string, string | undefined>) => {
-    const newParams = new URLSearchParams(searchParams);
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value) {
-        newParams.set(key, value);
-      } else {
-        newParams.delete(key);
-      }
-    });
-    setSearchParams(newParams);
-  };
+  }, [categoryParam, filterParam, searchQuery, selectedAvIds, sortParam]);
 
   const toggleAttributeValue = (id: number) => {
     const set = new Set(selectedAvIds);

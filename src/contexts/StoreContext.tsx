@@ -55,7 +55,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [promoStatus, setPromoStatus] = useState<'idle' | 'loading' | 'applied' | 'error'>('idle');
   const [promoMessage, setPromoMessage] = useState('');
 
-  const parseVariantSelection = (label: any): Record<string, string> => {
+  const parseVariantSelection = useCallback((label: any): Record<string, string> => {
     if (typeof label !== 'string') return {};
     const parts = label.split('/').map((p: string) => p.trim()).filter(Boolean);
     const out: Record<string, string> = {};
@@ -67,9 +67,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (key && value) out[key] = value;
     }
     return out;
-  };
+  }, []);
 
-  const getMaxAllowedForVariant = (product: Product, variantLabel?: string): number => {
+  const getMaxAllowedForVariant = useCallback((product: Product, variantLabel?: string): number => {
     let allowed = typeof product.stock === 'number' ? product.stock : Infinity;
     const selection = parseVariantSelection(variantLabel);
     const variants = Array.isArray((product as any).variants) ? (product as any).variants : [];
@@ -85,7 +85,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (typeof stock === 'number') allowed = Math.min(allowed, stock);
     }
     return allowed;
-  };
+  }, [parseVariantSelection]);
 
   // Cart functions
   const addToCart = useCallback((product: Product, quantity = 1, variant?: string) => {
@@ -123,7 +123,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       toast.success('Produit ajouté au panier');
       return [...prev, { product, quantity, variant }];
     });
-  }, []);
+  }, [getMaxAllowedForVariant]);
 
   const removeFromCart = useCallback((productId: number, variant?: string) => {
     setCart(prev => prev.filter(item => {
@@ -148,7 +148,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (nextQty !== quantity) toast.error(`Stock insuffisant (max ${maxAllowed})`);
       return { ...item, quantity: nextQty };
     }));
-  }, [removeFromCart]);
+  }, [getMaxAllowedForVariant, removeFromCart]);
 
   const clearCart = useCallback(() => {
     setCart([]);
