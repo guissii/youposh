@@ -166,6 +166,23 @@ const resources = {
       easyExchange: 'Échange facile',
       '7daysExchange': '7 jours pour échanger',
 
+      // Order Form
+      finalizeOrder: 'Finaliser votre demande',
+      fullName: 'Nom complet',
+      phone: 'Téléphone',
+      city: 'Ville',
+      address: 'Adresse',
+      addressPlaceholder: 'Rue, quartier, n° de maison...',
+      note: 'Remarque',
+      notePlaceholder: 'Ex: livrer le matin...',
+      optional: 'facultatif',
+      deliveryMaroc: 'Livraison Maroc : 35 dh',
+      orderSummary: 'Résumé de la commande',
+      variant: 'Variante',
+      unitPrice: 'Prix unitaire',
+      confirmOnWhatsApp: 'Confirmer sur WhatsApp',
+      fillRequiredFields: 'Veuillez remplir les champs obligatoires (*)',
+
       // Admin
       adminPanel: 'Panneau Admin',
       dashboard: 'Tableau de bord',
@@ -365,6 +382,23 @@ const resources = {
       easyExchange: 'التبديل ساهل',
       exchangePeriod: '7 أيام للتبديل',
 
+      // Order Form
+      finalizeOrder: 'تأكيد الطلب',
+      fullName: 'الاسم الكامل',
+      phone: 'الهاتف',
+      city: 'المدينة',
+      address: 'العنوان',
+      addressPlaceholder: 'الحي، الزنقة، رقم الدار...',
+      note: 'ملاحظة',
+      notePlaceholder: 'شي معلومة إضافية...',
+      optional: 'اختياري',
+      deliveryMaroc: 'توصيل للمغرب: 35 درهم',
+      orderSummary: 'ملخص الطلب',
+      variant: 'النوع',
+      unitPrice: 'الثمن',
+      confirmOnWhatsApp: 'تأكيد عبر الواتساب',
+      fillRequiredFields: 'عمر الخانات الضرورية (*)',
+
       // Admin
       adminPanel: 'لوحة التحكم',
       dashboard: 'الداشبورد',
@@ -406,8 +440,8 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'fr',
-    fallbackLng: 'fr',
+    lng: 'ar',
+    fallbackLng: 'ar',
     interpolation: {
       escapeValue: false,
     },

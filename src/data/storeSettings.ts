@@ -28,7 +28,7 @@ export const defaultStoreSettings: StoreSettings = {
     brandColorYou: '#2563EB',
     brandColorPosh: '#DC2626',
     brandColorCart: '#2563EB',
-    shippingFeeLocal: 20,
+    shippingFeeLocal: 35,
     shippingFeeNational: 35,
     watermarkEnabled: true,
     watermarkOpacity: 20,

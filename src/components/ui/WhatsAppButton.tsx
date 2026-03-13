@@ -59,20 +59,20 @@ export function generateOrderWhatsAppMessage(
   const subtotalAfterPromo = Math.max(0, subtotal - promoDiscount);
   const grandTotal = subtotalAfterPromo + deliveryFee;
   const promoLines = promo && promoDiscount > 0
-    ? `🎟️ Code promo (${promo.code}): -${promoDiscount} dh\n💵 Sous-total après promo: ${subtotalAfterPromo} dh\n`
+    ? `Code promo (${promo.code}): -${promoDiscount} dh\nSous-total après promo: ${subtotalAfterPromo} dh\n`
     : '';
 
   return `Bonjour, je souhaite commander ce produit :
 
-📦 Produit: ${product.name}${variantLine}
-🔗 URL: ${window.location.origin}/product/${product.id}
-🔢 Quantité: ${quantity}
-💰 Prix unitaire: ${product.price} dh
-💵 Sous-total: ${subtotal} dh
-${promoLines}🚚 Livraison: ${deliveryFee} dh
-💰 Total: ${grandTotal} dh
+Produit: ${product.name}${variantLine}
+URL: ${window.location.origin}/product/${product.id}
+Quantité: ${quantity}
+Prix unitaire: ${product.price} dh
+Sous-total: ${subtotal} dh
+${promoLines}Livraison: ${deliveryFee} dh
+Total: ${grandTotal} dh
 
-👤 Mes informations :
+Mes informations :
 Nom: ${customer.customerName}
 Téléphone: ${customer.phone}
 Ville: ${customer.city}${customer.address ? `\nAdresse: ${customer.address}` : ''}${noteLine}
@@ -82,7 +82,7 @@ Merci !`;
 
 export function generateCartWhatsAppMessage(items: CartItem[]): string {
   const itemsList = items.map(item =>
-    `- ${item.product.name} x${item.quantity} = ${item.product.price * item.quantity} dh\n  🔗 ${window.location.origin}/product/${item.product.id}`
+    `- ${item.product.name} x${item.quantity} = ${item.product.price * item.quantity} dh\n  ${window.location.origin}/product/${item.product.id}`
   ).join('\n');
 
   const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);

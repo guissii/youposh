@@ -30,7 +30,6 @@ export default function ProductPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
-  // const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews'>('description'); // Removed tabs
   const storeSettings = useStoreSettings();
 
   const [isZoomOpen, setIsZoomOpen] = useState(false);
@@ -182,8 +181,8 @@ export default function ProductPage() {
     );
   }
 
-  const variantsArray = Array.isArray(product.variants) ? product.variants : [];
-  const galleryImages = [product.image, ...(Array.isArray(product.images) ? product.images : [])].filter(Boolean);
+  const variantsArray = product.variants;
+  const galleryImages = [product.image, ...product.images].filter(Boolean);
 
   const discount = product.originalPrice
     ? Math.round((1 - product.price / product.originalPrice) * 100)
@@ -444,7 +443,7 @@ export default function ProductPage() {
                             className={`relative px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-all ${isSelected
                               ? 'border-[var(--yp-blue)] bg-[var(--yp-blue-50)] text-[var(--yp-blue)]'
                               : isDisabled
-                                ? 'border-[var(--yp-gray-200)] bg-[var(--yp-gray-100)] text-[var(--yp-gray-500)] cursor-not-allowed opacity-70'
+                                ? 'border-dashed border-gray-300 bg-gray-50 text-gray-400 cursor-not-allowed opacity-60 grayscale'
                                 : 'border-[var(--yp-gray-300)] hover:border-[var(--yp-blue)] text-[var(--yp-gray-700)]'
                               }`}
                           >

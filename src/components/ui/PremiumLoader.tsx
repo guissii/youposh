@@ -25,11 +25,12 @@ export default function PremiumLoader({ message, subMessage, fullScreen = true }
                 <div className="absolute inset-2 rounded-full border-4 border-transparent border-b-[var(--yp-blue)] border-r-[var(--yp-red)] animate-spin" style={{ animationDuration: '2s', animationDirection: 'reverse' }}></div>
 
                 {/* Inner static circle with brand logo */}
-                <div className="absolute inset-5 bg-white rounded-full shadow-lg flex items-center justify-center z-10 overflow-hidden border border-gray-100">
-                    {/* Fallback to YP text if logo img is missing */}
-                    <span className="font-heading font-black text-transparent bg-clip-text bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-red)] text-2xl tracking-tighter shadow-sm">
-                        YP
-                    </span>
+                <div className="absolute inset-5 bg-white rounded-full shadow-lg flex items-center justify-center z-10 overflow-hidden border border-gray-100 p-3">
+                    <img 
+                        src="/images/logo final.png" 
+                        alt="Logo" 
+                        className="w-full h-full object-contain animate-pulse" 
+                    />
                 </div>
             </div>
 

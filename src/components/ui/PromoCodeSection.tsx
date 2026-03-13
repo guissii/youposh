@@ -132,7 +132,7 @@ const PromoCodeSection = () => {
                 استمتع بعرض حصري يوفر لك فلوسك !
               </motion.h2>
               <p className="text-lg text-gray-600 mb-1 leading-relaxed font-medium">
-                أدخل كود الترويج وخذ خصم فوري يصل إلى ٥٠٪
+                أدخل كود الترويج وخذ خصم فوري يصل إلى 50%
               </p>
               <p className="text-sm text-deco-orange font-semibold tracking-wide font-sans opacity-80">
                 OFFRE LIMITÉE — Profitez-en maintenant

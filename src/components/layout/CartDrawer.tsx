@@ -39,10 +39,7 @@ export default function CartDrawer() {
   const [customerAddress, setCustomerAddress] = useState('');
   const [customerNote, setCustomerNote] = useState('');
 
-  const isFes = /^f[eèé]s$/i.test(customerCity.trim());
-  const deliveryFee = customerCity.trim().length >= 2
-    ? (isFes ? (settings.shippingFeeLocal ?? 20) : (settings.shippingFeeNational ?? 35))
-    : (settings.shippingFeeNational ?? 35);
+  const deliveryFee = settings.shippingFeeNational ?? 35;
   const subtotalAfterPromo = Math.max(0, cartTotal - (promoStatus === 'applied' ? promoDiscount : 0));
   const grandTotal = subtotalAfterPromo + deliveryFee;
 

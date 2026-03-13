@@ -1,15 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '@/contexts/StoreContext';
-import { fetchProducts } from '@/lib/api';
 import { X, Tag, ArrowLeft } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
-import { getImageUrl } from '@/lib/utils';
 import { toast } from 'sonner';
 
 export function GlobalCouponNotification() {
   const { applyPromoCode, promoCode, promoStatus, setIsCartOpen } = useStore();
   const [isVisible, setIsVisible] = useState(false);
-  const [products, setProducts] = useState<any[]>([]);
   const [couponInput, setCouponInput] = useState('');
   const [isApplying, setIsApplying] = useState(false);
   const location = useLocation();
@@ -28,20 +25,7 @@ export function GlobalCouponNotification() {
       return;
     }
 
-    const loadData = async () => {
-      try {
-        const prods = await fetchProducts('sort=popular');
-        if (Array.isArray(prods) && prods.length > 0) {
-          const shuffled = [...prods].sort(() => 0.5 - Math.random());
-          setProducts(shuffled.slice(0, 2));
-        }
-      } catch (err) {
-        console.warn('Coupon notification: could not load products', err);
-      }
-      setTimeout(() => setIsVisible(true), 2500);
-    };
-
-    loadData();
+    setTimeout(() => setIsVisible(true), 2500);
   }, [promoCode, promoStatus, location.pathname]);
 
   const handleApply = async () => {
@@ -87,29 +71,6 @@ export function GlobalCouponNotification() {
             </p>
           </div>
 
-          <p className="text-gray-400 text-xs mb-4" dir="rtl">
-            أدخل كود الخصم ديالك واستمتع بالعروض الحصرية 🔥
-          </p>
-
-          {products.length > 0 && (
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex -space-x-3">
-                {products.map((p, i) => (
-                  <div key={p.id} className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl border-[3px] border-[#1A1A1A] overflow-hidden bg-white shadow-lg relative" style={{ zIndex: 10 - i }}>
-                    <img
-                      src={getImageUrl(p.image)}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-              <p className="text-gray-500 text-[11px] leading-snug" dir="rtl">
-                خصومات على منتجات مختارة
-              </p>
-            </div>
-          )}
-
           <div className="flex gap-2">
             <input
               type="text"
@@ -129,7 +90,7 @@ export function GlobalCouponNotification() {
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  تطبيق
+                  تأكيد
                   <ArrowLeft className="w-3.5 h-3.5" />
                 </>
               )}
