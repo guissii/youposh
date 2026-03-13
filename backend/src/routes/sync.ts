@@ -18,7 +18,12 @@ async function getSheetsClient() {
   const clientEmail = getEnv('GOOGLE_SERVICE_ACCOUNT_EMAIL');
   const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
   if (!privateKeyRaw) throw new Error('Missing env: GOOGLE_PRIVATE_KEY (or GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY)');
-  const privateKey = privateKeyRaw.replace(/\\n/g, '\n').trim();
+  const privateKey = String(privateKeyRaw)
+    .replace(/^\s*["']|["']\s*$/g, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .replace(/\\n/g, '\n')
+    .trim();
 
   const auth = new google.auth.JWT({
     email: clientEmail,

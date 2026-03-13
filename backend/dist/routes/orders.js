@@ -37,7 +37,12 @@ function getSheetsClient() {
         if (!spreadsheetId || !clientEmail || !privateKeyRaw) {
             throw new Error('Google Sheets env vars missing');
         }
-        const privateKey = privateKeyRaw.replace(/\\n/g, '\n').trim();
+        const privateKey = String(privateKeyRaw)
+            .replace(/^\s*["']|["']\s*$/g, '')
+            .replace(/\r\n/g, '\n')
+            .replace(/\r/g, '\n')
+            .replace(/\\n/g, '\n')
+            .trim();
         const auth = new googleapis_1.google.auth.JWT({
             email: clientEmail,
             key: privateKey,
