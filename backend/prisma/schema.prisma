@@ -213,3 +213,13 @@ model HeroSettings {
   overlayOpacity   Int      @default(55)
   updatedAt        DateTime @updatedAt
 }
+
+model AdminUser {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         String   @default("admin") // "admin", "editor", "viewer"
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

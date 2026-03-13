@@ -12,6 +12,7 @@ import promoCodeRoutes from './routes/promoCodes';
 import uploadRoutes from './routes/upload';
 import settingsRoutes from './routes/settings';
 import attributeLibraryRoutes from './routes/attributeLibrary';
+import authRoutes from './routes/auth';
 import path from 'path';
 
 const app = express();
@@ -29,6 +30,7 @@ app.get('/api/health', (_req, res) => {
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Mount routes
+app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/categories', categoryRoutes);
