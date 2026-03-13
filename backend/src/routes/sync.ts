@@ -126,4 +126,53 @@ router.get('/sheet-to-excel', async (req, res) => {
   }
 });
 
+// GET /api/sync/sheets-health
+// Quick health check to confirm the server can read/write the configured Google Sheet.
+router.get('/sheets-health', async (_req, res) => {
+  try {
+    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+    const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+    const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
+
+    if (!spreadsheetId || !clientEmail || !privateKeyRaw) {
+      return res.status(400).json({
+        ok: false,
+        error: 'Missing Google Sheets env vars',
+        env: {
+          hasSpreadsheetId: Boolean(spreadsheetId),
+          hasClientEmail: Boolean(clientEmail),
+          hasPrivateKey: Boolean(privateKeyRaw),
+        },
+      });
+    }
+
+    const { sheets } = await getSheetsClient();
+    const meta = await sheets.spreadsheets.get({
+      spreadsheetId,
+      fields: 'properties.title,sheets.properties.title',
+    });
+
+    const testSheetTitle = 'test';
+    await ensureSheetTabExists(testSheetTitle);
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `'${testSheetTitle}'!A1`,
+      valueInputOption: 'RAW',
+      requestBody: { values: [[`ok ${new Date().toISOString()}`]] },
+    });
+
+    return res.json({
+      ok: true,
+      spreadsheetId,
+      spreadsheetTitle: meta.data.properties?.title ?? null,
+      tabs: (meta.data.sheets ?? []).map(s => s.properties?.title).filter(Boolean),
+      writeTest: { sheet: testSheetTitle, cell: 'A1' },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('sheets-health error:', message);
+    return res.status(500).json({ ok: false, error: message });
+  }
+});
+
 export default router;
