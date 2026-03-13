@@ -3,7 +3,8 @@ const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://
 async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const headers: HeadersInit = { 'Content-Type': 'application/json' };
     
-    const token = localStorage.getItem('token');
+    // Check for admin token first, then fallback to standard token
+    const token = localStorage.getItem('yp_admin_token') || localStorage.getItem('token');
     if (token) {
         (headers as any)['Authorization'] = `Bearer ${token}`;
     }

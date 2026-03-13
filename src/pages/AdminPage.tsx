@@ -1067,6 +1067,14 @@ const AdminPage = () => {
 
   const tabTitles: Record<TabId, string> = { dashboard: t('dashboard'), orders: t('orders'), products: t('products'), categories: 'Catégories', promos: 'Codes Promo', watermark: 'Watermark', settings: t('settings') };
 
+  const handleLogout = () => {
+    localStorage.removeItem('yp_admin_token');
+    localStorage.removeItem('yp_admin_user');
+    localStorage.removeItem('token'); // Clear legacy token if any
+    toast.success('Déconnexion réussie');
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex">
       <aside className="w-[260px] bg-white shadow-lg fixed h-full z-10 border-r border-gray-100">
@@ -1084,7 +1092,7 @@ const AdminPage = () => {
           ))}
         </nav>
         <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-100">
-          <button onClick={() => navigate('/')} className="w-full flex items-center gap-3 px-4 py-2.5 text-[#666] hover:bg-red-50 hover:text-red-500 rounded-xl transition-colors text-sm"><LogOut className="w-5 h-5" />{t('logout')}</button>
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 text-[#666] hover:bg-red-50 hover:text-red-500 rounded-xl transition-colors text-sm"><LogOut className="w-5 h-5" />{t('logout')}</button>
         </div>
       </aside>
 
