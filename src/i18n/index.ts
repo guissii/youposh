@@ -103,6 +103,7 @@ const resources = {
       relatedProducts: 'Produits similaires',
       inStock: 'En stock',
       outOfStock: 'Rupture de stock',
+      continueOrder: 'Continuer la commande',
       sku: 'Référence',
       category: 'Catégorie',
       warranty: 'Garantie',
@@ -182,6 +183,7 @@ const resources = {
       orderSummary: 'Résumé de la commande',
       variant: 'Variante',
       unitPrice: 'Prix unitaire',
+      currency: 'dh',
       confirmOnWhatsApp: 'Confirmer sur WhatsApp',
       fillRequiredFields: 'Veuillez remplir les champs obligatoires (*)',
 
@@ -321,6 +323,7 @@ const resources = {
       relatedProducts: 'منتجات مشابهة',
       inStock: 'متوفر',
       outOfStock: 'نفد من المخزون',
+      continueOrder: 'متابعة الطلب',
       sku: 'الرمز',
       category: 'الفئة',
       warranty: 'الضمان',
@@ -400,6 +403,7 @@ const resources = {
       orderSummary: 'ملخص الطلب',
       variant: 'النوع',
       unitPrice: 'السعر',
+      currency: 'د.م.',
       confirmOnWhatsApp: 'تأكيد عبر واتساب',
       fillRequiredFields: 'املأ الحقول المطلوبة (*)',
 

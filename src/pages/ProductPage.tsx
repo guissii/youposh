@@ -408,12 +408,12 @@ export default function ProductPage() {
 
                 {/* Price */}
                 <div className="flex items-baseline gap-3 flex-wrap">
-                  <span className="text-3xl sm:text-4xl font-bold text-[var(--yp-dark)]">{product.price} dh</span>
+                  <span className="text-3xl sm:text-4xl font-bold text-[var(--yp-dark)]">{product.price} <span className="text-xl">{t('currency')}</span></span>
                   {product.originalPrice && (
                     <>
-                      <span className="text-xl text-[var(--yp-gray-500)] line-through">{product.originalPrice} dh</span>
+                      <span className="text-xl text-[var(--yp-gray-500)] line-through">{product.originalPrice} {t('currency')}</span>
                       <span className="bg-[var(--yp-red-50)] text-[var(--yp-red)] px-3 py-1 rounded-lg text-sm font-bold">
-                        {t('save') || 'Économisez'} {product.originalPrice - product.price} dh
+                        {t('save') || 'Économisez'} {product.originalPrice - product.price} {t('currency')}
                       </span>
                     </>
                   )}
@@ -481,7 +481,7 @@ export default function ProductPage() {
                       </button>
                     </div>
                     <span className="text-sm text-[var(--yp-gray-600)]">
-                      {t('total')}: <span className="font-bold text-[var(--yp-dark)] text-lg">{subtotal} dh</span>
+                      {t('total')}: <span className="font-bold text-[var(--yp-dark)] text-lg" dir="ltr">{subtotal} {t('currency')}</span>
                     </span>
                   </div>
                 </div>
@@ -777,22 +777,22 @@ export default function ProductPage() {
                   </div>
                   <div className="flex justify-between text-[var(--yp-gray-600)]">
                     <span>{t('unitPrice') || 'Prix unitaire'}</span>
-                    <span className="font-medium text-[var(--yp-dark)]">{product.price} dh</span>
+                    <span className="font-medium text-[var(--yp-dark)]">{product.price} {t('currency')}</span>
                   </div>
                   <div className="flex justify-between text-[var(--yp-gray-600)]">
                     <span>{t('subtotal') || 'Sous-total'}</span>
-                    <span className="font-medium text-[var(--yp-dark)]">{subtotal} dh</span>
+                    <span className="font-medium text-[var(--yp-dark)]">{subtotal} {t('currency')}</span>
                   </div>
                   {promoStatus === 'applied' && promoCode && promoDiscount > 0 && (
                     <div className="flex justify-between text-emerald-700">
                       <span>Code promo ({promoCode})</span>
-                      <span className="font-semibold">- {promoDiscount} dh</span>
+                      <span className="font-semibold">- {promoDiscount} {t('currency')}</span>
                     </div>
                   )}
                   {promoStatus === 'applied' && promoCode && promoDiscount > 0 && (
                     <div className="flex justify-between text-[var(--yp-gray-600)]">
                       <span>Sous-total après promo</span>
-                      <span className="font-medium text-[var(--yp-dark)]">{subtotalAfterPromo} dh</span>
+                      <span className="font-medium text-[var(--yp-dark)]">{subtotalAfterPromo} {t('currency')}</span>
                     </div>
                   )}
                   <div className="flex justify-between items-center text-[var(--yp-gray-600)]">
@@ -800,12 +800,12 @@ export default function ProductPage() {
                       <Truck className="w-3.5 h-3.5" />
                       {t('delivery') || 'Livraison'}
                     </span>
-                    <span className="font-medium">{deliveryFee} dh</span>
+                    <span className="font-medium">{deliveryFee} {t('currency')}</span>
                   </div>
                   <div className="border-t border-[var(--yp-gray-300)] pt-2 mt-2">
                     <div className="flex justify-between">
                       <span className="font-bold text-[var(--yp-dark)]">{t('total')}</span>
-                      <span className="font-bold text-[var(--yp-dark)] text-lg">{grandTotal} dh</span>
+                      <span className="font-bold text-[var(--yp-dark)] text-lg">{grandTotal} {t('currency')}</span>
                     </div>
                   </div>
                 </div>
