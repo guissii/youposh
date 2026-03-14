@@ -789,9 +789,9 @@ router.post('/:id/sync', async (req, res) => {
         try {
             await updateOrderInGoogleSheet(order as unknown as OrderForSheet);
             res.json({ message: 'Order synced to Google Sheets', order });
-        } catch (e) {
+        } catch (e: any) {
             console.error('Manual sync failed:', e);
-            res.status(500).json({ error: 'Failed to sync to Google Sheets: ' + (e instanceof Error ? e.message : String(e)) });
+            res.status(500).json({ error: 'Failed to sync to Google Sheets: ' + (e instanceof Error ? e.message : String(e)), details: e?.message });
         }
     } catch (error) {
         console.error('Error syncing order:', error);
