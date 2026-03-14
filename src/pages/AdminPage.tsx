@@ -947,6 +947,45 @@ const AdminPage = () => {
             </div>
           </div>
 
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-[#666] mb-1">Couleur "YOU"</label>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="color" 
+                  value={heroForm.titleColorYou?.startsWith('#') ? heroForm.titleColorYou : '#2563EB'} 
+                  onChange={e => setHeroForm(f => ({ ...f, titleColorYou: e.target.value }))} 
+                  className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white" 
+                />
+                <input 
+                  type="text" 
+                  value={heroForm.titleColorYou || ''} 
+                  onChange={e => setHeroForm(f => ({ ...f, titleColorYou: e.target.value }))} 
+                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" 
+                  placeholder="#2563EB"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#666] mb-1">Couleur "POSH"</label>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="color" 
+                  value={heroForm.titleColorPosh?.startsWith('#') ? heroForm.titleColorPosh : '#DC2626'} 
+                  onChange={e => setHeroForm(f => ({ ...f, titleColorPosh: e.target.value }))} 
+                  className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white" 
+                />
+                <input 
+                  type="text" 
+                  value={heroForm.titleColorPosh || ''} 
+                  onChange={e => setHeroForm(f => ({ ...f, titleColorPosh: e.target.value }))} 
+                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" 
+                  placeholder="#DC2626"
+                />
+              </div>
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-[#666] mb-1">Titre Principal</label>
             <input 

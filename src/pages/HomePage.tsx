@@ -129,8 +129,8 @@ export default function HomePage() {
 
             {/* Main Title */}
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 font-sans tracking-tight animate-fade-in-up delay-100 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
-              <span className="text-[var(--yp-blue)] drop-shadow-[0_2px_2px_rgba(255,255,255,0.2)]">YOU</span>
-              <span className="text-[var(--yp-red)] drop-shadow-[0_2px_2px_rgba(255,255,255,0.2)]">POSH</span> <br className="hidden sm:block" />
+              <span className="drop-shadow-[0_2px_2px_rgba(255,255,255,0.2)]" style={{ color: heroSettings.titleColorYou || 'var(--yp-blue)' }}>YOU</span>
+              <span className="drop-shadow-[0_2px_2px_rgba(255,255,255,0.2)]" style={{ color: heroSettings.titleColorPosh || 'var(--yp-red)' }}>POSH</span> <br className="hidden sm:block" />
               <span className="text-3xl sm:text-4xl lg:text-5xl font-bold block mt-4 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
                 {t('heroTitle').replace('YOUPOSH ', '')}
               </span>
