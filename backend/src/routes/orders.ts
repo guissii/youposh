@@ -762,4 +762,28 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// POST /api/orders/:id/sync - Manually sync an order to Google Sheets
+router.post('/:id/sync', async (req, res) => {
+    try {
+        const order = await prisma.order.findUnique({
+            where: { id: req.params.id },
+            include: {
+                items: { include: { product: true } },
+            },
+        });
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+
+        try {
+            await updateOrderInGoogleSheet(order as unknown as OrderForSheet);
+            res.json({ message: 'Order synced to Google Sheets', order });
+        } catch (e) {
+            console.error('Manual sync failed:', e);
+            res.status(500).json({ error: 'Failed to sync to Google Sheets: ' + (e instanceof Error ? e.message : String(e)) });
+        }
+    } catch (error) {
+        console.error('Error syncing order:', error);
+        res.status(500).json({ error: 'Failed to sync order' });
+    }
+});
+
 export default router;
