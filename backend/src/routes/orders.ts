@@ -87,10 +87,14 @@ function getDeliveryStatusFromOrderStatus(status: string) {
     return 'not_shipped';
 }
 
+function cleanEnvVar(val: string | undefined) {
+    if (!val) return '';
+    return val.replace(/['"]/g, '').trim();
+}
+
 async function getSheetsClient() {
-    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
-    // Clean email: remove quotes and whitespace
-    const clientEmail = (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || '').replace(/["'\s]/g, '');
+    const spreadsheetId = cleanEnvVar(process.env.GOOGLE_SHEETS_SPREADSHEET_ID);
+    const clientEmail = cleanEnvVar(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL);
     const privateKeyRaw =
         process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
         process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64 ||
@@ -371,7 +375,10 @@ async function appendOrderToGoogleSheet(order: OrderForSheet) {
         warnSheetsEnvMissing();
         return;
     }
-    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+    const spreadsheetId = cleanEnvVar(process.env.GOOGLE_SHEETS_SPREADSHEET_ID);
+
+    const createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
+    const sheetTitle = `Commandes_${createdAt.getFullYear()}_${String(createdAt.getMonth() + 1).padStart(2, '0')}`;
 
     const { sheets, sheetId, hasDeliveryFormatting } = await ensureSheetTabExists(sheetTitle);
     await ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetId, hasDeliveryFormatting);
@@ -429,7 +436,7 @@ async function updateOrderInGoogleSheet(order: OrderForSheet) {
         // THROW ERROR HERE instead of silent return, so manual sync can catch it
         throw new Error('Google Sheets env vars missing (ID, Email, or Private Key)');
     }
-    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+    const spreadsheetId = cleanEnvVar(process.env.GOOGLE_SHEETS_SPREADSHEET_ID);
     const createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
     const sheetTitle = `Commandes_${createdAt.getFullYear()}_${String(createdAt.getMonth() + 1).padStart(2, '0')}`;
     const { sheets, sheetId, hasDeliveryFormatting } = await ensureSheetTabExists(sheetTitle);
@@ -508,8 +515,7 @@ function parseVariantSelection(label: any): Record<string, string> {
 // GET /api/orders/debug-auth - Diagnose Google Auth issues
 router.get('/debug-auth', async (req, res) => {
     try {
-        // Clean email here too
-        const email = (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || 'MISSING').replace(/["'\s]/g, '');
+        const email = cleanEnvVar(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) || 'MISSING';
         const keyRaw = 
             process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
             process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64 ||
