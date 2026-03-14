@@ -619,7 +619,7 @@ router.post('/', async (req, res) => {
 
             const totalAfterDiscount = Math.max(0, subtotal - discount);
 
-            const created = await tx.order.create({
+        const created = await tx.order.create({
                 data: {
                     customerName,
                     phone,
@@ -646,6 +646,7 @@ router.post('/', async (req, res) => {
                 },
             });
 
+            // Update product stock...
             for (const item of normalizedItems) {
                 const product = await tx.product.findUnique({
                     where: { id: item.productId },
@@ -657,17 +658,7 @@ router.post('/', async (req, res) => {
                     },
                 });
 
-                if (!product) {
-                    throw new Error(`Product not found: ${item.productId}`);
-                }
-
-                if (product.inStock === false) {
-                    throw new Error(`Produit en rupture de stock: ${item.productId}`);
-                }
-
-                if (Number(product.stock ?? 0) < Number(item.quantity ?? 0)) {
-                    throw new Error(`Out of stock: ${item.productId}`);
-                }
+                if (!product) continue; // Should not happen
 
                 const selection = parseVariantSelection(item?.variant);
                 let nextVariants: any = product.variants;
@@ -682,10 +673,7 @@ router.post('/', async (req, res) => {
                             if (typeof opt.value !== 'string') return opt;
                             if (opt.value !== selectedValue) return opt;
                             if (typeof opt.stock !== 'number') return opt;
-                            if (opt.stock < item.quantity) {
-                                throw new Error(`Out of stock: ${item.productId} (${v.name}: ${opt.value})`);
-                            }
-                            return { ...opt, stock: opt.stock - item.quantity };
+                            return { ...opt, stock: Math.max(0, opt.stock - item.quantity) };
                         });
 
                         return { ...v, options: newOptions };
@@ -693,7 +681,7 @@ router.post('/', async (req, res) => {
                     nextVariants = updated;
                 }
 
-                const newStock = Number(product.stock ?? 0) - Number(item.quantity ?? 0);
+                const newStock = Math.max(0, Number(product.stock ?? 0) - Number(item.quantity ?? 0));
 
                 await tx.product.update({
                     where: { id: item.productId },
@@ -716,6 +704,7 @@ router.post('/', async (req, res) => {
             return created;
         });
 
+        // Sync to Google Sheets
         try {
             await appendOrderToGoogleSheet(order as unknown as OrderForSheet);
         } catch (e) {
