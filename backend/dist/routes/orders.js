@@ -25,23 +25,40 @@ function warnSheetsEnvMissing() {
 function loadGooglePrivateKey() {
     const base64 = process.env.GOOGLE_PRIVATE_KEY_BASE64 || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64;
     const raw = process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
-    let key;
+    let keyContent = '';
     if (base64) {
-        key = Buffer.from(String(base64), 'base64').toString('utf8');
+        // Handle Base64 encoded key
+        try {
+            keyContent = Buffer.from(String(base64), 'base64').toString('utf8');
+        }
+        catch (e) {
+            console.error('Failed to decode Base64 key:', e);
+        }
     }
     else if (raw) {
-        key = String(raw);
+        keyContent = String(raw);
     }
-    if (!key) {
-        throw new Error('Google Sheets env vars missing');
+    if (!keyContent) {
+        console.error('loadGooglePrivateKey: No key found in env vars');
+        throw new Error('Google Sheets env vars missing (Private Key)');
     }
-    return String(key)
-        .replace(/^\s*["']|["']\s*$/g, '')
-        .replace(/\r\n/g, '\n')
-        .replace(/\r/g, '\n')
-        .replace(/\\\\n/g, '\n')
-        .replace(/\\n/g, '\n')
-        .trim();
+    // Aggressive cleaning to ensure valid PEM format
+    // 1. Remove headers/footers if present to normalize
+    let body = keyContent
+        .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+        .replace(/-----END PRIVATE KEY-----/g, '')
+        .replace(/\\n/g, '') // Remove literal escaped newlines
+        .replace(/\s+/g, ''); // Remove all whitespace (newlines, spaces)
+    // 2. Re-construct canonical PEM
+    const chunkSize = 64;
+    const chunks = [];
+    for (let i = 0; i < body.length; i += chunkSize) {
+        chunks.push(body.slice(i, i + chunkSize));
+    }
+    const validKey = `-----BEGIN PRIVATE KEY-----\n${chunks.join('\n')}\n-----END PRIVATE KEY-----\n`;
+    // Debug log (safe)
+    console.log(`loadGooglePrivateKey: Key reconstructed. Total length: ${validKey.length}`);
+    return validKey;
 }
 function getDeliveryStatusFromOrderStatus(status) {
     if (status === 'shipped')
@@ -703,6 +720,38 @@ router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     catch (error) {
         console.error('Error deleting order:', error);
         res.status(500).json({ error: 'Failed to delete order' });
+    }
+}));
+// POST /api/orders/:id/sync - Manually sync an order to Google Sheets
+router.post('/:id/sync', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const order = yield prisma.order.findUnique({
+            where: { id: req.params.id },
+            include: {
+                items: { include: { product: true } },
+            },
+        });
+        if (!order)
+            return res.status(404).json({ error: 'Order not found' });
+        try {
+            // Force create/update
+            yield updateOrderInGoogleSheet(order);
+            res.json({ message: 'Order synced to Google Sheets', order });
+        }
+        catch (e) {
+            console.error('Manual sync failed:', e);
+            // Return full error details to client
+            res.status(500).json({
+                error: 'Failed to sync to Google Sheets',
+                message: e instanceof Error ? e.message : String(e),
+                details: ((_a = e === null || e === void 0 ? void 0 : e.response) === null || _a === void 0 ? void 0 : _a.data) || (e === null || e === void 0 ? void 0 : e.stack)
+            });
+        }
+    }
+    catch (error) {
+        console.error('Error syncing order:', error);
+        res.status(500).json({ error: 'Failed to sync order' });
     }
 }));
 exports.default = router;

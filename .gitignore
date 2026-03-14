@@ -9,3 +9,5 @@ uploads
 uploads/categories
 uploads/products
 brain
+.vercel
+.env*.local

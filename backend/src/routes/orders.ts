@@ -360,7 +360,12 @@ async function appendOrderToGoogleSheet(order: OrderForSheet) {
     if (
         !process.env.GOOGLE_SHEETS_SPREADSHEET_ID ||
         !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
-        !(process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY)
+        !(
+            process.env.GOOGLE_PRIVATE_KEY ||
+            process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY ||
+            process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
+            process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64
+        )
     ) {
         warnSheetsEnvMissing();
         return;
@@ -415,7 +420,12 @@ async function updateOrderInGoogleSheet(order: OrderForSheet) {
     if (
         !process.env.GOOGLE_SHEETS_SPREADSHEET_ID ||
         !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
-        !(process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY)
+        !(
+            process.env.GOOGLE_PRIVATE_KEY ||
+            process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY ||
+            process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
+            process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64
+        )
     ) {
         warnSheetsEnvMissing();
         // THROW ERROR HERE instead of silent return, so manual sync can catch it
