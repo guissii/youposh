@@ -29,8 +29,8 @@
 
     /* Brand Colors — YouPosh Official Palette */
     /* Primary Brand Colors (Text / Main Branding) */
-    --yp-blue: #00b2ea; /* Blue for "YOU" */
-    --yp-red: #fd0e24;  /* Red for "POSH" */
+    --yp-blue: #01b3e9; /* Blue for "YOU" */
+    --yp-red: #ff5757;  /* Red for "POSH" */
 
     /* Individual Color Overrides */
     --yp-color-you: var(--yp-blue);
@@ -38,20 +38,20 @@
     --yp-color-cart: var(--yp-blue);
 
     /* Secondary Brand Colors (Pictogram / Accents) */
-    --yp-blue-alt: #01B3EA;
-    --yp-red-alt: #FE0E25;
+    --yp-blue-alt: #01b3e9;
+    --yp-red-alt: #ff5757;
 
     /* Derived Shades for UI States (Hover, Light Backgrounds) */
-    --yp-blue-dark: #1D4ED8; /* Slightly darker for hover */
+    --yp-blue-dark: #009acb; /* Slightly darker for hover */
     --yp-blue-light: #60A5FA;
     --yp-blue-50: #EFF6FF;
     --yp-blue-100: #DBEAFE;
-    --yp-blue-rgb: 37 99 235;
+    --yp-blue-rgb: 1 179 233;
 
-    --yp-red-dark: #B91C1C; /* Slightly darker for hover */
+    --yp-red-dark: #e04545; /* Slightly darker for hover */
     --yp-red-light: #EF4444;
     --yp-red-50: #FEF2F2;
-    --yp-red-rgb: 220 38 38;
+    --yp-red-rgb: 255 87 87;
 
     /* Neutrals */
     --yp-dark: #0F172A;

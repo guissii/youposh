@@ -85,15 +85,10 @@ export default function HomePage() {
         {/* ══════════════════════════════════════════════
             HERO — Minimalist Blue Gradient Design
             ══════════════════════════════════════════════ */}
-        <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-[#0f172a]">
-          {/* Smooth Blue Gradient Background */}
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-[#0f172a] via-[#1e3a8a] to-[#3b82f6]" />
+        <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
           
-          {/* Subtle noise/texture overlay for depth */}
-          <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
-
           {/* Hero Video Background */}
-          <div className="absolute inset-0 w-full h-full overflow-hidden opacity-30 mix-blend-screen pointer-events-none">
+          <div className="absolute inset-0 w-full h-full overflow-hidden">
             <video 
               autoPlay 
               loop 
@@ -103,6 +98,9 @@ export default function HomePage() {
             >
               <source src="/videos/hero video.mp4" type="video/mp4" />
             </video>
+            
+            {/* Overlay to ensure text readability */}
+            {/* <div className="absolute inset-0 bg-black/40" /> */}
           </div>
 
 
@@ -123,15 +121,16 @@ export default function HomePage() {
             </div>
 
             {/* Main Title */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 drop-shadow-sm font-sans tracking-tight animate-fade-in-up delay-100">
-              YOUPOSH <br className="hidden sm:block" />
-              <span className="text-3xl sm:text-4xl lg:text-5xl font-normal block mt-4 text-blue-100">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 font-sans tracking-tight animate-fade-in-up delay-100 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
+              <span className="text-[var(--yp-blue)] drop-shadow-[0_2px_2px_rgba(255,255,255,0.2)]">YOU</span>
+              <span className="text-[var(--yp-red)] drop-shadow-[0_2px_2px_rgba(255,255,255,0.2)]">POSH</span> <br className="hidden sm:block" />
+              <span className="text-3xl sm:text-4xl lg:text-5xl font-bold block mt-4 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
                 {t('heroTitle').replace('YOUPOSH ', '')}
               </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-lg sm:text-xl text-blue-50/90 max-w-3xl mx-auto leading-relaxed mb-10 font-light animate-fade-in-up delay-200">
+            <p className="text-lg sm:text-xl text-white font-bold max-w-3xl mx-auto leading-relaxed mb-10 animate-fade-in-up delay-200 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] bg-black/10 backdrop-blur-[2px] rounded-xl p-4 border border-white/10">
               {t('heroSubtitle')}
             </p>
 

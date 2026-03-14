@@ -67,7 +67,7 @@ function loadGooglePrivateKey(): string {
 
     // Aggressive cleaning to ensure valid PEM format
     // 1. Remove headers/footers if present to normalize
-    let body = keyContent
+    const body = keyContent
         .replace(/-----BEGIN PRIVATE KEY-----/g, '')
         .replace(/-----END PRIVATE KEY-----/g, '')
         .replace(/\\n/g, '') // Remove literal escaped newlines
@@ -589,9 +589,9 @@ router.get('/debug-auth', async (req, res) => {
                 authTest.authResult = `SUCCESS! Token generated.`;
             } catch (e) {
                 authTest.authResult = `FAILED: ${e instanceof Error ? e.message : String(e)}`;
-                // @ts-ignore
+                // @ts-expect-error - Google Auth error response type is not typed in the library
                 if (e.response && e.response.data) {
-                    // @ts-ignore
+                    // @ts-expect-error - Google Auth error response type is not typed in the library
                     authTest.apiError = e.response.data;
                 }
             }

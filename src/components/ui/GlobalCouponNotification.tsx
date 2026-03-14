@@ -17,8 +17,10 @@ export function GlobalCouponNotification() {
       return;
     }
 
-    const dismissKey = `yp_dismissed_coupon_${location.pathname}`;
-    if (sessionStorage.getItem(dismissKey)) return;
+    // Force show every time for now as requested "MUST APPEAR ON ALL PAGES"
+    // To make it less annoying in production we might want to uncomment the dismissal check later
+    // const dismissKey = `yp_dismissed_coupon_v2_${location.pathname}`;
+    // if (sessionStorage.getItem(dismissKey)) return;
 
     if (promoCode && promoStatus === 'applied') {
       setIsVisible(false);
@@ -48,14 +50,14 @@ export function GlobalCouponNotification() {
 
   const handleDismiss = () => {
     setIsVisible(false);
-    sessionStorage.setItem(`yp_dismissed_coupon_${location.pathname}`, 'true');
+    // sessionStorage.setItem(`yp_dismissed_coupon_v2_${location.pathname}`, 'true');
   };
 
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-24 right-4 sm:right-6 sm:bottom-6 z-40 max-w-[280px] sm:max-w-[320px] w-[calc(100%-32px)] animate-in slide-in-from-right-10 fade-in duration-700">
-      <div className="bg-[#1A1A1A] text-white rounded-xl shadow-xl overflow-hidden relative border border-gray-800/50">
+    <div className="fixed bottom-24 right-4 sm:right-6 sm:bottom-24 z-[60] max-w-[280px] sm:max-w-[320px] w-[calc(100%-32px)] animate-in slide-in-from-right-10 fade-in duration-700">
+      <div className="bg-black/30 backdrop-blur-md text-white rounded-xl shadow-xl overflow-hidden relative border border-white/10">
         <button
           onClick={handleDismiss}
           className="absolute top-2 right-2 p-1 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all z-10"

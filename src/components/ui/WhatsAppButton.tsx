@@ -158,7 +158,7 @@ export default function WhatsAppButton({
     return (
       <button
         onClick={handleClick}
-        className="fixed bottom-4 right-4 z-50 flex items-center gap-3 bg-[#00A884] hover:bg-[#008f6f] text-white pl-2 pr-5 py-2 rounded-full shadow-2xl hover:shadow-[0_8px_30px_rgba(0,168,132,0.4)] active:scale-95 transition-all duration-300 group animate-scale-in"
+        className="fixed bottom-4 right-4 z-50 flex flex-col items-center gap-1 bg-[#00A884] hover:bg-[#008f6f] text-white p-3 rounded-2xl shadow-2xl hover:shadow-[0_8px_30px_rgba(0,168,132,0.4)] active:scale-95 transition-all duration-300 group animate-scale-in"
         aria-label="Ouvrir le panier"
       >
         <div className="relative">
@@ -171,8 +171,8 @@ export default function WhatsAppButton({
             </span>
           )}
         </div>
-        <div className="flex flex-col items-start leading-none">
-          <span className="text-[13px] font-bold uppercase tracking-wide">Panier</span>
+        <div className="flex flex-col items-center leading-none">
+          <span className="text-[10px] font-bold uppercase tracking-wide">أضف إلى السلة</span>
         </div>
       </button>
     );

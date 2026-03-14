@@ -29,7 +29,7 @@ function loadGooglePrivateKey(): string {
   }
 
   // Aggressive cleaning to ensure valid PEM format
-  let body = keyContent
+  const body = keyContent
       .replace(/-----BEGIN PRIVATE KEY-----/g, '')
       .replace(/-----END PRIVATE KEY-----/g, '')
       .replace(/\\n/g, '') // Remove literal escaped newlines
