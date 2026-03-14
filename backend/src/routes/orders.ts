@@ -507,6 +507,65 @@ function parseVariantSelection(label: any): Record<string, string> {
     return out;
 }
 
+// GET /api/orders/debug-auth - Diagnose Google Auth issues
+router.get('/debug-auth', async (req, res) => {
+    try {
+        const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || 'MISSING';
+        const keyRaw = 
+            process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
+            process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64 ||
+            process.env.GOOGLE_PRIVATE_KEY ||
+            process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY ||
+            'MISSING';
+        
+        let keyStatus = 'MISSING';
+        let keyPreview = 'N/A';
+        let reconstructedKey = '';
+
+        if (keyRaw !== 'MISSING') {
+            try {
+                reconstructedKey = loadGooglePrivateKey();
+                keyStatus = 'LOADED_AND_RECONSTRUCTED';
+                const lines = reconstructedKey.split('\n');
+                keyPreview = `Starts with: ${lines[0]}, Ends with: ${lines[lines.length - 2] || lines[lines.length - 1]}, Total Length: ${reconstructedKey.length}`;
+            } catch (e) {
+                keyStatus = `ERROR_PARSING: ${e instanceof Error ? e.message : String(e)}`;
+            }
+        }
+
+        const authTest = {
+            email,
+            keyStatus,
+            keyPreview,
+            authResult: 'PENDING'
+        };
+
+        if (keyStatus === 'LOADED_AND_RECONSTRUCTED') {
+            try {
+                const auth = new google.auth.JWT({
+                    email,
+                    key: reconstructedKey,
+                    scopes: SHEETS_SCOPES,
+                });
+                const token = await auth.getAccessToken();
+                authTest.authResult = `SUCCESS! Token generated.`;
+            } catch (e) {
+                authTest.authResult = `FAILED: ${e instanceof Error ? e.message : String(e)}`;
+                // @ts-ignore
+                if (e.response && e.response.data) {
+                    // @ts-ignore
+                    authTest.apiError = e.response.data;
+                }
+            }
+        }
+
+        res.json(authTest);
+
+    } catch (error) {
+        res.status(500).json({ error: 'Debug failed', details: error instanceof Error ? error.message : String(error) });
+    }
+});
+
 // GET all orders with optional status filter
 router.get('/', async (req, res) => {
     try {
@@ -820,65 +879,6 @@ router.post('/:id/sync', async (req, res) => {
     } catch (error) {
         console.error('Error syncing order:', error);
         res.status(500).json({ error: 'Failed to sync order' });
-    }
-});
-
-// GET /api/orders/debug-auth - Diagnose Google Auth issues
-router.get('/debug-auth', async (req, res) => {
-    try {
-        const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || 'MISSING';
-        const keyRaw = 
-            process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
-            process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64 ||
-            process.env.GOOGLE_PRIVATE_KEY ||
-            process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY ||
-            'MISSING';
-        
-        let keyStatus = 'MISSING';
-        let keyPreview = 'N/A';
-        let reconstructedKey = '';
-
-        if (keyRaw !== 'MISSING') {
-            try {
-                reconstructedKey = loadGooglePrivateKey();
-                keyStatus = 'LOADED_AND_RECONSTRUCTED';
-                const lines = reconstructedKey.split('\n');
-                keyPreview = `Starts with: ${lines[0]}, Ends with: ${lines[lines.length - 2] || lines[lines.length - 1]}, Total Length: ${reconstructedKey.length}`;
-            } catch (e) {
-                keyStatus = `ERROR_PARSING: ${e instanceof Error ? e.message : String(e)}`;
-            }
-        }
-
-        const authTest = {
-            email,
-            keyStatus,
-            keyPreview,
-            authResult: 'PENDING'
-        };
-
-        if (keyStatus === 'LOADED_AND_RECONSTRUCTED') {
-            try {
-                const auth = new google.auth.JWT({
-                    email,
-                    key: reconstructedKey,
-                    scopes: SHEETS_SCOPES,
-                });
-                const token = await auth.getAccessToken();
-                authTest.authResult = `SUCCESS! Token generated.`;
-            } catch (e) {
-                authTest.authResult = `FAILED: ${e instanceof Error ? e.message : String(e)}`;
-                // @ts-ignore
-                if (e.response && e.response.data) {
-                    // @ts-ignore
-                    authTest.apiError = e.response.data;
-                }
-            }
-        }
-
-        res.json(authTest);
-
-    } catch (error) {
-        res.status(500).json({ error: 'Debug failed', details: error instanceof Error ? error.message : String(error) });
     }
 });
 
