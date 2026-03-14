@@ -14,14 +14,14 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import CartDrawer from '@/components/layout/CartDrawer';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import { loadHeroSettings } from '@/data/heroSettings';
+import { useHeroSettings } from '@/data/heroSettings';
 
 
 
 export default function HomePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const heroSettings = loadHeroSettings();
+  const heroSettings = useHeroSettings();
 
   const flashRef = useScrollReveal();
   const bestsellersRef = useScrollReveal();
