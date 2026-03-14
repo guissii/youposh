@@ -803,10 +803,16 @@ router.post('/:id/sync', async (req, res) => {
             
             const innerMessage = e instanceof Error ? e.message : String(e);
             const detailedError = e?.response?.data?.error || e?.response?.data?.error_description || innerMessage;
+            
+            // Add specific invalid_grant hint
+            let hint = '';
+            if (String(detailedError).includes('invalid_grant')) {
+                hint = ' (Check system time or key validity)';
+            }
 
             // Return full error details to client in the 'error' field so apiFetch picks it up
             res.status(500).json({ 
-                error: `Sync failed: ${detailedError}`,
+                error: `Sync failed: ${detailedError}${hint}`,
                 message: innerMessage,
                 details: e?.response?.data || e?.stack
             });
