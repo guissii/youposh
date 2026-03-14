@@ -92,12 +92,7 @@ export default function HomePage() {
           {/* Subtle noise/texture overlay for depth */}
           <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
 
-          {/* Top Right Slogan */}
-          <div className="absolute top-6 right-6 sm:top-10 sm:right-10 z-20">
-            <p className="text-white/80 text-xs sm:text-sm font-medium tracking-wide border-b border-white/20 pb-1">
-              {t('heroSlogan')}
-            </p>
-          </div>
+
 
           {/* Content Container */}
           <div className="relative z-10 w-full max-w-5xl mx-auto px-6 sm:px-8 text-center flex flex-col items-center">

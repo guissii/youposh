@@ -105,6 +105,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return prev;
       }
       if (existing) {
+        if (existing.quantity + quantity > 10) {
+          toast.error('La quantité maximale par produit est limitée à 10');
+          return prev;
+        }
         if (existing.quantity + quantity > maxAllowed) {
           toast.error(`Stock insuffisant (max ${maxAllowed})`);
           return prev;
@@ -115,6 +119,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
+      }
+      if (quantity > 10) {
+        toast.error('La quantité maximale par produit est limitée à 10');
+        return prev;
       }
       if (quantity > maxAllowed) {
         toast.error(`Stock insuffisant (max ${maxAllowed})`);
@@ -144,8 +152,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (typeof variant === 'string' && item.variant !== variant) return item;
 
       const maxAllowed = getMaxAllowedForVariant(item.product, item.variant);
-      const nextQty = Math.min(quantity, maxAllowed);
-      if (nextQty !== quantity) toast.error(`Stock insuffisant (max ${maxAllowed})`);
+      const nextQty = Math.min(quantity, maxAllowed, 10);
+      
+      if (quantity > 10) {
+         toast.error('La quantité maximale par produit est limitée à 10');
+      } else if (nextQty !== quantity) {
+         toast.error(`Stock insuffisant (max ${maxAllowed})`);
+      }
       return { ...item, quantity: nextQty };
     }));
   }, [getMaxAllowedForVariant, removeFromCart]);

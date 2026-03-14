@@ -704,6 +704,9 @@ router.post('/', async (req, res) => {
                 if (Number(product.stock ?? 0) < Number(item.quantity ?? 0)) {
                     throw new Error(`Out of stock: ${item.productId}`);
                 }
+                if (Number(item.quantity) > 10) {
+                    throw new Error(`La quantité maximale par produit est limitée à 10 pièces`);
+                }
                 subtotal += Number(product.price) * Number(item.quantity);
             }
 
