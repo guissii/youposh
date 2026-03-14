@@ -48,16 +48,29 @@ function loadGooglePrivateKey(): string {
     }
 
     if (!key) {
+        console.error('loadGooglePrivateKey: No key found in env vars');
         throw new Error('Google Sheets env vars missing');
     }
 
-    return String(key)
+    // Clean up the key
+    const cleaned = String(key)
         .replace(/^\s*["']|["']\s*$/g, '')
         .replace(/\r\n/g, '\n')
         .replace(/\r/g, '\n')
         .replace(/\\\\n/g, '\n')
         .replace(/\\n/g, '\n')
         .trim();
+
+    // Basic validation
+    if (!cleaned.includes('BEGIN PRIVATE KEY') || !cleaned.includes('END PRIVATE KEY')) {
+        console.error('loadGooglePrivateKey: Key seems invalid (missing header/footer). Length:', cleaned.length);
+    } else {
+        // Debug log (safe)
+        const lines = cleaned.split('\n');
+        console.log(`loadGooglePrivateKey: Key loaded. Lines: ${lines.length}, Header: ${lines[0]}`);
+    }
+
+    return cleaned;
 }
 
 function getDeliveryStatusFromOrderStatus(status: string) {
