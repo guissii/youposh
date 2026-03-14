@@ -6,13 +6,13 @@ import {
   LogOut, Search, Bell, DollarSign, Clock, CheckCircle,
   Eye, EyeOff, Plus, Pencil, Trash2, X,
   TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Check, Stamp,
-  Zap, Flame, Star
+  Zap, Flame, Star, FileSpreadsheet
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   fetchDashboardStats, fetchRecentOrders, fetchTopProducts,
   fetchProducts, updateProduct, deleteProduct,
-  fetchOrders, updateOrderStatus, deleteOrder,
+  fetchOrders, updateOrderStatus, deleteOrder, syncOrderToSheets,
   fetchCategories, deleteCategory,
   fetchPromoCodes, deletePromoCode,
   type DashboardStats, setWatermarkStatusAPI
@@ -328,6 +328,18 @@ const AdminPage = () => {
     setExportModal(false);
   };
 
+  const handleSyncOrder = async (oid: string) => {
+    try {
+        toast.promise(syncOrderToSheets(oid), {
+            loading: 'Synchronisation en cours...',
+            success: 'Commande synchronisée avec Google Sheets !',
+            error: (err) => `Erreur sync: ${err.message}`
+        });
+    } catch (e) {
+        console.error(e);
+    }
+  };
+
   const renderOrders = () => {
     const visibleOrders = getVisibleOrders();
     return (
@@ -490,6 +502,14 @@ const AdminPage = () => {
                           <CheckCircle className="w-4 h-4" />
                         </button>
                       )}
+
+                      <button
+                        onClick={() => handleSyncOrder(o.id)}
+                        className="p-2 bg-green-50 hover:bg-green-100 rounded-xl text-green-600 hover:text-green-700 transition-colors border border-green-100 hover:border-green-300 shadow-sm"
+                        title="Synchroniser vers Google Sheets"
+                      >
+                        <FileSpreadsheet className="w-4 h-4" />
+                      </button>
 
                       <button
                         onClick={() => setDeleteConfirm({ type: 'order', id: o.id })}

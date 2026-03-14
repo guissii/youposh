@@ -69,6 +69,8 @@ export const updateOrderStatus = (id: string, status: string) =>
     apiFetch<any>(`/orders/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
 export const deleteOrder = (id: string) =>
     apiFetch<any>(`/orders/${id}`, { method: 'DELETE' });
+export const syncOrderToSheets = (id: string) =>
+    apiFetch<any>(`/orders/${id}/sync`, { method: 'POST' });
 
 // ─── Categories ────────────────────────────────────────────────
 export const fetchCategories = () => apiFetch<any[]>('/categories');
