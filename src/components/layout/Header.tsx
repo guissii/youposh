@@ -118,8 +118,8 @@ export default function Header() {
                 <span
                   className="font-bold text-lg xs:text-xl sm:text-2xl tracking-tight font-heading"
                 >
-                  <span className="text-[var(--yp-blue)]">YOU</span>
-                  <span className="text-[var(--yp-red)]">POSH</span>
+                  <span className="text-[#01b3e9]">YOU</span>
+                  <span className="text-[#ff5757]">POSH</span>
                 </span>
               </div>
 
