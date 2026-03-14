@@ -89,7 +89,8 @@ function getDeliveryStatusFromOrderStatus(status: string) {
 
 async function getSheetsClient() {
     const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
-    const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+    // Clean email: remove quotes and whitespace
+    const clientEmail = (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || '').replace(/["'\s]/g, '');
     const privateKeyRaw =
         process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
         process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64 ||
@@ -372,9 +373,6 @@ async function appendOrderToGoogleSheet(order: OrderForSheet) {
     }
     const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
 
-    const createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
-    const sheetTitle = `Commandes_${createdAt.getFullYear()}_${String(createdAt.getMonth() + 1).padStart(2, '0')}`;
-
     const { sheets, sheetId, hasDeliveryFormatting } = await ensureSheetTabExists(sheetTitle);
     await ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetId, hasDeliveryFormatting);
 
@@ -510,7 +508,8 @@ function parseVariantSelection(label: any): Record<string, string> {
 // GET /api/orders/debug-auth - Diagnose Google Auth issues
 router.get('/debug-auth', async (req, res) => {
     try {
-        const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || 'MISSING';
+        // Clean email here too
+        const email = (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || 'MISSING').replace(/["'\s]/g, '');
         const keyRaw = 
             process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
             process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64 ||
