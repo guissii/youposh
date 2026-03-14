@@ -17,10 +17,16 @@ const prisma = new client_1.PrismaClient();
 const SHEETS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 let didWarnSheetsEnvMissing = false;
 function warnSheetsEnvMissing() {
-    if (didWarnSheetsEnvMissing)
-        return;
+    // if (didWarnSheetsEnvMissing) return; // Always log for debugging now
     didWarnSheetsEnvMissing = true;
-    console.warn('Google Sheets sync skipped: missing env vars (GOOGLE_SHEETS_SPREADSHEET_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY / GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY or *_BASE64)');
+    const status = {
+        SPREADSHEET_ID: !!process.env.GOOGLE_SHEETS_SPREADSHEET_ID,
+        EMAIL: !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+        KEY_RAW: !!(process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY),
+        KEY_BASE64: !!(process.env.GOOGLE_PRIVATE_KEY_BASE64 || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64)
+    };
+    console.warn('Google Sheets sync skipped. Environment status:', JSON.stringify(status));
+    return status;
 }
 function loadGooglePrivateKey() {
     const base64 = process.env.GOOGLE_PRIVATE_KEY_BASE64 || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64;
@@ -44,7 +50,7 @@ function loadGooglePrivateKey() {
     }
     // Aggressive cleaning to ensure valid PEM format
     // 1. Remove headers/footers if present to normalize
-    let body = keyContent
+    const body = keyContent
         .replace(/-----BEGIN PRIVATE KEY-----/g, '')
         .replace(/-----END PRIVATE KEY-----/g, '')
         .replace(/\\n/g, '') // Remove literal escaped newlines
@@ -67,10 +73,15 @@ function getDeliveryStatusFromOrderStatus(status) {
         return 'delivered';
     return 'not_shipped';
 }
+function cleanEnvVar(val) {
+    if (!val)
+        return '';
+    return val.replace(/['"]/g, '').trim();
+}
 function getSheetsClient() {
     return __awaiter(this, void 0, void 0, function* () {
-        const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
-        const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+        const spreadsheetId = cleanEnvVar(process.env.GOOGLE_SHEETS_SPREADSHEET_ID);
+        const clientEmail = cleanEnvVar(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL);
         const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
             process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64 ||
             process.env.GOOGLE_PRIVATE_KEY ||
@@ -118,17 +129,17 @@ function ensureSheetTabExists(sheetTitle) {
 }
 function getExpectedSheetHeaders() {
     return [
-        'ID commande',
-        'Date création',
         'Nom client',
         'Téléphone',
         'Ville',
         'Adresse',
+        'Statut livraison',
         'Produits',
-        'Quantité totale',
         'Total',
         'Statut commande',
-        'Statut livraison',
+        'Quantité totale',
+        'ID commande',
+        'Date création',
         'Code promo',
         'Remise',
         'Remarque',
@@ -165,14 +176,15 @@ function ensureSheetFormatting(sheets, spreadsheetId, sheetId, options) {
                     },
                 },
             },
+            // Updated DataValidation ranges for new column order
             {
                 setDataValidation: {
                     range: {
                         sheetId,
                         startRowIndex: 1,
                         endRowIndex,
-                        startColumnIndex: 9,
-                        endColumnIndex: 10,
+                        startColumnIndex: 7, // H: Statut commande (index 7)
+                        endColumnIndex: 8,
                     },
                     rule: {
                         condition: {
@@ -190,8 +202,8 @@ function ensureSheetFormatting(sheets, spreadsheetId, sheetId, options) {
                         sheetId,
                         startRowIndex: 1,
                         endRowIndex,
-                        startColumnIndex: 10,
-                        endColumnIndex: 11,
+                        startColumnIndex: 4, // E: Statut livraison (index 4)
+                        endColumnIndex: 5,
                     },
                     rule: {
                         condition: {
@@ -209,8 +221,8 @@ function ensureSheetFormatting(sheets, spreadsheetId, sheetId, options) {
                 sheetId,
                 startRowIndex: 1,
                 endRowIndex,
-                startColumnIndex: 10,
-                endColumnIndex: 11,
+                startColumnIndex: 4, // E: Statut livraison
+                endColumnIndex: 5,
             };
             requests.push({
                 addConditionalFormatRule: {
@@ -314,11 +326,14 @@ function appendOrderToGoogleSheet(order) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         if (!process.env.GOOGLE_SHEETS_SPREADSHEET_ID ||
             !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
-            !(process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY)) {
+            !(process.env.GOOGLE_PRIVATE_KEY ||
+                process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY ||
+                process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
+                process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64)) {
             warnSheetsEnvMissing();
             return;
         }
-        const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+        const spreadsheetId = cleanEnvVar(process.env.GOOGLE_SHEETS_SPREADSHEET_ID);
         const createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
         const sheetTitle = `Commandes_${createdAt.getFullYear()}_${String(createdAt.getMonth() + 1).padStart(2, '0')}`;
         const { sheets, sheetId, hasDeliveryFormatting } = yield ensureSheetTabExists(sheetTitle);
@@ -334,17 +349,17 @@ function appendOrderToGoogleSheet(order) {
         const qtyTotal = items.reduce((sum, it) => { var _a; return sum + Number((_a = it.quantity) !== null && _a !== void 0 ? _a : 0); }, 0);
         const deliveryStatus = getDeliveryStatusFromOrderStatus(order.status);
         const row = [
-            order.id,
-            createdAt.toISOString(),
             (_b = order.customerName) !== null && _b !== void 0 ? _b : '',
             (_c = order.phone) !== null && _c !== void 0 ? _c : '',
             (_d = order.city) !== null && _d !== void 0 ? _d : '',
             (_e = order.address) !== null && _e !== void 0 ? _e : '',
+            deliveryStatus,
             productsLabel,
-            qtyTotal,
             (_f = order.total) !== null && _f !== void 0 ? _f : 0,
             (_g = order.status) !== null && _g !== void 0 ? _g : '',
-            deliveryStatus,
+            qtyTotal,
+            order.id,
+            createdAt.toISOString(),
             (_h = order.promoCode) !== null && _h !== void 0 ? _h : '',
             (_j = order.discount) !== null && _j !== void 0 ? _j : 0,
             (_k = order.notes) !== null && _k !== void 0 ? _k : '',
@@ -364,11 +379,15 @@ function updateOrderInGoogleSheet(order) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         if (!process.env.GOOGLE_SHEETS_SPREADSHEET_ID ||
             !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
-            !(process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY)) {
-            warnSheetsEnvMissing();
-            return;
+            !(process.env.GOOGLE_PRIVATE_KEY ||
+                process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY ||
+                process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
+                process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64)) {
+            const status = warnSheetsEnvMissing();
+            // THROW ERROR HERE instead of silent return, so manual sync can catch it
+            throw new Error(`Google Sheets env vars missing: ${JSON.stringify(status)}`);
         }
-        const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+        const spreadsheetId = cleanEnvVar(process.env.GOOGLE_SHEETS_SPREADSHEET_ID);
         const createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
         const sheetTitle = `Commandes_${createdAt.getFullYear()}_${String(createdAt.getMonth() + 1).padStart(2, '0')}`;
         const { sheets, sheetId, hasDeliveryFormatting } = yield ensureSheetTabExists(sheetTitle);
@@ -397,28 +416,50 @@ function updateOrderInGoogleSheet(order) {
         const qtyTotal = items.reduce((sum, it) => { var _a; return sum + Number((_a = it.quantity) !== null && _a !== void 0 ? _a : 0); }, 0);
         const deliveryStatus = getDeliveryStatusFromOrderStatus(order.status);
         const row = [
-            order.id,
-            createdAt.toISOString(),
             (_d = order.customerName) !== null && _d !== void 0 ? _d : '',
             (_e = order.phone) !== null && _e !== void 0 ? _e : '',
             (_f = order.city) !== null && _f !== void 0 ? _f : '',
             (_g = order.address) !== null && _g !== void 0 ? _g : '',
+            deliveryStatus,
             productsLabel,
-            qtyTotal,
             (_h = order.total) !== null && _h !== void 0 ? _h : 0,
             (_j = order.status) !== null && _j !== void 0 ? _j : '',
-            deliveryStatus,
+            qtyTotal,
+            order.id,
+            createdAt.toISOString(),
             (_k = order.promoCode) !== null && _k !== void 0 ? _k : '',
             (_l = order.discount) !== null && _l !== void 0 ? _l : 0,
             (_m = order.notes) !== null && _m !== void 0 ? _m : '',
             new Date().toISOString(),
         ];
         if (rowIndex === -1) {
-            yield sheets.spreadsheets.values.append({
+            // Strategy: Insert a new empty row at index 1 (row 2), then update it.
+            // This ensures the new order is always at the top.
+            // 1. Insert empty row at index 1
+            yield sheets.spreadsheets.batchUpdate({
                 spreadsheetId,
-                range: `'${sheetTitle}'!A1`,
+                requestBody: {
+                    requests: [
+                        {
+                            insertDimension: {
+                                range: {
+                                    sheetId,
+                                    dimension: 'ROWS',
+                                    startIndex: 1,
+                                    endIndex: 2,
+                                },
+                                inheritFromBefore: false,
+                            },
+                        },
+                    ],
+                },
+            });
+            // 2. Update the new row (Row 2) with data
+            const endColLetter = 'O';
+            yield sheets.spreadsheets.values.update({
+                spreadsheetId,
+                range: `'${sheetTitle}'!A2:${endColLetter}2`,
                 valueInputOption: 'RAW',
-                insertDataOption: 'INSERT_ROWS',
                 requestBody: { values: [row] },
             });
         }
@@ -449,6 +490,60 @@ function parseVariantSelection(label) {
     }
     return out;
 }
+// GET /api/orders/debug-auth - Diagnose Google Auth issues
+router.get('/debug-auth', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const email = cleanEnvVar(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) || 'MISSING';
+        const keyRaw = process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
+            process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64 ||
+            process.env.GOOGLE_PRIVATE_KEY ||
+            process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY ||
+            'MISSING';
+        let keyStatus = 'MISSING';
+        let keyPreview = 'N/A';
+        let reconstructedKey = '';
+        if (keyRaw !== 'MISSING') {
+            try {
+                reconstructedKey = loadGooglePrivateKey();
+                keyStatus = 'LOADED_AND_RECONSTRUCTED';
+                const lines = reconstructedKey.split('\n');
+                keyPreview = `Starts with: ${lines[0]}, Ends with: ${lines[lines.length - 2] || lines[lines.length - 1]}, Total Length: ${reconstructedKey.length}`;
+            }
+            catch (e) {
+                keyStatus = `ERROR_PARSING: ${e instanceof Error ? e.message : String(e)}`;
+            }
+        }
+        const authTest = {
+            email,
+            keyStatus,
+            keyPreview,
+            authResult: 'PENDING'
+        };
+        if (keyStatus === 'LOADED_AND_RECONSTRUCTED') {
+            try {
+                const auth = new googleapis_1.google.auth.JWT({
+                    email,
+                    key: reconstructedKey,
+                    scopes: SHEETS_SCOPES,
+                });
+                const token = yield auth.getAccessToken();
+                authTest.authResult = `SUCCESS! Token generated.`;
+            }
+            catch (e) {
+                authTest.authResult = `FAILED: ${e instanceof Error ? e.message : String(e)}`;
+                // @ts-expect-error - Google Auth error response type is not typed in the library
+                if (e.response && e.response.data) {
+                    // @ts-expect-error - Google Auth error response type is not typed in the library
+                    authTest.apiError = e.response.data;
+                }
+            }
+        }
+        res.json(authTest);
+    }
+    catch (error) {
+        res.status(500).json({ error: 'Debug failed', details: error instanceof Error ? error.message : String(error) });
+    }
+}));
 // GET all orders with optional status filter
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -523,7 +618,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             .join('\n');
         const finalNotes = [notes, extraNotes].filter((s) => typeof s === 'string' && s.trim()).join('\n');
         const order = yield prisma.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
-            var _a, _b, _c, _d, _e, _f;
+            var _a, _b, _c, _d;
             const productIds = [...new Set(normalizedItems.map((it) => it.productId))];
             const products = yield tx.product.findMany({
                 where: { id: { in: productIds } },
@@ -541,6 +636,9 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 }
                 if (Number((_a = product.stock) !== null && _a !== void 0 ? _a : 0) < Number((_b = item.quantity) !== null && _b !== void 0 ? _b : 0)) {
                     throw new Error(`Out of stock: ${item.productId}`);
+                }
+                if (Number(item.quantity) > 10) {
+                    throw new Error(`La quantité maximale par produit est limitée à 10 pièces`);
                 }
                 subtotal += Number(product.price) * Number(item.quantity);
             }
@@ -593,6 +691,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                     items: { include: { product: true } },
                 },
             });
+            // Update product stock...
             for (const item of normalizedItems) {
                 const product = yield tx.product.findUnique({
                     where: { id: item.productId },
@@ -603,15 +702,8 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         variants: true,
                     },
                 });
-                if (!product) {
-                    throw new Error(`Product not found: ${item.productId}`);
-                }
-                if (product.inStock === false) {
-                    throw new Error(`Produit en rupture de stock: ${item.productId}`);
-                }
-                if (Number((_c = product.stock) !== null && _c !== void 0 ? _c : 0) < Number((_d = item.quantity) !== null && _d !== void 0 ? _d : 0)) {
-                    throw new Error(`Out of stock: ${item.productId}`);
-                }
+                if (!product)
+                    continue; // Should not happen
                 const selection = parseVariantSelection(item === null || item === void 0 ? void 0 : item.variant);
                 let nextVariants = product.variants;
                 if (selection && product.variants && Array.isArray(product.variants)) {
@@ -628,16 +720,13 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                                 return opt;
                             if (typeof opt.stock !== 'number')
                                 return opt;
-                            if (opt.stock < item.quantity) {
-                                throw new Error(`Out of stock: ${item.productId} (${v.name}: ${opt.value})`);
-                            }
-                            return Object.assign(Object.assign({}, opt), { stock: opt.stock - item.quantity });
+                            return Object.assign(Object.assign({}, opt), { stock: Math.max(0, opt.stock - item.quantity) });
                         });
                         return Object.assign(Object.assign({}, v), { options: newOptions });
                     });
                     nextVariants = updated;
                 }
-                const newStock = Number((_e = product.stock) !== null && _e !== void 0 ? _e : 0) - Number((_f = item.quantity) !== null && _f !== void 0 ? _f : 0);
+                const newStock = Math.max(0, Number((_c = product.stock) !== null && _c !== void 0 ? _c : 0) - Number((_d = item.quantity) !== null && _d !== void 0 ? _d : 0));
                 yield tx.product.update({
                     where: { id: item.productId },
                     data: {
@@ -656,8 +745,11 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             }
             return created;
         }));
+        // Sync to Google Sheets
         try {
-            yield appendOrderToGoogleSheet(order);
+            // Use updateOrderInGoogleSheet instead of appendOrderToGoogleSheet
+            // because it's proven to work (used by manual sync) and handles duplicates safely.
+            yield updateOrderInGoogleSheet(order);
         }
         catch (e) {
             console.warn('Sheets sync failed:', e instanceof Error ? e.message : String(e));
@@ -724,7 +816,7 @@ router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* 
 }));
 // POST /api/orders/:id/sync - Manually sync an order to Google Sheets
 router.post('/:id/sync', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _a, _b, _c, _d, _e;
     try {
         const order = yield prisma.order.findUnique({
             where: { id: req.params.id },
@@ -741,11 +833,18 @@ router.post('/:id/sync', (req, res) => __awaiter(void 0, void 0, void 0, functio
         }
         catch (e) {
             console.error('Manual sync failed:', e);
-            // Return full error details to client
+            const innerMessage = e instanceof Error ? e.message : String(e);
+            const detailedError = ((_b = (_a = e === null || e === void 0 ? void 0 : e.response) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.error) || ((_d = (_c = e === null || e === void 0 ? void 0 : e.response) === null || _c === void 0 ? void 0 : _c.data) === null || _d === void 0 ? void 0 : _d.error_description) || innerMessage;
+            // Add specific invalid_grant hint
+            let hint = '';
+            if (String(detailedError).includes('invalid_grant')) {
+                hint = ' (Check system time or key validity)';
+            }
+            // Return full error details to client in the 'error' field so apiFetch picks it up
             res.status(500).json({
-                error: 'Failed to sync to Google Sheets',
-                message: e instanceof Error ? e.message : String(e),
-                details: ((_a = e === null || e === void 0 ? void 0 : e.response) === null || _a === void 0 ? void 0 : _a.data) || (e === null || e === void 0 ? void 0 : e.stack)
+                error: `Sync failed: ${detailedError}${hint}`,
+                message: innerMessage,
+                details: ((_e = e === null || e === void 0 ? void 0 : e.response) === null || _e === void 0 ? void 0 : _e.data) || (e === null || e === void 0 ? void 0 : e.stack)
             });
         }
     }

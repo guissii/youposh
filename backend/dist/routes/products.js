@@ -102,13 +102,13 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const sortKey = (_a = sort) !== null && _a !== void 0 ? _a : 'popular';
         let orderBy = [{ sortOrder: 'desc' }, { salesCount: 'desc' }]; // Default sort now respects manual sortOrder
         if (sortKey === 'newest')
-            orderBy = [{ publishedAt: 'desc' }, { createdAt: 'desc' }];
+            orderBy = [{ sortOrder: 'desc' }, { publishedAt: 'desc' }, { createdAt: 'desc' }];
         if (sortKey === 'price-asc')
-            orderBy = [{ price: 'asc' }];
+            orderBy = [{ sortOrder: 'desc' }, { price: 'asc' }];
         if (sortKey === 'price-desc')
-            orderBy = [{ price: 'desc' }];
+            orderBy = [{ sortOrder: 'desc' }, { price: 'desc' }];
         if (sortKey === 'bestsellers')
-            orderBy = [{ salesCount: 'desc' }, { viewsCount: 'desc' }];
+            orderBy = [{ sortOrder: 'desc' }, { salesCount: 'desc' }, { viewsCount: 'desc' }];
         if (sortKey === 'popular')
             orderBy = [{ sortOrder: 'desc' }, { salesCount: 'desc' }, { viewsCount: 'desc' }];
         const products = yield prisma.product.findMany({

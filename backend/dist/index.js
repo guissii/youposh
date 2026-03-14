@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+const compression_1 = __importDefault(require("compression"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const products_1 = __importDefault(require("./routes/products"));
@@ -20,11 +21,25 @@ const sync_1 = __importDefault(require("./routes/sync"));
 const path_1 = __importDefault(require("path"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
+app.use((0, compression_1.default)());
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 // Health check
 app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+// Debug Env Route (Temporary)
+app.get('/api/debug-env', (_req, res) => {
+    const vars = {
+        GOOGLE_SERVICE_ACCOUNT_EMAIL: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ? 'Present' : 'Missing',
+        GOOGLE_SHEETS_SPREADSHEET_ID: process.env.GOOGLE_SHEETS_SPREADSHEET_ID ? 'Present' : 'Missing',
+        GOOGLE_PRIVATE_KEY: process.env.GOOGLE_PRIVATE_KEY ? 'Present (Raw)' : 'Missing',
+        GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY ? 'Present (Service)' : 'Missing',
+        GOOGLE_PRIVATE_KEY_BASE64: process.env.GOOGLE_PRIVATE_KEY_BASE64 ? 'Present (Base64)' : 'Missing',
+        GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64 ? 'Present (Service Base64)' : 'Missing',
+        NODE_ENV: process.env.NODE_ENV,
+    };
+    res.json(vars);
 });
 // Serve static files from the uploads directory
 app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../uploads')));
