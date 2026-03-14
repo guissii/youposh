@@ -488,13 +488,38 @@ async function updateOrderInGoogleSheet(order: OrderForSheet) {
         new Date().toISOString(),
     ];
     if (rowIndex === -1) {
-        await sheets.spreadsheets.values.append({
+        // Strategy: Insert a new empty row at index 1 (row 2), then update it.
+        // This ensures the new order is always at the top.
+        
+        // 1. Insert empty row at index 1
+        await sheets.spreadsheets.batchUpdate({
             spreadsheetId,
-            range: `'${sheetTitle}'!A1`,
+            requestBody: {
+                requests: [
+                    {
+                        insertDimension: {
+                            range: {
+                                sheetId,
+                                dimension: 'ROWS',
+                                startIndex: 1,
+                                endIndex: 2,
+                            },
+                            inheritFromBefore: false,
+                        },
+                    },
+                ],
+            },
+        });
+
+        // 2. Update the new row (Row 2) with data
+        const endColLetter = 'O';
+        await sheets.spreadsheets.values.update({
+            spreadsheetId,
+            range: `'${sheetTitle}'!A2:${endColLetter}2`,
             valueInputOption: 'RAW',
-            insertDataOption: 'INSERT_ROWS',
             requestBody: { values: [row] },
         });
+
     } else {
         const endColLetter = 'O';
         await sheets.spreadsheets.values.update({
