@@ -12,6 +12,8 @@ export interface HeroSettings {
     primaryCtaLink: string;
     secondaryCtaText: string;
     secondaryCtaLink: string;
+    badgeColor?: string;
+    badgeTextColor?: string;
     videoEnabled: boolean;
     videoUrl: string;
     videoPosterUrl: string;
@@ -32,6 +34,8 @@ export const defaultHeroSettings: HeroSettings = {
     primaryCtaLink: '/shop',
     secondaryCtaText: 'Voir les promotions',
     secondaryCtaLink: '/shop?filter=promo',
+    badgeColor: 'rgba(255, 255, 255, 0.1)',
+    badgeTextColor: '#ffffff',
     videoEnabled: false,
     videoUrl: '/videos/hero-video.mp4',
     videoPosterUrl: '/images/products/headphones.jpg',

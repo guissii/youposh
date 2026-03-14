@@ -79,10 +79,10 @@ router.get('/', async (req, res) => {
         const sortKey = (sort as string | undefined) ?? 'popular';
         let orderBy: any = [{ sortOrder: 'desc' }, { salesCount: 'desc' }]; // Default sort now respects manual sortOrder
 
-        if (sortKey === 'newest') orderBy = [{ publishedAt: 'desc' }, { createdAt: 'desc' }];
-        if (sortKey === 'price-asc') orderBy = [{ price: 'asc' }];
-        if (sortKey === 'price-desc') orderBy = [{ price: 'desc' }];
-        if (sortKey === 'bestsellers') orderBy = [{ salesCount: 'desc' }, { viewsCount: 'desc' }];
+        if (sortKey === 'newest') orderBy = [{ sortOrder: 'desc' }, { publishedAt: 'desc' }, { createdAt: 'desc' }];
+        if (sortKey === 'price-asc') orderBy = [{ sortOrder: 'desc' }, { price: 'asc' }];
+        if (sortKey === 'price-desc') orderBy = [{ sortOrder: 'desc' }, { price: 'desc' }];
+        if (sortKey === 'bestsellers') orderBy = [{ sortOrder: 'desc' }, { salesCount: 'desc' }, { viewsCount: 'desc' }];
         if (sortKey === 'popular') orderBy = [{ sortOrder: 'desc' }, { salesCount: 'desc' }, { viewsCount: 'desc' }];
 
         const products = await prisma.product.findMany({

@@ -29,10 +29,11 @@ import { ProductFormModal } from '@/components/admin/ProductFormModal';
 import { PromoFormModal } from '@/components/admin/PromoFormModal';
 import { CategoryFormModal } from '@/components/admin/CategoryFormModal';
 import { loadStoreSettings, saveStoreSettings, fetchStoreSettingsGlobal } from '@/data/storeSettings';
+import { loadHeroSettings, saveHeroSettings, fetchHeroSettingsGlobal } from '@/data/heroSettings';
 import { getImageUrl } from '@/lib/utils';
 import * as XLSX from 'xlsx';
 
-type TabId = 'dashboard' | 'orders' | 'products' | 'categories' | 'promos' | 'watermark' | 'settings';
+type TabId = 'dashboard' | 'orders' | 'products' | 'categories' | 'promos' | 'watermark' | 'hero' | 'settings';
 
 const AdminPage = () => {
   const { t } = useTranslation();
@@ -162,6 +163,9 @@ const AdminPage = () => {
       loadPromoCodes(); // For global coupon selector
       fetchStoreSettingsGlobal().then(setStoreForm);
     }
+    if (activeTab === 'hero') {
+      fetchHeroSettingsGlobal().then(setHeroForm);
+    }
   }, [activeTab, loadCategories, loadDashboard, loadOrders, loadProducts, loadPromoCodes]);
 
   useEffect(() => {
@@ -185,23 +189,22 @@ const AdminPage = () => {
       const id = Number(product.id);
       if (isNaN(id)) return;
       await updateProduct(id, { isVisible: !product.isVisible });
-      loadProducts();
+      // Optimistic update
+      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, isVisible: !product.isVisible } : p));
     } catch (e) { console.error(e); }
   };
 
-  const toggleFlag = async (product: any, flag: string) => {
+  const handlePriorityChange = async (product: any, newPriority: number) => {
     try {
       const id = Number(product.id);
       if (isNaN(id)) return;
-      await updateProduct(id, { [flag]: !product[flag] });
-      // Optimistic update or reload
-      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, [flag]: !p[flag] } : p));
-      // loadProducts(); // Optional if we want full sync
-      toast.success('Statut mis à jour');
-    } catch (e) { 
-        console.error(e);
-        toast.error("Erreur lors de la mise à jour");
-        loadProducts(); // Revert on error
+      // Optimistic update
+      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, sortOrder: newPriority } : p));
+      // Debounced save could be better, but direct update is safer for data integrity
+      await updateProduct(id, { sortOrder: newPriority });
+    } catch (e) {
+      console.error(e);
+      toast.error("Erreur lors de la mise à jour de la priorité");
     }
   };
 
@@ -567,7 +570,7 @@ const AdminPage = () => {
 
         <div className="w-full max-w-[calc(100vw-300px)] overflow-x-auto">
           <table className="w-full whitespace-nowrap">
-            <thead className="bg-gray-50/80"><tr>{['Produit', 'Catégorie', 'Prix', 'Stock', 'Ventes', 'Flags', 'Visible', 'Actions'].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#999] uppercase tracking-wider">{h}</th>)}</tr></thead>
+            <thead className="bg-gray-50/80"><tr>{['Produit', 'Catégorie', 'Prix', 'Stock', 'Ventes', 'Priorité', 'Visible', 'Actions'].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#999] uppercase tracking-wider">{h}</th>)}</tr></thead>
             <tbody className="divide-y">
               {filteredProducts.length === 0 && <tr><td colSpan={8} className="px-5 py-12 text-center text-[#999]">Aucun produit trouvé</td></tr>}
               {filteredProducts.map(p => (
@@ -586,41 +589,13 @@ const AdminPage = () => {
                   <td className="px-4 py-3"><span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${p.stock < 10 ? 'bg-red-100 text-red-600' : p.stock < 30 ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>{p.stock}</span></td>
                   <td className="px-4 py-3 text-sm text-[#666]"><div className="flex items-center gap-1"><TrendingUp className="w-3 h-3 text-green-500" />{p.salesCount}</div></td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-1">
-                      {/* Promo Badge (Read-only, derived) */}
-                      {p.originalPrice && p.originalPrice > p.price ? (
-                        <span className="px-1.5 py-1 rounded-md text-[10px] font-bold bg-red-100 text-red-600 border border-red-200" title="Promo (Prix barré)">
-                          SALE
-                        </span>
-                      ) : (
-                        <span className="w-8"></span> /* Spacer */
-                      )}
-
-                      {/* Interactive Toggles */}
-                      <button 
-                        onClick={() => toggleFlag(p, 'isNew')}
-                        className={`p-1.5 rounded-md transition-all border ${p.isNew ? 'bg-blue-100 text-blue-600 border-blue-200 shadow-sm' : 'bg-gray-50 text-gray-300 border-transparent hover:bg-gray-100 hover:text-gray-400'}`}
-                        title="Nouveau"
-                      >
-                        <Zap className="w-3.5 h-3.5 fill-current" />
-                      </button>
-
-                      <button 
-                        onClick={() => toggleFlag(p, 'isBestSeller')}
-                        className={`p-1.5 rounded-md transition-all border ${p.isBestSeller ? 'bg-purple-100 text-purple-600 border-purple-200 shadow-sm' : 'bg-gray-50 text-gray-300 border-transparent hover:bg-gray-100 hover:text-gray-400'}`}
-                        title="Best Seller"
-                      >
-                        <Flame className="w-3.5 h-3.5 fill-current" />
-                      </button>
-
-                      <button 
-                        onClick={() => toggleFlag(p, 'isFeatured')}
-                        className={`p-1.5 rounded-md transition-all border ${p.isFeatured ? 'bg-amber-100 text-amber-600 border-amber-200 shadow-sm' : 'bg-gray-50 text-gray-300 border-transparent hover:bg-gray-100 hover:text-gray-400'}`}
-                        title="Mis en avant"
-                      >
-                        <Star className="w-3.5 h-3.5 fill-current" />
-                      </button>
-                    </div>
+                    <input
+                      type="number"
+                      value={p.sortOrder || 0}
+                      onChange={(e) => handlePriorityChange(p, parseInt(e.target.value) || 0)}
+                      className="w-16 px-2 py-1 border border-gray-200 rounded-lg text-sm text-center focus:border-[var(--yp-blue)] focus:outline-none"
+                      title="Priorité d'affichage (Plus grand = Premier)"
+                    />
                   </td>
                   <td className="px-4 py-3">
                     <button onClick={() => toggleVisibility(p)} className={`p-2 rounded-lg transition-colors ${p.isVisible ? 'hover:bg-green-50 text-green-600' : 'hover:bg-red-50 text-red-400'}`} title={p.isVisible ? 'Masquer' : 'Afficher'}>
@@ -924,6 +899,107 @@ const AdminPage = () => {
     </div>
   );
 
+  // ─── Hero Settings ──────────────────────────────────────────
+  const [heroForm, setHeroForm] = useState(loadHeroSettings());
+  const [heroSaved, setHeroSaved] = useState(false);
+
+  const handleHeroSave = async () => {
+    try {
+      await saveHeroSettings(heroForm);
+      setHeroSaved(true);
+      toast.success('Paramètres Hero enregistrés');
+      setTimeout(() => setHeroSaved(false), 2000);
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e.message || 'Erreur lors de la sauvegarde');
+    }
+  };
+
+  const renderHeroSettings = () => (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 className="font-semibold text-[#333] mb-4">Configuration de la section Hero</h3>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-[#666] mb-1">Texte du Badge (ex: N°1 au Maroc)</label>
+            <input 
+              type="text" 
+              value={heroForm.badgeText || ''} 
+              onChange={e => setHeroForm(f => ({ ...f, badgeText: e.target.value }))} 
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" 
+            />
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-[#666] mb-1">Couleur de fond du Badge</label>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="color" 
+                  value={heroForm.badgeColor?.startsWith('#') ? heroForm.badgeColor : '#ffffff'} 
+                  onChange={e => setHeroForm(f => ({ ...f, badgeColor: e.target.value }))} 
+                  className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white" 
+                />
+                <input 
+                  type="text" 
+                  value={heroForm.badgeColor || ''} 
+                  onChange={e => setHeroForm(f => ({ ...f, badgeColor: e.target.value }))} 
+                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" 
+                  placeholder="rgba(255,255,255,0.1) ou #FFFFFF"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#666] mb-1">Couleur du texte du Badge</label>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="color" 
+                  value={heroForm.badgeTextColor || '#ffffff'} 
+                  onChange={e => setHeroForm(f => ({ ...f, badgeTextColor: e.target.value }))} 
+                  className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white" 
+                />
+                <input 
+                  type="text" 
+                  value={heroForm.badgeTextColor || ''} 
+                  onChange={e => setHeroForm(f => ({ ...f, badgeTextColor: e.target.value }))} 
+                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" 
+                  placeholder="#FFFFFF"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[#666] mb-1">Titre Principal</label>
+            <input 
+              type="text" 
+              value={heroForm.title || ''} 
+              onChange={e => setHeroForm(f => ({ ...f, title: e.target.value }))} 
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" 
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[#666] mb-1">Sous-titre</label>
+            <textarea 
+              value={heroForm.subtitle || ''} 
+              onChange={e => setHeroForm(f => ({ ...f, subtitle: e.target.value }))} 
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)] h-24" 
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3 mt-6">
+          <button onClick={handleHeroSave} className="px-6 py-2.5 bg-[var(--yp-blue)] text-white rounded-xl hover:bg-[var(--yp-blue-dark)] font-medium flex items-center gap-2 transition-colors">
+            {heroSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {heroSaved ? 'Enregistré' : 'Enregistrer'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   // ─── Settings ───────────────────────────────────────────────
   const [storeForm, setStoreForm] = useState(loadStoreSettings());
   const [storeSaved, setStoreSaved] = useState(false);
@@ -1078,10 +1154,11 @@ const AdminPage = () => {
     { id: 'categories', label: 'Catégories', icon: FolderOpen },
     { id: 'promos', label: 'Codes Promo', icon: Ticket },
     { id: 'watermark', label: 'Watermark', icon: Stamp },
+    { id: 'hero', label: 'Accueil (Hero)', icon: Flame },
     { id: 'settings', label: t('settings'), icon: Settings },
   ];
 
-  const tabTitles: Record<TabId, string> = { dashboard: t('dashboard'), orders: t('orders'), products: t('products'), categories: 'Catégories', promos: 'Codes Promo', watermark: 'Watermark', settings: t('settings') };
+  const tabTitles: Record<TabId, string> = { dashboard: t('dashboard'), orders: t('orders'), products: t('products'), categories: 'Catégories', promos: 'Codes Promo', watermark: 'Watermark', hero: 'Configuration Accueil', settings: t('settings') };
 
   const handleLogout = () => {
     localStorage.removeItem('yp_admin_token');
@@ -1127,10 +1204,11 @@ const AdminPage = () => {
           {activeTab === 'products' && renderProducts()}
           {activeTab === 'categories' && renderCategories()}
           {activeTab === 'promos' && renderPromoCodes()}
-      {activeTab === 'watermark' && renderWatermark()}
-      {activeTab === 'settings' && renderSettings()}
-    </div>
-  </main>
+          {activeTab === 'watermark' && renderWatermark()}
+          {activeTab === 'hero' && renderHeroSettings()}
+          {activeTab === 'settings' && renderSettings()}
+        </div>
+      </main>
 
       {activeTab === 'products' && productModal.open && <ProductFormModal product={productModal.product} onClose={() => setProductModal({ open: false })} onSave={() => { setProductModal({ open: false }); loadProducts(); toast.success('Produit enregistré avec succès'); }} />}
       {productModal.open && activeTab !== 'products' && <ProductFormModal product={productModal.product} onClose={() => setProductModal({ open: false })} onSave={() => { setProductModal({ open: false }); loadProducts(); toast.success('Produit enregistré avec succès'); }} />}

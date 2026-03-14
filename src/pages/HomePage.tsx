@@ -110,11 +110,18 @@ export default function HomePage() {
             
             {/* Badge: "Favorite Room 1" / N°1 au Maroc */}
             <div className="mb-8 animate-fade-in-up">
-              <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md text-white px-5 py-2 rounded-full text-sm font-semibold border border-white/20 shadow-lg hover:bg-white/15 transition-colors cursor-default">
+              <span
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold border border-white/20 shadow-lg hover:brightness-110 transition-colors cursor-default"
+                style={{
+                  backgroundColor: heroSettings.badgeColor || 'rgba(255, 255, 255, 0.1)',
+                  color: heroSettings.badgeTextColor || 'white',
+                  backdropFilter: 'blur(12px)'
+                }}
+              >
                 <span className="flex items-center justify-center w-5 h-5 bg-white rounded-full text-[var(--yp-red)]">
-                   <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-red-600">
-                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                   </svg>
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-red-600">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
                 </span>
                 {t('heroBadgeTitle')}
               </span>
