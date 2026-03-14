@@ -795,11 +795,17 @@ router.post('/:id/sync', async (req, res) => {
         if (!order) return res.status(404).json({ error: 'Order not found' });
 
         try {
+            // Force create/update
             await updateOrderInGoogleSheet(order as unknown as OrderForSheet);
             res.json({ message: 'Order synced to Google Sheets', order });
         } catch (e: any) {
             console.error('Manual sync failed:', e);
-            res.status(500).json({ error: 'Failed to sync to Google Sheets: ' + (e instanceof Error ? e.message : String(e)), details: e?.message });
+            // Return full error details to client
+            res.status(500).json({ 
+                error: 'Failed to sync to Google Sheets',
+                message: e instanceof Error ? e.message : String(e),
+                details: e?.response?.data || e?.stack
+            });
         }
     } catch (error) {
         console.error('Error syncing order:', error);
