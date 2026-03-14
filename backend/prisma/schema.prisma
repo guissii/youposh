@@ -82,6 +82,12 @@ model Product {
   updatedAt     DateTime    @updatedAt
   orderItems    OrderItem[]
   attributeValues ProductAttributeValue[]
+
+  @@index([status, isVisible, inStock])
+  @@index([salesCount(sort: Desc)])
+  @@index([viewsCount(sort: Desc)])
+  @@index([publishedAt(sort: Desc)])
+  @@index([sortOrder(sort: Desc)])
 }
 
 model CategoryAttribute {

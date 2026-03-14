@@ -194,20 +194,6 @@ const AdminPage = () => {
     } catch (e) { console.error(e); }
   };
 
-  const handlePriorityChange = async (product: any, newPriority: number) => {
-    try {
-      const id = Number(product.id);
-      if (isNaN(id)) return;
-      // Optimistic update
-      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, sortOrder: newPriority } : p));
-      // Debounced save could be better, but direct update is safer for data integrity
-      await updateProduct(id, { sortOrder: newPriority });
-    } catch (e) {
-      console.error(e);
-      toast.error("Erreur lors de la mise à jour de la priorité");
-    }
-  };
-
   const handleDelete = async () => {
     if (!deleteConfirm) return;
     try {
@@ -570,9 +556,9 @@ const AdminPage = () => {
 
         <div className="w-full max-w-[calc(100vw-300px)] overflow-x-auto">
           <table className="w-full whitespace-nowrap">
-            <thead className="bg-gray-50/80"><tr>{['Produit', 'Catégorie', 'Prix', 'Stock', 'Ventes', 'Priorité', 'Visible', 'Actions'].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#999] uppercase tracking-wider">{h}</th>)}</tr></thead>
+            <thead className="bg-gray-50/80"><tr>{['Produit', 'Catégorie', 'Prix', 'Stock', 'Ventes', 'Visible', 'Actions'].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#999] uppercase tracking-wider">{h}</th>)}</tr></thead>
             <tbody className="divide-y">
-              {filteredProducts.length === 0 && <tr><td colSpan={8} className="px-5 py-12 text-center text-[#999]">Aucun produit trouvé</td></tr>}
+              {filteredProducts.length === 0 && <tr><td colSpan={7} className="px-5 py-12 text-center text-[#999]">Aucun produit trouvé</td></tr>}
               {filteredProducts.map(p => (
                 <tr key={p.id} className={`hover:bg-gray-50/50 transition-colors ${!p.isVisible ? 'opacity-50' : ''}`}>
                   <td className="px-4 py-3">
@@ -588,15 +574,6 @@ const AdminPage = () => {
                   </td>
                   <td className="px-4 py-3"><span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${p.stock < 10 ? 'bg-red-100 text-red-600' : p.stock < 30 ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>{p.stock}</span></td>
                   <td className="px-4 py-3 text-sm text-[#666]"><div className="flex items-center gap-1"><TrendingUp className="w-3 h-3 text-green-500" />{p.salesCount}</div></td>
-                  <td className="px-4 py-3">
-                    <input
-                      type="number"
-                      value={p.sortOrder || 0}
-                      onChange={(e) => handlePriorityChange(p, parseInt(e.target.value) || 0)}
-                      className="w-16 px-2 py-1 border border-gray-200 rounded-lg text-sm text-center focus:border-[var(--yp-blue)] focus:outline-none"
-                      title="Priorité d'affichage (Plus grand = Premier)"
-                    />
-                  </td>
                   <td className="px-4 py-3">
                     <button onClick={() => toggleVisibility(p)} className={`p-2 rounded-lg transition-colors ${p.isVisible ? 'hover:bg-green-50 text-green-600' : 'hover:bg-red-50 text-red-400'}`} title={p.isVisible ? 'Masquer' : 'Afficher'}>
                       {p.isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
