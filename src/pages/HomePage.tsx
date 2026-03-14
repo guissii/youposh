@@ -92,6 +92,19 @@ export default function HomePage() {
           {/* Subtle noise/texture overlay for depth */}
           <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
 
+          {/* Hero Video Background */}
+          <div className="absolute inset-0 w-full h-full overflow-hidden opacity-30 mix-blend-screen pointer-events-none">
+            <video 
+              autoPlay 
+              loop 
+              muted 
+              playsInline 
+              className="w-full h-full object-cover"
+            >
+              <source src="/videos/hero video.mp4" type="video/mp4" />
+            </video>
+          </div>
+
 
 
           {/* Content Container */}
