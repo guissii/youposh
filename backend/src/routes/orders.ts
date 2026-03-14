@@ -29,11 +29,18 @@ const SHEETS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 let didWarnSheetsEnvMissing = false;
 
 function warnSheetsEnvMissing() {
-    if (didWarnSheetsEnvMissing) return;
+    // if (didWarnSheetsEnvMissing) return; // Always log for debugging now
     didWarnSheetsEnvMissing = true;
-    console.warn(
-        'Google Sheets sync skipped: missing env vars (GOOGLE_SHEETS_SPREADSHEET_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY / GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY or *_BASE64)'
-    );
+    
+    const status = {
+        SPREADSHEET_ID: !!process.env.GOOGLE_SHEETS_SPREADSHEET_ID,
+        EMAIL: !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+        KEY_RAW: !!(process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY),
+        KEY_BASE64: !!(process.env.GOOGLE_PRIVATE_KEY_BASE64 || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64)
+    };
+    
+    console.warn('Google Sheets sync skipped. Environment status:', JSON.stringify(status));
+    return status;
 }
 
 function loadGooglePrivateKey(): string {
@@ -432,9 +439,9 @@ async function updateOrderInGoogleSheet(order: OrderForSheet) {
             process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64
         )
     ) {
-        warnSheetsEnvMissing();
+        const status = warnSheetsEnvMissing();
         // THROW ERROR HERE instead of silent return, so manual sync can catch it
-        throw new Error('Google Sheets env vars missing (ID, Email, or Private Key)');
+        throw new Error(`Google Sheets env vars missing: ${JSON.stringify(status)}`);
     }
     const spreadsheetId = cleanEnvVar(process.env.GOOGLE_SHEETS_SPREADSHEET_ID);
     const createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
