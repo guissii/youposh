@@ -154,17 +154,17 @@ async function ensureSheetTabExists(sheetTitle: string) {
 
 function getExpectedSheetHeaders(): string[] {
     return [
-        'ID commande',
-        'Date création',
         'Nom client',
         'Téléphone',
         'Ville',
         'Adresse',
+        'Statut livraison',
         'Produits',
-        'Quantité totale',
         'Total',
         'Statut commande',
-        'Statut livraison',
+        'Quantité totale',
+        'ID commande',
+        'Date création',
         'Code promo',
         'Remise',
         'Remarque',
@@ -209,14 +209,15 @@ async function ensureSheetFormatting(
                 },
             },
         },
+        // Updated DataValidation ranges for new column order
         {
             setDataValidation: {
                 range: {
                     sheetId,
                     startRowIndex: 1,
                     endRowIndex,
-                    startColumnIndex: 9,
-                    endColumnIndex: 10,
+                    startColumnIndex: 7, // H: Statut commande (index 7)
+                    endColumnIndex: 8,
                 },
                 rule: {
                     condition: {
@@ -234,8 +235,8 @@ async function ensureSheetFormatting(
                     sheetId,
                     startRowIndex: 1,
                     endRowIndex,
-                    startColumnIndex: 10,
-                    endColumnIndex: 11,
+                    startColumnIndex: 4, // E: Statut livraison (index 4)
+                    endColumnIndex: 5,
                 },
                 rule: {
                     condition: {
@@ -254,8 +255,8 @@ async function ensureSheetFormatting(
             sheetId,
             startRowIndex: 1,
             endRowIndex,
-            startColumnIndex: 10,
-            endColumnIndex: 11,
+            startColumnIndex: 4, // E: Statut livraison
+            endColumnIndex: 5,
         };
 
         requests.push(
@@ -402,17 +403,17 @@ async function appendOrderToGoogleSheet(order: OrderForSheet) {
     const deliveryStatus = getDeliveryStatusFromOrderStatus(order.status);
 
     const row = [
-        order.id,
-        createdAt.toISOString(),
         order.customerName ?? '',
         order.phone ?? '',
         order.city ?? '',
         order.address ?? '',
+        deliveryStatus,
         productsLabel,
-        qtyTotal,
         order.total ?? 0,
         order.status ?? '',
-        deliveryStatus,
+        qtyTotal,
+        order.id,
+        createdAt.toISOString(),
         order.promoCode ?? '',
         order.discount ?? 0,
         order.notes ?? '',
@@ -471,17 +472,17 @@ async function updateOrderInGoogleSheet(order: OrderForSheet) {
     const qtyTotal = items.reduce((sum, it) => sum + Number(it.quantity ?? 0), 0);
     const deliveryStatus = getDeliveryStatusFromOrderStatus(order.status);
     const row = [
-        order.id,
-        createdAt.toISOString(),
         order.customerName ?? '',
         order.phone ?? '',
         order.city ?? '',
         order.address ?? '',
+        deliveryStatus,
         productsLabel,
-        qtyTotal,
         order.total ?? 0,
         order.status ?? '',
-        deliveryStatus,
+        qtyTotal,
+        order.id,
+        createdAt.toISOString(),
         order.promoCode ?? '',
         order.discount ?? 0,
         order.notes ?? '',
