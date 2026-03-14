@@ -54,7 +54,7 @@ export function GlobalCouponNotification() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-6 right-4 sm:right-6 z-[100] max-w-[320px] w-[calc(100%-32px)] animate-in slide-in-from-right-10 fade-in duration-700">
+    <div className="fixed bottom-6 right-4 sm:right-6 z-40 max-w-[320px] w-[calc(100%-32px)] animate-in slide-in-from-right-10 fade-in duration-700">
       <div className="bg-[#1A1A1A] text-white rounded-2xl shadow-2xl overflow-hidden relative border border-gray-800/50">
         <button
           onClick={handleDismiss}
