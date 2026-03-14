@@ -1027,6 +1027,8 @@ const AdminPage = () => {
       await saveStoreSettings(storeForm);
       setStoreSaved(true);
       toast.success('Paramètres enregistrés');
+      // Force reload global colors
+      window.dispatchEvent(new Event('youposh_store_settings_updated'));
       setTimeout(() => setStoreSaved(false), 2000);
     } catch (e: any) {
       console.error(e);
