@@ -32,6 +32,8 @@ export default function HomePage() {
   const [bestsellers, setBestsellers] = useState<any[]>([]);
   const [newArrivals, setNewArrivals] = useState<any[]>([]);
 
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -48,10 +50,32 @@ export default function HomePage() {
         setNewArrivals(latest.filter((p: any) => p.isVisible !== false).slice(0, 4));
       } catch (error) {
         console.error("Erreur chargement page accueil:", error);
+        setError("Impossible de charger les produits. Veuillez vérifier votre connexion.");
       }
     }
     loadData();
   }, []);
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[var(--yp-gray-100)] flex flex-col">
+        <Header />
+        <main className="flex-1 flex items-center justify-center p-8">
+          <div className="text-center bg-white p-8 rounded-2xl shadow-sm max-w-md w-full">
+            <h2 className="text-xl font-bold text-red-600 mb-2">Oups !</h2>
+            <p className="text-gray-600">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-6 bg-blue-600 text-white px-6 py-2 rounded-xl font-medium"
+            >
+              Réessayer
+            </button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--yp-gray-100)]">

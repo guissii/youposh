@@ -358,7 +358,7 @@ const resources = {
 
       // Promo Banner
       promoBannerTitle: 'استفد من عروضنا',
-      promoBannerDesc: 'خصم يصل إلى 50% على تشكيلة مختارة',
+      promoBannerDesc: 'خصم يصل إلى %50 على تشكيلة مختارة',
       discoverPromos: 'اكتشف العروض',
 
       // Trust Badges

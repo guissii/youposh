@@ -129,10 +129,10 @@ const PromoCodeSection = () => {
                 className="text-3xl md:text-4xl font-bold text-deco-blue mb-3 leading-tight"
                 style={{ textShadow: "0 2px 4px rgba(0,0,0,0.05)" }}
               >
-                استمتع بعرض حصري يوفر لك فلوسك !
+                استمتع بعرض حصري يوفر لك فلوسك!
               </motion.h2>
               <p className="text-lg text-gray-600 mb-1 leading-relaxed font-medium">
-                أدخل كود الترويج وخذ خصم فوري يصل إلى 50%
+                أدخل كود الترويج وخذ خصم فوري يصل إلى %50
               </p>
               <p className="text-sm text-deco-orange font-semibold tracking-wide font-sans opacity-80">
                 OFFRE LIMITÉE — Profitez-en maintenant
