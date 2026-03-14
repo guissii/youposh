@@ -790,10 +790,14 @@ router.post('/:id/sync', async (req, res) => {
             res.json({ message: 'Order synced to Google Sheets', order });
         } catch (e: any) {
             console.error('Manual sync failed:', e);
-            // Return full error details to client
+            
+            const innerMessage = e instanceof Error ? e.message : String(e);
+            const detailedError = e?.response?.data?.error || e?.response?.data?.error_description || innerMessage;
+
+            // Return full error details to client in the 'error' field so apiFetch picks it up
             res.status(500).json({ 
-                error: 'Failed to sync to Google Sheets',
-                message: e instanceof Error ? e.message : String(e),
+                error: `Sync failed: ${detailedError}`,
+                message: innerMessage,
                 details: e?.response?.data || e?.stack
             });
         }
