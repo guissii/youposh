@@ -172,8 +172,10 @@ const resources = {
       // Order Form
       finalizeOrder: 'Finaliser votre demande',
       fullName: 'Nom complet',
+      namePlaceholder: 'Mohammed El Amrani',
       phone: 'Téléphone',
       city: 'Ville',
+      cityPlaceholder: 'Ex: Fès, Casablanca, Marrakech...',
       address: 'Adresse',
       addressPlaceholder: 'Rue, quartier, n° de maison...',
       note: 'Remarque',
@@ -392,8 +394,10 @@ const resources = {
       // Order Form
       finalizeOrder: 'تأكيد الطلب',
       fullName: 'الاسم الكامل',
+      namePlaceholder: 'محمد العمراني',
       phone: 'الهاتف',
       city: 'المدينة',
+      cityPlaceholder: 'مثال: الدار البيضاء، الرباط، طنجة...',
       address: 'العنوان',
       addressPlaceholder: 'الحي، الشارع، رقم المنزل...',
       note: 'ملاحظة',

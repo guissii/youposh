@@ -504,24 +504,24 @@ export default function ProductPage() {
                   </button>
 
                   {/* Secondary — Cart + Wishlist */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="flex gap-3">
                     <button
                       onClick={handleAddToCart}
                       disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
-                      className="bg-[var(--yp-color-cart)] text-white hover:opacity-90 py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors text-xs shadow-sm hover:shadow-md active:scale-95"
+                      className="flex-1 bg-white border-2 border-[var(--yp-color-cart)] text-[var(--yp-color-cart)] hover:bg-[var(--yp-color-cart)] hover:text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98]"
                     >
-                      <ShoppingCart className="w-4 h-4" />
+                      <ShoppingCart className="w-5 h-5" />
                       {t('addToCart')}
                     </button>
                     <button
                       onClick={() => addToWishlist(product)}
-                      className={`border-2 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all text-sm ${isInWishlist(product.id)
+                      className={`w-14 flex-shrink-0 border-2 rounded-xl flex items-center justify-center transition-all ${isInWishlist(product.id)
                         ? 'border-[var(--yp-red)] text-[var(--yp-red)] bg-[var(--yp-red-50)]'
-                        : 'border-[var(--yp-gray-300)] hover:border-[var(--yp-red)] hover:text-[var(--yp-red)] text-[var(--yp-gray-700)]'
+                        : 'border-[var(--yp-gray-300)] hover:border-[var(--yp-red)] hover:text-[var(--yp-red)] text-[var(--yp-gray-500)]'
                         }`}
+                      aria-label={t('addToWishlist')}
                     >
-                      <Heart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
-                      {isInWishlist(product.id) ? t('added') : t('addToWishlist')}
+                      <Heart className={`w-6 h-6 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
                     </button>
                   </div>
                 </div>
@@ -636,7 +636,7 @@ export default function ProductPage() {
                     type="text"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Mohammed El Amrani"
+                    placeholder={t('namePlaceholder') || 'Mohammed El Amrani'}
                     className="w-full px-4 py-3 bg-[var(--yp-gray-200)] border border-[var(--yp-gray-300)] rounded-xl text-[var(--yp-dark)] placeholder-[var(--yp-gray-500)] focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-[var(--yp-blue)]/20 transition-all"
                   />
                 </div>
@@ -664,7 +664,7 @@ export default function ProductPage() {
                     type="text"
                     value={customerCity}
                     onChange={(e) => setCustomerCity(e.target.value)}
-                    placeholder="Ex: Fès, Casablanca, Marrakech..."
+                    placeholder={t('cityPlaceholder') || 'Ex: Fès, Casablanca, Marrakech...'}
                     className="w-full px-4 py-3 bg-[var(--yp-gray-200)] border border-[var(--yp-gray-300)] rounded-xl text-[var(--yp-dark)] placeholder-[var(--yp-gray-500)] focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-[var(--yp-blue)]/20 transition-all"
                   />
                   {customerCity.trim().length >= 2 && (
@@ -812,17 +812,17 @@ export default function ProductPage() {
               </div>
 
               {/* ── Final CTA — Confirmer sur WhatsApp ── */}
-              <button
-                onClick={handleConfirmWhatsApp}
-                disabled={!isFormValid}
-                className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2.5 transition-all ${isFormValid
-                  ? 'bg-[var(--yp-whatsapp)] hover:bg-[var(--yp-whatsapp-dark)] text-white shadow-lg shadow-green-500/20 active:scale-[0.98]'
-                  : 'bg-[var(--yp-gray-300)] text-[var(--yp-gray-500)] cursor-not-allowed'
-                  }`}
-              >
-                <MessageCircle className="w-5 h-5" />
-                {t('confirmOnWhatsApp') || 'Confirmer sur WhatsApp'}
-              </button>
+                <button
+                  onClick={handleConfirmWhatsApp}
+                  disabled={!isFormValid}
+                  className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2.5 transition-all ${isFormValid
+                    ? 'bg-[var(--yp-whatsapp)] hover:bg-[var(--yp-whatsapp-dark)] text-white shadow-lg shadow-green-500/20 active:scale-[0.98]'
+                    : 'bg-[var(--yp-gray-300)] text-[var(--yp-gray-500)] cursor-not-allowed'
+                    }`}
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  {t('confirmOnWhatsApp') || 'Confirmer sur WhatsApp'}
+                </button>
 
               {!isFormValid && (
                 <p className="text-xs text-[var(--yp-gray-500)] text-center">

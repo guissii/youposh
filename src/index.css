@@ -29,8 +29,8 @@
 
     /* Brand Colors — YouPosh Official Palette */
     /* Primary Brand Colors (Text / Main Branding) */
-    --yp-blue: #01b3e9; /* Blue for "YOU" */
-    --yp-red: #ff5757;  /* Red for "POSH" */
+    --yp-blue: #0077b6; /* Blue for "YOU" */
+    --yp-red: #d90429;  /* Red for "POSH" */
 
     /* Individual Color Overrides */
     --yp-color-you: var(--yp-blue);
