@@ -8,45 +8,45 @@ const router = Router();
 const SHEETS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 
 function loadGooglePrivateKey(): string {
-  const base64 =
-    process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
-    process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64;
+  const base64 = process.env.GOOGLE_PRIVATE_KEY_BASE64 || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64;
+  const raw = process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
 
-  const raw =
-    process.env.GOOGLE_PRIVATE_KEY ||
-    process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
+  let keyContent = '';
 
-  let key: string | undefined;
   if (base64) {
-    key = Buffer.from(String(base64), 'base64').toString('utf8');
+      try {
+          keyContent = Buffer.from(String(base64), 'base64').toString('utf8');
+      } catch (e) {
+          console.error('Failed to decode Base64 key:', e);
+      }
   } else if (raw) {
-    key = String(raw);
+      keyContent = String(raw);
   }
 
-  if (!key) {
-    console.error('loadGooglePrivateKey: No key found in env vars');
-    throw new Error(
-      'Missing env: GOOGLE_PRIVATE_KEY / GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY (or *_BASE64)'
-    );
+  if (!keyContent) {
+      console.error('loadGooglePrivateKey: No key found in env vars');
+      throw new Error('Missing env: GOOGLE_PRIVATE_KEY / GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY (or *_BASE64)');
   }
 
-  const cleaned = String(key)
-    .replace(/^\s*["']|["']\s*$/g, '')
-    .replace(/\r\n/g, '\n')
-    .replace(/\r/g, '\n')
-    .replace(/\\\\n/g, '\n')
-    .replace(/\\n/g, '\n')
-    .trim();
+  // Aggressive cleaning to ensure valid PEM format
+  let body = keyContent
+      .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+      .replace(/-----END PRIVATE KEY-----/g, '')
+      .replace(/\\n/g, '') // Remove literal escaped newlines
+      .replace(/\s+/g, ''); // Remove all whitespace
 
-  // Basic validation
-  if (!cleaned.includes('BEGIN PRIVATE KEY') || !cleaned.includes('END PRIVATE KEY')) {
-      console.error('loadGooglePrivateKey: Key seems invalid (missing header/footer). Length:', cleaned.length);
-  } else {
-      const lines = cleaned.split('\n');
-      console.log(`loadGooglePrivateKey: Key loaded. Lines: ${lines.length}, Header: ${lines[0]}`);
+  // Re-construct canonical PEM
+  const chunkSize = 64;
+  const chunks = [];
+  for (let i = 0; i < body.length; i += chunkSize) {
+      chunks.push(body.slice(i, i + chunkSize));
   }
+  
+  const validKey = `-----BEGIN PRIVATE KEY-----\n${chunks.join('\n')}\n-----END PRIVATE KEY-----\n`;
 
-  return cleaned;
+  console.log(`loadGooglePrivateKey: Key reconstructed. Total length: ${validKey.length}`);
+  
+  return validKey;
 }
 
 function getEnv(name: string): string {

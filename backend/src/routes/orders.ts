@@ -40,37 +40,45 @@ function loadGooglePrivateKey(): string {
     const base64 = process.env.GOOGLE_PRIVATE_KEY_BASE64 || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64;
     const raw = process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
 
-    let key: string | undefined;
+    let keyContent = '';
+
     if (base64) {
-        key = Buffer.from(String(base64), 'base64').toString('utf8');
+        // Handle Base64 encoded key
+        try {
+            keyContent = Buffer.from(String(base64), 'base64').toString('utf8');
+        } catch (e) {
+            console.error('Failed to decode Base64 key:', e);
+        }
     } else if (raw) {
-        key = String(raw);
+        keyContent = String(raw);
     }
 
-    if (!key) {
+    if (!keyContent) {
         console.error('loadGooglePrivateKey: No key found in env vars');
-        throw new Error('Google Sheets env vars missing');
+        throw new Error('Google Sheets env vars missing (Private Key)');
     }
 
-    // Clean up the key
-    const cleaned = String(key)
-        .replace(/^\s*["']|["']\s*$/g, '')
-        .replace(/\r\n/g, '\n')
-        .replace(/\r/g, '\n')
-        .replace(/\\\\n/g, '\n')
-        .replace(/\\n/g, '\n')
-        .trim();
+    // Aggressive cleaning to ensure valid PEM format
+    // 1. Remove headers/footers if present to normalize
+    let body = keyContent
+        .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+        .replace(/-----END PRIVATE KEY-----/g, '')
+        .replace(/\\n/g, '') // Remove literal escaped newlines
+        .replace(/\s+/g, ''); // Remove all whitespace (newlines, spaces)
 
-    // Basic validation
-    if (!cleaned.includes('BEGIN PRIVATE KEY') || !cleaned.includes('END PRIVATE KEY')) {
-        console.error('loadGooglePrivateKey: Key seems invalid (missing header/footer). Length:', cleaned.length);
-    } else {
-        // Debug log (safe)
-        const lines = cleaned.split('\n');
-        console.log(`loadGooglePrivateKey: Key loaded. Lines: ${lines.length}, Header: ${lines[0]}`);
+    // 2. Re-construct canonical PEM
+    const chunkSize = 64;
+    const chunks = [];
+    for (let i = 0; i < body.length; i += chunkSize) {
+        chunks.push(body.slice(i, i + chunkSize));
     }
+    
+    const validKey = `-----BEGIN PRIVATE KEY-----\n${chunks.join('\n')}\n-----END PRIVATE KEY-----\n`;
 
-    return cleaned;
+    // Debug log (safe)
+    console.log(`loadGooglePrivateKey: Key reconstructed. Total length: ${validKey.length}`);
+    
+    return validKey;
 }
 
 function getDeliveryStatusFromOrderStatus(status: string) {
