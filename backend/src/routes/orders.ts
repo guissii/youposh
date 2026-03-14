@@ -418,7 +418,8 @@ async function updateOrderInGoogleSheet(order: OrderForSheet) {
         !(process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY)
     ) {
         warnSheetsEnvMissing();
-        return;
+        // THROW ERROR HERE instead of silent return, so manual sync can catch it
+        throw new Error('Google Sheets env vars missing (ID, Email, or Private Key)');
     }
     const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
     const createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
