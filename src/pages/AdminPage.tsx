@@ -885,6 +885,8 @@ const AdminPage = () => {
       await saveHeroSettings(heroForm);
       setHeroSaved(true);
       toast.success('Paramètres Hero enregistrés');
+      // Force reload to update colors globally if needed, or rely on event dispatch
+      window.dispatchEvent(new Event('youposh_hero_settings_updated'));
       setTimeout(() => setHeroSaved(false), 2000);
     } catch (e: any) {
       console.error(e);
