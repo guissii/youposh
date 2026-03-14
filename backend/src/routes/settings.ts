@@ -99,10 +99,26 @@ router.post('/hero', async (req, res) => {
         delete data.id;
         delete data.updatedAt;
 
+        // Clean up data to remove any fields not in the schema (Prisma strict mode fix)
+        const allowedFields = [
+            'isEnabled', 'badgeText', 'title', 'subtitle', 'slogan',
+            'primaryCtaText', 'primaryCtaLink', 'secondaryCtaText', 'secondaryCtaLink',
+            'badgeColor', 'badgeTextColor', 'titleColorYou', 'titleColorPosh',
+            'videoEnabled', 'videoUrl', 'videoPosterUrl',
+            'videoAutoplay', 'videoMuted', 'videoLoop', 'showOnMobile', 'overlayOpacity'
+        ];
+
+        const cleanData: any = {};
+        for (const key of Object.keys(data)) {
+            if (allowedFields.includes(key)) {
+                cleanData[key] = data[key];
+            }
+        }
+
         const settings = await prisma.heroSettings.upsert({
             where: { id: 1 },
-            update: data,
-            create: { id: 1, ...data },
+            update: cleanData,
+            create: { id: 1, ...cleanData },
         });
         res.json(settings);
     } catch (error) {
