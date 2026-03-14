@@ -781,7 +781,9 @@ router.post('/', async (req, res) => {
 
         // Sync to Google Sheets
         try {
-            await appendOrderToGoogleSheet(order as unknown as OrderForSheet);
+            // Use updateOrderInGoogleSheet instead of appendOrderToGoogleSheet
+            // because it's proven to work (used by manual sync) and handles duplicates safely.
+            await updateOrderInGoogleSheet(order as unknown as OrderForSheet);
         } catch (e) {
             console.warn('Sheets sync failed:', e instanceof Error ? e.message : String(e));
         }
