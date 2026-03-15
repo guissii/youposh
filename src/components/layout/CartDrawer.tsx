@@ -76,6 +76,8 @@ export default function CartDrawer() {
       });
     } catch (err) {
       console.error('Failed to save order:', err);
+      toast.error('Échec de la sauvegarde de la commande. Vérifiez votre connexion puis réessayez.');
+      return;
     }
 
     // 2) Open WhatsApp

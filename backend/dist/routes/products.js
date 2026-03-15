@@ -19,9 +19,14 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const client_1 = require("@prisma/client");
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const router = (0, express_1.Router)();
 const prisma = new client_1.PrismaClient();
 function isActive(p) {
@@ -371,14 +376,42 @@ router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         if (isNaN(productId)) {
             return res.status(400).json({ error: 'Invalid product ID' });
         }
-        // Check if product exists first
         const product = yield prisma.product.findUnique({ where: { id: productId } });
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
         }
-        // Delete dependencies first (e.g. attribute values) if cascade delete is not set in DB
         yield prisma.productAttributeValue.deleteMany({ where: { productId } });
-        // Now delete the product
+        const driver = (process.env.UPLOADS_DRIVER || 'local').toLowerCase();
+        if (driver === 'local') {
+            const baseUploadsDir = process.env.UPLOADS_DIR || path_1.default.resolve(process.cwd(), 'uploads');
+            const tryUnlink = (u) => {
+                if (!u)
+                    return;
+                let p = '';
+                try {
+                    if (u.startsWith('http')) {
+                        const url = new URL(u);
+                        if (!url.pathname.startsWith('/uploads/'))
+                            return;
+                        p = path_1.default.join(baseUploadsDir, url.pathname.replace('/uploads/', ''));
+                    }
+                    else if (u.startsWith('/uploads/')) {
+                        p = path_1.default.join(baseUploadsDir, u.replace('/uploads/', ''));
+                    }
+                    if (!p)
+                        return;
+                    if (!p.startsWith(baseUploadsDir))
+                        return;
+                    if (fs_1.default.existsSync(p))
+                        fs_1.default.unlinkSync(p);
+                }
+                catch (_a) {
+                }
+            };
+            tryUnlink(product.image);
+            for (const img of product.images || [])
+                tryUnlink(img);
+        }
         yield prisma.product.delete({
             where: { id: productId },
         });

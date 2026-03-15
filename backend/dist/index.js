@@ -19,6 +19,7 @@ const attributeLibrary_1 = __importDefault(require("./routes/attributeLibrary"))
 const auth_1 = __importDefault(require("./routes/auth"));
 const sync_1 = __importDefault(require("./routes/sync"));
 const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
 app.use((0, compression_1.default)());
@@ -41,8 +42,14 @@ app.get('/api/debug-env', (_req, res) => {
     };
     res.json(vars);
 });
-// Serve static files from the uploads directory
-app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../uploads')));
+const uploadsDir = process.env.UPLOADS_DIR || path_1.default.resolve(process.cwd(), 'uploads');
+if (!fs_1.default.existsSync(uploadsDir)) {
+    try {
+        fs_1.default.mkdirSync(uploadsDir, { recursive: true });
+    }
+    catch (_a) { }
+}
+app.use('/uploads', express_1.default.static(uploadsDir, { maxAge: '7d', immutable: true }));
 // Mount routes
 app.use('/api/auth', auth_1.default);
 app.use('/api/products', products_1.default);

@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import fs from 'fs';
+import path from 'path';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -394,16 +396,37 @@ router.delete('/:id', async (req, res) => {
             return res.status(400).json({ error: 'Invalid product ID' });
         }
 
-        // Check if product exists first
         const product = await prisma.product.findUnique({ where: { id: productId } });
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
         }
 
-        // Delete dependencies first (e.g. attribute values) if cascade delete is not set in DB
         await prisma.productAttributeValue.deleteMany({ where: { productId } });
 
-        // Now delete the product
+        const driver = (process.env.UPLOADS_DRIVER || 'local').toLowerCase();
+        if (driver === 'local') {
+            const baseUploadsDir = process.env.UPLOADS_DIR || path.resolve(process.cwd(), 'uploads');
+            const tryUnlink = (u?: string | null) => {
+                if (!u) return;
+                let p = '';
+                try {
+                    if (u.startsWith('http')) {
+                        const url = new URL(u);
+                        if (!url.pathname.startsWith('/uploads/')) return;
+                        p = path.join(baseUploadsDir, url.pathname.replace('/uploads/', ''));
+                    } else if (u.startsWith('/uploads/')) {
+                        p = path.join(baseUploadsDir, u.replace('/uploads/', ''));
+                    }
+                    if (!p) return;
+                    if (!p.startsWith(baseUploadsDir)) return;
+                    if (fs.existsSync(p)) fs.unlinkSync(p);
+                } catch {
+                }
+            };
+            tryUnlink(product.image);
+            for (const img of product.images || []) tryUnlink(img);
+        }
+
         await prisma.product.delete({
             where: { id: productId },
         });

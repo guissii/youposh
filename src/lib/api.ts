@@ -158,6 +158,13 @@ export const setWatermarkStatusAPI = async (enabled: boolean) => {
     }
 };
 
+// ─── Upload Utils ──────────────────────────────────────────────
+export const deleteUploadedFile = (url: string) =>
+    apiFetch<any>('/upload/delete', {
+        method: 'POST',
+        body: JSON.stringify({ url }),
+    });
+
 // ─── Auth ──────────────────────────────────────────────────────
 export const login = async (email: string, password: string) => {
     const res = await fetch(`${API_BASE}/auth/login`, {

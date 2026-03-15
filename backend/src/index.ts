@@ -16,6 +16,7 @@ import attributeLibraryRoutes from './routes/attributeLibrary';
 import authRoutes from './routes/auth';
 import syncRoutes from './routes/sync';
 import path from 'path';
+import fs from 'fs';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -43,8 +44,11 @@ app.get('/api/debug-env', (_req, res) => {
     res.json(vars);
 });
 
-// Serve static files from the uploads directory
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+const uploadsDir = process.env.UPLOADS_DIR || path.resolve(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    try { fs.mkdirSync(uploadsDir, { recursive: true }); } catch {}
+}
+app.use('/uploads', express.static(uploadsDir, { maxAge: '7d', immutable: true }));
 
 // Mount routes
 app.use('/api/auth', authRoutes);
