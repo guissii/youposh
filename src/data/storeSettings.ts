@@ -20,7 +20,7 @@ export interface StoreSettings {
 
 export const defaultStoreSettings: StoreSettings = {
     storeName: 'YOUPOSH',
-    phone: '+212 690-939090',
+    phone: '0690-939090',
     email: 'youposh.ys@gmail.com',
     currency: 'MAD',
     brandPrimary: '#2563EB',

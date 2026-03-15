@@ -495,7 +495,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                     {applyWatermark && storeSettingsConfig && (
                                         <div className="absolute inset-0 pointer-events-none overflow-hidden">
                                             <img
-                                                src="/images/categories/logo final.png"
+                                                src="/images/finalwatermak.png"
                                                 alt="Watermark"
                                                 className="absolute select-none pointer-events-none z-10 drop-shadow-lg filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]"
                                                 style={{

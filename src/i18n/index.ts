@@ -302,7 +302,7 @@ const resources = {
       inStockOnly: 'متوفر فقط',
 
       // Product Card
-      addToCart: 'أضف للعربة',
+      addToCart: 'أضف إلى السلة',
       addToWishlist: 'أضف للمفضلة',
       added: 'تمت الإضافة',
       order: 'اطلب',

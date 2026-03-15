@@ -95,6 +95,25 @@ export default function ProductCard({
               wrapperClassName="w-full h-full"
             />
           )}
+          {/* CSS Watermark Layer */}
+          {settings.watermarkEnabled && (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-[15]">
+              <img
+                src="/images/finalwatermak.png"
+                alt="Watermark"
+                className="absolute select-none pointer-events-none drop-shadow-md filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]"
+                style={{
+                  width: `${settings.watermarkSize * 1.5}%`,
+                  height: 'auto',
+                  opacity: settings.watermarkOpacity / 100,
+                  left: `${settings.watermarkPosX}%`,
+                  top: `${settings.watermarkPosY}%`,
+                  transform: 'translate(-50%, -50%)',
+                  mixBlendMode: 'multiply'
+                }}
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex-1 min-w-0 flex flex-col justify-between">
@@ -179,6 +198,26 @@ export default function ProductCard({
               }}
               onError={() => setImgError(true)}
             />
+          )}
+
+          {/* CSS Watermark Layer */}
+          {settings.watermarkEnabled && (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-[4]">
+              <img
+                src="/images/finalwatermak.png"
+                alt="Watermark"
+                className="absolute select-none pointer-events-none drop-shadow-md filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]"
+                style={{
+                  width: `${settings.watermarkSize * 1.5}%`,
+                  height: 'auto',
+                  opacity: settings.watermarkOpacity / 100,
+                  left: `${settings.watermarkPosX}%`,
+                  top: `${settings.watermarkPosY}%`,
+                  transform: 'translate(-50%, -50%)',
+                  mixBlendMode: 'multiply'
+                }}
+              />
+            </div>
           )}
 
           {isOutOfStock && (
@@ -288,7 +327,7 @@ export default function ProductCard({
               alt="Watermark"
               className="absolute select-none pointer-events-none drop-shadow-md filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]"
               style={{
-                width: `${settings.watermarkSize}%`,
+                width: `${settings.watermarkSize * 1.5}%`,
                 height: 'auto',
                 opacity: settings.watermarkOpacity / 100,
                 left: `${settings.watermarkPosX}%`,

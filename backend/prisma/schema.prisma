@@ -180,7 +180,7 @@ model StoreSettings {
   id               Int      @id @default(1)
   storeName        String   @default("YOUPOSH")
   phone            String   @default("+212600000000")
-  email            String   @default("contact@youposh.ma")
+  email            String   @default("youposh.ys@gmail.com")
   currency         String   @default("MAD")
   brandPrimary     String   @default("#2563EB")
   brandSecondary   String   @default("#DC2626")

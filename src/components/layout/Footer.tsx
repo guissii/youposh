@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Instagram, Facebook, MessageCircle,
   MapPin, Phone, Mail, Truck, CreditCard, ArrowRight,
-  ChevronDown
+  ChevronDown, Music2
 } from 'lucide-react';
 import { useStoreSettings } from '@/data/storeSettings';
 
@@ -194,8 +194,9 @@ export default function Footer() {
             {/* Social */}
             <div className="flex items-center gap-2">
               {[
-                { icon: Instagram, href: 'https://www.instagram.com/youposh_officiel?igsh=ODZtdWJleWRhNDg5', hoverColor: 'hover:bg-gradient-to-br hover:from-purple-500 hover:to-pink-500' },
-                { icon: Facebook, href: '#', hoverColor: 'hover:bg-[var(--yp-blue)]' },
+                { icon: Instagram, href: 'https://www.instagram.com/youposh_officiel/', hoverColor: 'hover:bg-gradient-to-br hover:from-purple-500 hover:to-pink-500' },
+                { icon: Facebook, href: 'https://www.facebook.com/share/1H3vgQ3dro/', hoverColor: 'hover:bg-[var(--yp-blue)]' },
+                { icon: Music2, href: 'https://www.tiktok.com/@youposh_officiel?_r=1&_t=ZS-94ioAGNfjdv', hoverColor: 'hover:bg-black' },
                 { icon: MessageCircle, href: `https://wa.me/212690939090`, hoverColor: 'hover:bg-[var(--yp-whatsapp)]' },
               ].map((social, i) => (
                 <a
