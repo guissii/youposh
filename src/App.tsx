@@ -9,6 +9,7 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { GlobalCouponNotification } from '@/components/ui/GlobalCouponNotification';
 import PremiumLoader from '@/components/ui/PremiumLoader';
+import ScrollToTop from '@/components/ScrollToTop';
 
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 
@@ -29,6 +30,7 @@ function App() {
     <LanguageProvider>
       <StoreProvider>
         <Router>
+          <ScrollToTop />
           <Toaster
             position="top-center"
             toastOptions={{

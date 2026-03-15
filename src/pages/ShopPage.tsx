@@ -76,7 +76,6 @@ export default function ShopPage() {
 
   // Fetch products based on URL params
   useEffect(() => {
-    window.scrollTo(0, 0);
     const loadData = async () => {
       try {
         const queryParams = new URLSearchParams();

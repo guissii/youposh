@@ -54,7 +54,6 @@ export default function ProductPage() {
   const isAr = i18n.language === 'ar';
 
   useEffect(() => {
-    window.scrollTo(0, 0);
     setShowOrderForm(false);
     setCustomerName('');
     setCustomerPhone('');
