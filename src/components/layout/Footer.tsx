@@ -13,8 +13,8 @@ export default function Footer() {
   const navigate = useNavigate();
   const [openSection, setOpenSection] = useState<string | null>(null);
   const storeSettings = useStoreSettings();
-  const phone = storeSettings.phone && storeSettings.phone !== '+212600000000' ? storeSettings.phone : '+212 690-939090';
-  const email = storeSettings.email && storeSettings.email !== 'contact@youposh.ma' ? storeSettings.email : 'youposh.ys@gmail.com';
+  const phone = storeSettings.phone || '+212 690-939090';
+  const email = storeSettings.email || 'youposh.ys@gmail.com';
 
   const toggle = (section: string) =>
     setOpenSection(openSection === section ? null : section);

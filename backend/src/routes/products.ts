@@ -40,10 +40,11 @@ function computeBadge(p: any): 'promo' | 'bestseller' | 'new' | undefined {
 // GET all products with optional filters
 router.get('/', async (req, res) => {
     try {
-        const { category, badge, search, sort, inStock, all, av, limit } = req.query;
+        const { category, badge, search, sort, inStock, all, av, limit, includeArchived } = req.query;
         // Check if "all" is true OR if the request comes from the admin panel (implied by logic)
         // But to be safe, let's trust the "all" parameter more.
         const showAll = all === 'true';
+        const showArchived = includeArchived === 'true';
 
         // By default, only show visible products, unless "all=true" is passed (e.g. by admin)
         const where: any = {};
@@ -56,6 +57,10 @@ router.get('/', async (req, res) => {
             // Let's allow fetching everything except hard-deleted (which don't exist).
             // If admin wants to see archived, they can filter by status if we implement it.
             // For now, "all=true" returns EVERYTHING including drafts and archived.
+        }
+
+        if (showAll && !showArchived) {
+            where.NOT = { status: 'archived' };
         }
 
         if (category) where.categorySlug = category;
@@ -431,7 +436,7 @@ router.delete('/:id', async (req, res) => {
             where: { id: productId },
         });
 
-        res.json({ message: 'Product deleted successfully' });
+        res.json({ action: 'deleted', message: 'Product deleted successfully' });
     } catch (error: any) {
         console.error('Error deleting product:', error);
 
@@ -447,7 +452,7 @@ router.delete('/:id', async (req, res) => {
                         inStock: false
                     }
                 });
-                return res.json({ message: 'Produit archivé (car présent dans des commandes existantes)' });
+                return res.json({ action: 'archived', message: 'Produit archivé (car présent dans des commandes existantes)' });
             } catch (archiveError) {
                 return res.status(500).json({ error: 'Failed to archive product' });
             }

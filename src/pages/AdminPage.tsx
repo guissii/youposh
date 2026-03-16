@@ -52,6 +52,7 @@ const AdminPage = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [deliveryStatusFilter, setDeliveryStatusFilter] = useState('');
   const [productCategoryFilter, setProductCategoryFilter] = useState<string>('all');
+  const [showArchivedProducts, setShowArchivedProducts] = useState(false);
 
   const [productModal, setProductModal] = useState<{ open: boolean; product?: any }>({ open: false });
   const [promoModal, setPromoModal] = useState<{ open: boolean; promo?: any }>({ open: false });
@@ -96,15 +97,18 @@ const AdminPage = () => {
   const loadProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const query = searchQuery ? `search=${encodeURIComponent(searchQuery)}&all=true` : 'all=true';
-      const data = await fetchProducts(query);
+      const p = new URLSearchParams();
+      p.set('all', 'true');
+      if (searchQuery) p.set('search', searchQuery);
+      if (showArchivedProducts) p.set('includeArchived', 'true');
+      const data = await fetchProducts(p.toString());
       setProducts(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
       toast.error("Impossible de charger les produits");
     }
     setLoading(false);
-  }, [searchQuery]);
+  }, [searchQuery, showArchivedProducts]);
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
@@ -173,7 +177,7 @@ const AdminPage = () => {
       if (activeTab === 'products') loadProducts();
       if (activeTab === 'orders') loadOrders();
     }, 300); return () => clearTimeout(t);
-  }, [activeTab, loadOrders, loadProducts, searchQuery, statusFilter]);
+  }, [activeTab, loadOrders, loadProducts, searchQuery, statusFilter, showArchivedProducts]);
 
   const handleStatusChange = async (oid: string, status: string) => {
     try { await updateOrderStatus(oid, status); loadOrders(); if (orderDetail?.id === oid) setOrderDetail((p: any) => ({ ...p, status })); } catch (e) { console.error(e); }
@@ -201,8 +205,12 @@ const AdminPage = () => {
         const id = Number(deleteConfirm.id);
         if (isNaN(id)) throw new Error('ID produit invalide');
         
-        await deleteProduct(id);
-        toast.success('Produit supprimé avec succès');
+        const result = await deleteProduct(id);
+        if (result?.action === 'archived') {
+          toast.success(result.message || 'Produit archivé');
+        } else {
+          toast.success('Produit supprimé avec succès');
+        }
         loadProducts();
       }
       else if (deleteConfirm.type === 'order') {
@@ -531,6 +539,12 @@ const AdminPage = () => {
           <h3 className="font-semibold text-[#333]">Produits ({filteredProducts.length})</h3>
           <div className="flex gap-3">
             <div className="relative"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Rechercher..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)]" /></div>
+            <button
+              onClick={() => setShowArchivedProducts(v => !v)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${showArchivedProducts ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-[#666] border-gray-200 hover:bg-gray-100'}`}
+            >
+              Archivés
+            </button>
             <button onClick={() => setProductModal({ open: true })} className="px-4 py-2 bg-[var(--yp-blue)] text-white rounded-xl text-sm font-medium hover:bg-[var(--yp-blue-dark)] flex items-center gap-2 shadow-sm"><Plus className="w-4 h-4" />Ajouter</button>
           </div>
         </div>

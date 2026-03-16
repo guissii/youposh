@@ -56,8 +56,9 @@ export const createProduct = (data: any) =>
     apiFetch<any>('/products', { method: 'POST', body: JSON.stringify(data) });
 export const updateProduct = (id: number, data: any) =>
     apiFetch<any>(`/products/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export type DeleteProductResult = { action: 'deleted' | 'archived'; message?: string };
 export const deleteProduct = (id: number) =>
-    apiFetch<any>(`/products/${id}`, { method: 'DELETE' });
+    apiFetch<DeleteProductResult>(`/products/${id}`, { method: 'DELETE' });
 export const deleteProductImage = (productId: number, imageId: string) =>
     apiFetch<any>(`/products/${productId}/images/${imageId}`, { method: 'DELETE' });
 

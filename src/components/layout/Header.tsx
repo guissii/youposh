@@ -26,7 +26,7 @@ export default function Header() {
   const { language, toggleLanguage, isRTL } = useLanguage();
   const storeSettings = useStoreSettings();
   const { phone: rawPhone } = storeSettings;
-  const phone = rawPhone && rawPhone !== '+212600000000' ? rawPhone : '+212 690-939090';
+  const phone = rawPhone || '+212 690-939090';
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
