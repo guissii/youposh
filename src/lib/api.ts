@@ -40,6 +40,8 @@ export interface DashboardStats {
     completedOrders: number;
     cancelledOrders: number;
     totalProducts: number;
+    totalPageViews?: number;
+    uniqueVisitors?: number;
 }
 
 export const fetchDashboardStats = () => apiFetch<DashboardStats>('/dashboard/stats');

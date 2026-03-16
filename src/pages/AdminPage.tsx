@@ -235,10 +235,12 @@ const AdminPage = () => {
         <button onClick={loadDashboard} className="p-2 hover:bg-gray-100 rounded-lg text-[#666]"><RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /></button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {[
           { label: 'Total Commandes', value: stats?.totalOrders ?? '—', icon: ShoppingBag, color: 'from-blue-500 to-blue-600' },
           { label: 'Revenus', value: stats ? `${stats.totalRevenue.toFixed(2)} MAD` : '—', icon: DollarSign, color: 'from-emerald-500 to-emerald-600' },
+          { label: 'Vues Totales', value: stats?.totalPageViews ?? '—', icon: Eye, color: 'from-indigo-500 to-indigo-600' },
+          { label: 'Visiteurs Uniques', value: stats?.uniqueVisitors ?? '—', icon: TrendingUp, color: 'from-cyan-500 to-cyan-600' },
           { label: 'En attente', value: stats?.pendingOrders ?? '—', icon: Clock, color: 'from-amber-500 to-orange-500' },
           { label: 'En traitement', value: stats?.processingOrders ?? '—', icon: Package, color: 'from-purple-500 to-purple-600' },
         ].map((stat, i) => (

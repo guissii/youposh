@@ -233,3 +233,13 @@ model AdminUser {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+model VisitorStat {
+  id        Int      @id @default(autoincrement())
+  visitorId String   // Unique ID (e.g., hash of IP + User Agent)
+  path      String   // The page visited
+  timestamp DateTime @default(now())
+
+  @@index([timestamp])
+  @@index([visitorId])
+}

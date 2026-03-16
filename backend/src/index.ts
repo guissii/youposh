@@ -2,8 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import compression from 'compression';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
+import { PrismaClient } from '@prisma/client';
 
 dotenv.config();
+
+const prisma = new PrismaClient();
 
 import productRoutes from './routes/products';
 import orderRoutes from './routes/orders';
@@ -24,6 +28,39 @@ const PORT = process.env.PORT || 5000;
 app.use(compression());
 app.use(cors());
 app.use(express.json());
+
+// Visitor Tracking Middleware
+app.use(async (req, _res, next) => {
+    // Skip static files, uploads, and admin routes
+    if (
+        req.path.startsWith('/uploads') ||
+        req.path.startsWith('/api/auth') ||
+        req.path.startsWith('/api/dashboard') ||
+        req.path.startsWith('/api/upload') ||
+        req.method !== 'GET'
+    ) {
+        return next();
+    }
+
+    try {
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+        const userAgent = req.headers['user-agent'] || 'unknown';
+        const visitorId = crypto
+            .createHash('md5')
+            .update(`${ip}-${userAgent}`)
+            .digest('hex');
+
+        await prisma.visitorStat.create({
+            data: {
+                visitorId,
+                path: req.path,
+            },
+        });
+    } catch (err) {
+        console.error('Visitor tracking error:', err);
+    }
+    next();
+});
 
 // Health check
 app.get('/api/health', (_req, res) => {
