@@ -20,10 +20,10 @@ async function main() {
     const hash2 = await bcrypt.hash('support123', salt);
 
     await prisma.adminUser.upsert({
-        where: { email: 'admin@youposh.ma' },
+        where: { email: 'admin@youposh.ys@gmail.com' },
         update: { passwordHash: hash1 },
         create: {
-            email: 'admin@youposh.ma',
+            email: 'admin@youposh.ys@gmail.com',
             passwordHash: hash1,
             name: 'Super Admin',
             role: 'admin'
@@ -31,10 +31,10 @@ async function main() {
     });
 
     await prisma.adminUser.upsert({
-        where: { email: 'support@youposh.ma' },
+        where: { email: 'support@youposh.ys@gmail.com' },
         update: { passwordHash: hash2 },
         create: {
-            email: 'support@youposh.ma',
+            email: 'support@youposh.ys@gmail.com',
             passwordHash: hash2,
             name: 'Support Team',
             role: 'editor'
@@ -265,7 +265,31 @@ async function main() {
     });
     // ... other orders ...
     */
-    console.log('✅ (Customers/Orders seeding skipped for now to avoid schema conflicts)');
+    console.log('⚙️ Seeding Store Settings...');
+    await prisma.storeSettings.upsert({
+        where: { id: 1 },
+        update: {
+            phone: '+212 690-939090',
+            email: 'youposh.ys@gmail.com',
+        },
+        create: {
+            id: 1,
+            storeName: 'YOUPOSH',
+            phone: '+212 690-939090',
+            email: 'youposh.ys@gmail.com',
+            currency: 'MAD',
+            brandPrimary: '#2563EB',
+            brandSecondary: '#DC2626',
+            shippingFeeLocal: 20,
+            shippingFeeNational: 35,
+            watermarkEnabled: true,
+            watermarkOpacity: 20,
+            watermarkSize: 30,
+            watermarkPosX: 50,
+            watermarkPosY: 50,
+        }
+    });
+
     console.log('\n🎉 Seed terminé avec succès!');
 }
 

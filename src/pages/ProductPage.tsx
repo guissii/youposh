@@ -257,7 +257,7 @@ export default function ProductPage() {
       deliveryFee,
       promoStatus === 'applied' && promoCode && promoDiscount > 0 ? { code: promoCode, discount: promoDiscount } : undefined
     );
-    const cleanPhone = phone.replace(/[^\d]/g, '') || '212600000000';
+    const cleanPhone = phone.replace(/[^\d]/g, '') || '212690939090';
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 

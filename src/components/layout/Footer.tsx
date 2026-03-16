@@ -13,6 +13,8 @@ export default function Footer() {
   const navigate = useNavigate();
   const [openSection, setOpenSection] = useState<string | null>(null);
   const storeSettings = useStoreSettings();
+  const phone = storeSettings.phone && storeSettings.phone !== '+212600000000' ? storeSettings.phone : '+212 690-939090';
+  const email = storeSettings.email && storeSettings.email !== 'contact@youposh.ma' ? storeSettings.email : 'youposh.ys@gmail.com';
 
   const toggle = (section: string) =>
     setOpenSection(openSection === section ? null : section);
@@ -110,11 +112,11 @@ export default function Footer() {
               {String(t('footerDescription') || '').replace('YouPosh', storeSettings.storeName)}
             </p>
             <div className="flex flex-row flex-wrap items-center justify-start gap-x-4 gap-y-1 text-xs text-gray-400" dir="ltr">
-              <a href={`tel:${storeSettings.phone.replace(/[^\d+]/g, '')}`} className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors">
-                <Phone className="w-3.5 h-3.5" /> <span dir="ltr">{storeSettings.phone}</span>
+              <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors">
+                <Phone className="w-3.5 h-3.5" /> <span dir="ltr">{phone}</span>
               </a>
-              <a href={`mailto:${storeSettings.email}`} className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors" dir="ltr">
-                <Mail className="w-3.5 h-3.5" /> {storeSettings.email}
+              <a href={`mailto:${email}`} className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors" dir="ltr">
+                <Mail className="w-3.5 h-3.5" /> {email}
               </a>
               <a href="https://www.google.com/maps/place/YOUPOSH/@34.0223818,-5.0576576,17z/data=!3m1!4b1!4m6!3m5!1s0xd9f8b598bc0fc2d:0x5dc7d5969d47c9b9!8m2!3d34.0223818!4d-5.0550827!16s%2Fg%2F11m63brcry?entry=ttu&g_ep=EgoyMDI2MDMxMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors" dir="ltr">
                 <MapPin className="w-3.5 h-3.5" /> Fès

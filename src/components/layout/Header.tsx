@@ -25,7 +25,8 @@ export default function Header() {
   const { cartCount, setIsCartOpen } = useStore();
   const { language, toggleLanguage, isRTL } = useLanguage();
   const storeSettings = useStoreSettings();
-  const { phone } = storeSettings;
+  const { phone: rawPhone } = storeSettings;
+  const phone = rawPhone && rawPhone !== '+212600000000' ? rawPhone : '+212 690-939090';
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

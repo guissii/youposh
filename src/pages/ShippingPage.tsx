@@ -203,7 +203,7 @@ export default function ShippingPage() {
                             </p>
                             <button
                                 onClick={() => {
-                                    const cleanPhone = phone.replace(/[^\d]/g, '') || '212600000000';
+                                    const cleanPhone = phone.replace(/[^\d]/g, '') || '212690939090';
                                     window.open(`https://wa.me/${cleanPhone}?text=` + encodeURIComponent('Bonjour, je souhaite passer une commande.'), '_blank');
                                 }}
                                 className="bg-[var(--yp-whatsapp)] hover:bg-[var(--yp-whatsapp-dark)] text-white px-7 py-3.5 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl active:scale-[0.98] flex items-center gap-2 mx-auto"

@@ -101,7 +101,7 @@ Adresse: ${customerAddress}${customerNote ? `\nRemarque: ${customerNote}` : ''}
 
 Merci !`;
 
-    const cleanPhone = phone.replace(/[^\d]/g, '') || '212600000000';
+    const cleanPhone = phone.replace(/[^\d]/g, '') || '212690939090';
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 

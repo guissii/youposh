@@ -140,7 +140,7 @@ export default function WhatsAppButton({
     }
 
     const cleanPhone = phone.replace(/[^\d]/g, '');
-    const finalPhone = cleanPhone || '212600000000';
+    const finalPhone = cleanPhone || '212690939090';
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${finalPhone}?text=${encodedMessage}`, '_blank');
   };
