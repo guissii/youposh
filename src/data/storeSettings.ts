@@ -43,7 +43,6 @@ import { fetchStoreSettingsAPI, updateStoreSettingsAPI } from '@/lib/api';
 
 const UPDATE_EVENT = 'youposh_store_settings_updated';
 const OFFICIAL_STORE_PHONE = '+212 690-939090';
-const OFFICIAL_STORE_EMAIL = 'youposh.ys@gmail.com';
 
 let cachedStoreSettings: StoreSettings | null = null;
 let isStoreSettingsLoading = false;
@@ -136,7 +135,9 @@ export async function fetchStoreSettingsGlobal(): Promise<StoreSettings> {
     isStoreSettingsLoading = true;
     try {
         const settings = await fetchStoreSettingsAPI();
-        cachedStoreSettings = { ...defaultStoreSettings, ...settings, phone: OFFICIAL_STORE_PHONE, email: OFFICIAL_STORE_EMAIL };
+        // Fallback to default email if empty
+        const email = settings.email || defaultStoreSettings.email;
+        cachedStoreSettings = { ...defaultStoreSettings, ...settings, phone: OFFICIAL_STORE_PHONE, email };
         applyBrandTheme(cachedStoreSettings as StoreSettings);
         window.dispatchEvent(new CustomEvent(UPDATE_EVENT, { detail: cachedStoreSettings }));
         return cachedStoreSettings as StoreSettings;
@@ -168,10 +169,12 @@ export async function saveStoreSettings(settings: Partial<StoreSettings>): Promi
         }
 
         cleanSettings.phone = OFFICIAL_STORE_PHONE;
-        cleanSettings.email = OFFICIAL_STORE_EMAIL;
-
         const updated = await updateStoreSettingsAPI(cleanSettings);
-        cachedStoreSettings = { ...defaultStoreSettings, ...updated, phone: OFFICIAL_STORE_PHONE, email: OFFICIAL_STORE_EMAIL };
+        
+        // Fallback to default email if empty in response
+        const email = updated.email || defaultStoreSettings.email;
+        cachedStoreSettings = { ...defaultStoreSettings, ...updated, phone: OFFICIAL_STORE_PHONE, email };
+        
         applyBrandTheme(cachedStoreSettings as StoreSettings);
         window.dispatchEvent(new CustomEvent(UPDATE_EVENT, { detail: cachedStoreSettings }));
         return cachedStoreSettings as StoreSettings;

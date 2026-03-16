@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Instagram, Facebook, MessageCircle,
   MapPin, Phone, Truck, CreditCard, ArrowRight,
-  ChevronDown, Music2
+  ChevronDown, Music2, Mail
 } from 'lucide-react';
 import { useStoreSettings } from '@/data/storeSettings';
 import { toWhatsAppPhone } from '@/lib/utils';
@@ -115,6 +115,9 @@ export default function Footer() {
             <div className="flex flex-row flex-wrap items-center justify-start gap-x-4 gap-y-2 text-xs text-gray-400" dir="ltr">
               <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors">
                 <Phone className="w-3.5 h-3.5" /> <span dir="ltr">{phone}</span>
+              </a>
+              <a href={`mailto:${storeSettings.email || 'youposh.ys@gmail.com'}`} className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors">
+                <Mail className="w-3.5 h-3.5" /> <span>{storeSettings.email || 'youposh.ys@gmail.com'}</span>
               </a>
               <a href={`https://wa.me/${waPhone}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-[#25D366] transition-colors">
                 <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
