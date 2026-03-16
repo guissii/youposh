@@ -42,6 +42,8 @@ import { useState, useEffect } from 'react';
 import { fetchStoreSettingsAPI, updateStoreSettingsAPI } from '@/lib/api';
 
 const UPDATE_EVENT = 'youposh_store_settings_updated';
+const OFFICIAL_STORE_PHONE = '+212 690-939090';
+const OFFICIAL_STORE_EMAIL = 'youposh.ys@gmail.com';
 
 let cachedStoreSettings: StoreSettings | null = null;
 let isStoreSettingsLoading = false;
@@ -134,7 +136,7 @@ export async function fetchStoreSettingsGlobal(): Promise<StoreSettings> {
     isStoreSettingsLoading = true;
     try {
         const settings = await fetchStoreSettingsAPI();
-        cachedStoreSettings = { ...defaultStoreSettings, ...settings };
+        cachedStoreSettings = { ...defaultStoreSettings, ...settings, phone: OFFICIAL_STORE_PHONE, email: OFFICIAL_STORE_EMAIL };
         applyBrandTheme(cachedStoreSettings as StoreSettings);
         window.dispatchEvent(new CustomEvent(UPDATE_EVENT, { detail: cachedStoreSettings }));
         return cachedStoreSettings as StoreSettings;
@@ -165,8 +167,11 @@ export async function saveStoreSettings(settings: Partial<StoreSettings>): Promi
             }
         }
 
+        cleanSettings.phone = OFFICIAL_STORE_PHONE;
+        cleanSettings.email = OFFICIAL_STORE_EMAIL;
+
         const updated = await updateStoreSettingsAPI(cleanSettings);
-        cachedStoreSettings = { ...defaultStoreSettings, ...updated };
+        cachedStoreSettings = { ...defaultStoreSettings, ...updated, phone: OFFICIAL_STORE_PHONE, email: OFFICIAL_STORE_EMAIL };
         applyBrandTheme(cachedStoreSettings as StoreSettings);
         window.dispatchEvent(new CustomEvent(UPDATE_EVENT, { detail: cachedStoreSettings }));
         return cachedStoreSettings as StoreSettings;

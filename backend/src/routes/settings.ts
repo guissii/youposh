@@ -4,6 +4,9 @@ import { PrismaClient } from '@prisma/client';
 const router = express.Router();
 const prisma = new PrismaClient();
 
+const OFFICIAL_STORE_PHONE = '+212 690-939090';
+const OFFICIAL_STORE_EMAIL = 'youposh.ys@gmail.com';
+
 // ── Store Settings ──
 
 router.get('/store', async (req, res) => {
@@ -11,9 +14,9 @@ router.get('/store', async (req, res) => {
         const settings = await prisma.storeSettings.findUnique({ where: { id: 1 } });
         if (!settings) {
             const defaultSettings = await prisma.storeSettings.create({ data: { id: 1 } });
-            return res.json(defaultSettings);
+            return res.json({ ...defaultSettings, phone: OFFICIAL_STORE_PHONE, email: OFFICIAL_STORE_EMAIL });
         }
-        res.json(settings);
+        res.json({ ...settings, phone: OFFICIAL_STORE_PHONE, email: OFFICIAL_STORE_EMAIL });
     } catch (error) {
         console.error('Error fetching store settings:', error);
         res.status(500).json({ error: 'Failed to fetch store settings' });
@@ -44,6 +47,9 @@ router.post('/store', async (req, res) => {
                 cleanData[key] = data[key];
             }
         }
+
+        cleanData.phone = OFFICIAL_STORE_PHONE;
+        cleanData.email = OFFICIAL_STORE_EMAIL;
 
         const settings = await prisma.storeSettings.upsert({
             where: { id: 1 },
