@@ -101,7 +101,7 @@
   }
 
   html {
-    scroll-behavior: smooth;
+    /* Removed scroll-behavior: smooth to ensure instant ScrollToTop on route change */
     -webkit-tap-highlight-color: transparent;
     -webkit-text-size-adjust: 100%;
     touch-action: manipulation;

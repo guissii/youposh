@@ -66,6 +66,7 @@ export default function ProductPage() {
       try {
         if (!id) return;
         setIsLoadingProduct(true);
+        setProduct(null); // Clear previous product to avoid showing stale data
         setProductLoadError('');
         const p = await fetchProduct(Number(id));
         const normalized = {
