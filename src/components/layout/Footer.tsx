@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   Instagram, Facebook, MessageCircle,
-  MapPin, Phone, Mail, Truck, CreditCard, ArrowRight,
+  MapPin, Phone, Truck, CreditCard, ArrowRight,
   ChevronDown, Music2
 } from 'lucide-react';
 import { useStoreSettings } from '@/data/storeSettings';
@@ -15,7 +15,6 @@ export default function Footer() {
   const [openSection, setOpenSection] = useState<string | null>(null);
   const storeSettings = useStoreSettings();
   const phone = storeSettings.phone || '+212 690-939090';
-  const email = storeSettings.email || 'youposh.ys@gmail.com';
   const waPhone = toWhatsAppPhone(phone);
 
   const toggle = (section: string) =>
@@ -119,9 +118,6 @@ export default function Footer() {
               </a>
               <a href={`https://wa.me/${waPhone}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-[#25D366] transition-colors">
                 <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
-              </a>
-              <a href={`mailto:${email}`} className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors" dir="ltr">
-                <Mail className="w-3.5 h-3.5" /> {email}
               </a>
               <a href="https://www.instagram.com/youposh_officiel/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-[#E4405F] transition-colors">
                 <Instagram className="w-3.5 h-3.5" /> Instagram
