@@ -5,7 +5,7 @@ import {
   ShoppingBag, Search, Menu, X, ChevronDown, Heart,
   MapPin, Phone, ArrowLeft, Globe,
   Home, Percent, TrendingUp, Sparkles, Grid3X3,
-  Truck, MessageCircle, CircleHelp, Instagram,
+  Truck, MessageCircle, CircleHelp, Instagram, Music2,
   Smartphone, Home as HomeIcon, Sparkles as SparklesIcon, Shirt, Car, Gamepad2, Gift, Baby
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
@@ -66,6 +66,9 @@ export default function Header() {
               </a>
               <a href="https://www.instagram.com/youposh_officiel/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#E4405F] transition-colors">
                 <Instagram className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </a>
+              <a href="https://www.tiktok.com/@youposh_officiel?_r=1&_t=ZS-94ioAGNfjdv" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">
+                <Music2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </a>
             </div>
             <div className="w-px h-3 bg-white/20" />
