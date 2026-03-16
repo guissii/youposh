@@ -70,8 +70,12 @@ export const createOrder = (data: any) =>
     apiFetch<any>('/orders', { method: 'POST', body: JSON.stringify(data) });
 export const updateOrderStatus = (id: string, status: string) =>
     apiFetch<any>(`/orders/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
-export const deleteOrder = (id: string) =>
-    apiFetch<any>(`/orders/${id}`, { method: 'DELETE' });
+export const deleteOrder = (id: string, options?: { removeFromSheets?: boolean }) => {
+    const p = new URLSearchParams();
+    if (options?.removeFromSheets) p.set('removeFromSheets', '1');
+    const qs = p.toString();
+    return apiFetch<any>(`/orders/${id}${qs ? `?${qs}` : ''}`, { method: 'DELETE' });
+};
 export const syncOrderToSheets = (id: string) =>
     apiFetch<any>(`/orders/${id}/sync`, { method: 'POST' });
 

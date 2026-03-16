@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -41,6 +41,8 @@ export default function ProductPage() {
   const [customerCity, setCustomerCity] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
   const [customerNote, setCustomerNote] = useState('');
+  const [isSubmittingWhatsApp, setIsSubmittingWhatsApp] = useState(false);
+  const isSubmittingWhatsAppRef = useRef(false);
   const [promoInput, setPromoInput] = useState(promoCode || '');
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoStatus, setPromoStatus] = useState<'idle' | 'loading' | 'applied' | 'error'>('idle');
@@ -222,44 +224,59 @@ export default function ProductPage() {
   const isFormValid = customerName.trim().length >= 2 && customerPhone.trim().length >= 8 && customerCity.trim().length >= 2 && customerAddress.trim().length >= 5;
 
   const handleConfirmWhatsApp = async () => {
-    // 1) Save order to DB so it appears in admin
+    if (isSubmittingWhatsAppRef.current) return;
+    isSubmittingWhatsAppRef.current = true;
+    setIsSubmittingWhatsApp(true);
     try {
-      await createOrder({
-        customerName,
-        phone: customerPhone,
-        city: customerCity,
-        address: customerAddress,
-        notes: customerNote || '',
-        promoCode: promoStatus === 'applied' && promoCode ? promoCode : undefined,
-        items: [{
-          productId: product.id,
-          quantity,
-          price: product.price,
-          variant: selectedVariantLabel || undefined,
-        }],
-      });
-    } catch (err) {
-      console.error('Failed to save order:', err);
-      // Still open WhatsApp even if save fails
-    }
+      const message = generateOrderWhatsAppMessage(
+        product,
+        quantity,
+        selectedVariantLabel || undefined,
+        {
+          customerName,
+          phone: customerPhone,
+          city: customerCity,
+          address: customerAddress,
+          note: customerNote || undefined,
+        },
+        deliveryFee,
+        promoStatus === 'applied' && promoCode && promoDiscount > 0 ? { code: promoCode, discount: promoDiscount } : undefined
+      );
+      const waPhone = toWhatsAppPhone(phone || '+212 690-939090');
+      const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`;
+      const waWindow = window.open('', '_blank');
 
-    // 2) Open WhatsApp
-    const message = generateOrderWhatsAppMessage(
-      product,
-      quantity,
-      selectedVariantLabel || undefined,
-      {
-        customerName,
-        phone: customerPhone,
-        city: customerCity,
-        address: customerAddress,
-        note: customerNote || undefined,
-      },
-      deliveryFee,
-      promoStatus === 'applied' && promoCode && promoDiscount > 0 ? { code: promoCode, discount: promoDiscount } : undefined
-    );
-    const waPhone = toWhatsAppPhone(phone || '+212 690-939090');
-    window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`, '_blank');
+      // 1) Save order to DB so it appears in admin
+      try {
+        await createOrder({
+          customerName,
+          phone: customerPhone,
+          city: customerCity,
+          address: customerAddress,
+          notes: customerNote || '',
+          promoCode: promoStatus === 'applied' && promoCode ? promoCode : undefined,
+          items: [{
+            productId: product.id,
+            quantity,
+            price: product.price,
+            variant: selectedVariantLabel || undefined,
+          }],
+        });
+      } catch (err) {
+        console.error('Failed to save order:', err);
+        // Still open WhatsApp even if save fails
+      }
+
+      if (waWindow) {
+        waWindow.location.href = waUrl;
+        waWindow.focus?.();
+      } else {
+        window.location.href = waUrl;
+      }
+    } finally {
+      setIsSubmittingWhatsApp(false);
+      isSubmittingWhatsAppRef.current = false;
+    }
   };
 
   const handleAddToCart = () => {
@@ -814,8 +831,8 @@ export default function ProductPage() {
               {/* ── Final CTA — Confirmer sur WhatsApp ── */}
                 <button
                   onClick={handleConfirmWhatsApp}
-                  disabled={!isFormValid}
-                  className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2.5 transition-all ${isFormValid
+                  disabled={!isFormValid || isSubmittingWhatsApp}
+                  className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2.5 transition-all ${(isFormValid && !isSubmittingWhatsApp)
                     ? 'bg-[var(--yp-whatsapp)] hover:bg-[var(--yp-whatsapp-dark)] text-white shadow-lg shadow-green-500/20 active:scale-[0.98]'
                     : 'bg-[var(--yp-gray-300)] text-[var(--yp-gray-500)] cursor-not-allowed'
                     }`}

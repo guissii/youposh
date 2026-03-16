@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
@@ -51,6 +51,7 @@ const AdminPage = () => {
   const [promoCodes, setPromoCodes] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState('');
   const [deliveryStatusFilter, setDeliveryStatusFilter] = useState('');
+  const [monthFilter, setMonthFilter] = useState('');
   const [productCategoryFilter, setProductCategoryFilter] = useState<string>('all');
   const [showArchivedProducts, setShowArchivedProducts] = useState(false);
 
@@ -116,6 +117,15 @@ const AdminPage = () => {
       const p = new URLSearchParams();
       if (statusFilter) p.set('status', statusFilter);
       if (searchQuery) p.set('search', searchQuery);
+      if (monthFilter) {
+        const [yy, mm] = monthFilter.split('-');
+        const y = Number(yy);
+        const m = Number(mm);
+        if (Number.isFinite(y) && Number.isFinite(m)) {
+          p.set('year', String(y));
+          p.set('month', String(m));
+        }
+      }
       const data = await fetchOrders(p.toString());
       setOrders(Array.isArray(data) ? data : []);
     } catch (e) {
@@ -123,7 +133,7 @@ const AdminPage = () => {
       toast.error("Impossible de charger les commandes");
     }
     setLoading(false);
-  }, [statusFilter, searchQuery]);
+  }, [statusFilter, searchQuery, monthFilter]);
 
   const loadCategories = useCallback(async () => {
     setLoading(true);
@@ -155,7 +165,7 @@ const AdminPage = () => {
   }, []);
 
   useEffect(() => {
-    setSearchQuery(''); setStatusFilter(''); setDeliveryStatusFilter('');
+    setSearchQuery(''); setStatusFilter(''); setDeliveryStatusFilter(''); setMonthFilter('');
     if (activeTab === 'dashboard') loadDashboard();
     if (activeTab === 'products') loadProducts();
     if (activeTab === 'orders') loadOrders();
@@ -177,7 +187,7 @@ const AdminPage = () => {
       if (activeTab === 'products') loadProducts();
       if (activeTab === 'orders') loadOrders();
     }, 300); return () => clearTimeout(t);
-  }, [activeTab, loadOrders, loadProducts, searchQuery, statusFilter, showArchivedProducts]);
+  }, [activeTab, loadOrders, loadProducts, searchQuery, statusFilter, monthFilter, showArchivedProducts]);
 
   const handleStatusChange = async (oid: string, status: string) => {
     try { await updateOrderStatus(oid, status); loadOrders(); if (orderDetail?.id === oid) setOrderDetail((p: any) => ({ ...p, status })); } catch (e) { console.error(e); }
@@ -214,8 +224,12 @@ const AdminPage = () => {
         loadProducts();
       }
       else if (deleteConfirm.type === 'order') {
-        await deleteOrder(deleteConfirm.id);
-        toast.success('Commande supprimée avec succès');
+        const result = await deleteOrder(deleteConfirm.id, { removeFromSheets: true });
+        if (result?.sheets && result.sheets.removed === false) {
+          toast.success('Commande supprimée (Sheets non modifié)');
+        } else {
+          toast.success('Commande supprimée avec succès');
+        }
         loadOrders();
       }
       else if (deleteConfirm.type === 'category') {
@@ -341,6 +355,24 @@ const AdminPage = () => {
 
   const renderOrders = () => {
     const visibleOrders = getVisibleOrders();
+    const now = new Date();
+    const monthOptions = Array.from({ length: 12 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label = d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+      return { key, label };
+    });
+    const groupedOrders = visibleOrders.reduce((acc: Array<{ key: string; label: string; orders: any[] }>, o: any) => {
+      const d = new Date(o.createdAt);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const existing = acc[acc.length - 1];
+      if (existing && existing.key === key) {
+        existing.orders.push(o);
+        return acc;
+      }
+      acc.push({ key, label: d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }), orders: [o] });
+      return acc;
+    }, []);
     return (
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 flex flex-col h-[calc(100vh-140px)] overflow-hidden">
         {/* Header Section */}
@@ -380,6 +412,22 @@ const AdminPage = () => {
                 <option value="shipped">Confirmée</option>
                 <option value="delivered">Terminée</option>
                 <option value="cancelled">Annulée</option>
+              </select>
+              <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            </div>
+
+            <div className="relative">
+              <select
+                value={monthFilter}
+                onChange={e => setMonthFilter(e.target.value)}
+                className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-blue-100 appearance-none pr-9 bg-gray-50/50 hover:bg-white transition-all font-medium text-gray-700"
+              >
+                <option value="">Mois: Tous</option>
+                {monthOptions.map(m => (
+                  <option key={m.key} value={m.key}>
+                    {m.label}
+                  </option>
+                ))}
               </select>
               <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             </div>
@@ -432,8 +480,15 @@ const AdminPage = () => {
                   </td>
                 </tr>
               )}
-              {visibleOrders.map(o => (
-                <tr key={o.id} className="hover:bg-blue-50/30 transition-colors group">
+              {groupedOrders.map(g => (
+                <Fragment key={g.key}>
+                  <tr className="bg-gray-50">
+                    <td colSpan={8} className="px-6 py-3 text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      {g.label}
+                    </td>
+                  </tr>
+                  {g.orders.map(o => (
+                    <tr key={o.id} className="hover:bg-blue-50/30 transition-colors group">
                   <td className="px-6 py-4">
                     <span className="font-mono text-xs font-medium text-gray-400 bg-gray-50 p-1.5 rounded-md border border-gray-100" title={o.id}>
                       #{o.id.slice(0, 6)}
@@ -519,7 +574,9 @@ const AdminPage = () => {
                       </button>
                     </div>
                   </td>
-                </tr>
+                    </tr>
+                  ))}
+                </Fragment>
               ))}
             </tbody>
           </table>

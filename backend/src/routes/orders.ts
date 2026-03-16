@@ -449,11 +449,11 @@ async function updateOrderInGoogleSheet(order: OrderForSheet) {
     const sheetTitle = `Commandes_${createdAt.getFullYear()}_${String(createdAt.getMonth() + 1).padStart(2, '0')}`;
     const { sheets, sheetId, hasDeliveryFormatting } = await ensureSheetTabExists(sheetTitle);
     await ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetId, hasDeliveryFormatting);
-    const colA = await sheets.spreadsheets.values.get({
+    const colId = await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: `'${sheetTitle}'!A:A`,
+        range: `'${sheetTitle}'!J:J`,
     });
-    const values = (colA.data.values ?? []) as any[][];
+    const values = (colId.data.values ?? []) as any[][];
     let rowIndex = -1;
     for (let i = 0; i < values.length; i++) {
         const v = values[i]?.[0];
@@ -531,6 +531,74 @@ async function updateOrderInGoogleSheet(order: OrderForSheet) {
         });
     }
 }
+
+async function deleteOrderFromGoogleSheet(orderId: string, createdAt: Date) {
+    if (
+        !process.env.GOOGLE_SHEETS_SPREADSHEET_ID ||
+        !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
+        !(
+            process.env.GOOGLE_PRIVATE_KEY ||
+            process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY ||
+            process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
+            process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64
+        )
+    ) {
+        return { removed: false, reason: 'missing_env' as const };
+    }
+
+    const spreadsheetId = cleanEnvVar(process.env.GOOGLE_SHEETS_SPREADSHEET_ID);
+    const dt = createdAt ? new Date(createdAt) : new Date();
+    const sheetTitle = `Commandes_${dt.getFullYear()}_${String(dt.getMonth() + 1).padStart(2, '0')}`;
+
+    const { sheets } = await getSheetsClient();
+    const meta = await sheets.spreadsheets.get({
+        spreadsheetId,
+        fields: 'sheets.properties.title,sheets.properties.sheetId',
+    });
+
+    const existingSheet = (meta.data.sheets ?? []).find((s: any) => s.properties?.title === sheetTitle);
+    const sheetId = existingSheet?.properties?.sheetId;
+    if (sheetId == null) {
+        return { removed: false, reason: 'missing_sheet' as const };
+    }
+
+    const colId = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: `'${sheetTitle}'!J:J`,
+    });
+    const values = (colId.data.values ?? []) as any[][];
+    let rowIndex = -1;
+    for (let i = 0; i < values.length; i++) {
+        const v = values[i]?.[0];
+        if (String(v) === String(orderId)) {
+            rowIndex = i + 1;
+            break;
+        }
+    }
+    if (rowIndex <= 1) {
+        return { removed: false, reason: rowIndex === 1 ? 'header_match' as const : 'not_found' as const };
+    }
+
+    await sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: {
+            requests: [
+                {
+                    deleteDimension: {
+                        range: {
+                            sheetId,
+                            dimension: 'ROWS',
+                            startIndex: rowIndex - 1,
+                            endIndex: rowIndex,
+                        },
+                    },
+                },
+            ],
+        },
+    });
+
+    return { removed: true as const };
+}
 function parseVariantSelection(label: any): Record<string, string> {
     if (typeof label !== 'string') return {};
     const parts = label.split('/').map(p => p.trim()).filter(Boolean);
@@ -607,13 +675,20 @@ router.get('/debug-auth', async (req, res) => {
 // GET all orders with optional status filter
 router.get('/', async (req, res) => {
     try {
-        const { status, search } = req.query;
+        const { status, search, year, month } = req.query;
 
         const where: any = {};
         if (status === 'delivered' || status === 'completed') {
             where.status = { in: ['delivered', 'completed'] };
         } else if (status) {
             where.status = status;
+        }
+        const y = typeof year === 'string' ? Number(year) : NaN;
+        const m = typeof month === 'string' ? Number(month) : NaN;
+        if (Number.isFinite(y) && Number.isFinite(m) && y > 2000 && m >= 1 && m <= 12) {
+            const start = new Date(y, m - 1, 1, 0, 0, 0, 0);
+            const end = new Date(y, m, 1, 0, 0, 0, 0);
+            where.createdAt = { gte: start, lt: end };
         }
         if (search) {
             where.OR = [
@@ -875,10 +950,29 @@ router.put('/:id/status', async (req, res) => {
 // DELETE order
 router.delete('/:id', async (req, res) => {
     try {
+        const { removeFromSheets } = req.query;
+        const shouldRemoveFromSheets = String(removeFromSheets ?? '') === '1' || String(removeFromSheets ?? '').toLowerCase() === 'true';
+
+        const existing = await prisma.order.findUnique({
+            where: { id: req.params.id },
+            select: { id: true, createdAt: true },
+        });
+        if (!existing) return res.status(404).json({ error: 'Order not found' });
+
         await prisma.order.delete({
             where: { id: req.params.id },
         });
-        res.json({ message: 'Order deleted' });
+
+        let sheets: any = undefined;
+        if (shouldRemoveFromSheets) {
+            try {
+                sheets = await deleteOrderFromGoogleSheet(existing.id, existing.createdAt);
+            } catch (e) {
+                sheets = { removed: false, error: e instanceof Error ? e.message : String(e) };
+            }
+        }
+
+        res.json({ message: 'Order deleted', sheets });
     } catch (error) {
         console.error('Error deleting order:', error);
         res.status(500).json({ error: 'Failed to delete order' });

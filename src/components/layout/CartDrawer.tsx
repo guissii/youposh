@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { X, Plus, Minus, ShoppingBag, Trash2, MessageCircle, ArrowRight, User, Phone, MapPin, FileText, Home } from 'lucide-react';
@@ -38,6 +38,8 @@ export default function CartDrawer() {
   const [customerCity, setCustomerCity] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
   const [customerNote, setCustomerNote] = useState('');
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const isSubmittingOrderRef = useRef(false);
 
   const deliveryFee = settings.shippingFeeNational ?? 35;
   const subtotalAfterPromo = Math.max(0, cartTotal - (promoStatus === 'applied' ? promoDiscount : 0));
@@ -52,35 +54,15 @@ export default function CartDrawer() {
 
   const handleWhatsAppOrder = async () => {
     if (cart.length === 0 || !isFormValid) return;
+    if (isSubmittingOrderRef.current) return;
     const unavailable = cart.find(item => item.product.inStock === false || (typeof (item.product as any).stock === 'number' && Number((item.product as any).stock) <= 0));
     if (unavailable) {
       toast.error(`${unavailable.product.name} : ${t('outOfStock') || 'Rupture de stock'}`);
       return;
     }
+    isSubmittingOrderRef.current = true;
+    setIsSubmittingOrder(true);
 
-    // 1) Save order to DB
-    try {
-      await createOrder({
-        customerName,
-        phone: customerPhone,
-        city: customerCity,
-        address: customerAddress,
-        notes: customerNote || '',
-        promoCode: promoStatus === 'applied' && promoCode ? promoCode : undefined,
-        items: cart.map(item => ({
-          productId: item.product.id,
-          quantity: item.quantity,
-          price: item.product.price,
-          variant: item.variant || undefined,
-        })),
-      });
-    } catch (err) {
-      console.error('Failed to save order:', err);
-      toast.error('Échec de la sauvegarde de la commande. Vérifiez votre connexion puis réessayez.');
-      return;
-    }
-
-    // 2) Open WhatsApp
     const itemsList = cart.map(item =>
       `- ${item.product.name} x${item.quantity} = ${item.product.price * item.quantity} dh\n  URL: ${window.location.origin}/product/${item.product.id}`
     ).join('\n');
@@ -102,7 +84,41 @@ Adresse: ${customerAddress}${customerNote ? `\nRemarque: ${customerNote}` : ''}
 Merci !`;
 
     const waPhone = toWhatsAppPhone(phone || '+212 690-939090');
-    window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`, '_blank');
+    const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`;
+    const waWindow = window.open('', '_blank');
+
+    // 1) Save order to DB
+    try {
+      await createOrder({
+        customerName,
+        phone: customerPhone,
+        city: customerCity,
+        address: customerAddress,
+        notes: customerNote || '',
+        promoCode: promoStatus === 'applied' && promoCode ? promoCode : undefined,
+        items: cart.map(item => ({
+          productId: item.product.id,
+          quantity: item.quantity,
+          price: item.product.price,
+          variant: item.variant || undefined,
+        })),
+      });
+    } catch (err) {
+      console.error('Failed to save order:', err);
+      toast.error('Échec de la sauvegarde de la commande. Vérifiez votre connexion puis réessayez.');
+      waWindow?.close();
+      return;
+    } finally {
+      setIsSubmittingOrder(false);
+      isSubmittingOrderRef.current = false;
+    }
+
+    if (waWindow) {
+      waWindow.location.href = waUrl;
+      waWindow.focus?.();
+    } else {
+      window.location.href = waUrl;
+    }
   };
 
   if (!isCartOpen) return null;
@@ -374,8 +390,8 @@ Merci !`;
               <>
                 <button
                   onClick={handleWhatsAppOrder}
-                  disabled={!isFormValid}
-                  className={`w-full py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors ${isFormValid
+                  disabled={!isFormValid || isSubmittingOrder}
+                  className={`w-full py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors ${(isFormValid && !isSubmittingOrder)
                     ? 'bg-green-500 hover:bg-green-600 text-white'
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }`}
