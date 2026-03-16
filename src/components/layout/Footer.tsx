@@ -7,6 +7,7 @@ import {
   ChevronDown, Music2
 } from 'lucide-react';
 import { useStoreSettings } from '@/data/storeSettings';
+import { toWhatsAppPhone } from '@/lib/utils';
 
 export default function Footer() {
   const { t } = useTranslation();
@@ -15,6 +16,7 @@ export default function Footer() {
   const storeSettings = useStoreSettings();
   const phone = storeSettings.phone || '+212 690-939090';
   const email = storeSettings.email || 'youposh.ys@gmail.com';
+  const waPhone = toWhatsAppPhone(phone);
 
   const toggle = (section: string) =>
     setOpenSection(openSection === section ? null : section);
@@ -83,7 +85,7 @@ export default function Footer() {
             <div className="flex w-full sm:w-auto gap-2">
               <input
                 type="email"
-                placeholder="votre@email.com"
+                placeholder="Votre email"
                 className="flex-1 sm:w-56 bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[var(--yp-blue)] transition-colors"
               />
               <button className="bg-[var(--yp-blue)] hover:bg-[var(--yp-blue-dark)] text-white px-4 py-2 rounded-xl font-semibold text-sm transition-colors">
@@ -115,7 +117,7 @@ export default function Footer() {
               <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors">
                 <Phone className="w-3.5 h-3.5" /> <span dir="ltr">{phone}</span>
               </a>
-              <a href="https://wa.me/212690939090" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-[#25D366] transition-colors">
+              <a href={`https://wa.me/${waPhone}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-[#25D366] transition-colors">
                 <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
               </a>
               <a href={`mailto:${email}`} className="flex items-center gap-1.5 hover:text-[var(--yp-blue-light)] transition-colors" dir="ltr">
@@ -205,7 +207,7 @@ export default function Footer() {
                 { icon: Instagram, href: 'https://www.instagram.com/youposh_officiel/', hoverColor: 'hover:bg-gradient-to-br hover:from-purple-500 hover:to-pink-500' },
                 { icon: Facebook, href: 'https://www.facebook.com/share/1H3vgQ3dro/', hoverColor: 'hover:bg-[var(--yp-blue)]' },
                 { icon: Music2, href: 'https://www.tiktok.com/@youposh_officiel?_r=1&_t=ZS-94ioAGNfjdv', hoverColor: 'hover:bg-black' },
-                { icon: MessageCircle, href: `https://wa.me/212690939090`, hoverColor: 'hover:bg-[var(--yp-whatsapp)]' },
+                { icon: MessageCircle, href: `https://wa.me/${waPhone}`, hoverColor: 'hover:bg-[var(--yp-whatsapp)]' },
               ].map((social, i) => (
                 <a
                   key={i}

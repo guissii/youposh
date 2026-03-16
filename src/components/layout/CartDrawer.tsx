@@ -6,7 +6,7 @@ import { useStore } from '@/contexts/StoreContext';
 import { toast } from 'sonner';
 
 import { useStoreSettings } from '@/data/storeSettings';
-import { getImageUrl } from '@/lib/utils';
+import { getImageUrl, toWhatsAppPhone } from '@/lib/utils';
 import { createOrder } from '@/lib/api';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
@@ -101,8 +101,8 @@ Adresse: ${customerAddress}${customerNote ? `\nRemarque: ${customerNote}` : ''}
 
 Merci !`;
 
-    const cleanPhone = phone.replace(/[^\d]/g, '') || '212690939090';
-    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
+    const waPhone = toWhatsAppPhone(phone || '+212 690-939090');
+    window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   if (!isCartOpen) return null;
@@ -249,7 +249,7 @@ Merci !`;
                     type="tel"
                     value={customerPhone}
                     onChange={e => setCustomerPhone(e.target.value)}
-                    placeholder="+212 6XX XXX XXX"
+                    placeholder="Votre numéro"
                     className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)] text-sm"
                   />
                 </div>

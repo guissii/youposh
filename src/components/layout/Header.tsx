@@ -12,6 +12,7 @@ import { useStore } from '@/contexts/StoreContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useStoreSettings } from '@/data/storeSettings';
 import { fetchCategories } from '@/lib/api';
+import { toWhatsAppPhone } from '@/lib/utils';
 import SearchModal from './SearchModal';
 
 const categoryIconMap: Record<string, React.ElementType> = {
@@ -27,6 +28,7 @@ export default function Header() {
   const storeSettings = useStoreSettings();
   const { phone: rawPhone } = storeSettings;
   const phone = rawPhone || '+212 690-939090';
+  const waPhone = toWhatsAppPhone(phone);
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -61,7 +63,7 @@ export default function Header() {
           </div>
           <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
             <div className="flex items-center gap-3 mr-1">
-              <a href="https://wa.me/212690939090" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#25D366] transition-colors">
+              <a href={`https://wa.me/${waPhone}`} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#25D366] transition-colors">
                 <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </a>
               <a href="https://www.instagram.com/youposh_officiel/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#E4405F] transition-colors">
@@ -366,8 +368,7 @@ export default function Header() {
                 {/* WhatsApp — Simple line */}
                 <button
                   onClick={() => {
-                    const cleanPhone = phone.replace(/[^\d]/g, '');
-                    window.open(`https://wa.me/${cleanPhone}?text=` + encodeURIComponent('Bonjour, je suis intéressé par vos produits.'), '_blank');
+                    window.open(`https://wa.me/${waPhone}?text=` + encodeURIComponent('Bonjour, je suis intéressé par vos produits.'), '_blank');
                     setIsMobileMenuOpen(false);
                   }}
                   className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-[var(--yp-whatsapp-dark)] hover:bg-emerald-50 transition-colors"

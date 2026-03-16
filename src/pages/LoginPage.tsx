@@ -51,7 +51,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-blue-100 transition-all"
-                  placeholder="admin@youposh.ys@gmail.com"
+                  placeholder="Email admin"
                   autoFocus
                   required
                 />

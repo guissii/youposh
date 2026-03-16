@@ -53,6 +53,7 @@ const steps = [
 ];
 
 import { useStoreSettings } from '@/data/storeSettings';
+import { toWhatsAppPhone } from '@/lib/utils';
 
 export default function ShippingPage() {
     const { phone } = useStoreSettings();
@@ -203,8 +204,8 @@ export default function ShippingPage() {
                             </p>
                             <button
                                 onClick={() => {
-                                    const cleanPhone = phone.replace(/[^\d]/g, '') || '212690939090';
-                                    window.open(`https://wa.me/${cleanPhone}?text=` + encodeURIComponent('Bonjour, je souhaite passer une commande.'), '_blank');
+                                    const waPhone = toWhatsAppPhone(phone || '+212 690-939090');
+                                    window.open(`https://wa.me/${waPhone}?text=` + encodeURIComponent('Bonjour, je souhaite passer une commande.'), '_blank');
                                 }}
                                 className="bg-[var(--yp-whatsapp)] hover:bg-[var(--yp-whatsapp-dark)] text-white px-7 py-3.5 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl active:scale-[0.98] flex items-center gap-2 mx-auto"
                             >

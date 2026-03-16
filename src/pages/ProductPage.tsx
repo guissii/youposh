@@ -14,7 +14,7 @@ import Footer from '@/components/layout/Footer';
 import CartDrawer from '@/components/layout/CartDrawer';
 import WhatsAppButton, { generateOrderWhatsAppMessage } from '@/components/ui/WhatsAppButton';
 import { useStoreSettings } from '@/data/storeSettings';
-import { getImageUrl } from '@/lib/utils';
+import { getImageUrl, toWhatsAppPhone } from '@/lib/utils';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import PremiumLoader from '@/components/ui/PremiumLoader';
@@ -258,8 +258,8 @@ export default function ProductPage() {
       deliveryFee,
       promoStatus === 'applied' && promoCode && promoDiscount > 0 ? { code: promoCode, discount: promoDiscount } : undefined
     );
-    const cleanPhone = phone.replace(/[^\d]/g, '') || '212690939090';
-    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
+    const waPhone = toWhatsAppPhone(phone || '+212 690-939090');
+    window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleAddToCart = () => {
@@ -650,7 +650,7 @@ export default function ProductPage() {
                     type="tel"
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
-                    placeholder="06XX XXX XXX"
+                    placeholder="Votre numéro"
                     className="w-full px-4 py-3 bg-[var(--yp-gray-200)] border border-[var(--yp-gray-300)] rounded-xl text-[var(--yp-dark)] placeholder-[var(--yp-gray-500)] focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-[var(--yp-blue)]/20 transition-all"
                   />
                 </div>

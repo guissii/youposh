@@ -11,3 +11,11 @@ export function getImageUrl(path: string | undefined | null): string {
   const base = import.meta.env.DEV ? 'http://localhost:5000' : '';
   return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
 }
+
+export function toWhatsAppPhone(rawPhone: string | undefined | null): string {
+  const digits = String(rawPhone || '').replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.startsWith('0') && digits.length === 10) return `212${digits.slice(1)}`;
+  if (digits.startsWith('212')) return digits;
+  return digits;
+}

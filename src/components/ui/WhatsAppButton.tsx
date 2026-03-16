@@ -21,6 +21,7 @@ interface OrderInfo {
 }
 
 import { useStoreSettings } from '@/data/storeSettings';
+import { toWhatsAppPhone } from '@/lib/utils';
 
 // Remove the hardcoded const WHATSAPP_NUMBER
 // since we will get it directly from settings now.
@@ -139,8 +140,7 @@ export default function WhatsAppButton({
       message = 'Bonjour, je suis intéressé par vos produits.';
     }
 
-    const cleanPhone = phone.replace(/[^\d]/g, '');
-    const finalPhone = cleanPhone || '212690939090';
+    const finalPhone = toWhatsAppPhone(phone || '+212 690-939090');
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${finalPhone}?text=${encodedMessage}`, '_blank');
   };

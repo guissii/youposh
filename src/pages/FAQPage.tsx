@@ -21,7 +21,7 @@ const faqData: FAQItem[] = [
         category: 'Commandes',
         icon: ShoppingCart,
         question: 'Comment passer une commande ?',
-        answer: 'Choisissez votre produit, cliquez sur "Commander via WhatsApp" et envoyez-nous votre commande. Vous pouvez aussi nous contacter directement sur WhatsApp au +212 6XX XXX XXX. Nous confirmons votre commande sous 30 minutes.',
+        answer: 'Choisissez votre produit, cliquez sur "Commander via WhatsApp" et envoyez-nous votre commande. Vous pouvez aussi nous contacter directement sur WhatsApp au +212 690-939090. Nous confirmons votre commande sous 30 minutes.',
     },
     {
         category: 'Commandes',
@@ -96,6 +96,7 @@ const faqData: FAQItem[] = [
 ];
 
 import { useStoreSettings } from '@/data/storeSettings';
+import { toWhatsAppPhone } from '@/lib/utils';
 
 export default function FAQPage() {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -206,8 +207,8 @@ export default function FAQPage() {
                             </p>
                             <button
                                 onClick={() => {
-                                    const cleanPhone = phone.replace(/[^\d]/g, '') || '212690939090';
-                                    window.open(`https://wa.me/${cleanPhone}?text=` + encodeURIComponent('Bonjour, j\'ai une question.'), '_blank');
+                                    const waPhone = toWhatsAppPhone(phone || '+212 690-939090');
+                                    window.open(`https://wa.me/${waPhone}?text=` + encodeURIComponent('Bonjour, j\'ai une question.'), '_blank');
                                 }}
                                 className="bg-[var(--yp-whatsapp)] hover:bg-[var(--yp-whatsapp-dark)] text-white px-7 py-3.5 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl active:scale-[0.98] flex items-center gap-2 mx-auto"
                             >
