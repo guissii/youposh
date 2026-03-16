@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, ImageOff, Flame, Sparkles, TrendingUp } from 'lucide-react';
+import { Heart, ImageOff, Flame, Sparkles, TrendingUp, ShoppingBag } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
 import { useTranslation } from 'react-i18next';
 import type { Product } from '@/types';
@@ -103,7 +103,7 @@ export default function ProductCard({
                 alt="Watermark"
                 className="absolute select-none pointer-events-none drop-shadow-md filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]"
                 style={{
-                  width: `${settings.watermarkSize * 1.5}%`,
+                  width: `${settings.watermarkSize}%`,
                   height: 'auto',
                   opacity: settings.watermarkOpacity / 100,
                   left: `${settings.watermarkPosX}%`,
@@ -208,7 +208,7 @@ export default function ProductCard({
                 alt="Watermark"
                 className="absolute select-none pointer-events-none drop-shadow-md filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]"
                 style={{
-                  width: `${settings.watermarkSize * 1.5}%`,
+                  width: `${settings.watermarkSize}%`,
                   height: 'auto',
                   opacity: settings.watermarkOpacity / 100,
                   left: `${settings.watermarkPosX}%`,
@@ -248,12 +248,13 @@ export default function ProductCard({
         {/* Bottom actions */}
         <div className="px-3 pb-3 pt-1 flex items-stretch gap-2">
           <button
-            onClick={handleAddToCart}
-            disabled={isOutOfStock}
-            className={`flex-1 h-9 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-color-cart)] text-white hover:opacity-90'}`}
-          >
-            {isOutOfStock ? compactOutLabel : (t('addToCart') || 'Ajouter')}
-          </button>
+              onClick={handleAddToCart}
+              disabled={isOutOfStock}
+              className={`flex-1 h-9 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-1.5 ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-color-cart)] text-white hover:opacity-90'}`}
+            >
+              {!isOutOfStock && <ShoppingBag className="w-3.5 h-3.5" />}
+              {isOutOfStock ? compactOutLabel : (t('addToCart') || 'Ajouter')}
+            </button>
           <button
             onClick={handleWishlistToggle}
             className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 border-2 ${isFavorite
@@ -327,7 +328,7 @@ export default function ProductCard({
               alt="Watermark"
               className="absolute select-none pointer-events-none drop-shadow-md filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]"
               style={{
-                width: `${settings.watermarkSize * 1.5}%`,
+                width: `${settings.watermarkSize}%`,
                 height: 'auto',
                 opacity: settings.watermarkOpacity / 100,
                 left: `${settings.watermarkPosX}%`,
@@ -417,8 +418,9 @@ export default function ProductCard({
         <button
           onClick={handleAddToCart}
           disabled={isOutOfStock}
-          className={`flex-1 h-9 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-color-cart)] text-white hover:opacity-90'}`}
+          className={`flex-1 h-9 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-1.5 ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-color-cart)] text-white hover:opacity-90'}`}
         >
+          {!isOutOfStock && <ShoppingBag className="w-3.5 h-3.5" />}
           {isOutOfStock ? (t('outOfStock') || 'Rupture') : (t('addToCart') || 'Ajouter')}
         </button>
         <button

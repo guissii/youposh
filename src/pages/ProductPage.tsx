@@ -323,7 +323,7 @@ export default function ProductPage() {
                         alt="Watermark"
                         className="absolute select-none pointer-events-none drop-shadow-md filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]"
                         style={{
-                          width: `${storeSettings.watermarkSize * 1.5}%`,
+                          width: `${storeSettings.watermarkSize}%`,
                           height: 'auto',
                           opacity: storeSettings.watermarkOpacity / 100,
                           left: `${storeSettings.watermarkPosX}%`,
