@@ -6,7 +6,7 @@ import {
   LogOut, Search, Bell, DollarSign, Clock, CheckCircle,
   Eye, EyeOff, Plus, Pencil, Trash2, X,
   TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Check, Stamp,
-  Flame, FileSpreadsheet
+  Flame, FileSpreadsheet, Menu
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -54,6 +54,7 @@ const AdminPage = () => {
   const [monthFilter, setMonthFilter] = useState('');
   const [productCategoryFilter, setProductCategoryFilter] = useState<string>('all');
   const [showArchivedProducts, setShowArchivedProducts] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const [productModal, setProductModal] = useState<{ open: boolean; product?: any }>({ open: false });
   const [promoModal, setPromoModal] = useState<{ open: boolean; promo?: any }>({ open: false });
@@ -1263,7 +1264,37 @@ const AdminPage = () => {
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex">
-      <aside className="w-[260px] bg-white shadow-lg fixed h-full z-10 border-r border-gray-100">
+      <div className={`fixed inset-0 z-50 lg:hidden ${isMobileSidebarOpen ? '' : 'pointer-events-none'}`}>
+        <div
+          className={`absolute inset-0 bg-black/50 transition-opacity ${isMobileSidebarOpen ? 'opacity-100' : 'opacity-0'}`}
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+        <aside
+          className={`absolute top-0 left-0 w-[260px] bg-white shadow-lg h-full border-r border-gray-100 transform transition-transform ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        >
+          <div className="p-5 border-b border-gray-100 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-blue-dark)] rounded-xl flex items-center justify-center shadow-md shrink-0"><ShoppingBag className="w-5 h-5 text-white" /></div>
+              <div className="min-w-0"><span className="font-bold text-[#333] text-lg truncate block">{storeForm.storeName || 'Boutique'}</span><p className="text-[10px] text-[#999] font-medium uppercase tracking-wider">Admin Pro</p></div>
+            </div>
+            <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 hover:bg-gray-100 rounded-xl text-[#666]">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <nav className="p-3 space-y-0.5">
+            {sidebarItems.map(item => (
+              <button key={item.id} onClick={() => { setActiveTab(item.id); setIsMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-sm ${activeTab === item.id ? 'bg-[var(--yp-blue)]/10 text-[var(--yp-blue)] font-semibold' : 'text-[#666] hover:bg-gray-50'}`}>
+                <item.icon className="w-5 h-5" />{item.label}{activeTab === item.id && <div className="ml-auto w-1.5 h-1.5 bg-[var(--yp-blue)] rounded-full" />}
+              </button>
+            ))}
+          </nav>
+          <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-100">
+            <button onClick={() => { setIsMobileSidebarOpen(false); handleLogout(); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-[#666] hover:bg-red-50 hover:text-red-500 rounded-xl transition-colors text-sm"><LogOut className="w-5 h-5" />{t('logout')}</button>
+          </div>
+        </aside>
+      </div>
+
+      <aside className="hidden lg:flex w-[260px] bg-white shadow-lg fixed h-full z-10 border-r border-gray-100">
         <div className="p-5 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-blue-dark)] rounded-xl flex items-center justify-center shadow-md"><ShoppingBag className="w-5 h-5 text-white" /></div>
@@ -1282,9 +1313,17 @@ const AdminPage = () => {
         </div>
       </aside>
 
-      <main className="flex-1 ml-[260px]">
-        <header className="bg-white/80 backdrop-blur-md shadow-sm px-8 py-4 flex items-center justify-between sticky top-0 z-[5] border-b border-gray-100">
-          <div><h1 className="text-xl font-bold text-[#333]">{tabTitles[activeTab]}</h1><p className="text-xs text-[#999] mt-0.5">{new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
+      <main className="flex-1 lg:ml-[260px] min-w-0">
+        <header className="bg-white/80 backdrop-blur-md shadow-sm px-4 py-3 lg:px-8 lg:py-4 flex items-center justify-between sticky top-0 z-[5] border-b border-gray-100">
+          <div className="flex items-center gap-3 min-w-0">
+            <button onClick={() => setIsMobileSidebarOpen(true)} className="lg:hidden p-2 hover:bg-gray-100 rounded-xl text-[#666]">
+              <Menu className="w-5 h-5" />
+            </button>
+            <div className="min-w-0">
+              <h1 className="text-lg lg:text-xl font-bold text-[#333] truncate">{tabTitles[activeTab]}</h1>
+              <p className="hidden sm:block text-xs text-[#999] mt-0.5">{new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            </div>
+          </div>
           <div className="flex items-center gap-3">
             <button className="p-2.5 hover:bg-gray-100 rounded-xl relative"><Bell className="w-5 h-5 text-[#666]" />{(stats?.pendingOrders ?? 0) > 0 && <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 rounded-full text-[10px] text-white font-bold flex items-center justify-center">{stats?.pendingOrders}</span>}</button>
             <div className="w-10 h-10 bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-blue-dark)] rounded-xl flex items-center justify-center text-white font-bold shadow-md">A</div>
