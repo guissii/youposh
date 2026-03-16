@@ -60,6 +60,15 @@ export default function Header() {
             <span className="sm:hidden text-gray-300 text-[10px] truncate">{t('deliveryShort')}</span>
           </div>
           <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
+            <div className="flex items-center gap-3 mr-1">
+              <a href="https://wa.me/212690939090" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#25D366] transition-colors">
+                <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </a>
+              <a href="https://www.instagram.com/youposh_officiel/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#E4405F] transition-colors">
+                <Instagram className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </a>
+            </div>
+            <div className="w-px h-3 bg-white/20" />
             <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className="flex items-center gap-1 sm:gap-1.5 text-gray-300 hover:text-[var(--yp-blue-light)] transition-colors">
               <Phone className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
               <span className="hidden xs:inline text-[10px] sm:text-xs">{phone}</span>
