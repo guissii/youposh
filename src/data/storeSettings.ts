@@ -16,6 +16,7 @@ export interface StoreSettings {
     watermarkPosX: number;
     watermarkPosY: number;
     activeGlobalCoupon?: string; // Code promo à afficher globalement
+    promoSectionEnabled: boolean;
 }
 
 export const defaultStoreSettings: StoreSettings = {
@@ -36,6 +37,7 @@ export const defaultStoreSettings: StoreSettings = {
     watermarkPosX: 50,
     watermarkPosY: 50,
     activeGlobalCoupon: '',
+    promoSectionEnabled: true,
 };
 
 import { useState, useEffect } from 'react';

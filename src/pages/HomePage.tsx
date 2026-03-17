@@ -15,6 +15,7 @@ import Footer from '@/components/layout/Footer';
 import CartDrawer from '@/components/layout/CartDrawer';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { useHeroSettings } from '@/data/heroSettings';
+import { useStoreSettings } from '@/data/storeSettings';
 
 
 
@@ -22,6 +23,7 @@ export default function HomePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const heroSettings = useHeroSettings();
+  const storeSettings = useStoreSettings();
 
   const flashRef = useScrollReveal();
   const bestsellersRef = useScrollReveal();
@@ -168,7 +170,7 @@ export default function HomePage() {
         {/* ══════════════════════════════════════════════
             PROMO CODE ENTRY — 3D Moroccan Style
             ══════════════════════════════════════════════ */}
-        <PromoCodeSection />
+        {storeSettings.promoSectionEnabled !== false && <PromoCodeSection />}
 
         {/* ══════════════════════════════════════════════
             QUICK HIGHLIGHTS — 3 blocks: Promos / Nouveautés / Best-sellers

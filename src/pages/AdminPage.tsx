@@ -1171,6 +1171,28 @@ const AdminPage = () => {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 className="font-semibold text-[#333] mb-4">Section Promo (Accueil)</h3>
+        <p className="text-sm text-[#666] mb-4">Afficher ou masquer la grande section "استمتع بعرض حصري" sur la page d'accueil.</p>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setStoreForm((f: any) => ({ ...f, promoSectionEnabled: !f.promoSectionEnabled }))}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${storeForm.promoSectionEnabled !== false ? 'bg-green-500' : 'bg-gray-300'}`}
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${storeForm.promoSectionEnabled !== false ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
+          <span className="text-sm font-medium text-[#333]">
+            {storeForm.promoSectionEnabled !== false ? 'Section activée' : 'Section masquée'}
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-3 mt-4">
+          <button onClick={handleStoreSave} className="px-6 py-2.5 bg-[var(--yp-blue)] text-white rounded-xl hover:bg-[var(--yp-blue-dark)] font-medium flex items-center gap-2 transition-colors">
+            {storeSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {storeSaved ? 'Enregistré' : 'Enregistrer'}
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h3 className="font-semibold text-[#333] mb-4">Coupon Global (Pop-up)</h3>
         <p className="text-sm text-[#666] mb-4">Sélectionnez un code promo à afficher sous forme de pop-up sur le site pour tous les visiteurs.</p>
         <div className="max-w-md">

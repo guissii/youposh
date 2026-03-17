@@ -35,7 +35,7 @@ router.post('/store', async (req, res) => {
             'brandColorYou', 'brandColorPosh', 'brandColorCart',
             'shippingFeeLocal', 'shippingFeeNational',
             'watermarkEnabled', 'watermarkOpacity', 'watermarkSize', 'watermarkPosX', 'watermarkPosY',
-            'activeGlobalCoupon'
+            'activeGlobalCoupon', 'promoSectionEnabled'
         ];
 
         const cleanData: any = {};
