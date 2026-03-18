@@ -161,7 +161,7 @@ export async function saveStoreSettings(settings: Partial<StoreSettings>): Promi
             'brandColorYou', 'brandColorPosh', 'brandColorCart',
             'shippingFeeLocal', 'shippingFeeNational',
             'watermarkEnabled', 'watermarkOpacity', 'watermarkSize', 'watermarkPosX', 'watermarkPosY',
-            'activeGlobalCoupon'
+            'activeGlobalCoupon', 'promoSectionEnabled'
         ];
         const cleanSettings: any = {};
         for (const key of Object.keys(settings)) {

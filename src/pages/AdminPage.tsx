@@ -1321,27 +1321,27 @@ const AdminPage = () => {
         </aside>
       </div>
 
-      <aside className="hidden lg:flex w-[260px] bg-white shadow-lg fixed h-full z-10 border-r border-gray-100">
-        <div className="p-5 border-b border-gray-100">
+      <aside className="hidden lg:flex flex-col w-[260px] bg-white shadow-lg fixed top-0 left-0 h-full z-10 border-r border-gray-100">
+        <div className="p-5 border-b border-gray-100 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-blue-dark)] rounded-xl flex items-center justify-center shadow-md"><ShoppingBag className="w-5 h-5 text-white" /></div>
-            <div><span className="font-bold text-[#333] text-lg">{storeForm.storeName || 'Boutique'}</span><p className="text-[10px] text-[#999] font-medium uppercase tracking-wider">Admin Pro</p></div>
+            <div className="w-10 h-10 bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-blue-dark)] rounded-xl flex items-center justify-center shadow-md shrink-0"><ShoppingBag className="w-5 h-5 text-white" /></div>
+            <div className="min-w-0"><span className="font-bold text-[#333] text-lg truncate block">{storeForm.storeName || 'Boutique'}</span><p className="text-[10px] text-[#999] font-medium uppercase tracking-wider">Admin Pro</p></div>
           </div>
         </div>
-        <nav className="p-3 space-y-0.5">
+        <nav className="p-3 space-y-0.5 flex-1 overflow-y-auto no-scrollbar">
           {sidebarItems.map(item => (
             <button key={item.id} onClick={() => setActiveTab(item.id)} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all text-sm ${activeTab === item.id ? 'bg-[var(--yp-blue)]/10 text-[var(--yp-blue)] font-semibold' : 'text-[#666] hover:bg-gray-50'}`}>
-              <item.icon className="w-5 h-5" />{item.label}{activeTab === item.id && <div className="ml-auto w-1.5 h-1.5 bg-[var(--yp-blue)] rounded-full" />}
+              <item.icon className="w-5 h-5 shrink-0" /><span className="truncate">{item.label}</span>{activeTab === item.id && <div className="ml-auto shrink-0 w-1.5 h-1.5 bg-[var(--yp-blue)] rounded-full" />}
             </button>
           ))}
         </nav>
-        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-100">
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 text-[#666] hover:bg-red-50 hover:text-red-500 rounded-xl transition-colors text-sm"><LogOut className="w-5 h-5" />{t('logout')}</button>
+        <div className="p-3 border-t border-gray-100 shrink-0">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 text-[#666] hover:bg-red-50 hover:text-red-500 rounded-xl transition-colors text-sm"><LogOut className="w-5 h-5 shrink-0" />{t('logout')}</button>
         </div>
       </aside>
 
-      <main className="flex-1 lg:ml-[260px] min-w-0 w-full max-w-[100vw] overflow-x-hidden">
-        <header className="bg-white/80 backdrop-blur-md shadow-sm px-4 py-3 lg:px-8 lg:py-4 flex items-center justify-between sticky top-0 z-[5] border-b border-gray-100">
+      <main className="flex-1 lg:ml-[260px] min-w-0 flex flex-col min-h-screen">
+        <header className="bg-white/80 backdrop-blur-md shadow-sm px-4 py-3 lg:px-8 lg:py-4 flex items-center justify-between sticky top-0 z-[5] border-b border-gray-100 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <button onClick={() => setIsMobileSidebarOpen(true)} className="lg:hidden p-2 hover:bg-gray-100 rounded-xl text-[#666]">
               <Menu className="w-5 h-5" />
