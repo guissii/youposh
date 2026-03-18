@@ -33,7 +33,7 @@ const resources = {
       heroSlogan: '100% web uniquement – sur notre site',
       heroBadgeTitle: 'N°1 au Maroc',
       heroTitle: 'YOUPOSH La qualité et la sincérité sont les piliers du succès',
-      heroSubtitle: 'Découvrez - un monde sans frontières. Notre site offre une expérience inoubliable. Haute qualité et concise.',
+      heroSubtitle: 'Découvrez - un monde sans frontières. Notre site offre une expérience inoubliable. Haute qualité et concise',
       heroPrimaryCta: 'Voir les fonctionnalités %',
       heroSecondaryCta: 'Télécharger le fichier',
       specialOffer: 'Offre spéciale',
@@ -109,7 +109,7 @@ const resources = {
       warranty: 'Garantie',
       year: 'an',
       origin: 'Origine',
-      reviewText: 'Excellent produit, je recommande vivement ! Livraison rapide et emballage soigné.',
+      reviewText: 'Excellent produit, je recommande vivement ! Livraison rapide et emballage soigné',
 
       // Cart
       yourCart: 'Votre panier',
@@ -152,8 +152,8 @@ const resources = {
       securePaymentDesc: 'Paiement à la livraison',
 
       // Footer
-      yourPremier: 'Votre boutique en ligne de produits de qualité au meilleur prix.',
-      footerDescription: 'YOUPOSH - Votre destination privilégiée pour les produits électroniques, accessoires et gadgets au Maroc.',
+      yourPremier: 'Votre boutique en ligne de produits de qualité au meilleur prix',
+      footerDescription: 'YOUPOSH - Votre destination privilégiée pour les produits électroniques, accessoires et gadgets au Maroc',
       quickLinks: 'Liens rapides',
       help: 'Aide',
       aboutUs: 'Qui sommes-nous',
@@ -331,7 +331,7 @@ const resources = {
       warranty: 'الضمان',
       year: 'سنة',
       origin: 'المنشأ',
-      reviewText: 'منتج ممتاز جداً، أنصح به! التوصيل كان سريعاً والتغليف ممتاز.',
+      reviewText: 'منتج ممتاز جداً، أنصح به! التوصيل كان سريعاً والتغليف ممتاز',
 
       // Cart
       yourCart: 'عربة التسوق',
@@ -374,8 +374,8 @@ const resources = {
       securePaymentDesc: 'الدفع عند الاستلام',
 
       // Footer
-      yourPremier: 'متجرك الإلكتروني لمنتجات عالية الجودة بأفضل الأسعار.',
-      footerDescription: 'YOUPOSH - وجهتك المفضلة للإلكترونيات والإكسسوارات في المغرب.',
+      yourPremier: 'متجرك الإلكتروني لمنتجات عالية الجودة بأفضل الأسعار',
+      footerDescription: 'YOUPOSH - وجهتك المفضلة للإلكترونيات والإكسسوارات في المغرب',
       quickLinks: 'روابط سريعة',
       help: 'مساعدة',
       aboutUs: 'من نحن',

@@ -363,7 +363,8 @@ Merci !`;
                         <span className="w-8 text-center font-medium">{item.quantity}</span>
                         <button
                           onClick={() => updateCartQuantity(item.product.id, item.quantity + 1, item.variant)}
-                          className="w-7 h-7 bg-white border rounded-lg flex items-center justify-center hover:border-[var(--yp-blue)]"
+                          disabled={item.quantity >= 10}
+                          className={`w-7 h-7 bg-white border rounded-lg flex items-center justify-center ${item.quantity >= 10 ? 'opacity-50 cursor-not-allowed' : 'hover:border-[var(--yp-blue)]'}`}
                         >
                           <Plus className="w-3 h-3" />
                         </button>

@@ -491,7 +491,7 @@ export default function ProductPage() {
                       </button>
                       <span className="w-12 text-center font-bold text-[var(--yp-dark)]">{quantity}</span>
                       <button
-                        onClick={() => setQuantity(Math.min(quantity + 1, Math.max(1, maxQty || 1)))}
+                        onClick={() => setQuantity(Math.min(quantity + 1, 10, Math.max(1, maxQty || 1)))}
                         className="w-11 h-11 flex items-center justify-center hover:bg-[var(--yp-gray-200)] transition-colors"
                       >
                         <Plus className="w-4 h-4" />
