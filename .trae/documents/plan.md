@@ -1,41 +1,99 @@
-# Plan de Résolution des Bugs
+# Plan d'Amélioration UI/UX : Carousel d'Images Produit
 
-## Résumé
-Ce plan détaille les modifications nécessaires pour corriger les deux problèmes signalés sur le front-end du site :
-1. La suppression des points à la fin des phrases (particulièrement en arabe) qui s'affichent de manière incorrecte à cause du sens de lecture RTL (Right-To-Left).
-2. La limitation de la quantité maximale d'un produit à 10 articles lors de la sélection.
+## 1. Audit de l'Existant
 
-## Analyse de l'état actuel
-- **Problème des points (.) :** Les fichiers de traduction (`src/i18n/index.ts`) et les données mockées (`src/data/products.ts`) contiennent des chaînes de caractères avec des points à la fin (ex: `descriptionAr: '...صوت عالي الجودة.'`). En arabe, cela provoque un affichage défectueux où le point apparaît au début de la phrase à gauche au lieu de la fin.
-- **Problème de quantité :** Dans `src/pages/ProductPage.tsx`, le bouton `+` pour augmenter la quantité limite la valeur par rapport au stock (`maxQty`), mais si le stock est infini, il n'y a pas de limite stricte de 10 appliquée directement sur le bouton. Bien que `StoreContext.tsx` protège le panier à 10 maximum, le formulaire direct WhatsApp contourne cette vérification.
+### État Actuel
+Le fichier `src/pages/ProductPage.tsx` gère l'affichage de la page produit.
+- **Affichage Principal** : Une image unique est affichée dans un conteneur `div` (ligne 311).
+- **Navigation** : La navigation se fait uniquement via une liste de miniatures (thumbnails) en dessous (ligne 374).
+- **État** : Une variable d'état `selectedImage` (index numérique) contrôle l'image affichée.
+- **Interaction** : Le clic sur une miniature met à jour `selectedImage`. Il n'y a pas de fonctionnalité de glissement (swipe) pour les appareils tactiles.
+- **Composants** : Le projet dispose déjà d'un composant `Carousel` réutilisable dans `src/components/ui/carousel.tsx` basé sur `embla-carousel-react`, mais il n'est pas utilisé sur la page produit.
 
-## Modifications Proposées
+### Problèmes Identifiés
+- Manque de fluidité sur mobile (pas de swipe).
+- Expérience utilisateur datée comparée aux standards e-commerce (Amazon, Shopify).
+- Friction dans la navigation entre les images (clic obligatoire).
 
-### 1. Suppression des points à la fin des phrases
-Nous allons retirer les points finaux des descriptions et textes pour éviter le bug d'affichage.
+## 2. Objectifs
 
-- **Fichier ciblé :** `src/i18n/index.ts`
-  - *Quoi/Comment :* Parcourir les chaînes de traduction (ex: `footerDescription`, `yourPremier`, `reviewText`, etc.) et supprimer le `.` à la fin des valeurs. Les `...` (points de suspension) seront conservés car ils s'affichent généralement bien ou ont un sens différent.
+Implémenter un carousel tactile pour les images produits sans modifier le backend ni la structure globale de l'interface.
 
-- **Fichier ciblé :** `src/data/products.ts`
-  - *Quoi/Comment :* Retirer le `.` à la fin de tous les champs `descriptionAr` et `description`.
+### Fonctionnalités Attendues
+- **Swipe Horizontal** : Navigation tactile (gauche/droite) sur l'image principale.
+- **Synchronisation Bidirectionnelle** :
+    - Swipe du carousel -> Met à jour la miniature active.
+    - Clic sur miniature -> Scrolle le carousel vers l'image correspondante.
+- **Indicateurs Visuels** : Maintien des miniatures actives.
+- **Conservation des Overlays** : Garder les badges (Promo, Stock), le filigrane (Watermark) et le bouton de zoom au-dessus du carousel.
 
-### 2. Limitation de la quantité à 10 produits
-Nous allons empêcher l'utilisateur de sélectionner plus de 10 articles pour un même produit.
+## 3. Plan d'Implémentation
 
-- **Fichier ciblé :** `src/pages/ProductPage.tsx`
-  - *Quoi/Comment :* Modifier l'événement `onClick` du bouton `+` (ligne ~495) pour inclure une limite stricte de 10.
-  - *Code actuel :* `onClick={() => setQuantity(Math.min(quantity + 1, Math.max(1, maxQty || 1)))}`
-  - *Nouveau code :* `onClick={() => setQuantity(Math.min(quantity + 1, 10, Math.max(1, maxQty || 1)))}`
+### Fichiers à Modifier
+- `src/pages/ProductPage.tsx`
 
-- **Fichier ciblé :** `src/components/layout/CartDrawer.tsx`
-  - *Quoi/Comment :* Désactiver le bouton `+` si `item.quantity >= 10` ou limiter visuellement, bien que la logique backend de `StoreContext` bloque déjà l'ajout au-delà de 10.
+### Étapes Détaillées
 
-## Hypothèses et Décisions
-- **Backend non touché :** Conformément à vos instructions, aucune modification ne sera apportée au dossier `backend/`.
-- **Points de suspension :** Les `...` comme dans `Chargement...` ne seront pas supprimés car ils ne posent généralement pas le même problème esthétique qu'un point final isolé.
+#### Étape 1 : Importation des Composants
+Importer les composants nécessaires depuis la librairie UI existante :
+```typescript
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi
+} from "@/components/ui/carousel";
+```
 
-## Étapes de Vérification
-1. Changer la langue du site en arabe et vérifier le pied de page, les descriptions de produits et les avis pour confirmer qu'aucun point n'apparaît au début des phrases.
-2. Aller sur la page d'un produit, cliquer sur le bouton `+` de quantité et s'assurer qu'il se bloque à 10.
-3. Cliquer sur "Continuer la commande" avec la quantité de 10 pour vérifier que le résumé de la commande affiche bien 10 articles.
+#### Étape 2 : Adaptation de l'État (State)
+Ajouter un état pour l'API du carousel afin de le contrôler par code :
+```typescript
+const [api, setApi] = useState<CarouselApi>();
+```
+
+#### Étape 3 : Logique de Synchronisation
+Ajouter deux effets (`useEffect`) pour synchroniser l'état `selectedImage` et le carousel :
+
+1.  **Carousel vers État** : Écouter l'événement `select` de l'API Embla pour mettre à jour `selectedImage` quand l'utilisateur swipe.
+2.  **État vers Carousel** : Quand `selectedImage` change (via clic miniature), appeler `api.scrollTo(index)` pour bouger le carousel.
+
+#### Étape 4 : Modification du Rendu (JSX)
+Remplacer le conteneur de l'image principale actuelle par le composant `Carousel`.
+
+**Structure Actuelle :**
+```jsx
+<div className="relative aspect-square ...">
+  <LazyLoadImage src={currentImage} ... />
+  {/* Overlays (Badges, Watermark, Zoom) */}
+</div>
+```
+
+**Nouvelle Structure Proposée :**
+```jsx
+<div className="relative aspect-square ...">
+  <Carousel setApi={setApi} className="w-full h-full">
+    <CarouselContent>
+      {galleryImages.map((img, index) => (
+        <CarouselItem key={index}>
+          <div className="w-full h-full flex items-center justify-center">
+             <LazyLoadImage src={img} ... />
+          </div>
+        </CarouselItem>
+      ))}
+    </CarouselContent>
+  </Carousel>
+  
+  {/* Les Overlays (Badges, Watermark, Zoom) restent ici, en position absolue par-dessus le carousel */}
+</div>
+```
+
+### Contraintes Techniques & Style
+- **CSS** : Utiliser les classes utilitaires Tailwind existantes (`w-full`, `h-full`) pour s'assurer que le carousel remplit le conteneur carré.
+- **Performance** : Continuer d'utiliser `LazyLoadImage` pour l'optimisation.
+- **Responsive** : Le comportement swipe sera natif sur mobile grâce à Embla Carousel.
+
+## 4. Vérification
+- **Test Mobile** : Simuler un appareil mobile et vérifier que le glissement (swipe) change l'image.
+- **Test Desktop** : Vérifier que le clic sur les miniatures fonctionne toujours.
+- **Test Synchro** : Vérifier que la bordure bleue de la miniature active suit l'image affichée dans le carousel.
+- **Intégrité** : Vérifier que le zoom, les badges et le filigrane s'affichent correctement par-dessus les images.

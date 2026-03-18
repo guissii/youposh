@@ -18,6 +18,12 @@ import { getImageUrl, toWhatsAppPhone } from '@/lib/utils';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import PremiumLoader from '@/components/ui/PremiumLoader';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi
+} from "@/components/ui/carousel";
 
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
@@ -29,6 +35,26 @@ export default function ProductPage() {
 
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [api, setApi] = useState<CarouselApi>();
+
+  useEffect(() => {
+    if (!api) return;
+
+    const onSelect = () => {
+      setSelectedImage(api.selectedScrollSnap());
+    };
+
+    api.on("select", onSelect);
+    
+    return () => {
+      api.off("select", onSelect);
+    };
+  }, [api]);
+
+  useEffect(() => {
+    if (!api) return;
+    api.scrollTo(selectedImage);
+  }, [api, selectedImage]);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
   const storeSettings = useStoreSettings();
 
@@ -309,20 +335,32 @@ export default function ProductPage() {
               {/* ═══ Bloc 1 — Image Gallery ═══ */}
               <div className="space-y-4">
                 <div className="relative aspect-square bg-white rounded-2xl overflow-hidden shadow-card flex items-center justify-center bg-gray-100">
-                  {galleryImages[selectedImage] ? (
-                    <LazyLoadImage
-                      src={`${getImageUrl(galleryImages[selectedImage])}?v=wmki`}
-                      alt={isAr ? product.nameAr : product.name}
-                      effect="blur"
-                      className="w-full h-full object-cover"
-                      wrapperClassName="w-full h-full block"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center text-gray-400">
-                      <ImageOff className="w-12 h-12 mb-2" />
-                      <span className="text-sm">Aucune image</span>
-                    </div>
-                  )}
+                  <Carousel setApi={setApi} className="w-full h-full">
+                    <CarouselContent className="-ml-0">
+                      {galleryImages.length > 0 ? (
+                        galleryImages.map((img: string, index: number) => (
+                          <CarouselItem key={index} className="pl-0">
+                            <div className="w-full h-full flex items-center justify-center">
+                              <LazyLoadImage
+                                src={`${getImageUrl(img)}?v=wmki`}
+                                alt={isAr ? product.nameAr : product.name}
+                                effect="blur"
+                                className="w-full h-full object-cover"
+                                wrapperClassName="w-full h-full block"
+                              />
+                            </div>
+                          </CarouselItem>
+                        ))
+                      ) : (
+                        <CarouselItem className="pl-0">
+                          <div className="flex flex-col items-center justify-center text-gray-400 w-full h-full">
+                            <ImageOff className="w-12 h-12 mb-2" />
+                            <span className="text-sm">Aucune image</span>
+                          </div>
+                        </CarouselItem>
+                      )}
+                    </CarouselContent>
+                  </Carousel>
                   {galleryImages.length > 0 && (
                     <button
                       onClick={() => setIsZoomOpen(true)}
