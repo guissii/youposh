@@ -139,7 +139,7 @@ export const CategoryFormModal = ({ category, onClose, onSave }: Props) => {
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-[#666] mb-1">Nom (FR) *</label>
                             <input type="text" required value={form.name} onChange={e => setForm((f: any) => ({ ...f, name: e.target.value }))} className={inputClass} />
@@ -149,7 +149,7 @@ export const CategoryFormModal = ({ category, onClose, onSave }: Props) => {
                             <input type="text" dir="rtl" value={form.nameAr} onChange={e => setForm((f: any) => ({ ...f, nameAr: e.target.value }))} className={inputClass} />
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-[#666] mb-1">Slug *</label>
                             <input type="text" required value={form.slug} onChange={e => setForm((f: any) => ({ ...f, slug: e.target.value }))} className={inputClass} placeholder="electronique" />

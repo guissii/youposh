@@ -60,7 +60,7 @@ export const PromoFormModal = ({ promo, onClose, onSave }: Props) => {
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-[#666] mb-1">Code *</label>
                             <input type="text" required value={form.code} onChange={e => setForm(f => ({ ...f, code: e.target.value.toUpperCase() }))} className={inputClass + " font-mono tracking-wider"} placeholder="PROMO2024" />
@@ -77,7 +77,7 @@ export const PromoFormModal = ({ promo, onClose, onSave }: Props) => {
                         <label className="block text-sm font-medium text-[#666] mb-1">Description</label>
                         <input type="text" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className={inputClass} placeholder="Réduction spéciale été..." />
                     </div>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-[#666] mb-1">Valeur *</label>
                             <input type="number" required step="0.01" value={form.discountValue} onChange={e => setForm(f => ({ ...f, discountValue: e.target.value }))} className={inputClass} />
@@ -91,7 +91,7 @@ export const PromoFormModal = ({ promo, onClose, onSave }: Props) => {
                             <input type="number" value={form.maxUses} onChange={e => setForm(f => ({ ...f, maxUses: e.target.value }))} className={inputClass} placeholder="0 = illimité" />
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-[#666] mb-1">Date d'expiration</label>
                             <input type="date" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className={inputClass} />

@@ -389,8 +389,8 @@ const AdminPage = () => {
           </div>
 
           {/* Filters & Actions */}
-          <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-            <div className="relative flex-grow sm:flex-grow-0 min-w-[200px]">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full lg:w-auto mt-4 lg:mt-0">
+            <div className="relative flex-grow min-w-0">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
@@ -401,59 +401,64 @@ const AdminPage = () => {
               />
             </div>
 
-            <div className="relative">
-              <select
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-                className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-blue-100 appearance-none pr-9 bg-gray-50/50 hover:bg-white transition-all font-medium text-gray-700"
-              >
-                <option value="">Status: Tous</option>
-                <option value="pending">En attente</option>
-                <option value="processing">En traitement</option>
-                <option value="shipped">Confirmée</option>
-                <option value="delivered">Terminée</option>
-                <option value="cancelled">Annulée</option>
-              </select>
-              <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <div className="flex gap-2 w-full sm:w-auto">
+              <div className="relative flex-1 sm:flex-none">
+                <select
+                  value={statusFilter}
+                  onChange={e => setStatusFilter(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-blue-100 appearance-none pr-9 bg-gray-50/50 hover:bg-white transition-all font-medium text-gray-700"
+                >
+                  <option value="">Status: Tous</option>
+                  <option value="pending">En attente</option>
+                  <option value="processing">En traitement</option>
+                  <option value="shipped">Confirmée</option>
+                  <option value="delivered">Terminée</option>
+                  <option value="cancelled">Annulée</option>
+                </select>
+                <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
+
+              <div className="relative flex-1 sm:flex-none">
+                <select
+                  value={monthFilter}
+                  onChange={e => setMonthFilter(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-blue-100 appearance-none pr-9 bg-gray-50/50 hover:bg-white transition-all font-medium text-gray-700"
+                >
+                  <option value="">Mois: Tous</option>
+                  {monthOptions.map(m => (
+                    <option key={m.key} value={m.key}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
             </div>
 
-            <div className="relative">
-              <select
-                value={monthFilter}
-                onChange={e => setMonthFilter(e.target.value)}
-                className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-blue-100 appearance-none pr-9 bg-gray-50/50 hover:bg-white transition-all font-medium text-gray-700"
-              >
-                <option value="">Mois: Tous</option>
-                {monthOptions.map(m => (
-                  <option key={m.key} value={m.key}>
-                    {m.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            </div>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <div className="relative flex-1 sm:flex-none">
+                <select
+                  value={deliveryStatusFilter}
+                  onChange={e => setDeliveryStatusFilter(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-blue-100 appearance-none pr-9 bg-gray-50/50 hover:bg-white transition-all font-medium text-gray-700"
+                >
+                  <option value="">Livraison: Tous</option>
+                  <option value="not_shipped">Non expédiée</option>
+                  <option value="shipped">Expédiée</option>
+                  <option value="delivered">Livrée</option>
+                </select>
+                <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
 
-            <div className="relative">
-              <select
-                value={deliveryStatusFilter}
-                onChange={e => setDeliveryStatusFilter(e.target.value)}
-                className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-blue-100 appearance-none pr-9 bg-gray-50/50 hover:bg-white transition-all font-medium text-gray-700"
+              <button
+                onClick={() => setExportModal(true)}
+                className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-sm font-bold hover:bg-emerald-100 hover:border-emerald-300 flex items-center justify-center gap-2 transition-all shadow-sm whitespace-nowrap"
               >
-                <option value="">Livraison: Tous</option>
-                <option value="not_shipped">Non expédiée</option>
-                <option value="shipped">Expédiée</option>
-                <option value="delivered">Livrée</option>
-              </select>
-              <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <Save className="w-4 h-4" />
+                <span className="hidden sm:inline">Export Excel</span>
+                <span className="sm:hidden">Export</span>
+              </button>
             </div>
-
-            <button
-              onClick={() => setExportModal(true)}
-              className="px-4 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-sm font-bold hover:bg-emerald-100 hover:border-emerald-300 flex items-center gap-2 transition-all shadow-sm whitespace-nowrap"
-            >
-              <Save className="w-4 h-4" />
-              Export Excel
-            </button>
           </div>
         </div>
 
@@ -628,7 +633,7 @@ const AdminPage = () => {
           </div>
         </div>
 
-        <div className="w-full max-w-[calc(100vw-300px)] overflow-x-auto">
+        <div className="w-full overflow-x-auto">
           <table className="w-full whitespace-nowrap">
             <thead className="bg-gray-50/80"><tr>{['Produit', 'Catégorie', 'Prix', 'Stock', 'Ventes', 'Visible', 'Actions'].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#999] uppercase tracking-wider">{h}</th>)}</tr></thead>
             <tbody className="divide-y">
@@ -671,9 +676,9 @@ const AdminPage = () => {
   // ─── Categories ─────────────────────────────────────────────
   const renderCategories = () => (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-      <div className="p-5 border-b flex items-center justify-between">
+      <div className="p-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h3 className="font-semibold text-[#333]">Catégories ({categories.length})</h3>
-        <button onClick={() => setCategoryModal({ open: true })} className="px-4 py-2 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 flex items-center gap-2 shadow-sm"><Plus className="w-4 h-4" />Nouvelle catégorie</button>
+        <button onClick={() => setCategoryModal({ open: true })} className="px-4 py-2 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"><Plus className="w-4 h-4" />Nouvelle catégorie</button>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 p-5">
         {categories.length === 0 && <div className="col-span-full p-8 text-center text-[#999]">Aucune catégorie</div>}
@@ -705,12 +710,12 @@ const AdminPage = () => {
   // ─── Promo Codes ────────────────────────────────────────────
   const renderPromoCodes = () => (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-      <div className="p-5 border-b flex items-center justify-between">
+      <div className="p-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h3 className="font-semibold text-[#333]">Codes Promo ({promoCodes.length})</h3>
-        <button onClick={() => setPromoModal({ open: true })} className="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 flex items-center gap-2 shadow-sm"><Plus className="w-4 h-4" />Nouveau code</button>
+        <button onClick={() => setPromoModal({ open: true })} className="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"><Plus className="w-4 h-4" />Nouveau code</button>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
+      <div className="w-full overflow-x-auto">
+        <table className="w-full whitespace-nowrap">
           <thead className="bg-gray-50/80"><tr>{['Code', 'Description', 'Réduction', 'Min. commande', 'Utilisations', 'Statut', 'Expiration', 'Actions'].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#999] uppercase tracking-wider">{h}</th>)}</tr></thead>
           <tbody className="divide-y">
             {promoCodes.length === 0 && <tr><td colSpan={8} className="px-5 py-12 text-center text-[#999]">Aucun code promo</td></tr>}
@@ -1335,7 +1340,7 @@ const AdminPage = () => {
         </div>
       </aside>
 
-      <main className="flex-1 lg:ml-[260px] min-w-0">
+      <main className="flex-1 lg:ml-[260px] min-w-0 w-full max-w-[100vw] overflow-x-hidden">
         <header className="bg-white/80 backdrop-blur-md shadow-sm px-4 py-3 lg:px-8 lg:py-4 flex items-center justify-between sticky top-0 z-[5] border-b border-gray-100">
           <div className="flex items-center gap-3 min-w-0">
             <button onClick={() => setIsMobileSidebarOpen(true)} className="lg:hidden p-2 hover:bg-gray-100 rounded-xl text-[#666]">
@@ -1346,12 +1351,12 @@ const AdminPage = () => {
               <p className="hidden sm:block text-xs text-[#999] mt-0.5">{new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <button className="p-2.5 hover:bg-gray-100 rounded-xl relative"><Bell className="w-5 h-5 text-[#666]" />{(stats?.pendingOrders ?? 0) > 0 && <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 rounded-full text-[10px] text-white font-bold flex items-center justify-center">{stats?.pendingOrders}</span>}</button>
             <div className="w-10 h-10 bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-blue-dark)] rounded-xl flex items-center justify-center text-white font-bold shadow-md">A</div>
           </div>
         </header>
-        <div className="p-6 lg:p-8">
+        <div className="p-4 sm:p-6 lg:p-8 w-full overflow-x-hidden">
           {loading && <div className="flex items-center justify-center py-4 mb-4"><RefreshCw className="w-5 h-5 animate-spin text-[var(--yp-blue)]" /><span className="ml-2 text-sm text-[#999]">Chargement...</span></div>}
           {activeTab === 'dashboard' && renderDashboard()}
           {activeTab === 'orders' && renderOrders()}

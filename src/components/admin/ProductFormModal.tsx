@@ -327,7 +327,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
 
                     {/* ── Informations de base ── */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-[#666] mb-1">Nom (FR) *</label>
                             <input type="text" required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={inputClass} />
@@ -337,7 +337,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                             <input type="text" dir="rtl" value={form.nameAr} onChange={e => setForm(f => ({ ...f, nameAr: e.target.value }))} className={inputClass} />
                         </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-[#666] mb-1">Prix (MAD) *</label>
                             <input type="number" required step="0.01" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} className={inputClass} />
@@ -351,7 +351,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                             <input type="number" required value={form.stock} onChange={e => setForm(f => ({ ...f, stock: e.target.value }))} className={inputClass} />
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-[#666] mb-1">Catégorie</label>
                             <select value={form.categorySlug} onChange={e => setForm(f => ({ ...f, categorySlug: e.target.value }))} className={inputClass}>
