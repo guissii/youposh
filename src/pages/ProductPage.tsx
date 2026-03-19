@@ -341,18 +341,27 @@ export default function ProductPage() {
               {/* ═══ Bloc 1 — Image Gallery ═══ */}
               <div className="space-y-4">
                 <div className="relative aspect-square bg-white rounded-2xl overflow-hidden shadow-card flex items-center justify-center bg-gray-100">
-                  <Carousel setApi={setApi} className="w-full h-full">
-                    <CarouselContent className="-ml-0">
+                  <Carousel 
+                    setApi={setApi} 
+                    className="w-full h-full"
+                    opts={{
+                      loop: true,
+                      align: "start",
+                      containScroll: "trimSnaps"
+                    }}
+                  >
+                    <CarouselContent className="-ml-0 cursor-grab active:cursor-grabbing">
                       {galleryImages.length > 0 ? (
                         galleryImages.map((img: string, index: number) => (
                           <CarouselItem key={index} className="pl-0">
-                            <div className="w-full h-full flex items-center justify-center">
+                            <div className="w-full h-full flex items-center justify-center select-none">
                               <LazyLoadImage
                                 src={`${getImageUrl(img)}?v=wmki`}
                                 alt={isAr ? product.nameAr : product.name}
                                 effect="blur"
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover touch-pan-y"
                                 wrapperClassName="w-full h-full block"
+                                draggable={false}
                               />
                             </div>
                           </CarouselItem>
