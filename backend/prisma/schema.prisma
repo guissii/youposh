@@ -195,6 +195,7 @@ model StoreSettings {
   watermarkPosX    Float    @default(50)
   watermarkPosY    Float    @default(50)
   activeGlobalCoupon String  @default("")
+  globalCouponEnabled Boolean @default(true)
   promoSectionEnabled Boolean @default(true)
   updatedAt        DateTime @updatedAt
 }

@@ -1200,6 +1200,19 @@ const AdminPage = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h3 className="font-semibold text-[#333] mb-4">Coupon Global (Pop-up)</h3>
         <p className="text-sm text-[#666] mb-4">Sélectionnez un code promo à afficher sous forme de pop-up sur le site pour tous les visiteurs.</p>
+        
+        <div className="flex items-center gap-3 mb-4">
+          <button
+            onClick={() => setStoreForm((f: any) => ({ ...f, globalCouponEnabled: !f.globalCouponEnabled }))}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${storeForm.globalCouponEnabled !== false ? 'bg-green-500' : 'bg-gray-300'}`}
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${storeForm.globalCouponEnabled !== false ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
+          <span className="text-sm font-medium text-[#333]">
+            {storeForm.globalCouponEnabled !== false ? 'Notification activée' : 'Notification masquée'}
+          </span>
+        </div>
+
         <div className="max-w-md">
           <label className="block text-sm font-medium text-[#666] mb-1">Code Promo Actif</label>
           <select

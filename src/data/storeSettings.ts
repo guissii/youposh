@@ -16,6 +16,7 @@ export interface StoreSettings {
     watermarkPosX: number;
     watermarkPosY: number;
     activeGlobalCoupon?: string; // Code promo à afficher globalement
+    globalCouponEnabled: boolean; // Afficher/masquer la notification globale
     promoSectionEnabled: boolean;
 }
 
@@ -37,6 +38,7 @@ export const defaultStoreSettings: StoreSettings = {
     watermarkPosX: 50,
     watermarkPosY: 50,
     activeGlobalCoupon: '',
+    globalCouponEnabled: true,
     promoSectionEnabled: true,
 };
 
@@ -161,7 +163,7 @@ export async function saveStoreSettings(settings: Partial<StoreSettings>): Promi
             'brandColorYou', 'brandColorPosh', 'brandColorCart',
             'shippingFeeLocal', 'shippingFeeNational',
             'watermarkEnabled', 'watermarkOpacity', 'watermarkSize', 'watermarkPosX', 'watermarkPosY',
-            'activeGlobalCoupon', 'promoSectionEnabled'
+            'activeGlobalCoupon', 'globalCouponEnabled', 'promoSectionEnabled'
         ];
         const cleanSettings: any = {};
         for (const key of Object.keys(settings)) {
