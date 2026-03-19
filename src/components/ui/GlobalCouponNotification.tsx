@@ -12,7 +12,8 @@ export function GlobalCouponNotification() {
   const location = useLocation();
 
   useEffect(() => {
-    if (location.pathname.startsWith('/admin')) {
+    // Only show on home page and not on admin routes
+    if (location.pathname !== '/') {
       setIsVisible(false);
       return;
     }
@@ -56,24 +57,23 @@ export function GlobalCouponNotification() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-24 right-4 sm:right-6 sm:bottom-24 z-[60] max-w-[280px] sm:max-w-[320px] w-[calc(100%-32px)] animate-in slide-in-from-right-10 fade-in duration-700">
-      <div className="bg-black/30 backdrop-blur-md text-white rounded-xl shadow-xl overflow-hidden relative border border-white/10">
+    <div className="fixed bottom-24 right-4 sm:right-6 sm:bottom-24 z-[60] max-w-[240px] w-auto animate-in slide-in-from-right-10 fade-in duration-700">
+      <div className="bg-transparent text-gray-800 rounded-xl relative">
         <button
           onClick={handleDismiss}
-          className="absolute top-2 right-2 p-1 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all z-10"
+          className="absolute -top-2 -right-2 p-1 text-gray-400 hover:text-gray-600 bg-white shadow-sm rounded-full transition-all z-10 border border-gray-100"
         >
           <X className="w-3.5 h-3.5" />
         </button>
 
-        <div className="p-3 sm:p-5">
-          <div className="flex items-center gap-2 mb-2 pr-5">
-            <Tag className="w-4 h-4 text-[var(--yp-color-posh)] flex-shrink-0" />
-            <p className="font-bold text-sm sm:text-lg leading-snug" dir="rtl">
-              🎁 عندك كوبون؟
+        <div className="p-2 sm:p-3">
+          <div className="flex items-center gap-2 mb-2 pr-2">
+            <p className="font-bold text-sm leading-snug drop-shadow-sm text-[#FF5722]" dir="rtl">
+              🎁 Istafid laaaan
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             <input
               type="text"
               value={couponInput}
@@ -81,12 +81,12 @@ export function GlobalCouponNotification() {
               onKeyDown={e => e.key === 'Enter' && handleApply()}
               placeholder="Code..."
               dir="rtl"
-              className="flex-1 bg-white/10 border border-white/20 text-white placeholder-gray-500 text-xs sm:text-sm font-medium px-2.5 py-2 rounded-lg focus:outline-none focus:border-[var(--yp-color-posh)] focus:ring-1 focus:ring-[var(--yp-color-posh)]/30 transition-all"
+              className="w-24 bg-white/90 border border-gray-200 text-gray-800 placeholder-gray-400 text-xs font-medium px-2 py-1.5 rounded-lg focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722]/30 transition-all shadow-sm"
             />
             <button
               onClick={handleApply}
               disabled={isApplying || !couponInput.trim()}
-              className="bg-[var(--yp-color-posh)] hover:opacity-90 disabled:opacity-50 text-white text-xs sm:text-sm font-bold py-2 px-3 rounded-lg transition-all shadow-lg shadow-[var(--yp-color-posh)]/20 active:scale-95 whitespace-nowrap flex items-center gap-1"
+              className="bg-[#FF5722] hover:bg-[#F4511E] disabled:opacity-50 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition-all shadow-md active:scale-95 whitespace-nowrap flex items-center gap-1"
             >
               {isApplying ? (
                 <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
