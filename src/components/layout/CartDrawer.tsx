@@ -10,6 +10,7 @@ import { getImageUrl, toWhatsAppPhone } from '@/lib/utils';
 import { createOrder } from '@/lib/api';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
+import PremiumLoader from '@/components/ui/PremiumLoader';
 
 export default function CartDrawer() {
   const { t, i18n } = useTranslation();
@@ -45,7 +46,7 @@ export default function CartDrawer() {
   const subtotalAfterPromo = Math.max(0, cartTotal - (promoStatus === 'applied' ? promoDiscount : 0));
   const grandTotal = subtotalAfterPromo + deliveryFee;
 
-  const isFormValid = customerName.trim().length >= 2 && customerPhone.trim().length >= 8 && customerCity.trim().length >= 2 && customerAddress.trim().length >= 5;
+  const isFormValid = customerName.trim().length > 0 && customerPhone.trim().length > 0 && customerCity.trim().length > 0 && customerAddress.trim().length > 0;
 
   const [promoInput, setPromoInput] = useState(promoCode || '');
   useEffect(() => {
@@ -85,7 +86,6 @@ Merci !`;
 
     const waPhone = toWhatsAppPhone(phone || '+212 690-939090');
     const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`;
-    const waWindow = window.open('', '_blank');
 
     // 1) Save order to DB
     try {
@@ -106,27 +106,37 @@ Merci !`;
     } catch (err) {
       console.error('Failed to save order:', err);
       toast.error('Échec de la sauvegarde de la commande. Vérifiez votre connexion puis réessayez.');
-      waWindow?.close();
-      return;
-    } finally {
       setIsSubmittingOrder(false);
       isSubmittingOrderRef.current = false;
+      return;
     }
 
-    if (waWindow) {
-      waWindow.location.href = waUrl;
-      waWindow.focus?.();
-    } else {
-      window.location.href = waUrl;
-    }
+    // Redirect to WhatsApp in the same tab
+    window.location.href = waUrl;
+
+    // Reset state after a delay in case the user returns to the tab
+    setTimeout(() => {
+      setIsSubmittingOrder(false);
+      isSubmittingOrderRef.current = false;
+    }, 3000);
   };
 
   if (!isCartOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 h-dvh">
-      {/* Backdrop */}
-      <div
+    <>
+      {isSubmittingOrder && (
+        <div className="fixed inset-0 z-[9999] bg-white">
+          <PremiumLoader 
+            fullScreen 
+            message={t('redirectingWhatsApp') || 'Redirection vers WhatsApp...'} 
+            subMessage={t('pleaseWait') || 'Veuillez patienter quelques instants...'} 
+          />
+        </div>
+      )}
+      <div className="fixed inset-0 z-50 h-dvh">
+        {/* Backdrop */}
+        <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={() => { setIsCartOpen(false); setShowForm(false); }}
       />
@@ -264,7 +274,7 @@ Merci !`;
                   <input
                     type="tel"
                     value={customerPhone}
-                    onChange={e => setCustomerPhone(e.target.value)}
+                    onChange={e => setCustomerPhone(e.target.value.replace(/[^0-9+\s]/g, ''))}
                     placeholder="Votre numéro"
                     className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)] text-sm"
                   />
@@ -436,5 +446,6 @@ Merci !`;
         )}
       </div>
     </div>
+    </>
   );
 }

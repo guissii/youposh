@@ -247,7 +247,7 @@ export default function ProductPage() {
   const deliveryFee = settings.shippingFeeNational ?? 35;
   const grandTotal = subtotalAfterPromo + deliveryFee;
 
-  const isFormValid = customerName.trim().length >= 2 && customerPhone.trim().length >= 8 && customerCity.trim().length >= 2 && customerAddress.trim().length >= 5;
+  const isFormValid = customerName.trim().length > 0 && customerPhone.trim().length > 0 && customerCity.trim().length > 0 && customerAddress.trim().length > 0;
 
   const handleConfirmWhatsApp = async () => {
     if (isSubmittingWhatsAppRef.current) return;
@@ -270,7 +270,6 @@ export default function ProductPage() {
       );
       const waPhone = toWhatsAppPhone(phone || '+212 690-939090');
       const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`;
-      const waWindow = window.open('', '_blank');
 
       // 1) Save order to DB so it appears in admin
       try {
@@ -293,15 +292,13 @@ export default function ProductPage() {
         // Still open WhatsApp even if save fails
       }
 
-      if (waWindow) {
-        waWindow.location.href = waUrl;
-        waWindow.focus?.();
-      } else {
-        window.location.href = waUrl;
-      }
+      // Direct redirection to WhatsApp in the same tab
+      window.location.href = waUrl;
     } finally {
-      setIsSubmittingWhatsApp(false);
-      isSubmittingWhatsAppRef.current = false;
+      setTimeout(() => {
+        setIsSubmittingWhatsApp(false);
+        isSubmittingWhatsAppRef.current = false;
+      }, 3000);
     }
   };
 
@@ -311,6 +308,15 @@ export default function ProductPage() {
 
   return (
     <div className="min-h-screen bg-[var(--yp-gray-100)]">
+      {isSubmittingWhatsApp && (
+        <div className="fixed inset-0 z-[9999] bg-white">
+          <PremiumLoader 
+            fullScreen 
+            message={t('redirectingWhatsApp') || 'Redirection vers WhatsApp...'} 
+            subMessage={t('pleaseWait') || 'Veuillez patienter quelques instants...'} 
+          />
+        </div>
+      )}
       <Header />
 
       <main className="pb-20">
@@ -704,7 +710,7 @@ export default function ProductPage() {
                   <input
                     type="tel"
                     value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    onChange={(e) => setCustomerPhone(e.target.value.replace(/[^0-9+\s]/g, ''))}
                     placeholder="Votre numéro"
                     className="w-full px-4 py-3 bg-[var(--yp-gray-200)] border border-[var(--yp-gray-300)] rounded-xl text-[var(--yp-dark)] placeholder-[var(--yp-gray-500)] focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-[var(--yp-blue)]/20 transition-all"
                   />
