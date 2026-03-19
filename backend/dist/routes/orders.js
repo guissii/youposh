@@ -392,11 +392,11 @@ function updateOrderInGoogleSheet(order) {
         const sheetTitle = `Commandes_${createdAt.getFullYear()}_${String(createdAt.getMonth() + 1).padStart(2, '0')}`;
         const { sheets, sheetId, hasDeliveryFormatting } = yield ensureSheetTabExists(sheetTitle);
         yield ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetId, hasDeliveryFormatting);
-        const colA = yield sheets.spreadsheets.values.get({
+        const colId = yield sheets.spreadsheets.values.get({
             spreadsheetId,
-            range: `'${sheetTitle}'!A:A`,
+            range: `'${sheetTitle}'!J:J`,
         });
-        const values = ((_a = colA.data.values) !== null && _a !== void 0 ? _a : []);
+        const values = ((_a = colId.data.values) !== null && _a !== void 0 ? _a : []);
         let rowIndex = -1;
         for (let i = 0; i < values.length; i++) {
             const v = (_b = values[i]) === null || _b === void 0 ? void 0 : _b[0];
@@ -474,6 +474,66 @@ function updateOrderInGoogleSheet(order) {
         }
     });
 }
+function deleteOrderFromGoogleSheet(orderId, createdAt) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a, _b, _c, _d;
+        if (!process.env.GOOGLE_SHEETS_SPREADSHEET_ID ||
+            !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
+            !(process.env.GOOGLE_PRIVATE_KEY ||
+                process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY ||
+                process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
+                process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64)) {
+            return { removed: false, reason: 'missing_env' };
+        }
+        const spreadsheetId = cleanEnvVar(process.env.GOOGLE_SHEETS_SPREADSHEET_ID);
+        const dt = createdAt ? new Date(createdAt) : new Date();
+        const sheetTitle = `Commandes_${dt.getFullYear()}_${String(dt.getMonth() + 1).padStart(2, '0')}`;
+        const { sheets } = yield getSheetsClient();
+        const meta = yield sheets.spreadsheets.get({
+            spreadsheetId,
+            fields: 'sheets.properties.title,sheets.properties.sheetId',
+        });
+        const existingSheet = ((_a = meta.data.sheets) !== null && _a !== void 0 ? _a : []).find((s) => { var _a; return ((_a = s.properties) === null || _a === void 0 ? void 0 : _a.title) === sheetTitle; });
+        const sheetId = (_b = existingSheet === null || existingSheet === void 0 ? void 0 : existingSheet.properties) === null || _b === void 0 ? void 0 : _b.sheetId;
+        if (sheetId == null) {
+            return { removed: false, reason: 'missing_sheet' };
+        }
+        const colId = yield sheets.spreadsheets.values.get({
+            spreadsheetId,
+            range: `'${sheetTitle}'!J:J`,
+        });
+        const values = ((_c = colId.data.values) !== null && _c !== void 0 ? _c : []);
+        let rowIndex = -1;
+        for (let i = 0; i < values.length; i++) {
+            const v = (_d = values[i]) === null || _d === void 0 ? void 0 : _d[0];
+            if (String(v) === String(orderId)) {
+                rowIndex = i + 1;
+                break;
+            }
+        }
+        if (rowIndex <= 1) {
+            return { removed: false, reason: rowIndex === 1 ? 'header_match' : 'not_found' };
+        }
+        yield sheets.spreadsheets.batchUpdate({
+            spreadsheetId,
+            requestBody: {
+                requests: [
+                    {
+                        deleteDimension: {
+                            range: {
+                                sheetId,
+                                dimension: 'ROWS',
+                                startIndex: rowIndex - 1,
+                                endIndex: rowIndex,
+                            },
+                        },
+                    },
+                ],
+            },
+        });
+        return { removed: true };
+    });
+}
 function parseVariantSelection(label) {
     if (typeof label !== 'string')
         return {};
@@ -547,13 +607,20 @@ router.get('/debug-auth', (req, res) => __awaiter(void 0, void 0, void 0, functi
 // GET all orders with optional status filter
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { status, search } = req.query;
+        const { status, search, year, month } = req.query;
         const where = {};
         if (status === 'delivered' || status === 'completed') {
             where.status = { in: ['delivered', 'completed'] };
         }
         else if (status) {
             where.status = status;
+        }
+        const y = typeof year === 'string' ? Number(year) : NaN;
+        const m = typeof month === 'string' ? Number(month) : NaN;
+        if (Number.isFinite(y) && Number.isFinite(m) && y > 2000 && m >= 1 && m <= 12) {
+            const start = new Date(y, m - 1, 1, 0, 0, 0, 0);
+            const end = new Date(y, m, 1, 0, 0, 0, 0);
+            where.createdAt = { gte: start, lt: end };
         }
         if (search) {
             where.OR = [
@@ -804,10 +871,27 @@ router.put('/:id/status', (req, res) => __awaiter(void 0, void 0, void 0, functi
 // DELETE order
 router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const { removeFromSheets } = req.query;
+        const shouldRemoveFromSheets = String(removeFromSheets !== null && removeFromSheets !== void 0 ? removeFromSheets : '') === '1' || String(removeFromSheets !== null && removeFromSheets !== void 0 ? removeFromSheets : '').toLowerCase() === 'true';
+        const existing = yield prisma.order.findUnique({
+            where: { id: req.params.id },
+            select: { id: true, createdAt: true },
+        });
+        if (!existing)
+            return res.status(404).json({ error: 'Order not found' });
         yield prisma.order.delete({
             where: { id: req.params.id },
         });
-        res.json({ message: 'Order deleted' });
+        let sheets = undefined;
+        if (shouldRemoveFromSheets) {
+            try {
+                sheets = yield deleteOrderFromGoogleSheet(existing.id, existing.createdAt);
+            }
+            catch (e) {
+                sheets = { removed: false, error: e instanceof Error ? e.message : String(e) };
+            }
+        }
+        res.json({ message: 'Order deleted', sheets });
     }
     catch (error) {
         console.error('Error deleting order:', error);

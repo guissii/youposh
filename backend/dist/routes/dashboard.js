@@ -16,11 +16,16 @@ const prisma = new client_1.PrismaClient();
 // GET dashboard stats
 router.get('/stats', (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const [totalOrders, totalProducts, orders] = yield Promise.all([
+        const [totalOrders, totalProducts, orders, totalPageViews, uniqueVisitorsResult] = yield Promise.all([
             prisma.order.count(),
             prisma.product.count(),
             prisma.order.findMany({ select: { total: true, status: true } }),
+            prisma.visitorStat.count(),
+            prisma.visitorStat.groupBy({
+                by: ['visitorId'],
+            }),
         ]);
+        const uniqueVisitors = uniqueVisitorsResult.length;
         const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
         const pendingOrders = orders.filter(o => o.status === 'pending').length;
         const processingOrders = orders.filter(o => o.status === 'processing').length;
@@ -34,6 +39,8 @@ router.get('/stats', (_req, res) => __awaiter(void 0, void 0, void 0, function* 
             completedOrders,
             cancelledOrders,
             totalProducts,
+            totalPageViews,
+            uniqueVisitors,
         });
     }
     catch (error) {

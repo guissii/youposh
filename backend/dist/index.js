@@ -7,7 +7,9 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const compression_1 = __importDefault(require("compression"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const client_1 = require("@prisma/client");
 dotenv_1.default.config();
+const prisma = new client_1.PrismaClient();
 const products_1 = __importDefault(require("./routes/products"));
 const orders_1 = __importDefault(require("./routes/orders"));
 const categories_1 = __importDefault(require("./routes/categories"));
@@ -18,6 +20,7 @@ const settings_1 = __importDefault(require("./routes/settings"));
 const attributeLibrary_1 = __importDefault(require("./routes/attributeLibrary"));
 const auth_1 = __importDefault(require("./routes/auth"));
 const sync_1 = __importDefault(require("./routes/sync"));
+const tracking_1 = __importDefault(require("./routes/tracking"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const app = (0, express_1.default)();
@@ -61,6 +64,7 @@ app.use('/api/promo-codes', promoCodes_1.default);
 app.use('/api/upload', upload_1.default);
 app.use('/api/settings', settings_1.default);
 app.use('/api/sync', sync_1.default);
+app.use('/api/track', tracking_1.default);
 // Only listen when running locally (not on Vercel)
 if (!process.env.VERCEL) {
     app.listen(PORT, () => {

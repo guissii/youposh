@@ -67,10 +67,11 @@ function computeBadge(p) {
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const { category, badge, search, sort, inStock, all, av, limit } = req.query;
+        const { category, badge, search, sort, inStock, all, av, limit, includeArchived } = req.query;
         // Check if "all" is true OR if the request comes from the admin panel (implied by logic)
         // But to be safe, let's trust the "all" parameter more.
         const showAll = all === 'true';
+        const showArchived = includeArchived === 'true';
         // By default, only show visible products, unless "all=true" is passed (e.g. by admin)
         const where = {};
         if (!showAll) {
@@ -83,6 +84,9 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             // Let's allow fetching everything except hard-deleted (which don't exist).
             // If admin wants to see archived, they can filter by status if we implement it.
             // For now, "all=true" returns EVERYTHING including drafts and archived.
+        }
+        if (showAll && !showArchived) {
+            where.NOT = { status: 'archived' };
         }
         if (category)
             where.categorySlug = category;
@@ -415,7 +419,7 @@ router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         yield prisma.product.delete({
             where: { id: productId },
         });
-        res.json({ message: 'Product deleted successfully' });
+        res.json({ action: 'deleted', message: 'Product deleted successfully' });
     }
     catch (error) {
         console.error('Error deleting product:', error);
@@ -431,7 +435,7 @@ router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         inStock: false
                     }
                 });
-                return res.json({ message: 'Produit archivé (car présent dans des commandes existantes)' });
+                return res.json({ action: 'archived', message: 'Produit archivé (car présent dans des commandes existantes)' });
             }
             catch (archiveError) {
                 return res.status(500).json({ error: 'Failed to archive product' });
