@@ -1,55 +1,65 @@
-# Plan d'Optimisation des Performances (Audit VPS)  ne t
+# Audit de Performance et Optimisation des Ressources (VPS)
 
-Ce plan vise à rendre le site "You Posh" extrêmement rapide et efficace sur votre VPS, en se concentrant sur le frontend et la configuration du serveur web, sans toucher à la logique backend.
+Cet audit évalue l'état actuel de l'application YouShop en termes d'optimisation des performances et propose des solutions concrètes pour maximiser l'utilisation des ressources de votre VPS Contabo (Cloud VPS 10, NVMe).
 
-## 1. Optimisation des Assets (Images & Vidéo)
+## 1. Frontend (React / Vite)
 
-C'est le levier le plus important pour la vitesse de chargement.
+### État actuel : **Excellent**
+Le frontend est déjà très bien optimisé grâce à la configuration `vite.config.ts`.
+*   **Compression Avancée** : Les plugins `vite-plugin-compression` génèrent des fichiers Gzip (`.gz`) et Brotli (`.br`). Cela réduit la taille du code téléchargé par les clients de plus de 70%.
+*   **Code Splitting** : Le code est séparé en plusieurs morceaux (`vendor`, `ui`). Si vous modifiez un composant, le navigateur des clients n'aura pas à retélécharger React ou les autres grosses librairies.
+*   **Lazy Loading des Images** : L'utilisation de `react-lazy-load-image-component` avec l'effet de flou (`effect="blur"`) est implémentée partout (Produits, Panier, Recherche). Cela économise énormément de bande passante.
 
-* **Images** : Conversion de toutes les images statiques (`public/images`) en format **WebP** (plus léger et meilleure qualité).
+### Recommandations Frontend
+*   *Rien à faire dans l'immédiat.* L'architecture actuelle est robuste et prête pour la production.
 
-  * *Action* : Créer un script utilitaire utilisant `sharp` (déjà installé) pour convertir automatiquement les images.
+---
 
-  * *Modification* : Mettre à jour les références d'images dans le code pour utiliser `.webp`.
+## 2. Backend (Node.js / Express)
 
-* **Vidéo Hero** : La vidéo `hero video.mp4` est chargée immédiatement.
+### État actuel : **Bon**
+*   **Compression HTTP** : Le middleware `compression()` est activé, ce qui réduit la taille des réponses JSON envoyées par l'API.
+*   **Base de données** : PostgreSQL (Prisma) tourne localement ou via un pooler efficace, ce qui limite la latence réseau.
 
-  * *Action* : Générer une "image poster" (miniature) légère pour l'afficher pendant le chargement de la vidéo.
+### Recommandation Backend : PM2 Cluster Mode (Très Important)
+Actuellement, votre serveur Node.js tourne en mode "Fork" (un seul processus). Node.js est "single-threaded" par défaut, ce qui signifie qu'il n'utilise qu'un seul cœur (CPU) de votre VPS, même si vous en avez plusieurs !
 
-  * *Optimisation* : S'assurer que la vidéo est compressée pour le web (Handbrake ou ffmpeg, mais nous ferons ce que nous pouvons via code/config).
+**La solution : Le mode Cluster de PM2.**
+Ce mode va créer un processus Node.js pour *chaque* cœur de votre CPU. Si votre VPS a 4 cœurs, PM2 lancera 4 instances de votre backend qui se partageront le travail, multipliant par 4 la capacité de votre serveur à encaisser des visiteurs simultanés.
 
-* **Lazy Loading** : Vérifier que toutes les images sous la ligne de flottaison utilisent `loading="lazy"` (déjà partiellement en place avec `react-lazy-load-image-component`).
+---
 
-## 2. Configuration du Serveur Nginx (Spécial VPS)
+## 3. Plan d'Action (À exécuter sur le VPS)
 
-Pour un VPS, la configuration du serveur web est cruciale pour ne pas gaspiller la bande passante et servir les fichiers instantanément.
+Pour appliquer ces optimisations et corriger les statistiques (comme discuté précédemment), veuillez copier et coller ces commandes sur votre VPS :
 
-* **Compression** : Activer **Gzip** et **Brotli** au niveau de Nginx pour réduire la taille des fichiers texte (HTML, CSS, JS) de 70%.
+### Étape 1 : Mettre à jour et compiler le code
+```bash
+cd /var/www/youposh
+git reset --hard
+git pull origin main
+cd backend
+npm install
+npx prisma generate
+npx prisma db push
+npm run build
+```
 
-* **Mise en cache (Caching)** : Configurer des en-têtes `Cache-Control` agressifs pour les assets statiques (images, JS, CSS) afin qu'ils soient stockés dans le navigateur du visiteur pendant 1 an (`immutable`).
+### Étape 2 : Activer le Mode Cluster PM2
+Nous allons supprimer l'ancien processus simple et lancer le nouveau en mode cluster maximum :
 
-* **HTTP/2** : Activer HTTP/2 pour le chargement parallèle des ressources.
+```bash
+# 1. Supprimer l'ancien processus
+pm2 delete youshop-api
 
-## 3. Optimisation du Code Frontend (Vite & React)
+# 2. Relancer en mode Cluster (utilise tous les cœurs CPU disponibles)
+pm2 start dist/index.js --name "youshop-api" -i max
 
-* **Préchargement (Preloading)** : Ajouter des balises `<link rel="preload">` dans `index.html` pour les ressources critiques (police principale, image/vidéo hero) afin d'éliminer le délai d'affichage.
+# 3. Sauvegarder la configuration pour qu'elle redémarre en cas de reboot du VPS
+pm2 save
+```
 
-* **Analyse du Bundle** : Vérifier que les bibliothèques lourdes (`xlsx`) ne sont chargées que sur les pages qui en ont besoin (Admin).
-
-* **Nettoyage** : S'assurer que les dépendances backend (`@google-cloud/storage`) ne sont pas incluses dans le bundle client.
-
-## 4. Stratégie de Cache Avancée (Service Worker)
-
-* Mettre en place une stratégie de cache simple pour les assets statiques via un Service Worker (PWA) pour que le site se charge instantanément lors des visites répétées.
-
-***
-
-## Étapes d'implémentation
-
-1. **Créer le script d'optimisation d'images** : `scripts/optimize-images.js`.
-2. **Mettre à jour** **`index.html`** : Ajouter les balises de préchargement (fonts, hero).
-3. **Configurer Nginx** : Fournir le fichier `nginx.conf` optimisé à déployer sur le VPS.
-4. **Optimiser** **`vite.config.ts`** : Affiner le découpage du code (Code Splitting).
-5. **Mise à jour des composants** : Adapter `HomePage.tsx` pour utiliser l'image poster de la vidéo.
-
-Ce plan respecte la contrainte "ne pas toucher au backend" et se concentre purement sur la performance perçue et réelle pour l'utilisateur.
+## Résultat attendu après ces commandes :
+1.  **Vitesse** : Le site sera plus rapide à répondre car la charge sera répartie sur tous les processeurs de votre VPS.
+2.  **Stabilité** : Si un processus crash (erreur mémoire), les autres continuent de fonctionner, garantissant un "Zero Downtime".
+3.  **Statistiques** : Le bug des vues "gonflées" (dû aux robots et aux rafraîchissements) sera corrigé grâce au nouveau code que vous viendrez de `pull`.

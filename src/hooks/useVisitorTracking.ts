@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const generateVisitorId = () => {
@@ -12,18 +12,35 @@ const generateVisitorId = () => {
 
 export const useVisitorTracking = () => {
   const location = useLocation();
+  const lastTrackedPath = useRef<string | null>(null);
 
   useEffect(() => {
     const trackVisit = async () => {
       try {
+        // Prevent tracking the exact same path multiple times (e.g. strict double renders)
+        if (lastTrackedPath.current === location.pathname) {
+          return;
+        }
+        
         const visitorId = generateVisitorId();
         // Ignore admin routes
         if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/login')) {
             return;
         }
 
+        // Prevent spam tracking from rapid refreshes
+        const lastTrackTime = sessionStorage.getItem(`tracked_${location.pathname}`);
+        const now = Date.now();
+        if (lastTrackTime && (now - parseInt(lastTrackTime, 10) < 60000)) {
+          // Skip if visited same page in last 60 seconds
+          return;
+        }
+
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
         
+        lastTrackedPath.current = location.pathname;
+        sessionStorage.setItem(`tracked_${location.pathname}`, now.toString());
+
         await fetch(`${API_URL}/track`, {
           method: 'POST',
           headers: {
@@ -31,7 +48,7 @@ export const useVisitorTracking = () => {
           },
           body: JSON.stringify({
             visitorId,
-            path: location.pathname + location.search
+            path: location.pathname
           }),
         });
       } catch (error) {
@@ -40,5 +57,5 @@ export const useVisitorTracking = () => {
     };
 
     trackVisit();
-  }, [location]);
+  }, [location.pathname]);
 };
