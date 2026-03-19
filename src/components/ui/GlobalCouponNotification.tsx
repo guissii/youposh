@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '@/contexts/StoreContext';
-import { X, Tag, ArrowLeft } from 'lucide-react';
+import { X, ArrowLeft } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 
