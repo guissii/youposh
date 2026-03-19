@@ -10,6 +10,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { GlobalCouponNotification } from '@/components/ui/GlobalCouponNotification';
 import PremiumLoader from '@/components/ui/PremiumLoader';
 import ScrollToTop from '@/components/ScrollToTop';
+import Tracker from '@/components/Tracker';
 
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 
@@ -31,6 +32,7 @@ function App() {
       <StoreProvider>
         <Router>
           <ScrollToTop />
+          <Tracker />
           <Toaster
             position="top-center"
             toastOptions={{

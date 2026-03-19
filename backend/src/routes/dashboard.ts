@@ -7,11 +7,17 @@ const prisma = new PrismaClient();
 // GET dashboard stats
 router.get('/stats', async (_req, res) => {
     try {
-        const [totalOrders, totalProducts, orders] = await Promise.all([
+        const [totalOrders, totalProducts, orders, totalPageViews, uniqueVisitorsResult] = await Promise.all([
             prisma.order.count(),
             prisma.product.count(),
             prisma.order.findMany({ select: { total: true, status: true } }),
+            prisma.visitorStat.count(),
+            prisma.visitorStat.groupBy({
+                by: ['visitorId'],
+            }),
         ]);
+
+        const uniqueVisitors = uniqueVisitorsResult.length;
 
         const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
         const pendingOrders = orders.filter(o => o.status === 'pending').length;
@@ -27,6 +33,8 @@ router.get('/stats', async (_req, res) => {
             completedOrders,
             cancelledOrders,
             totalProducts,
+            totalPageViews,
+            uniqueVisitors,
         });
     } catch (error) {
         console.error('Error fetching dashboard stats:', error);

@@ -18,6 +18,7 @@ import settingsRoutes from './routes/settings';
 import attributeLibraryRoutes from './routes/attributeLibrary';
 import authRoutes from './routes/auth';
 import syncRoutes from './routes/sync';
+import trackingRoutes from './routes/tracking';
 import path from 'path';
 import fs from 'fs';
 
@@ -64,6 +65,7 @@ app.use('/api/promo-codes', promoCodeRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/sync', syncRoutes);
+app.use('/api/track', trackingRoutes);
 
 // Only listen when running locally (not on Vercel)
 if (!process.env.VERCEL) {
