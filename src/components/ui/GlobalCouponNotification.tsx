@@ -69,7 +69,7 @@ export function GlobalCouponNotification() {
         <div className="p-2 sm:p-3">
           <div className="flex items-center gap-2 mb-2 pr-2">
             <p className="font-bold text-sm leading-snug drop-shadow-sm text-[#FF5722]" dir="rtl">
-              🎁 Istafid laaaan
+              🎁 إستفد دابا !
             </p>
           </div>
 
