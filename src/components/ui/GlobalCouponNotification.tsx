@@ -87,7 +87,7 @@ export function GlobalCouponNotification() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 100, scale: 0.9 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed bottom-28 sm:bottom-6 left-4 right-4 sm:left-auto sm:right-6 z-[60] sm:max-w-[280px] w-auto mx-auto sm:mx-0"
+          className="fixed bottom-24 sm:bottom-28 left-4 right-4 sm:left-auto sm:right-6 z-[60] sm:max-w-[280px] w-auto mx-auto sm:mx-0"
         >
           <div className="bg-[#FF7A1A] text-white rounded-xl shadow-2xl overflow-hidden relative border border-white/20">
             {/* Close Button */}
