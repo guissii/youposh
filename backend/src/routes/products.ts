@@ -101,12 +101,19 @@ router.get('/', async (req, res) => {
             where.isBestSeller = true;
         } else if (badgeKey === 'new') {
             where.isNew = true;
+        } else if (badgeKey === 'promo') {
+            // Optimisation : au lieu de filtrer en mémoire, on utilise Prisma
+            // Prisma ne supporte pas la comparaison de deux colonnes (originalPrice > price) directement dans le `where` standard.
+            // On s'assure au moins que originalPrice n'est pas nul. Le filtrage strict se fera en post-DB.
+            where.originalPrice = { not: null };
         }
 
         const products = await prisma.product.findMany({
             where,
             orderBy,
-            take: limit ? parseInt(limit as string) : undefined,
+            // Ne pas limiter ici si on doit filtrer/trier en post-DB sur des champs calculés dynamiquement, 
+            // mais on applique la limite si c'est un tri natif simple (comme nouveautés) pour soulager la RAM.
+            take: (badgeKey === 'promo' || sortKey === 'popular' || sortKey === 'promo') ? undefined : (limit ? parseInt(limit as string) : undefined),
             include: {
                 category: true,
                 attributeValues: {
@@ -121,36 +128,42 @@ router.get('/', async (req, res) => {
             },
         });
 
-        // Optimization: Only select minimum necessary fields for computing dynamic badges
-        const activeProducts = await prisma.product.findMany({
-            where: { status: 'published', isVisible: true, inStock: true },
-            select: {
-                id: true,
-                price: true,
-                originalPrice: true,
-                publishedAt: true,
-                salesCount: true,
-                viewsCount: true,
-            },
-        });
+        // Si aucun filtre complexe, on n'a pas besoin de calculer les scores pour TOUTE la BDD, juste pour les produits retournés.
+        // Cela résout le problème de lenteur dans le panneau d'administration (O(n) evité).
+        let popularIds = new Set<number>();
+        let featuredIds = new Set<number>();
 
-        const popularIds = new Set(
-            [...activeProducts]
-                .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
-                .slice(0, 8)
-                .map(p => p.id)
-        );
+        if (sortKey === 'popular' || badgeKey === 'popular' || badgeKey === 'new') {
+             const activeProducts = await prisma.product.findMany({
+                where: { status: 'published', isVisible: true, inStock: true },
+                select: {
+                    id: true,
+                    price: true,
+                    originalPrice: true,
+                    publishedAt: true,
+                    salesCount: true,
+                    viewsCount: true,
+                },
+            });
 
-        const featuredIds = new Set(
-            [...activeProducts]
-                .sort((a, b) => {
-                    const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-                    const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-                    return db - da;
-                })
-                .slice(0, 8)
-                .map(p => p.id)
-        );
+            popularIds = new Set(
+                [...activeProducts]
+                    .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
+                    .slice(0, 8)
+                    .map(p => p.id)
+            );
+
+            featuredIds = new Set(
+                [...activeProducts]
+                    .sort((a, b) => {
+                        const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+                        const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+                        return db - da;
+                    })
+                    .slice(0, 8)
+                    .map(p => p.id)
+            );
+        }
 
         const withComputed = products.map(p => {
             const computed = {
@@ -182,6 +195,11 @@ router.get('/', async (req, res) => {
                 const discB = (Number(b.originalPrice ?? 0) - Number(b.price));
                 return discB - discA;
             });
+        }
+
+        // Appliquer la limite post-DB si elle a été sautée dans la requête Prisma
+        if (limit && (badgeKey === 'promo' || sortKey === 'popular' || sortKey === 'promo')) {
+            filtered = filtered.slice(0, parseInt(limit as string));
         } else if (sortKey === 'newest') {
             filtered = [...filtered].sort((a, b) => {
                 const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
