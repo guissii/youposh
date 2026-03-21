@@ -26,6 +26,8 @@ import fs from 'fs';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS || '1');
+app.set('trust proxy', Number.isFinite(trustProxyHops) && trustProxyHops > 0 ? trustProxyHops : 1);
 
 // Security Middlewares
 app.use(helmet({
@@ -91,7 +93,7 @@ app.use('/api/track', trackingRoutes);
 if (!process.env.VERCEL) {
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
-        console.log(`Version: ${new Date().toISOString()} - Supabase Upload Fix Applied`);
+        console.log(`Version: ${new Date().toISOString()} - API boot OK`);
     });
 }
 

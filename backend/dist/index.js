@@ -27,6 +27,8 @@ const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
+const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS || '1');
+app.set('trust proxy', Number.isFinite(trustProxyHops) && trustProxyHops > 0 ? trustProxyHops : 1);
 // Security Middlewares
 app.use((0, helmet_1.default)({
     crossOriginResourcePolicy: false, // Allow cross-origin if needed for images
@@ -86,7 +88,7 @@ app.use('/api/track', tracking_1.default);
 if (!process.env.VERCEL) {
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
-        console.log(`Version: ${new Date().toISOString()} - Supabase Upload Fix Applied`);
+        console.log(`Version: ${new Date().toISOString()} - API boot OK`);
     });
 }
 exports.default = app;
