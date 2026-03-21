@@ -105,7 +105,7 @@ router.post('/hero', async (req, res) => {
             'primaryCtaText', 'primaryCtaLink', 'secondaryCtaText', 'secondaryCtaLink',
             'badgeColor', 'badgeTextColor', 'titleColorYou', 'titleColorPosh',
             'videoEnabled', 'videoUrl', 'videoPosterUrl',
-            'videoAutoplay', 'videoMuted', 'videoLoop', 'showOnMobile', 'overlayOpacity'
+            'videoAutoplay', 'videoMuted', 'videoLoop', 'showOnMobile', 'overlayOpacity', 'heroVideoEnabled'
         ];
 
         const cleanData: any = {};

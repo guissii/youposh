@@ -223,6 +223,7 @@ model HeroSettings {
   videoLoop        Boolean  @default(true)
   showOnMobile     Boolean  @default(true)
   overlayOpacity   Int      @default(55)
+  heroVideoEnabled Boolean  @default(true)
   updatedAt        DateTime @updatedAt
 }
 

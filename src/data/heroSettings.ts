@@ -24,6 +24,7 @@ export interface HeroSettings {
     videoLoop: boolean;
     showOnMobile: boolean;
     overlayOpacity: number;
+    heroVideoEnabled?: boolean;
 }
 
 export const defaultHeroSettings: HeroSettings = {
@@ -48,6 +49,7 @@ export const defaultHeroSettings: HeroSettings = {
     videoLoop: true,
     showOnMobile: true,
     overlayOpacity: 35,
+    heroVideoEnabled: true,
 };
 
 import { useState, useEffect } from 'react';

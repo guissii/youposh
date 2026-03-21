@@ -976,7 +976,18 @@ const AdminPage = () => {
   const renderHeroSettings = () => (
     <div className="space-y-6">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h3 className="font-semibold text-[#333] mb-4">Configuration de la section Hero</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-[#333]">Configuration de la section Hero</h3>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-[#666]">Vidéo d'arrière-plan</span>
+            <button
+              onClick={() => setHeroForm(f => ({ ...f, heroVideoEnabled: !f.heroVideoEnabled }))}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${heroForm.heroVideoEnabled !== false ? 'bg-[var(--yp-blue)]' : 'bg-gray-300'}`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${heroForm.heroVideoEnabled !== false ? 'translate-x-6' : 'translate-x-1'}`} />
+            </button>
+          </div>
+        </div>
         
         <div className="space-y-4">
           <div>

@@ -84,16 +84,24 @@ export default function HomePage() {
         <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
           
           {/* Hero Video Background */}
-          <div className="absolute inset-0 w-full h-full overflow-hidden">
-            <video 
-              autoPlay 
-              loop 
-              muted 
-              playsInline 
-              className="w-full h-full object-cover"
-            >
-              <source src="/videos/hero video.mp4" type="video/mp4" />
-            </video>
+          <div className="absolute inset-0 w-full h-full overflow-hidden bg-black">
+            {heroSettings.heroVideoEnabled !== false ? (
+              <video 
+                autoPlay 
+                loop 
+                muted 
+                playsInline 
+                className="w-full h-full object-cover opacity-80"
+              >
+                <source src="/videos/hero video.mp4" type="video/mp4" />
+              </video>
+            ) : (
+              <img 
+                src={heroSettings.videoPosterUrl || "/images/products/headphones.jpg"} 
+                alt="Hero Background" 
+                className="w-full h-full object-cover opacity-60"
+              />
+            )}
             
             {/* Overlay to ensure text readability */}
             {/* <div className="absolute inset-0 bg-black/40" /> */}
