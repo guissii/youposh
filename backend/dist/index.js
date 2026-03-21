@@ -8,6 +8,8 @@ const cors_1 = __importDefault(require("cors"));
 const compression_1 = __importDefault(require("compression"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const client_1 = require("@prisma/client");
+const helmet_1 = __importDefault(require("helmet"));
+const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 dotenv_1.default.config();
 const prisma = new client_1.PrismaClient();
 const products_1 = __importDefault(require("./routes/products"));
@@ -25,6 +27,21 @@ const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
+// Security Middlewares
+app.use((0, helmet_1.default)({
+    crossOriginResourcePolicy: false, // Allow cross-origin if needed for images
+    crossOriginOpenerPolicy: false
+}));
+// Rate Limiting
+const limiter = (0, express_rate_limit_1.default)({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 200, // Limit each IP to 200 requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Trop de requêtes, veuillez réessayer plus tard.' }
+});
+// Apply rate limiter to all /api routes
+app.use('/api', limiter);
 app.use((0, compression_1.default)());
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());

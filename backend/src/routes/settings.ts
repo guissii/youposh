@@ -1,8 +1,30 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this';
+
+function requireAdmin(req: express.Request, res: express.Response): boolean {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ error: 'Token manquant' });
+        return false;
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET) as { role?: string };
+        if (decoded.role !== 'admin' && decoded.role !== 'editor') {
+            res.status(403).json({ error: 'Accès refusé' });
+            return false;
+        }
+        return true;
+    } catch {
+        res.status(401).json({ error: 'Token invalide' });
+        return false;
+    }
+}
 
 // ── Store Settings ──
 
@@ -22,6 +44,7 @@ router.get('/store', async (req, res) => {
 
 router.post('/store', async (req, res) => {
     try {
+        if (!requireAdmin(req, res)) return;
         const data = req.body;
         // Ensure ID and updatedAt are not updated
         delete data.id;
@@ -61,6 +84,7 @@ router.post('/store', async (req, res) => {
 // ── Watermark status (non-destructive overlay) ──
 router.patch('/watermark/status', async (req, res) => {
     try {
+        if (!requireAdmin(req, res)) return;
         const { isEnabled } = req.body ?? {};
         if (typeof isEnabled !== 'boolean') {
             return res.status(400).json({ error: 'isEnabled boolean is required' });
@@ -95,6 +119,7 @@ router.get('/hero', async (req, res) => {
 
 router.post('/hero', async (req, res) => {
     try {
+        if (!requireAdmin(req, res)) return;
         const data = req.body;
         delete data.id;
         delete data.updatedAt;
@@ -113,6 +138,13 @@ router.post('/hero', async (req, res) => {
             if (allowedFields.includes(key)) {
                 cleanData[key] = data[key];
             }
+        }
+        if (cleanData.overlayOpacity !== undefined) {
+            const parsed = Number(cleanData.overlayOpacity);
+            cleanData.overlayOpacity = Number.isFinite(parsed) ? Math.max(0, Math.min(100, Math.round(parsed))) : 55;
+        }
+        if (cleanData.heroVideoEnabled === false) {
+            cleanData.videoEnabled = false;
         }
 
         const settings = await prisma.heroSettings.upsert({

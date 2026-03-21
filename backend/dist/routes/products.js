@@ -63,6 +63,15 @@ function computeBadge(p) {
         return 'new';
     return undefined;
 }
+function parsePositiveInt(value) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed))
+        return undefined;
+    const normalized = Math.floor(parsed);
+    if (normalized <= 0)
+        return undefined;
+    return normalized;
+}
 // GET all products with optional filters
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -109,7 +118,14 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             ];
         }
         const sortKey = (_a = sort) !== null && _a !== void 0 ? _a : 'popular';
+        const badgeKey = badge;
+        const requestedLimit = parsePositiveInt(limit);
+        const baseLimit = showAll ? 200 : 48;
+        const safeLimit = Math.min(requestedLimit !== null && requestedLimit !== void 0 ? requestedLimit : baseLimit, 500);
+        const requiresPostProcessing = badgeKey === 'promo' || sortKey === 'popular' || sortKey === 'promo' || badgeKey === 'popular';
+        const prismaTake = requiresPostProcessing ? Math.min(safeLimit * 3, 1000) : safeLimit;
         let orderBy = [{ sortOrder: 'desc' }, { salesCount: 'desc' }]; // Default sort now respects manual sortOrder
+        // Basic sorting directly via DB when possible
         if (sortKey === 'newest')
             orderBy = [{ sortOrder: 'desc' }, { publishedAt: 'desc' }, { createdAt: 'desc' }];
         if (sortKey === 'price-asc')
@@ -120,10 +136,26 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             orderBy = [{ sortOrder: 'desc' }, { salesCount: 'desc' }, { viewsCount: 'desc' }];
         if (sortKey === 'popular')
             orderBy = [{ sortOrder: 'desc' }, { salesCount: 'desc' }, { viewsCount: 'desc' }];
+        // Optimization: Push standard badge filters to database
+        if (badgeKey === 'in-stock') {
+            where.inStock = true;
+        }
+        else if (badgeKey === 'bestseller') {
+            where.isBestSeller = true;
+        }
+        else if (badgeKey === 'new') {
+            where.isNew = true;
+        }
+        else if (badgeKey === 'promo') {
+            // Optimisation : au lieu de filtrer en mémoire, on utilise Prisma
+            // Prisma ne supporte pas la comparaison de deux colonnes (originalPrice > price) directement dans le `where` standard.
+            // On s'assure au moins que originalPrice n'est pas nul. Le filtrage strict se fera en post-DB.
+            where.originalPrice = { not: null };
+        }
         const products = yield prisma.product.findMany({
             where,
             orderBy,
-            take: limit ? parseInt(limit) : undefined,
+            take: prismaTake,
             include: {
                 category: true,
                 attributeValues: {
@@ -137,54 +169,51 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 },
             },
         });
-        const activeProducts = yield prisma.product.findMany({
-            where: { status: 'published', isVisible: true, inStock: true },
-            select: {
-                id: true,
-                price: true,
-                originalPrice: true,
-                publishedAt: true,
-                salesCount: true,
-                viewsCount: true,
-                cartAddCount: true,
-                status: true,
-                isVisible: true,
-                inStock: true,
-            },
-        });
-        const popularIds = new Set([...activeProducts]
-            .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
-            .slice(0, 8)
-            .map(p => p.id));
-        const featuredIds = new Set([...activeProducts]
-            .sort((a, b) => {
-            const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-            const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-            return db - da;
-        })
-            .slice(0, 8)
-            .map(p => p.id));
+        // Si aucun filtre complexe, on n'a pas besoin de calculer les scores pour TOUTE la BDD, juste pour les produits retournés.
+        // Cela résout le problème de lenteur dans le panneau d'administration (O(n) evité).
+        let popularIds = new Set();
+        let featuredIds = new Set();
+        if (sortKey === 'popular' || badgeKey === 'popular' || badgeKey === 'new') {
+            const activeProducts = yield prisma.product.findMany({
+                where: { status: 'published', isVisible: true, inStock: true },
+                orderBy: [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }],
+                take: 300,
+                select: {
+                    id: true,
+                    price: true,
+                    originalPrice: true,
+                    publishedAt: true,
+                    salesCount: true,
+                    viewsCount: true,
+                    cartAddCount: true,
+                },
+            });
+            popularIds = new Set([...activeProducts]
+                .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
+                .slice(0, 8)
+                .map(p => p.id));
+            featuredIds = new Set([...activeProducts]
+                .sort((a, b) => {
+                const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+                const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+                return db - da;
+            })
+                .slice(0, 8)
+                .map(p => p.id));
+        }
         const withComputed = products.map(p => {
             const computed = Object.assign(Object.assign({}, p), { badge: computeBadge(p), isNew: isNewProduct(p), isBestSeller: isBestSellerProduct(p), isPopular: popularIds.has(p.id), isFeatured: featuredIds.has(p.id) });
             return computed;
         });
-        const badgeKey = badge;
         let filtered = withComputed;
+        // Post-DB filtering for dynamic properties
         if (badgeKey === 'promo') {
             filtered = filtered.filter(p => p.originalPrice != null && Number(p.originalPrice) > Number(p.price));
-        }
-        else if (badgeKey === 'new') {
-            filtered = filtered.filter(p => p.isNew);
-        }
-        else if (badgeKey === 'bestseller') {
-            filtered = filtered.filter(p => p.isBestSeller);
         }
         else if (badgeKey === 'popular') {
             filtered = filtered.filter(p => p.isPopular);
         }
-        else if (badgeKey === 'in-stock') {
-            filtered = filtered.filter(p => p.inStock === true);
-        }
+        // Post-DB sorting for dynamic properties
         if (sortKey === 'popular') {
             filtered = [...filtered].sort((a, b) => getPopularityScore(b) - getPopularityScore(a));
         }
@@ -196,7 +225,8 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 return discB - discA;
             });
         }
-        else if (sortKey === 'newest') {
+        // Appliquer la limite post-DB si elle a été sautée dans la requête Prisma
+        if (sortKey === 'newest') {
             filtered = [...filtered].sort((a, b) => {
                 const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
                 const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
@@ -206,6 +236,7 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         else if (sortKey === 'bestsellers') {
             filtered = [...filtered].sort((a, b) => { var _a, _b; return Number((_a = b.salesCount) !== null && _a !== void 0 ? _a : 0) - Number((_b = a.salesCount) !== null && _b !== void 0 ? _b : 0); });
         }
+        filtered = filtered.slice(0, safeLimit);
         res.json(filtered);
     }
     catch (error) {
@@ -233,8 +264,10 @@ router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         });
         if (!product)
             return res.status(404).json({ error: 'Product not found' });
-        const activeProducts = yield prisma.product.findMany({
+        const popularCandidates = yield prisma.product.findMany({
             where: { status: 'published', isVisible: true, inStock: true },
+            orderBy: [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }],
+            take: 300,
             select: {
                 id: true,
                 price: true,
@@ -243,23 +276,19 @@ router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 salesCount: true,
                 viewsCount: true,
                 cartAddCount: true,
-                status: true,
-                isVisible: true,
-                inStock: true,
             },
         });
-        const popularIds = new Set([...activeProducts]
+        const popularIds = new Set([...popularCandidates]
             .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
             .slice(0, 8)
             .map(p => p.id));
-        const featuredIds = new Set([...activeProducts]
-            .sort((a, b) => {
-            const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-            const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-            return db - da;
-        })
-            .slice(0, 8)
-            .map(p => p.id));
+        const featuredCandidates = yield prisma.product.findMany({
+            where: { status: 'published', isVisible: true, inStock: true },
+            orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
+            take: 8,
+            select: { id: true },
+        });
+        const featuredIds = new Set(featuredCandidates.map(p => p.id));
         res.json(Object.assign(Object.assign({}, product), { badge: computeBadge(product), isNew: isNewProduct(product), isBestSeller: isBestSellerProduct(product), isPopular: popularIds.has(product.id), isFeatured: featuredIds.has(product.id) }));
     }
     catch (error) {

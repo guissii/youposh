@@ -88,6 +88,8 @@ model Product {
   @@index([viewsCount(sort: Desc)])
   @@index([publishedAt(sort: Desc)])
   @@index([sortOrder(sort: Desc)])
+  @@index([categorySlug])
+  @@index([price])
 }
 
 model CategoryAttribute {
@@ -148,6 +150,9 @@ model Order {
   items        OrderItem[]
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+
+  @@index([createdAt(sort: Desc)])
+  @@index([status, createdAt(sort: Desc)])
 }
 
 model OrderItem {

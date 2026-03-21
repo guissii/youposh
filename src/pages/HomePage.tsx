@@ -87,13 +87,13 @@ export default function HomePage() {
           <div className="absolute inset-0 w-full h-full overflow-hidden bg-black">
             {heroSettings.heroVideoEnabled !== false ? (
               <video 
-                autoPlay 
-                loop 
-                muted 
+                autoPlay={heroSettings.videoAutoplay !== false}
+                loop={heroSettings.videoLoop !== false}
+                muted={heroSettings.videoMuted !== false}
                 playsInline 
                 className="w-full h-full object-cover opacity-80"
               >
-                <source src="/videos/hero video.mp4" type="video/mp4" />
+                <source src={heroSettings.videoUrl || "/videos/hero video.mp4"} type="video/mp4" />
               </video>
             ) : (
               <img 
@@ -102,9 +102,12 @@ export default function HomePage() {
                 className="w-full h-full object-cover opacity-60"
               />
             )}
-            
-            {/* Overlay to ensure text readability */}
-            {/* <div className="absolute inset-0 bg-black/40" /> */}
+            {Number(heroSettings.overlayOpacity ?? 0) > 0 && (
+              <div
+                className="absolute inset-0 bg-black"
+                style={{ opacity: Math.max(0, Math.min(100, Number(heroSettings.overlayOpacity ?? 0))) / 100 }}
+              />
+            )}
           </div>
 
 

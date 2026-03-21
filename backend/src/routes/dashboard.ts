@@ -7,23 +7,29 @@ const prisma = new PrismaClient();
 // GET dashboard stats
 router.get('/stats', async (_req, res) => {
     try {
-        const [totalOrders, totalProducts, orders, totalPageViews, uniqueVisitorsResult] = await Promise.all([
+        const [totalOrders, totalProducts, revenue, totalPageViews, statusCounts, uniqueVisitorCountRaw] = await Promise.all([
             prisma.order.count(),
             prisma.product.count(),
-            prisma.order.findMany({ select: { total: true, status: true } }),
+            prisma.order.aggregate({ _sum: { total: true } }),
             prisma.visitorStat.count(),
-            prisma.visitorStat.groupBy({
-                by: ['visitorId'],
+            prisma.order.groupBy({
+                by: ['status'],
+                _count: { status: true },
             }),
+            prisma.$queryRaw<Array<{ count: bigint | number }>>`SELECT COUNT(DISTINCT "visitorId")::bigint AS count FROM "VisitorStat"`,
         ]);
 
-        const uniqueVisitors = uniqueVisitorsResult.length;
+        const statusMap = new Map<string, number>();
+        for (const row of statusCounts) {
+            statusMap.set(row.status, row._count.status);
+        }
 
-        const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
-        const pendingOrders = orders.filter(o => o.status === 'pending').length;
-        const processingOrders = orders.filter(o => o.status === 'processing').length;
-        const completedOrders = orders.filter(o => ['completed', 'delivered'].includes(o.status)).length;
-        const cancelledOrders = orders.filter(o => o.status === 'cancelled').length;
+        const uniqueVisitors = Number(uniqueVisitorCountRaw?.[0]?.count ?? 0);
+        const totalRevenue = Number(revenue._sum.total ?? 0);
+        const pendingOrders = statusMap.get('pending') ?? 0;
+        const processingOrders = statusMap.get('processing') ?? 0;
+        const completedOrders = (statusMap.get('completed') ?? 0) + (statusMap.get('delivered') ?? 0);
+        const cancelledOrders = statusMap.get('cancelled') ?? 0;
 
         res.json({
             totalOrders,

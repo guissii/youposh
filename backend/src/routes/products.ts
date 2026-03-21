@@ -37,6 +37,14 @@ function computeBadge(p: any): 'promo' | 'bestseller' | 'new' | undefined {
     return undefined;
 }
 
+function parsePositiveInt(value: unknown): number | undefined {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) return undefined;
+    const normalized = Math.floor(parsed);
+    if (normalized <= 0) return undefined;
+    return normalized;
+}
+
 // GET all products with optional filters
 router.get('/', async (req, res) => {
     try {
@@ -84,6 +92,12 @@ router.get('/', async (req, res) => {
         }
 
         const sortKey = (sort as string | undefined) ?? 'popular';
+        const badgeKey = badge as string | undefined;
+        const requestedLimit = parsePositiveInt(limit);
+        const baseLimit = showAll ? 200 : 48;
+        const safeLimit = Math.min(requestedLimit ?? baseLimit, 500);
+        const requiresPostProcessing = badgeKey === 'promo' || sortKey === 'popular' || sortKey === 'promo' || badgeKey === 'popular';
+        const prismaTake = requiresPostProcessing ? Math.min(safeLimit * 3, 1000) : safeLimit;
         let orderBy: any = [{ sortOrder: 'desc' }, { salesCount: 'desc' }]; // Default sort now respects manual sortOrder
         
         // Basic sorting directly via DB when possible
@@ -94,7 +108,6 @@ router.get('/', async (req, res) => {
         if (sortKey === 'popular') orderBy = [{ sortOrder: 'desc' }, { salesCount: 'desc' }, { viewsCount: 'desc' }];
 
         // Optimization: Push standard badge filters to database
-        const badgeKey = badge as string | undefined;
         if (badgeKey === 'in-stock') {
             where.inStock = true;
         } else if (badgeKey === 'bestseller') {
@@ -111,9 +124,7 @@ router.get('/', async (req, res) => {
         const products = await prisma.product.findMany({
             where,
             orderBy,
-            // Ne pas limiter ici si on doit filtrer/trier en post-DB sur des champs calculés dynamiquement, 
-            // mais on applique la limite si c'est un tri natif simple (comme nouveautés) pour soulager la RAM.
-            take: (badgeKey === 'promo' || sortKey === 'popular' || sortKey === 'promo') ? undefined : (limit ? parseInt(limit as string) : undefined),
+            take: prismaTake,
             include: {
                 category: true,
                 attributeValues: {
@@ -136,6 +147,8 @@ router.get('/', async (req, res) => {
         if (sortKey === 'popular' || badgeKey === 'popular' || badgeKey === 'new') {
              const activeProducts = await prisma.product.findMany({
                 where: { status: 'published', isVisible: true, inStock: true },
+                orderBy: [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }],
+                take: 300,
                 select: {
                     id: true,
                     price: true,
@@ -143,6 +156,7 @@ router.get('/', async (req, res) => {
                     publishedAt: true,
                     salesCount: true,
                     viewsCount: true,
+                    cartAddCount: true,
                 },
             });
 
@@ -198,9 +212,7 @@ router.get('/', async (req, res) => {
         }
 
         // Appliquer la limite post-DB si elle a été sautée dans la requête Prisma
-        if (limit && (badgeKey === 'promo' || sortKey === 'popular' || sortKey === 'promo')) {
-            filtered = filtered.slice(0, parseInt(limit as string));
-        } else if (sortKey === 'newest') {
+        if (sortKey === 'newest') {
             filtered = [...filtered].sort((a, b) => {
                 const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
                 const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
@@ -209,6 +221,8 @@ router.get('/', async (req, res) => {
         } else if (sortKey === 'bestsellers') {
             filtered = [...filtered].sort((a, b) => Number(b.salesCount ?? 0) - Number(a.salesCount ?? 0));
         }
+
+        filtered = filtered.slice(0, safeLimit);
 
         res.json(filtered);
     } catch (error) {
@@ -237,8 +251,10 @@ router.get('/:id', async (req, res) => {
         });
         if (!product) return res.status(404).json({ error: 'Product not found' });
 
-        const activeProducts = await prisma.product.findMany({
+        const popularCandidates = await prisma.product.findMany({
             where: { status: 'published', isVisible: true, inStock: true },
+            orderBy: [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }],
+            take: 300,
             select: {
                 id: true,
                 price: true,
@@ -247,28 +263,25 @@ router.get('/:id', async (req, res) => {
                 salesCount: true,
                 viewsCount: true,
                 cartAddCount: true,
-                status: true,
-                isVisible: true,
-                inStock: true,
             },
         });
 
         const popularIds = new Set(
-            [...activeProducts]
+            [...popularCandidates]
                 .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
                 .slice(0, 8)
                 .map(p => p.id)
         );
 
+        const featuredCandidates = await prisma.product.findMany({
+            where: { status: 'published', isVisible: true, inStock: true },
+            orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
+            take: 8,
+            select: { id: true },
+        });
+
         const featuredIds = new Set(
-            [...activeProducts]
-                .sort((a, b) => {
-                    const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-                    const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-                    return db - da;
-                })
-                .slice(0, 8)
-                .map(p => p.id)
+            featuredCandidates.map(p => p.id)
         );
 
         res.json({

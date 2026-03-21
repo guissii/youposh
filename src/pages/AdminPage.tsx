@@ -990,6 +990,46 @@ const AdminPage = () => {
         </div>
         
         <div className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-[#666] mb-1">URL vidéo Hero</label>
+              <input
+                type="text"
+                value={heroForm.videoUrl || ''}
+                onChange={e => setHeroForm(f => ({ ...f, videoUrl: e.target.value }))}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
+                placeholder="/videos/hero video.mp4"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#666] mb-1">Poster image (fallback)</label>
+              <input
+                type="text"
+                value={heroForm.videoPosterUrl || ''}
+                onChange={e => setHeroForm(f => ({ ...f, videoPosterUrl: e.target.value }))}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
+                placeholder="/images/products/headphones.jpg"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-[#666]">Masque sombre (overlay)</label>
+              <span className="text-sm text-[#666]">{Math.max(0, Math.min(100, Number(heroForm.overlayOpacity ?? 0)))}%</span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={Math.max(0, Math.min(100, Number(heroForm.overlayOpacity ?? 0)))}
+              onChange={e => setHeroForm(f => ({ ...f, overlayOpacity: Number(e.target.value) }))}
+              className="w-full"
+            />
+            <p className="mt-1 text-xs text-[#888]">0% = masque supprimé</p>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-[#666] mb-1">Texte du Badge (ex: N°1 au Maroc)</label>
             <input 
