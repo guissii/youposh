@@ -17,7 +17,7 @@ interface ProductCardProps {
 
 const MAX_THUMBS = 3;
 
-export default function ProductCard({
+function ProductCard({
   product,
   variant = 'default',
 }: ProductCardProps) {
@@ -440,3 +440,7 @@ export default function ProductCard({
     </div>
   );
 }
+
+export default React.memo(ProductCard, (prevProps, nextProps) => {
+  return prevProps.product.id === nextProps.product.id && prevProps.variant === nextProps.variant;
+});

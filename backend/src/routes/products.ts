@@ -85,12 +85,23 @@ router.get('/', async (req, res) => {
 
         const sortKey = (sort as string | undefined) ?? 'popular';
         let orderBy: any = [{ sortOrder: 'desc' }, { salesCount: 'desc' }]; // Default sort now respects manual sortOrder
-
+        
+        // Basic sorting directly via DB when possible
         if (sortKey === 'newest') orderBy = [{ sortOrder: 'desc' }, { publishedAt: 'desc' }, { createdAt: 'desc' }];
         if (sortKey === 'price-asc') orderBy = [{ sortOrder: 'desc' }, { price: 'asc' }];
         if (sortKey === 'price-desc') orderBy = [{ sortOrder: 'desc' }, { price: 'desc' }];
         if (sortKey === 'bestsellers') orderBy = [{ sortOrder: 'desc' }, { salesCount: 'desc' }, { viewsCount: 'desc' }];
         if (sortKey === 'popular') orderBy = [{ sortOrder: 'desc' }, { salesCount: 'desc' }, { viewsCount: 'desc' }];
+
+        // Optimization: Push standard badge filters to database
+        const badgeKey = badge as string | undefined;
+        if (badgeKey === 'in-stock') {
+            where.inStock = true;
+        } else if (badgeKey === 'bestseller') {
+            where.isBestSeller = true;
+        } else if (badgeKey === 'new') {
+            where.isNew = true;
+        }
 
         const products = await prisma.product.findMany({
             where,
@@ -110,6 +121,7 @@ router.get('/', async (req, res) => {
             },
         });
 
+        // Optimization: Only select minimum necessary fields for computing dynamic badges
         const activeProducts = await prisma.product.findMany({
             where: { status: 'published', isVisible: true, inStock: true },
             select: {
@@ -119,10 +131,6 @@ router.get('/', async (req, res) => {
                 publishedAt: true,
                 salesCount: true,
                 viewsCount: true,
-                cartAddCount: true,
-                status: true,
-                isVisible: true,
-                inStock: true,
             },
         });
 
@@ -156,21 +164,16 @@ router.get('/', async (req, res) => {
             return computed;
         });
 
-        const badgeKey = badge as string | undefined;
         let filtered = withComputed;
 
+        // Post-DB filtering for dynamic properties
         if (badgeKey === 'promo') {
             filtered = filtered.filter(p => p.originalPrice != null && Number(p.originalPrice) > Number(p.price));
-        } else if (badgeKey === 'new') {
-            filtered = filtered.filter(p => p.isNew);
-        } else if (badgeKey === 'bestseller') {
-            filtered = filtered.filter(p => p.isBestSeller);
         } else if (badgeKey === 'popular') {
             filtered = filtered.filter(p => p.isPopular);
-        } else if (badgeKey === 'in-stock') {
-            filtered = filtered.filter(p => p.inStock === true);
         }
 
+        // Post-DB sorting for dynamic properties
         if (sortKey === 'popular') {
             filtered = [...filtered].sort((a, b) => getPopularityScore(b) - getPopularityScore(a));
         } else if (sortKey === 'promo') {

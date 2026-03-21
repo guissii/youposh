@@ -3,6 +3,8 @@ import cors from 'cors';
 import compression from 'compression';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 dotenv.config();
 
@@ -24,6 +26,24 @@ import fs from 'fs';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Security Middlewares
+app.use(helmet({
+    crossOriginResourcePolicy: false, // Allow cross-origin if needed for images
+    crossOriginOpenerPolicy: false
+}));
+
+// Rate Limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 200, // Limit each IP to 200 requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Trop de requêtes, veuillez réessayer plus tard.' }
+});
+
+// Apply rate limiter to all /api routes
+app.use('/api', limiter);
 
 app.use(compression());
 app.use(cors());

@@ -5,6 +5,7 @@ import {
   Grid3X3, List, ChevronDown, X, SlidersHorizontal,
   ArrowUpDown, Flame, Percent, Sparkles, Star, Tag, Package
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { fetchCategories, fetchProducts } from '@/lib/api';
 import ProductCard from '@/components/ui/ProductCard';
 import Header from '@/components/layout/Header';
@@ -35,10 +36,14 @@ export default function ShopPage() {
   const isNewPage = filterParam === 'new';
   const isBestsellerPage = filterParam === 'bestseller';
 
-  const [categories, setCategories] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const selectedCategory = categoryParam ? categories.find(c => c.slug === categoryParam) : undefined;
+  // Load categories with React Query
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
+  });
+
+  const selectedCategory = categoryParam ? categories.find((c: any) => c.slug === categoryParam) : undefined;
+
   const categoryAttributes = useMemo(
     () => (Array.isArray(selectedCategory?.attributes) ? selectedCategory.attributes : []),
     [selectedCategory]
@@ -56,11 +61,6 @@ export default function ShopPage() {
     setSearchParams(newParams);
   }, [searchParams, setSearchParams]);
 
-  // Load categories once
-  useEffect(() => {
-    fetchCategories().then(setCategories).catch(console.error);
-  }, []);
-
   useEffect(() => {
     if (!categoryParam || categoryAttributes.length === 0) return;
     const allowed = new Set<number>();
@@ -74,28 +74,24 @@ export default function ShopPage() {
     }
   }, [categoryParam, categoryAttributes, selectedAvIds, updateParams]);
 
-  // Fetch products based on URL params
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const queryParams = new URLSearchParams();
-        if (categoryParam) queryParams.set('category', categoryParam);
-        if (searchQuery) queryParams.set('search', searchQuery);
-        if (sortParam) queryParams.set('sort', sortParam);
-        if (filterParam && filterParam !== 'all') queryParams.set('badge', filterParam);
-        if (selectedAvIds.length) queryParams.set('av', selectedAvIds.join(','));
-
-        const data = await fetchProducts(queryParams.toString());
-        setProducts(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error('Failed to load products', err);
-        setProducts([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
+  // Fetch products based on URL params using React Query
+  const queryParamsStr = useMemo(() => {
+    const queryParams = new URLSearchParams();
+    if (categoryParam) queryParams.set('category', categoryParam);
+    if (searchQuery) queryParams.set('search', searchQuery);
+    if (sortParam) queryParams.set('sort', sortParam);
+    if (filterParam && filterParam !== 'all') queryParams.set('badge', filterParam);
+    if (selectedAvIds.length) queryParams.set('av', selectedAvIds.join(','));
+    return queryParams.toString();
   }, [categoryParam, filterParam, searchQuery, selectedAvIds, sortParam]);
+
+  const { data: productsData = [], isLoading: loading } = useQuery({
+    queryKey: ['products', queryParamsStr],
+    queryFn: () => fetchProducts(queryParamsStr),
+  });
+
+  // Keep backward compatibility for local state variable name
+  const products = Array.isArray(productsData) ? productsData : [];
 
   const toggleAttributeValue = (id: number) => {
     const set = new Set(selectedAvIds);

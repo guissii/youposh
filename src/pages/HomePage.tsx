@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft, // Changed to ArrowLeft as requested
@@ -30,33 +30,27 @@ export default function HomePage() {
   const exclusivesRef = useScrollReveal();
   const discoverRef = useScrollReveal();
 
-  const [promoProducts, setPromoProducts] = useState<any[]>([]);
-  const [bestsellers, setBestsellers] = useState<any[]>([]);
-  const [newArrivals, setNewArrivals] = useState<any[]>([]);
+  // Use React Query for data fetching
+  const { data: promosRaw = [], isError: promoError } = useQuery({
+    queryKey: ['products', 'promo'],
+    queryFn: () => fetchProducts('limit=12'),
+  });
 
-  const [error, setError] = useState<string | null>(null);
+  const { data: popularRaw = [], isError: popularError } = useQuery({
+    queryKey: ['products', 'popular'],
+    queryFn: () => fetchProducts('sort=popular&limit=8'),
+  });
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        // Fetch data in parallel with limits to optimize performance
-        const [promos, popular, latest] = await Promise.all([
-          fetchProducts('limit=12'),
-          fetchProducts('sort=popular&limit=8'),
-          fetchProducts('sort=newest&limit=8'),
-        ]);
+  const { data: latestRaw = [], isError: newError } = useQuery({
+    queryKey: ['products', 'newest'],
+    queryFn: () => fetchProducts('sort=newest&limit=8'),
+  });
 
-        // Filter and set state
-        setPromoProducts(promos.filter((p: any) => p.isVisible !== false).slice(0, 6));
-        setBestsellers(popular.filter((p: any) => p.isVisible !== false).slice(0, 4));
-        setNewArrivals(latest.filter((p: any) => p.isVisible !== false).slice(0, 4));
-      } catch (error) {
-        console.error("Erreur chargement page accueil:", error);
-        setError("Impossible de charger les produits. Veuillez vérifier votre connexion.");
-      }
-    }
-    loadData();
-  }, []);
+  const promoProducts = promosRaw.filter((p: any) => p.isVisible !== false).slice(0, 6);
+  const bestsellers = popularRaw.filter((p: any) => p.isVisible !== false).slice(0, 4);
+  const newArrivals = latestRaw.filter((p: any) => p.isVisible !== false).slice(0, 4);
+
+  const error = (popularError || newError || promoError) ? "Impossible de charger les produits. Veuillez vérifier votre connexion." : null;
 
   if (error) {
     return (
