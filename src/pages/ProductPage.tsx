@@ -45,7 +45,7 @@ export default function ProductPage() {
     };
 
     api.on("select", onSelect);
-    
+
     return () => {
       api.off("select", onSelect);
     };
@@ -310,10 +310,10 @@ export default function ProductPage() {
     <div className="min-h-screen bg-[var(--yp-gray-100)]">
       {isSubmittingWhatsApp && (
         <div className="fixed inset-0 z-[9999] bg-white">
-          <PremiumLoader 
-            fullScreen 
-            message={t('redirectingWhatsApp') || 'Redirection vers WhatsApp...'} 
-            subMessage={t('pleaseWait') || 'Veuillez patienter quelques instants...'} 
+          <PremiumLoader
+            fullScreen
+            message={t('redirectingWhatsApp') || 'Redirection vers WhatsApp...'}
+            subMessage={t('pleaseWait') || 'Veuillez patienter quelques instants...'}
           />
         </div>
       )}
@@ -341,8 +341,8 @@ export default function ProductPage() {
               {/* ═══ Bloc 1 — Image Gallery ═══ */}
               <div className="space-y-4">
                 <div className="relative aspect-square bg-white rounded-2xl overflow-hidden shadow-card flex items-center justify-center bg-gray-100">
-                  <Carousel 
-                    setApi={setApi} 
+                  <Carousel
+                    setApi={setApi}
                     className="w-full h-full"
                     opts={{
                       loop: true,
@@ -356,7 +356,7 @@ export default function ProductPage() {
                           <CarouselItem key={index} className="pl-0">
                             <div className="w-full h-full flex items-center justify-center select-none">
                               <LazyLoadImage
-                                src={`${getImageUrl(img)}?v=wmki`}
+                                src={getImageUrl(img)}
                                 alt={isAr ? product.nameAr : product.name}
                                 effect="blur"
                                 className="w-full h-full object-cover touch-pan-y"
@@ -433,7 +433,7 @@ export default function ProductPage() {
                         }`}
                     >
                       <LazyLoadImage
-                        src={`${getImageUrl(img)}?v=wmki`}
+                        src={getImageUrl(img)}
                         alt=""
                         effect="blur"
                         className="w-full h-full object-cover"
@@ -882,17 +882,17 @@ export default function ProductPage() {
               </div>
 
               {/* ── Final CTA — Confirmer sur WhatsApp ── */}
-                <button
-                  onClick={handleConfirmWhatsApp}
-                  disabled={!isFormValid || isSubmittingWhatsApp}
-                  className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2.5 transition-all ${(isFormValid && !isSubmittingWhatsApp)
-                    ? 'bg-[var(--yp-whatsapp)] hover:bg-[var(--yp-whatsapp-dark)] text-white shadow-lg shadow-green-500/20 active:scale-[0.98]'
-                    : 'bg-[var(--yp-gray-300)] text-[var(--yp-gray-500)] cursor-not-allowed'
-                    }`}
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  {t('confirmOnWhatsApp') || 'Confirmer sur WhatsApp'}
-                </button>
+              <button
+                onClick={handleConfirmWhatsApp}
+                disabled={!isFormValid || isSubmittingWhatsApp}
+                className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2.5 transition-all ${(isFormValid && !isSubmittingWhatsApp)
+                  ? 'bg-[var(--yp-whatsapp)] hover:bg-[var(--yp-whatsapp-dark)] text-white shadow-lg shadow-green-500/20 active:scale-[0.98]'
+                  : 'bg-[var(--yp-gray-300)] text-[var(--yp-gray-500)] cursor-not-allowed'
+                  }`}
+              >
+                <MessageCircle className="w-5 h-5" />
+                {t('confirmOnWhatsApp') || 'Confirmer sur WhatsApp'}
+              </button>
 
               {!isFormValid && (
                 <p className="text-xs text-[var(--yp-gray-500)] text-center">
