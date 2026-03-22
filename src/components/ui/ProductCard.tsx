@@ -97,19 +97,21 @@ function ProductCard({
           )}
           {/* CSS Watermark Layer */}
           {settings.watermarkEnabled && (
-            <div className="absolute inset-0 pointer-events-none overflow-hidden z-[15]">
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-[15] transform-gpu">
               <img
                 src="/images/finalwatermak.png"
                 alt="Watermark"
-                className="absolute select-none pointer-events-none drop-shadow-md filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]"
+                className="absolute select-none pointer-events-none opacity-90"
+                loading="lazy"
+                decoding="async"
                 style={{
                   width: `${settings.watermarkSize}%`,
                   height: 'auto',
                   opacity: settings.watermarkOpacity / 100,
                   left: `${settings.watermarkPosX}%`,
                   top: `${settings.watermarkPosY}%`,
-                  transform: 'translate(-50%, -50%)',
-                  mixBlendMode: 'multiply'
+                  transform: 'translate3d(-50%, -50%, 0)',
+                  willChange: 'transform, opacity'
                 }}
               />
             </div>
@@ -202,19 +204,21 @@ function ProductCard({
 
           {/* CSS Watermark Layer */}
           {settings.watermarkEnabled && (
-            <div className="absolute inset-0 pointer-events-none overflow-hidden z-[4]">
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-[4] transform-gpu">
               <img
                 src="/images/finalwatermak.png"
                 alt="Watermark"
-                className="absolute select-none pointer-events-none drop-shadow-md filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]"
+                className="absolute select-none pointer-events-none opacity-90"
+                loading="lazy"
+                decoding="async"
                 style={{
                   width: `${settings.watermarkSize}%`,
                   height: 'auto',
                   opacity: settings.watermarkOpacity / 100,
                   left: `${settings.watermarkPosX}%`,
                   top: `${settings.watermarkPosY}%`,
-                  transform: 'translate(-50%, -50%)',
-                  mixBlendMode: 'multiply'
+                  transform: 'translate3d(-50%, -50%, 0)',
+                  willChange: 'transform, opacity'
                 }}
               />
             </div>
@@ -248,13 +252,13 @@ function ProductCard({
         {/* Bottom actions */}
         <div className="px-3 pb-3 pt-1 flex items-stretch gap-2">
           <button
-              onClick={handleAddToCart}
-              disabled={isOutOfStock}
-              className={`flex-1 h-9 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-1.5 ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-color-cart)] text-white hover:opacity-90'}`}
-            >
-              {!isOutOfStock && <ShoppingBag className="w-3.5 h-3.5" />}
-              {isOutOfStock ? compactOutLabel : (t('addToCart') || 'Ajouter')}
-            </button>
+            onClick={handleAddToCart}
+            disabled={isOutOfStock}
+            className={`flex-1 h-9 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-1.5 ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-color-cart)] text-white hover:opacity-90'}`}
+          >
+            {!isOutOfStock && <ShoppingBag className="w-3.5 h-3.5" />}
+            {isOutOfStock ? compactOutLabel : (t('addToCart') || 'Ajouter')}
+          </button>
           <button
             onClick={handleWishlistToggle}
             className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 border-2 ${isFavorite
@@ -322,19 +326,21 @@ function ProductCard({
 
         {/* CSS Watermark Layer */}
         {settings.watermarkEnabled && (
-          <div className="absolute inset-0 pointer-events-none overflow-hidden z-[15]">
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-[15] transform-gpu">
             <img
               src="/images/finalwatermak.png"
               alt="Watermark"
-              className="absolute select-none pointer-events-none drop-shadow-md filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)]"
+              className="absolute select-none pointer-events-none opacity-90"
+              loading="lazy"
+              decoding="async"
               style={{
                 width: `${settings.watermarkSize}%`,
                 height: 'auto',
                 opacity: settings.watermarkOpacity / 100,
                 left: `${settings.watermarkPosX}%`,
                 top: `${settings.watermarkPosY}%`,
-                transform: 'translate(-50%, -50%)',
-                mixBlendMode: 'multiply'
+                transform: 'translate3d(-50%, -50%, 0)',
+                willChange: 'transform, opacity'
               }}
             />
           </div>
