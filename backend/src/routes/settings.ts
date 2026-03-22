@@ -1,6 +1,7 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
+import { cacheMiddleware, clearCache } from '../utils/cache';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -28,7 +29,7 @@ function requireAdmin(req: express.Request, res: express.Response): boolean {
 
 // ── Store Settings ──
 
-router.get('/store', async (req, res) => {
+router.get('/store', cacheMiddleware(60), async (req, res) => {
     try {
         const settings = await prisma.storeSettings.findUnique({ where: { id: 1 } });
         if (!settings) {
@@ -73,6 +74,7 @@ router.post('/store', async (req, res) => {
             update: cleanData,
             create: { id: 1, ...cleanData },
         });
+        clearCache();
         res.json(settings);
     } catch (error: any) {
         console.error('Error updating store settings:', error);
@@ -94,6 +96,7 @@ router.patch('/watermark/status', async (req, res) => {
             update: { watermarkEnabled: isEnabled },
             create: { id: 1, watermarkEnabled: isEnabled },
         });
+        clearCache();
         res.json(settings);
     } catch (error) {
         console.error('Error updating watermark status:', error);
@@ -103,7 +106,7 @@ router.patch('/watermark/status', async (req, res) => {
 
 // ── Hero Settings ──
 
-router.get('/hero', async (req, res) => {
+router.get('/hero', cacheMiddleware(60), async (req, res) => {
     try {
         const settings = await prisma.heroSettings.findUnique({ where: { id: 1 } });
         if (!settings) {
@@ -152,6 +155,7 @@ router.post('/hero', async (req, res) => {
             update: cleanData,
             create: { id: 1, ...cleanData },
         });
+        clearCache();
         res.json(settings);
     } catch (error) {
         console.error('Error updating hero settings:', error);

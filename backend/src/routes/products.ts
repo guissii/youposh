@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
+import { cacheMiddleware, clearCache } from '../utils/cache';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -46,7 +47,7 @@ function parsePositiveInt(value: unknown): number | undefined {
 }
 
 // GET all products with optional filters
-router.get('/', async (req, res) => {
+router.get('/', cacheMiddleware(60), async (req, res) => {
     try {
         const { category, badge, search, sort, inStock, all, av, limit, includeArchived } = req.query;
         // Check if "all" is true OR if the request comes from the admin panel (implied by logic)
@@ -99,7 +100,7 @@ router.get('/', async (req, res) => {
         const requiresPostProcessing = badgeKey === 'promo' || sortKey === 'popular' || sortKey === 'promo' || badgeKey === 'popular';
         const prismaTake = requiresPostProcessing ? Math.min(safeLimit * 3, 1000) : safeLimit;
         let orderBy: any = [{ sortOrder: 'desc' }, { salesCount: 'desc' }]; // Default sort now respects manual sortOrder
-        
+
         // Basic sorting directly via DB when possible
         if (sortKey === 'newest') orderBy = [{ sortOrder: 'desc' }, { publishedAt: 'desc' }, { createdAt: 'desc' }];
         if (sortKey === 'price-asc') orderBy = [{ sortOrder: 'desc' }, { price: 'asc' }];
@@ -145,7 +146,7 @@ router.get('/', async (req, res) => {
         let featuredIds = new Set<number>();
 
         if (sortKey === 'popular' || badgeKey === 'popular' || badgeKey === 'new') {
-             const activeProducts = await prisma.product.findMany({
+            const activeProducts = await prisma.product.findMany({
                 where: { status: 'published', isVisible: true, inStock: true },
                 orderBy: [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }],
                 take: 300,
@@ -232,7 +233,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET single product
-router.get('/:id', async (req, res) => {
+router.get('/:id', cacheMiddleware(60), async (req, res) => {
     try {
         const product = await prisma.product.findUnique({
             where: { id: parseInt(req.params.id) },
@@ -360,6 +361,7 @@ router.post('/', async (req, res) => {
                 },
             },
         });
+        clearCache();
         res.status(201).json(product);
     } catch (error: any) {
         console.error('Error creating product:', error);
@@ -420,6 +422,7 @@ router.put('/:id', async (req, res) => {
                 },
             });
         });
+        clearCache();
         res.json(product);
     } catch (error) {
         console.error('Error updating product:', error);
@@ -470,6 +473,7 @@ router.delete('/:id', async (req, res) => {
             where: { id: productId },
         });
 
+        clearCache();
         res.json({ action: 'deleted', message: 'Product deleted successfully' });
     } catch (error: any) {
         console.error('Error deleting product:', error);
@@ -486,6 +490,7 @@ router.delete('/:id', async (req, res) => {
                         inStock: false
                     }
                 });
+                clearCache();
                 return res.json({ action: 'archived', message: 'Produit archivé (car présent dans des commandes existantes)' });
             } catch (archiveError) {
                 return res.status(500).json({ error: 'Failed to archive product' });

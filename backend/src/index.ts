@@ -38,7 +38,7 @@ app.use(helmet({
 // Rate Limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 200, // Limit each IP to 200 requests per windowMs
+    max: 1000, // Increased limit: 1000 requests per IP per 15m to handle heavy client-side navigation
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Trop de requêtes, veuillez réessayer plus tard.' }
@@ -72,7 +72,7 @@ app.get('/api/debug-env', (_req, res) => {
 
 const uploadsDir = process.env.UPLOADS_DIR || path.resolve(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadsDir)) {
-    try { fs.mkdirSync(uploadsDir, { recursive: true }); } catch {}
+    try { fs.mkdirSync(uploadsDir, { recursive: true }); } catch { }
 }
 app.use('/uploads', express.static(uploadsDir, { maxAge: '7d', immutable: true }));
 

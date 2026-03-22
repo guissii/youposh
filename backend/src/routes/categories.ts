@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { cacheMiddleware, clearCache } from '../utils/cache';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -24,7 +25,7 @@ const categoryInclude = {
 };
 
 // GET all categories
-router.get('/', async (_req, res) => {
+router.get('/', cacheMiddleware(60), async (_req, res) => {
     try {
         const categories = await prisma.category.findMany({
             include: categoryInclude,
@@ -37,9 +38,9 @@ router.get('/', async (_req, res) => {
 });
 
 // GET single category (with attributes)
-router.get('/:id', async (req, res) => {
+router.get('/:id', cacheMiddleware(60), async (req, res) => {
     try {
-        const id = parseInt(req.params.id);
+        const id = parseInt(String(req.params.id));
         const category = await prisma.category.findUnique({
             where: { id },
             include: categoryInclude,
@@ -95,6 +96,7 @@ router.post('/', async (req, res) => {
             });
         });
 
+        clearCache();
         res.status(201).json(created);
     } catch (error) {
         console.error('Error creating category:', error);
@@ -212,6 +214,7 @@ router.put('/:id', async (req, res) => {
             });
         });
 
+        clearCache();
         res.json(updated);
     } catch (error) {
         console.error('Error updating category:', error);
@@ -225,6 +228,7 @@ router.delete('/:id', async (req, res) => {
         await prisma.category.delete({
             where: { id: parseInt(req.params.id) },
         });
+        clearCache();
         res.json({ message: 'Category deleted' });
     } catch (error) {
         console.error('Error deleting category:', error);
