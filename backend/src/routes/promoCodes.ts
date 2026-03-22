@@ -79,7 +79,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const promo = await prisma.promoCode.update({
-            where: { id: parseInt(req.params.id) },
+            where: { id: parseInt(String(req.params.id)) },
             data: req.body,
         });
         res.json(promo);
