@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../utils/prisma';
 import { cacheMiddleware, clearCache } from '../utils/cache';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 function slugify(input: any): string {
     const s = String(input ?? '').trim().toLowerCase();

@@ -1,11 +1,10 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
+import prisma from '../utils/prisma';
 import { cacheMiddleware, clearCache } from '../utils/cache';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 function isActive(p: any): boolean {
     return p.status === 'published' && p.isVisible === true && p.inStock === true;

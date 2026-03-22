@@ -89,7 +89,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const promo = yield prisma.promoCode.update({
-            where: { id: parseInt(req.params.id) },
+            where: { id: parseInt(String(req.params.id)) },
             data: req.body,
         });
         res.json(promo);
@@ -102,7 +102,7 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 // DELETE promo code
 router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield prisma.promoCode.delete({ where: { id: parseInt(req.params.id) } });
+        yield prisma.promoCode.delete({ where: { id: parseInt(String(req.params.id)) } });
         res.json({ message: 'Promo code deleted' });
     }
     catch (error) {

@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../utils/prisma';
 import { google } from 'googleapis';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 type OrderForSheet = {
     id: string;
@@ -31,14 +30,14 @@ let didWarnSheetsEnvMissing = false;
 function warnSheetsEnvMissing() {
     // if (didWarnSheetsEnvMissing) return; // Always log for debugging now
     didWarnSheetsEnvMissing = true;
-    
+
     const status = {
         SPREADSHEET_ID: !!process.env.GOOGLE_SHEETS_SPREADSHEET_ID,
         EMAIL: !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
         KEY_RAW: !!(process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY),
         KEY_BASE64: !!(process.env.GOOGLE_PRIVATE_KEY_BASE64 || process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64)
     };
-    
+
     console.warn('Google Sheets sync skipped. Environment status:', JSON.stringify(status));
     return status;
 }
@@ -79,12 +78,12 @@ function loadGooglePrivateKey(): string {
     for (let i = 0; i < body.length; i += chunkSize) {
         chunks.push(body.slice(i, i + chunkSize));
     }
-    
+
     const validKey = `-----BEGIN PRIVATE KEY-----\n${chunks.join('\n')}\n-----END PRIVATE KEY-----\n`;
 
     // Debug log (safe)
     console.log(`loadGooglePrivateKey: Key reconstructed. Total length: ${validKey.length}`);
-    
+
     return validKey;
 }
 
@@ -491,7 +490,7 @@ async function updateOrderInGoogleSheet(order: OrderForSheet) {
     if (rowIndex === -1) {
         // Strategy: Insert a new empty row at index 1 (row 2), then update it.
         // This ensures the new order is always at the top.
-        
+
         // 1. Insert empty row at index 1
         await sheets.spreadsheets.batchUpdate({
             spreadsheetId,
@@ -617,13 +616,13 @@ function parseVariantSelection(label: any): Record<string, string> {
 router.get('/debug-auth', async (req, res) => {
     try {
         const email = cleanEnvVar(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) || 'MISSING';
-        const keyRaw = 
+        const keyRaw =
             process.env.GOOGLE_PRIVATE_KEY_BASE64 ||
             process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64 ||
             process.env.GOOGLE_PRIVATE_KEY ||
             process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY ||
             'MISSING';
-        
+
         let keyStatus = 'MISSING';
         let keyPreview = 'N/A';
         let reconstructedKey = '';
@@ -805,7 +804,7 @@ router.post('/', async (req, res) => {
 
             const totalAfterDiscount = Math.max(0, subtotal - discount);
 
-        const created = await tx.order.create({
+            const created = await tx.order.create({
                 data: {
                     customerName,
                     phone,
@@ -996,10 +995,10 @@ router.post('/:id/sync', async (req, res) => {
             res.json({ message: 'Order synced to Google Sheets', order });
         } catch (e: any) {
             console.error('Manual sync failed:', e);
-            
+
             const innerMessage = e instanceof Error ? e.message : String(e);
             const detailedError = e?.response?.data?.error || e?.response?.data?.error_description || innerMessage;
-            
+
             // Add specific invalid_grant hint
             let hint = '';
             if (String(detailedError).includes('invalid_grant')) {
@@ -1007,7 +1006,7 @@ router.post('/:id/sync', async (req, res) => {
             }
 
             // Return full error details to client in the 'error' field so apiFetch picks it up
-            res.status(500).json({ 
+            res.status(500).json({
                 error: `Sync failed: ${detailedError}${hint}`,
                 message: innerMessage,
                 details: e?.response?.data || e?.stack
