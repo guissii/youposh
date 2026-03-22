@@ -236,7 +236,7 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
 router.get('/:id', cacheMiddleware(60), async (req, res) => {
     try {
         const product = await prisma.product.findUnique({
-            where: { id: parseInt(req.params.id) },
+            where: { id: parseInt(String(req.params.id)) },
             include: {
                 category: true,
                 attributeValues: {
@@ -387,7 +387,7 @@ router.put('/:id', async (req, res) => {
             data.categorySlug = null;
         }
 
-        const id = parseInt(req.params.id);
+        const id = parseInt(String(req.params.id));
         const ids = Array.isArray(attributeValueIds)
             ? attributeValueIds.map((n: any) => parseInt(String(n))).filter((n: any) => Number.isFinite(n))
             : undefined;
@@ -433,7 +433,7 @@ router.put('/:id', async (req, res) => {
 // DELETE product
 router.delete('/:id', async (req, res) => {
     try {
-        const productId = parseInt(req.params.id);
+        const productId = parseInt(String(req.params.id));
         if (isNaN(productId)) {
             return res.status(400).json({ error: 'Invalid product ID' });
         }
@@ -483,7 +483,7 @@ router.delete('/:id', async (req, res) => {
             try {
                 // Soft delete / Archive instead
                 await prisma.product.update({
-                    where: { id: parseInt(req.params.id) },
+                    where: { id: parseInt(String(req.params.id)) },
                     data: {
                         status: 'archived',
                         isVisible: false,

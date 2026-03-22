@@ -27,6 +27,7 @@ const express_1 = require("express");
 const client_1 = require("@prisma/client");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const cache_1 = require("../utils/cache");
 const router = (0, express_1.Router)();
 const prisma = new client_1.PrismaClient();
 function isActive(p) {
@@ -73,7 +74,7 @@ function parsePositiveInt(value) {
     return normalized;
 }
 // GET all products with optional filters
-router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get('/', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         const { category, badge, search, sort, inStock, all, av, limit, includeArchived } = req.query;
@@ -245,10 +246,10 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 }));
 // GET single product
-router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get('/:id', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const product = yield prisma.product.findUnique({
-            where: { id: parseInt(req.params.id) },
+            where: { id: parseInt(String(req.params.id)) },
             include: {
                 category: true,
                 attributeValues: {
@@ -347,6 +348,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 },
             },
         });
+        (0, cache_1.clearCache)();
         res.status(201).json(product);
     }
     catch (error) {
@@ -363,7 +365,7 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         if (data.categorySlug === "") {
             data.categorySlug = null;
         }
-        const id = parseInt(req.params.id);
+        const id = parseInt(String(req.params.id));
         const ids = Array.isArray(attributeValueIds)
             ? attributeValueIds.map((n) => parseInt(String(n))).filter((n) => Number.isFinite(n))
             : undefined;
@@ -395,6 +397,7 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 },
             });
         }));
+        (0, cache_1.clearCache)();
         res.json(product);
     }
     catch (error) {
@@ -405,7 +408,7 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 // DELETE product
 router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const productId = parseInt(req.params.id);
+        const productId = parseInt(String(req.params.id));
         if (isNaN(productId)) {
             return res.status(400).json({ error: 'Invalid product ID' });
         }
@@ -448,6 +451,7 @@ router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         yield prisma.product.delete({
             where: { id: productId },
         });
+        (0, cache_1.clearCache)();
         res.json({ action: 'deleted', message: 'Product deleted successfully' });
     }
     catch (error) {
@@ -457,13 +461,14 @@ router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* 
             try {
                 // Soft delete / Archive instead
                 yield prisma.product.update({
-                    where: { id: parseInt(req.params.id) },
+                    where: { id: parseInt(String(req.params.id)) },
                     data: {
                         status: 'archived',
                         isVisible: false,
                         inStock: false
                     }
                 });
+                (0, cache_1.clearCache)();
                 return res.json({ action: 'archived', message: 'Produit archivé (car présent dans des commandes existantes)' });
             }
             catch (archiveError) {

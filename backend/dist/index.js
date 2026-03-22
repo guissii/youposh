@@ -37,7 +37,7 @@ app.use((0, helmet_1.default)({
 // Rate Limiting
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 200, // Limit each IP to 200 requests per windowMs
+    max: 1000, // Increased limit: 1000 requests per IP per 15m to handle heavy client-side navigation
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Trop de requêtes, veuillez réessayer plus tard.' }

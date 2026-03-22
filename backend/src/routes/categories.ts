@@ -107,7 +107,7 @@ router.post('/', async (req, res) => {
 // PUT update category
 router.put('/:id', async (req, res) => {
     try {
-        const id = parseInt(req.params.id);
+        const id = parseInt(String(req.params.id));
         const { attributes, ...categoryData } = req.body ?? {};
 
         const updated = await prisma.$transaction(async (tx) => {
@@ -226,7 +226,7 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         await prisma.category.delete({
-            where: { id: parseInt(req.params.id) },
+            where: { id: parseInt(String(req.params.id)) },
         });
         clearCache();
         res.json({ message: 'Category deleted' });

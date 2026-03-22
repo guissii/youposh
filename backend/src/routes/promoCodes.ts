@@ -92,7 +92,7 @@ router.put('/:id', async (req, res) => {
 // DELETE promo code
 router.delete('/:id', async (req, res) => {
     try {
-        await prisma.promoCode.delete({ where: { id: parseInt(req.params.id) } });
+        await prisma.promoCode.delete({ where: { id: parseInt(String(req.params.id)) } });
         res.json({ message: 'Promo code deleted' });
     } catch (error) {
         console.error('Error deleting promo code:', error);

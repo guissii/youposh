@@ -22,6 +22,7 @@ var __rest = (this && this.__rest) || function (s, e) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const client_1 = require("@prisma/client");
+const cache_1 = require("../utils/cache");
 const router = (0, express_1.Router)();
 const prisma = new client_1.PrismaClient();
 function slugify(input) {
@@ -42,7 +43,7 @@ const categoryInclude = {
     },
 };
 // GET all categories
-router.get('/', (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get('/', (0, cache_1.cacheMiddleware)(60), (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const categories = yield prisma.category.findMany({
             include: categoryInclude,
@@ -55,9 +56,9 @@ router.get('/', (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 }));
 // GET single category (with attributes)
-router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get('/:id', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const id = parseInt(req.params.id);
+        const id = parseInt(String(req.params.id));
         const category = yield prisma.category.findUnique({
             where: { id },
             include: categoryInclude,
@@ -115,6 +116,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 include: categoryInclude,
             });
         }));
+        (0, cache_1.clearCache)();
         res.status(201).json(created);
     }
     catch (error) {
@@ -126,7 +128,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const id = parseInt(req.params.id);
+        const id = parseInt(String(req.params.id));
         const _b = (_a = req.body) !== null && _a !== void 0 ? _a : {}, { attributes } = _b, categoryData = __rest(_b, ["attributes"]);
         const updated = yield prisma.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
             var _a, _b, _c, _d, _e, _f, _g, _h, _j;
@@ -214,6 +216,7 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 include: categoryInclude,
             });
         }));
+        (0, cache_1.clearCache)();
         res.json(updated);
     }
     catch (error) {
@@ -225,8 +228,9 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield prisma.category.delete({
-            where: { id: parseInt(req.params.id) },
+            where: { id: parseInt(String(req.params.id)) },
         });
+        (0, cache_1.clearCache)();
         res.json({ message: 'Category deleted' });
     }
     catch (error) {
