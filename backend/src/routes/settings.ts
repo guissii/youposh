@@ -238,13 +238,19 @@ sur votre serveur via WinSCP dans /var/www/youposh/backend/
         archive.append(readmeContent, { name: 'LISEZ_MOI_POUR_RESTAURER.txt' });
 
         // 7. Add the entire uploads folder (Images & Videos)
-        const localUploadsPath = path.resolve(process.cwd(), 'uploads');
-        if (fs.existsSync(localUploadsPath)) {
-            archive.directory(localUploadsPath, 'uploads');
+        // We MUST use the exact absolute path where the uploads are stored on the VPS.
+        // We use path.join(__dirname) to dynamically find the project root regardless of how PM2 starts it.
+        const projectRoot = path.resolve(__dirname, '../../');
+        const uploadsPath = path.join(projectRoot, 'uploads');
+        
+        if (fs.existsSync(uploadsPath)) {
+            archive.directory(uploadsPath, 'uploads');
         } else {
-            const vpsUploadsPath = path.resolve('/var/www/youposh/backend/uploads');
-            if (fs.existsSync(vpsUploadsPath)) {
-                archive.directory(vpsUploadsPath, 'uploads');
+            console.error('Uploads directory not found at:', uploadsPath);
+            // Fallback for hardcoded VPS path just in case
+            const vpsPath = '/var/www/youposh/backend/uploads';
+            if (fs.existsSync(vpsPath)) {
+                archive.directory(vpsPath, 'uploads');
             }
         }
 
