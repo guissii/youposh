@@ -347,19 +347,20 @@ export default function ProductPage() {
                     opts={{
                       loop: true,
                       align: "start",
-                      containScroll: "trimSnaps"
+                      containScroll: "trimSnaps",
+                      dragFree: true
                     }}
                   >
                     <CarouselContent className="-ml-0 cursor-grab active:cursor-grabbing">
                       {galleryImages.length > 0 ? (
                         galleryImages.map((img: string, index: number) => (
-                          <CarouselItem key={index} className="pl-0">
-                            <div className="w-full h-full flex items-center justify-center select-none">
+                          <CarouselItem key={index} className="pl-0 basis-full">
+                            <div className="w-full h-full flex items-center justify-center select-none relative pointer-events-none">
                               <LazyLoadImage
                                 src={getImageUrl(img)}
                                 alt={isAr ? product.nameAr : product.name}
                                 effect="blur"
-                                className="w-full h-full object-cover touch-pan-y"
+                                className="w-full h-full object-cover"
                                 wrapperClassName="w-full h-full block"
                                 draggable={false}
                               />
