@@ -9,8 +9,10 @@ export function getImageUrl(path: string | undefined | null): string {
   if (!path) return '';
   if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('/images/')) return path;
   
-  // Utiliser l'URL de l'API en production (celle du VPS)
-  const base = import.meta.env.DEV ? 'http://localhost:5000' : 'https://api.youposhmaroc.com';
+  // Utiliser l'URL de l'API en production pour toutes les images d'uploads
+  // La variable VITE_API_URL se termine souvent par /api, il faut l'enlever pour les images
+  const apiBase = import.meta.env.VITE_API_URL || 'https://api.youposhmaroc.com/api';
+  const base = apiBase.replace('/api', '');
   
   return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
 }
