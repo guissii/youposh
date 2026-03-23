@@ -43,7 +43,7 @@ export const defaultHeroSettings: HeroSettings = {
     titleColorPosh: '#DC2626',
     videoEnabled: false,
     videoUrl: '/videos/hero-video.mp4',
-    videoPosterUrl: '/images/products/headphones.jpg',
+    videoPosterUrl: '',
     videoAutoplay: true,
     videoMuted: true,
     videoLoop: true,

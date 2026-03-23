@@ -1041,13 +1041,15 @@ const AdminPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-[#666] mb-1">Poster image (fallback)</label>
-              <input
-                type="text"
-                value={heroForm.videoPosterUrl || ''}
-                onChange={e => setHeroForm(f => ({ ...f, videoPosterUrl: e.target.value }))}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
-                placeholder="/images/products/headphones.jpg"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={heroForm.videoPosterUrl || ''}
+                  onChange={e => setHeroForm(f => ({ ...f, videoPosterUrl: e.target.value }))}
+                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
+                  placeholder="Ex: /images/bg.jpg"
+                />
+              </div>
             </div>
           </div>
 

@@ -95,13 +95,13 @@ export default function HomePage() {
               >
                 <source src={heroSettings.videoUrl || "/videos/hero video.mp4"} type="video/mp4" />
               </video>
-            ) : (
+            ) : heroSettings.videoPosterUrl ? (
               <img 
-                src={heroSettings.videoPosterUrl || "/images/products/headphones.jpg"} 
+                src={heroSettings.videoPosterUrl} 
                 alt="Hero Background" 
                 className="w-full h-full object-cover opacity-60"
               />
-            )}
+            ) : null}
             {Number(heroSettings.overlayOpacity ?? 0) > 0 && (
               <div
                 className="absolute inset-0 bg-black"
