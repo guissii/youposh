@@ -238,15 +238,13 @@ sur votre serveur via WinSCP dans /var/www/youposh/backend/
         archive.append(readmeContent, { name: 'LISEZ_MOI_POUR_RESTAURER.txt' });
 
         // 7. Add the entire uploads folder (Images & Videos)
-        // We must use the absolute path to where the files actually live on the VPS
-        const uploadsPath = path.resolve('/var/www/youposh/backend/uploads');
-        if (fs.existsSync(uploadsPath)) {
-            archive.directory(uploadsPath, 'uploads');
+        const localUploadsPath = path.resolve(process.cwd(), 'uploads');
+        if (fs.existsSync(localUploadsPath)) {
+            archive.directory(localUploadsPath, 'uploads');
         } else {
-            // Fallback to local cwd if not on VPS
-            const localUploadsPath = path.resolve(process.cwd(), 'uploads');
-            if (fs.existsSync(localUploadsPath)) {
-                archive.directory(localUploadsPath, 'uploads');
+            const vpsUploadsPath = path.resolve('/var/www/youposh/backend/uploads');
+            if (fs.existsSync(vpsUploadsPath)) {
+                archive.directory(vpsUploadsPath, 'uploads');
             }
         }
 
