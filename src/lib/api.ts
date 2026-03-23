@@ -124,6 +124,20 @@ export const uploadProductImage = async (file: File) => {
     return res.json();
 };
 
+export const uploadVideo = async (file: File) => {
+    const formData = new FormData();
+    formData.append('video', file);
+    const res = await fetch(`${API_BASE}/upload/video`, {
+        method: 'POST',
+        body: formData,
+    });
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.message || 'Failed to upload video');
+    }
+    return res.json();
+};
+
 // ─── Promo Codes ───────────────────────────────────────────────
 export const fetchPromoCodes = () => apiFetch<any[]>('/promo-codes');
 export const createPromoCode = (data: any) =>

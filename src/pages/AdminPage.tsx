@@ -6,7 +6,7 @@ import {
   LogOut, Search, Bell, DollarSign, Clock, CheckCircle,
   Eye, EyeOff, Plus, Pencil, Trash2, X,
   TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Check, Stamp,
-  Flame, FileSpreadsheet, Menu
+  Flame, FileSpreadsheet, Menu, Upload, Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -15,7 +15,7 @@ import {
   fetchOrders, updateOrderStatus, deleteOrder, syncOrderToSheets,
   fetchCategories, deleteCategory,
   fetchPromoCodes, deletePromoCode,
-  type DashboardStats, setWatermarkStatusAPI
+  type DashboardStats, setWatermarkStatusAPI, uploadVideo
 } from '@/lib/api';
 import {
   ConfirmModal,
@@ -958,6 +958,7 @@ const AdminPage = () => {
   // ─── Hero Settings ──────────────────────────────────────────
   const [heroForm, setHeroForm] = useState(loadHeroSettings());
   const [heroSaved, setHeroSaved] = useState(false);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
 
   const handleHeroSave = async () => {
     try {
@@ -970,6 +971,31 @@ const AdminPage = () => {
     } catch (e: any) {
       console.error(e);
       toast.error(e.message || 'Erreur lors de la sauvegarde');
+    }
+  };
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('video/')) {
+      toast.error('Veuillez sélectionner un fichier vidéo valide');
+      return;
+    }
+
+    try {
+      setIsUploadingVideo(true);
+      const res = await uploadVideo(file);
+      if (res.url) {
+        setHeroForm(f => ({ ...f, videoUrl: res.url }));
+        toast.success('Vidéo uploadée avec succès');
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Erreur lors de l'upload de la vidéo");
+    } finally {
+      setIsUploadingVideo(false);
+      // Reset the input so the same file can be selected again if needed
+      e.target.value = '';
     }
   };
 
@@ -993,13 +1019,25 @@ const AdminPage = () => {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-[#666] mb-1">URL vidéo Hero</label>
-              <input
-                type="text"
-                value={heroForm.videoUrl || ''}
-                onChange={e => setHeroForm(f => ({ ...f, videoUrl: e.target.value }))}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
-                placeholder="/videos/hero video.mp4"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={heroForm.videoUrl || ''}
+                  onChange={e => setHeroForm(f => ({ ...f, videoUrl: e.target.value }))}
+                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
+                  placeholder="/videos/hero video.mp4"
+                />
+                <label className={`flex-shrink-0 flex items-center justify-center px-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 cursor-pointer hover:bg-gray-100 transition-colors ${isUploadingVideo ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  {isUploadingVideo ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
+                  <input
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={handleVideoUpload}
+                    disabled={isUploadingVideo}
+                  />
+                </label>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-[#666] mb-1">Poster image (fallback)</label>
