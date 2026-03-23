@@ -238,9 +238,16 @@ sur votre serveur via WinSCP dans /var/www/youposh/backend/
         archive.append(readmeContent, { name: 'LISEZ_MOI_POUR_RESTAURER.txt' });
 
         // 7. Add the entire uploads folder (Images & Videos)
-        const uploadsPath = path.resolve(process.cwd(), 'uploads');
+        // We must use the absolute path to where the files actually live on the VPS
+        const uploadsPath = path.resolve('/var/www/youposh/backend/uploads');
         if (fs.existsSync(uploadsPath)) {
             archive.directory(uploadsPath, 'uploads');
+        } else {
+            // Fallback to local cwd if not on VPS
+            const localUploadsPath = path.resolve(process.cwd(), 'uploads');
+            if (fs.existsSync(localUploadsPath)) {
+                archive.directory(localUploadsPath, 'uploads');
+            }
         }
 
         // 8. Finalize the zip and send it to the browser
