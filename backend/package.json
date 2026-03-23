@@ -35,7 +35,8 @@
     "pg": "^8.19.0",
     "sharp": "^0.34.5",
     "xlsx": "^0.18.5",
-    "archiver": "^7.0.1"
+    "archiver": "^7.0.1",
+    "unzipper": "^0.11.4"
   },
   "devDependencies": {
     "@types/compression": "^1.8.1",

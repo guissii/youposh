@@ -254,7 +254,10 @@ sur votre serveur via WinSCP dans /var/www/youposh/backend/
 
 // For restore we need multer to handle the file upload
 import multer from 'multer';
-const upload = multer({ storage: multer.memoryStorage() });
+import unzipper from 'unzipper';
+
+// We allow large files for the ZIP upload (e.g. 500MB)
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 500 * 1024 * 1024 } });
 
 router.post('/backup/import', upload.single('backup'), async (req, res) => {
     try {
@@ -265,9 +268,20 @@ router.post('/backup/import', upload.single('backup'), async (req, res) => {
             return res.status(400).json({ error: 'No backup file provided' });
         }
 
-        const data = JSON.parse(file.buffer.toString('utf-8'));
+        // 1. Unzip the file in memory
+        const directory = await unzipper.Open.buffer(file.buffer);
+        
+        // 2. Find the database JSON file
+        const dbFile = directory.files.find(d => d.path === 'database_youposh.json' || d.path.endsWith('.json'));
+        
+        if (!dbFile) {
+            return res.status(400).json({ error: 'Fichier de base de données introuvable dans le ZIP.' });
+        }
 
-        // Import logic from importData.ts adapted for direct injection
+        const dbBuffer = await dbFile.buffer();
+        const data = JSON.parse(dbBuffer.toString('utf-8'));
+
+        // 3. Import logic for Database
         await prisma.$transaction([
             prisma.orderItem.deleteMany(),
             prisma.order.deleteMany(),
@@ -325,8 +339,29 @@ router.post('/backup/import', upload.single('backup'), async (req, res) => {
         if (data.storeSettings?.length > 0) await prisma.storeSettings.createMany({ data: data.storeSettings });
         if (data.heroSettings?.length > 0) await prisma.heroSettings.createMany({ data: data.heroSettings });
 
+        // 4. Restore images (Extract 'uploads' folder from ZIP to the server disk)
+        const uploadsDest = path.resolve(process.cwd(), 'uploads');
+        if (!fs.existsSync(uploadsDest)) {
+            fs.mkdirSync(uploadsDest, { recursive: true });
+        }
+
+        for (const fileInZip of directory.files) {
+            if (fileInZip.path.startsWith('uploads/') && fileInZip.type === 'File') {
+                const relativePath = fileInZip.path.replace('uploads/', '');
+                const fullDestPath = path.join(uploadsDest, relativePath);
+                
+                // Ensure directory exists
+                const dir = path.dirname(fullDestPath);
+                if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+                // Write file
+                const buffer = await fileInZip.buffer();
+                fs.writeFileSync(fullDestPath, buffer);
+            }
+        }
+
         clearCache();
-        res.json({ message: 'Backup restored successfully' });
+        res.json({ message: 'Backup complet restauré avec succès !' });
     } catch (error: any) {
         console.error('Error during backup import:', error);
         res.status(500).json({ error: `Failed to restore backup: ${error.message}` });

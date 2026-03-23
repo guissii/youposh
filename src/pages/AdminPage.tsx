@@ -1272,7 +1272,7 @@ const AdminPage = () => {
             {isImporting ? 'Restauration en cours...' : 'Restaurer une Sauvegarde'}
             <input
               type="file"
-              accept=".json"
+              accept=".zip,.json"
               className="hidden"
               onChange={handleImportBackup}
               disabled={isExporting || isImporting}
