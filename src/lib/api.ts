@@ -158,25 +158,64 @@ export const validatePromoCode = (code: string, orderTotal?: number) =>
 // ─── Settings ──────────────────────────────────────────────────
 export const fetchStoreSettingsAPI = () => apiFetch<any>('/settings/store');
 export const updateStoreSettingsAPI = (data: any) =>
-    apiFetch<any>('/settings/store', { method: 'POST', body: JSON.stringify(data) });
+    apiFetch<any>('/settings/store', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+
+export const setWatermarkStatusAPI = (isEnabled: boolean) =>
+    apiFetch<any>('/settings/watermark/status', {
+        method: 'PATCH',
+        body: JSON.stringify({ isEnabled }),
+    });
 
 export const fetchHeroSettingsAPI = () => apiFetch<any>('/settings/hero');
 export const updateHeroSettingsAPI = (data: any) =>
-    apiFetch<any>('/settings/hero', { method: 'POST', body: JSON.stringify(data) });
+    apiFetch<any>('/settings/hero', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
 
-// ─── Watermark helpers ─────────────────────────────────────────
-export const setWatermarkStatusAPI = async (enabled: boolean) => {
-    try {
-        return await apiFetch<any>('/settings/watermark/status', {
-            method: 'PATCH',
-            body: JSON.stringify({ isEnabled: enabled }),
-        });
-    } catch {
-        return apiFetch<any>('/settings/store', {
-            method: 'POST',
-            body: JSON.stringify({ watermarkEnabled: enabled }),
-        });
+// ─── Backup & Restore ──────────────────────────────────────────
+export const exportBackupAPI = async () => {
+    const token = localStorage.getItem('yp_admin_token') || localStorage.getItem('token');
+    const headers: HeadersInit = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`${API_BASE}/settings/backup/export`, { headers });
+    if (!res.ok) throw new Error('Failed to export backup');
+    
+    // Create a downloadable blob
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `youposh_backup_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+};
+
+export const importBackupAPI = async (file: File) => {
+    const token = localStorage.getItem('yp_admin_token') || localStorage.getItem('token');
+    const headers: HeadersInit = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const formData = new FormData();
+    formData.append('backup', file);
+
+    const res = await fetch(`${API_BASE}/settings/backup/import`, {
+        method: 'POST',
+        headers,
+        body: formData,
+    });
+    
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to import backup');
     }
+    return res.json();
 };
 
 // ─── Upload Utils ──────────────────────────────────────────────

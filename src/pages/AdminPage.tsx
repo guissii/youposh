@@ -6,7 +6,7 @@ import {
   LogOut, Search, Bell, DollarSign, Clock, CheckCircle,
   Eye, EyeOff, Plus, Pencil, Trash2, X,
   TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Check, Stamp,
-  Flame, FileSpreadsheet, Menu, Upload, Loader2
+  Flame, FileSpreadsheet, Menu, Upload, Loader2, Download, UploadCloud
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -15,7 +15,8 @@ import {
   fetchOrders, updateOrderStatus, deleteOrder, syncOrderToSheets,
   fetchCategories, deleteCategory,
   fetchPromoCodes, deletePromoCode,
-  type DashboardStats, setWatermarkStatusAPI, uploadVideo
+  type DashboardStats, setWatermarkStatusAPI, uploadVideo,
+  exportBackupAPI, importBackupAPI
 } from '@/lib/api';
 import {
   ConfirmModal,
@@ -1191,6 +1192,8 @@ const AdminPage = () => {
   // ─── Settings ───────────────────────────────────────────────
   const [storeForm, setStoreForm] = useState(loadStoreSettings());
   const [storeSaved, setStoreSaved] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   const handleStoreSave = async () => {
     try {
@@ -1206,8 +1209,78 @@ const AdminPage = () => {
     }
   };
 
+  const handleExportBackup = async () => {
+    try {
+      setIsExporting(true);
+      toast.info('Préparation de la sauvegarde...');
+      await exportBackupAPI();
+      toast.success('Sauvegarde téléchargée avec succès !');
+    } catch (error: any) {
+      toast.error(error.message || 'Erreur lors de la sauvegarde');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleImportBackup = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!window.confirm("⚠️ ATTENTION : Cela va écraser TOUTE votre base de données actuelle avec les données du fichier. Êtes-vous sûr de vouloir continuer ?")) {
+      e.target.value = '';
+      return;
+    }
+
+    try {
+      setIsImporting(true);
+      toast.loading('Restauration en cours... Veuillez patienter.', { id: 'import-toast' });
+      await importBackupAPI(file);
+      toast.success('Base de données restaurée avec succès !', { id: 'import-toast' });
+      // Reload page to reflect new data
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (error: any) {
+      toast.error(error.message || 'Erreur lors de la restauration', { id: 'import-toast' });
+    } finally {
+      setIsImporting(false);
+      e.target.value = '';
+    }
+  };
+
   const renderSettings = () => (
     <div className="space-y-6">
+      {/* ── Section Sauvegarde & Restauration ── */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 className="font-semibold text-[#333] mb-2 flex items-center gap-2">
+          <Download className="w-5 h-5 text-[var(--yp-blue)]" />
+          Sauvegarde et Restauration
+        </h3>
+        <p className="text-sm text-gray-500 mb-6">
+          Téléchargez une copie complète de votre base de données (produits, commandes, paramètres) pour la conserver en sécurité, ou restaurez une ancienne sauvegarde.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <button
+            onClick={handleExportBackup}
+            disabled={isExporting || isImporting}
+            className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[var(--yp-blue)] text-white rounded-xl font-medium transition-all ${isExporting ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[var(--yp-blue-dark)] shadow-md shadow-blue-500/20'}`}
+          >
+            {isExporting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
+            {isExporting ? 'Création en cours...' : 'Télécharger une Sauvegarde'}
+          </button>
+          
+          <label className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 border-2 border-dashed border-[var(--yp-blue)] text-[var(--yp-blue)] bg-blue-50 rounded-xl font-medium transition-all cursor-pointer ${isImporting ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-100'}`}>
+            {isImporting ? <Loader2 className="w-5 h-5 animate-spin" /> : <UploadCloud className="w-5 h-5" />}
+            {isImporting ? 'Restauration en cours...' : 'Restaurer une Sauvegarde'}
+            <input
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={handleImportBackup}
+              disabled={isExporting || isImporting}
+            />
+          </label>
+        </div>
+      </div>
+
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h3 className="font-semibold text-[#333] mb-4">Informations de la boutique</h3>
         <div className="grid md:grid-cols-2 gap-4">

@@ -163,4 +163,118 @@ router.post('/hero', async (req, res) => {
     }
 });
 
+// ── Backup and Restore ──
+router.get('/backup/export', async (req, res) => {
+    try {
+        if (!requireAdmin(req, res)) return;
+        
+        // Export logic from exportData.ts adapted for direct response
+        const backup = {
+            categories: await prisma.category.findMany(),
+            products: await prisma.product.findMany(),
+            globalAttributes: await prisma.globalAttribute.findMany(),
+            globalAttributeValues: await prisma.globalAttributeValue.findMany(),
+            categoryAttributes: await prisma.categoryAttribute.findMany(),
+            categoryAttributeValues: await prisma.categoryAttributeValue.findMany(),
+            productAttributeValues: await prisma.productAttributeValue.findMany(),
+            promoCodes: await prisma.promoCode.findMany(),
+            orders: await prisma.order.findMany(),
+            orderItems: await prisma.orderItem.findMany(),
+            storeSettings: await prisma.storeSettings.findMany(),
+            heroSettings: await prisma.heroSettings.findMany()
+        };
+
+        const date = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `youposh_backup_${date}.json`;
+
+        res.setHeader('Content-disposition', `attachment; filename=${filename}`);
+        res.setHeader('Content-type', 'application/json');
+        res.send(JSON.stringify(backup, null, 2));
+    } catch (error) {
+        console.error('Error during backup export:', error);
+        res.status(500).json({ error: 'Failed to export backup' });
+    }
+});
+
+// For restore we need multer to handle the file upload
+import multer from 'multer';
+const upload = multer({ storage: multer.memoryStorage() });
+
+router.post('/backup/import', upload.single('backup'), async (req, res) => {
+    try {
+        if (!requireAdmin(req, res)) return;
+        
+        const file = (req as any).file;
+        if (!file) {
+            return res.status(400).json({ error: 'No backup file provided' });
+        }
+
+        const data = JSON.parse(file.buffer.toString('utf-8'));
+
+        // Import logic from importData.ts adapted for direct injection
+        await prisma.$transaction([
+            prisma.orderItem.deleteMany(),
+            prisma.order.deleteMany(),
+            prisma.productAttributeValue.deleteMany(),
+            prisma.categoryAttributeValue.deleteMany(),
+            prisma.globalAttributeValue.deleteMany(),
+            prisma.categoryAttribute.deleteMany(),
+            prisma.globalAttribute.deleteMany(),
+            prisma.product.deleteMany(),
+            prisma.category.deleteMany(),
+            prisma.promoCode.deleteMany(),
+            prisma.storeSettings.deleteMany(),
+            prisma.heroSettings.deleteMany(),
+        ]);
+
+        if (data.categories?.length > 0) await prisma.category.createMany({ data: data.categories });
+        
+        if (data.promoCodes?.length > 0) {
+            const promoCodes = data.promoCodes.map((p: any) => ({
+                ...p,
+                startDate: new Date(p.startDate),
+                endDate: p.endDate ? new Date(p.endDate) : null,
+                createdAt: new Date(p.createdAt),
+                updatedAt: new Date(p.updatedAt)
+            }));
+            await prisma.promoCode.createMany({ data: promoCodes });
+        }
+
+        if (data.products?.length > 0) {
+            const products = data.products.map((p: any) => ({
+                ...p,
+                publishedAt: p.publishedAt ? new Date(p.publishedAt) : null,
+                createdAt: new Date(p.createdAt),
+                updatedAt: new Date(p.updatedAt)
+            }));
+            await prisma.product.createMany({ data: products });
+        }
+
+        if (data.globalAttributes?.length > 0) await prisma.globalAttribute.createMany({ data: data.globalAttributes });
+        if (data.globalAttributeValues?.length > 0) await prisma.globalAttributeValue.createMany({ data: data.globalAttributeValues });
+        if (data.categoryAttributes?.length > 0) await prisma.categoryAttribute.createMany({ data: data.categoryAttributes });
+        if (data.categoryAttributeValues?.length > 0) await prisma.categoryAttributeValue.createMany({ data: data.categoryAttributeValues });
+        if (data.productAttributeValues?.length > 0) await prisma.productAttributeValue.createMany({ data: data.productAttributeValues });
+
+        if (data.orders?.length > 0) {
+            const orders = data.orders.map((o: any) => ({
+                ...o,
+                createdAt: new Date(o.createdAt),
+                updatedAt: new Date(o.updatedAt)
+            }));
+            await prisma.order.createMany({ data: orders });
+        }
+
+        if (data.orderItems?.length > 0) await prisma.orderItem.createMany({ data: data.orderItems });
+        if (data.storeSettings?.length > 0) await prisma.storeSettings.createMany({ data: data.storeSettings });
+        if (data.heroSettings?.length > 0) await prisma.heroSettings.createMany({ data: data.heroSettings });
+
+        clearCache();
+        res.json({ message: 'Backup restored successfully' });
+    } catch (error: any) {
+        console.error('Error during backup import:', error);
+        res.status(500).json({ error: `Failed to restore backup: ${error.message}` });
+    }
+});
+
 export default router;
