@@ -185,12 +185,12 @@ export const exportBackupAPI = async () => {
     const res = await fetch(`${API_BASE}/settings/backup/export`, { headers });
     if (!res.ok) throw new Error('Failed to export backup');
     
-    // Create a downloadable blob
+    // Create a downloadable blob (now a ZIP file instead of JSON)
     const blob = await res.blob();
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `youposh_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `youposh_backup_complet_${new Date().toISOString().split('T')[0]}.zip`;
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);

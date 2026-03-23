@@ -164,12 +164,16 @@ router.post('/hero', async (req, res) => {
 });
 
 // ── Backup and Restore ──
+import archiver from 'archiver';
+import fs from 'fs';
+import path from 'path';
+
 router.get('/backup/export', async (req, res) => {
     try {
         if (!requireAdmin(req, res)) return;
         
-        // Export logic from exportData.ts adapted for direct response
-        const backup = {
+        // 1. Gather all database data
+        const dbData = {
             categories: await prisma.category.findMany(),
             products: await prisma.product.findMany(),
             globalAttributes: await prisma.globalAttribute.findMany(),
@@ -185,14 +189,66 @@ router.get('/backup/export', async (req, res) => {
         };
 
         const date = new Date().toISOString().replace(/[:.]/g, '-');
-        const filename = `youposh_backup_${date}.json`;
+        const filename = `youposh_backup_complet_${date}.zip`;
 
+        // 2. Set headers for ZIP download in Chrome
         res.setHeader('Content-disposition', `attachment; filename=${filename}`);
-        res.setHeader('Content-type', 'application/json');
-        res.send(JSON.stringify(backup, null, 2));
+        res.setHeader('Content-type', 'application/zip');
+
+        // 3. Initialize Archiver (ZIP creator)
+        const archive = archiver('zip', { zlib: { level: 5 } }); // Level 5 compression (good balance)
+
+        archive.on('error', (err) => {
+            console.error('Archive error:', err);
+            if (!res.headersSent) res.status(500).json({ error: 'Failed to create zip' });
+        });
+
+        // Pipe the zip directly to the Chrome download stream
+        archive.pipe(res);
+
+        // 4. Add the Database JSON file to the zip
+        archive.append(JSON.stringify(dbData, null, 2), { name: 'database_youposh.json' });
+
+        // 5. Add the .env file (Credentials) if it exists
+        const envPath = path.resolve(process.cwd(), '.env');
+        if (fs.existsSync(envPath)) {
+            archive.file(envPath, { name: '.env' });
+        }
+
+        // 6. Add the README instructions
+        const readmeContent = `======================================================
+SAUVEGARDE TOTALE YOUPOSH - ${date}
+======================================================
+Cette archive contient l'intégralité de votre site.
+
+QUE CONTIENT CE DOSSIER ?
+1. database_youposh.json : Vos produits, commandes et paramètres.
+2. uploads/ : Toutes vos images (produits, catégories) et vidéos.
+3. .env : Vos mots de passe (Base de données, JWT).
+
+COMMENT RESTAURER CETTE SAUVEGARDE ?
+------------------------------------------------------
+Allez dans le panneau d'administration de votre site (Paramètres).
+Utilisez le bouton "Restaurer une Sauvegarde" et sélectionnez
+le fichier "database_youposh.json" qui se trouve dans ce dossier zip.
+
+Pour restaurer les images, copiez simplement le dossier "uploads"
+sur votre serveur via WinSCP dans /var/www/youposh/backend/
+======================================================`;
+        archive.append(readmeContent, { name: 'LISEZ_MOI_POUR_RESTAURER.txt' });
+
+        // 7. Add the entire uploads folder (Images & Videos)
+        const uploadsPath = path.resolve(process.cwd(), 'uploads');
+        if (fs.existsSync(uploadsPath)) {
+            archive.directory(uploadsPath, 'uploads');
+        }
+
+        // 8. Finalize the zip and send it to the browser
+        await archive.finalize();
+
     } catch (error) {
         console.error('Error during backup export:', error);
-        res.status(500).json({ error: 'Failed to export backup' });
+        if (!res.headersSent) res.status(500).json({ error: 'Failed to export backup' });
     }
 });
 
