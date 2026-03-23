@@ -164,7 +164,7 @@ router.post('/hero', async (req, res) => {
 });
 
 // ── Backup and Restore ──
-import archiver from 'archiver';
+const archiver = require('archiver');
 import fs from 'fs';
 import path from 'path';
 
@@ -198,7 +198,7 @@ router.get('/backup/export', async (req, res) => {
         // 3. Initialize Archiver (ZIP creator)
         const archive = archiver('zip', { zlib: { level: 5 } }); // Level 5 compression (good balance)
 
-        archive.on('error', (err) => {
+        archive.on('error', (err: any) => {
             console.error('Archive error:', err);
             if (!res.headersSent) res.status(500).json({ error: 'Failed to create zip' });
         });
@@ -265,7 +265,7 @@ sur votre serveur via WinSCP dans /var/www/youposh/backend/
 
 // For restore we need multer to handle the file upload
 import multer from 'multer';
-import unzipper from 'unzipper';
+const unzipper = require('unzipper');
 
 // We allow large files for the ZIP upload (e.g. 500MB)
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 500 * 1024 * 1024 } });
@@ -283,7 +283,7 @@ router.post('/backup/import', upload.single('backup'), async (req, res) => {
         const directory = await unzipper.Open.buffer(file.buffer);
         
         // 2. Find the database JSON file
-        const dbFile = directory.files.find(d => d.path === 'database_youposh.json' || d.path.endsWith('.json'));
+        const dbFile = directory.files.find((d: any) => d.path === 'database_youposh.json' || d.path.endsWith('.json'));
         
         if (!dbFile) {
             return res.status(400).json({ error: 'Fichier de base de données introuvable dans le ZIP.' });
