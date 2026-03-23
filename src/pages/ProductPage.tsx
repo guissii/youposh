@@ -347,15 +347,14 @@ export default function ProductPage() {
                     opts={{
                       loop: true,
                       align: "start",
-                      containScroll: "trimSnaps",
-                      dragFree: true
+                      containScroll: "trimSnaps"
                     }}
                   >
                     <CarouselContent className="-ml-0 cursor-grab active:cursor-grabbing">
                       {galleryImages.length > 0 ? (
                         galleryImages.map((img: string, index: number) => (
                           <CarouselItem key={index} className="pl-0 basis-full">
-                            <div className="w-full h-full flex items-center justify-center select-none relative pointer-events-none">
+                            <div className="w-full h-full flex items-center justify-center select-none">
                               <LazyLoadImage
                                 src={getImageUrl(img)}
                                 alt={isAr ? product.nameAr : product.name}
@@ -918,7 +917,7 @@ export default function ProductPage() {
             <X className="w-6 h-6 text-white" />
           </button>
           <img
-            src={`${getImageUrl(galleryImages[selectedImage])}?v=wmki`}
+            src={getImageUrl(galleryImages[selectedImage])}
             alt=""
             className="max-w-full max-h-[90vh] object-contain"
             onClick={(e) => e.stopPropagation()}
