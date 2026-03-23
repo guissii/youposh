@@ -85,7 +85,7 @@ export default function HomePage() {
           
           {/* Hero Video Background */}
           <div className="absolute inset-0 w-full h-full overflow-hidden bg-black">
-            {heroSettings.heroVideoEnabled !== false ? (
+            {heroSettings.videoEnabled !== false ? (
               <video 
                 autoPlay={heroSettings.videoAutoplay !== false}
                 loop={heroSettings.videoLoop !== false}

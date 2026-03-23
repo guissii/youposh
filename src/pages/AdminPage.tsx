@@ -981,10 +981,10 @@ const AdminPage = () => {
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-[#666]">Vidéo d'arrière-plan</span>
             <button
-              onClick={() => setHeroForm(f => ({ ...f, heroVideoEnabled: !f.heroVideoEnabled }))}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${heroForm.heroVideoEnabled !== false ? 'bg-[var(--yp-blue)]' : 'bg-gray-300'}`}
+              onClick={() => setHeroForm(f => ({ ...f, videoEnabled: !f.videoEnabled, heroVideoEnabled: !f.videoEnabled }))}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${heroForm.videoEnabled !== false ? 'bg-[var(--yp-blue)]' : 'bg-gray-300'}`}
             >
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${heroForm.heroVideoEnabled !== false ? 'translate-x-6' : 'translate-x-1'}`} />
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${heroForm.videoEnabled !== false ? 'translate-x-6' : 'translate-x-1'}`} />
             </button>
           </div>
         </div>
