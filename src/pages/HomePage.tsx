@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +25,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const heroSettings = useHeroSettings();
   const storeSettings = useStoreSettings();
+  const [isHeroVideoReady, setIsHeroVideoReady] = useState(false);
 
   const flashRef = useScrollReveal();
   const bestsellersRef = useScrollReveal();
@@ -49,6 +51,11 @@ export default function HomePage() {
   const promoProducts = promosRaw.filter((p: any) => p.isVisible !== false).slice(0, 6);
   const bestsellers = popularRaw.filter((p: any) => p.isVisible !== false).slice(0, 4);
   const newArrivals = latestRaw.filter((p: any) => p.isVisible !== false).slice(0, 4);
+  const isHeroVideoEnabled = heroSettings.videoEnabled !== false;
+
+  useEffect(() => {
+    setIsHeroVideoReady(false);
+  }, [heroSettings.videoUrl, isHeroVideoEnabled]);
 
   const error = (popularError || newError || promoError) ? "Impossible de charger les produits. Veuillez vérifier votre connexion." : null;
 
@@ -84,14 +91,23 @@ export default function HomePage() {
         <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
           
           {/* Hero Video Background */}
-          <div className="absolute inset-0 w-full h-full overflow-hidden bg-black">
-            {heroSettings.videoEnabled !== false ? (
+          <div
+            className="absolute inset-0 w-full h-full overflow-hidden"
+            style={{ background: 'linear-gradient(145deg, #04153A 0%, #0A2D73 45%, #1D4ED8 100%)' }}
+          >
+            <div
+              className={`absolute inset-0 transition-opacity duration-700 ${isHeroVideoEnabled && isHeroVideoReady ? 'opacity-0' : 'opacity-100'}`}
+              style={{ background: 'radial-gradient(circle at 20% 20%, #3B82F6 0%, transparent 40%), radial-gradient(circle at 80% 10%, #1E40AF 0%, transparent 35%), linear-gradient(145deg, #04153A 0%, #0A2D73 45%, #1D4ED8 100%)' }}
+            />
+            {isHeroVideoEnabled ? (
               <video 
                 autoPlay={heroSettings.videoAutoplay !== false}
                 loop={heroSettings.videoLoop !== false}
                 muted={heroSettings.videoMuted !== false}
-                playsInline 
-                className="w-full h-full object-cover opacity-80"
+                playsInline
+                onCanPlay={() => setIsHeroVideoReady(true)}
+                onLoadedData={() => setIsHeroVideoReady(true)}
+                className={`w-full h-full object-cover transition-opacity duration-700 ${isHeroVideoReady ? 'opacity-80' : 'opacity-0'}`}
               >
                 <source src={heroSettings.videoUrl || "/videos/hero video.mp4"} type="video/mp4" />
               </video>
@@ -118,7 +134,7 @@ export default function HomePage() {
             {/* Badge: "Favorite Room 1" / N°1 au Maroc */}
             <div className="mb-8 animate-fade-in-up">
               <span
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold border border-white/20 shadow-lg hover:brightness-110 transition-colors cursor-default"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold font-heading tracking-wide border border-white/20 shadow-lg hover:brightness-110 transition-colors cursor-default"
                 style={{
                   backgroundColor: heroSettings.badgeColor || 'rgba(255, 255, 255, 0.1)',
                   color: heroSettings.badgeTextColor || 'white',
@@ -135,16 +151,16 @@ export default function HomePage() {
             </div>
 
             {/* Main Title */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 font-sans tracking-tight animate-fade-in-up delay-100 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
-              <span className="drop-shadow-[0_2px_2px_rgba(255,255,255,0.2)]" style={{ color: heroSettings.titleColorYou || 'var(--yp-blue)' }}>YOU</span>
-              <span className="drop-shadow-[0_2px_2px_rgba(255,255,255,0.2)]" style={{ color: heroSettings.titleColorPosh || 'var(--yp-red)' }}>POSH</span> <br className="hidden sm:block" />
-              <span className="text-3xl sm:text-4xl lg:text-5xl font-bold block mt-4 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black font-heading text-blue-50 leading-[1.06] mb-6 tracking-tight animate-[hero-text_0.85s_ease-out_forwards] opacity-0 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
+              <span className="drop-shadow-[0_2px_2px_rgba(255,255,255,0.2)] tracking-tight" style={{ color: heroSettings.titleColorYou || 'var(--yp-blue)' }}>YOU</span>
+              <span className="drop-shadow-[0_2px_2px_rgba(255,255,255,0.2)] tracking-tight" style={{ color: heroSettings.titleColorPosh || 'var(--yp-red)' }}>POSH</span> <br className="hidden sm:block" />
+              <span className="text-3xl sm:text-4xl lg:text-5xl font-extrabold block mt-4 text-blue-50 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] leading-tight">
                 {t('heroTitle').replace('YOUPOSH ', '')}
               </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-lg sm:text-xl text-white font-bold max-w-3xl mx-auto leading-relaxed mb-10 animate-fade-in-up delay-200 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] bg-black/10 backdrop-blur-[2px] rounded-xl p-4 border border-white/10">
+            <p className="text-lg sm:text-xl text-blue-50 font-semibold font-heading max-w-3xl mx-auto leading-relaxed tracking-wide mb-10 animate-[hero-text_1.1s_ease-out_forwards] opacity-0 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] bg-blue-950/35 backdrop-blur-[2px] rounded-xl p-4 border border-blue-200/20">
               {t('heroSubtitle')}
             </p>
 
@@ -161,7 +177,7 @@ export default function HomePage() {
               {/* Secondary: Transparent Blue with White text */}
               <button
                 onClick={() => navigate(heroSettings.secondaryCtaLink)}
-                className="group w-full sm:w-auto bg-blue-600/20 hover:bg-blue-600/30 text-white px-8 py-4 rounded-full font-medium text-base sm:text-lg border border-white/20 backdrop-blur-sm transition-all duration-300 flex items-center justify-center gap-2"
+                className="group w-full sm:w-auto bg-blue-700/35 hover:bg-blue-700/50 text-blue-50 px-8 py-4 rounded-full font-medium text-base sm:text-lg border border-blue-100/30 backdrop-blur-sm transition-all duration-300 flex items-center justify-center gap-2"
               >
                 <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                 {t('heroSecondaryCta')}
@@ -247,12 +263,12 @@ export default function HomePage() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="inline-flex rounded-full h-1.5 w-1.5 bg-white animate-pulse" />
-                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/90">
-                          Offre Limitée
+                        <span className="text-[10px] sm:text-xs font-bold tracking-widest text-white/90">
+                          استافد دابا من أحسن العروض
                         </span>
                       </div>
-                      <h2 className="text-xl sm:text-3xl font-extrabold font-heading text-white leading-none tracking-tight drop-shadow-sm">
-                        Ventes Flash
+                      <h2 className="text-xl sm:text-3xl font-extrabold font-heading text-white leading-tight tracking-tight drop-shadow-sm">
+                        Nos meilleures offres du jour
                       </h2>
                     </div>
                   </div>

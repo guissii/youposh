@@ -124,6 +124,8 @@ export const uploadProductImage = async (file: File) => {
     return res.json();
 };
 
+
+
 export const uploadVideo = async (file: File) => {
     const formData = new FormData();
     formData.append('video', file);

@@ -164,14 +164,14 @@ router.post('/hero', async (req, res) => {
 });
 
 // ── Backup and Restore ──
-const archiver = require('archiver');
+import archiver from 'archiver';
 import fs from 'fs';
 import path from 'path';
 
 router.get('/backup/export', async (req, res) => {
     try {
         if (!requireAdmin(req, res)) return;
-        
+
         // 1. Gather all database data
         const dbData = {
             categories: await prisma.category.findMany(),
@@ -242,7 +242,7 @@ sur votre serveur via WinSCP dans /var/www/youposh/backend/
         // We use path.join(__dirname) to dynamically find the project root regardless of how PM2 starts it.
         const projectRoot = path.resolve(__dirname, '../../');
         const uploadsPath = path.join(projectRoot, 'uploads');
-        
+
         if (fs.existsSync(uploadsPath)) {
             archive.directory(uploadsPath, 'uploads');
         } else {
@@ -265,7 +265,7 @@ sur votre serveur via WinSCP dans /var/www/youposh/backend/
 
 // For restore we need multer to handle the file upload
 import multer from 'multer';
-const unzipper = require('unzipper');
+import unzipper from 'unzipper';
 
 // We allow large files for the ZIP upload (e.g. 500MB)
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 500 * 1024 * 1024 } });
@@ -273,7 +273,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 500
 router.post('/backup/import', upload.single('backup'), async (req, res) => {
     try {
         if (!requireAdmin(req, res)) return;
-        
+
         const file = (req as any).file;
         if (!file) {
             return res.status(400).json({ error: 'No backup file provided' });
@@ -281,10 +281,10 @@ router.post('/backup/import', upload.single('backup'), async (req, res) => {
 
         // 1. Unzip the file in memory
         const directory = await unzipper.Open.buffer(file.buffer);
-        
+
         // 2. Find the database JSON file
         const dbFile = directory.files.find((d: any) => d.path === 'database_youposh.json' || d.path.endsWith('.json'));
-        
+
         if (!dbFile) {
             return res.status(400).json({ error: 'Fichier de base de données introuvable dans le ZIP.' });
         }
@@ -309,7 +309,7 @@ router.post('/backup/import', upload.single('backup'), async (req, res) => {
         ]);
 
         if (data.categories?.length > 0) await prisma.category.createMany({ data: data.categories });
-        
+
         if (data.promoCodes?.length > 0) {
             const promoCodes = data.promoCodes.map((p: any) => ({
                 ...p,
@@ -360,7 +360,7 @@ router.post('/backup/import', upload.single('backup'), async (req, res) => {
             if (fileInZip.path.startsWith('uploads/') && fileInZip.type === 'File') {
                 const relativePath = fileInZip.path.replace('uploads/', '');
                 const fullDestPath = path.join(uploadsDest, relativePath);
-                
+
                 // Ensure directory exists
                 const dir = path.dirname(fullDestPath);
                 if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
