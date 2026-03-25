@@ -90,7 +90,7 @@ function ProductCard({
               src={getImageUrl(product.image)}
               alt={name}
               effect="blur"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain p-1"
               onError={() => setImgError(true)}
               wrapperClassName="w-full h-full"
             />
@@ -193,7 +193,7 @@ function ProductCard({
               alt={name}
               effect="blur"
               wrapperClassName="w-full h-full"
-              className={`w-full h-full object-cover transition-transform duration-500 hover:scale-105 ${isOutOfStock ? 'grayscale' : ''}`}
+              className={`w-full h-full object-contain transition-transform duration-500 hover:scale-105 p-3 ${isOutOfStock ? 'grayscale' : ''}`}
               style={{
                 objectPosition: `${product.cardFocalX ?? 50}% ${product.cardFocalY ?? 50}%`,
                 transform: `scale(${product.cardZoom ?? 1})`,

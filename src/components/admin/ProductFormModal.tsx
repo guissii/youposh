@@ -359,10 +359,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                 {categories.map(c => <option key={c.id} value={c.slug}>{c.name}</option>)}
                             </select>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-[#666] mb-1">SKU</label>
-                            <input type="text" value={form.sku} onChange={e => setForm(f => ({ ...f, sku: e.target.value }))} className={inputClass} />
-                        </div>
+
                     </div>
 
                     {/* ═══════════════════════════════════════════════
@@ -519,72 +516,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                             </div>
                         )}
 
-                        {/* ═══════════════════════════════════════════════
-                            CADRAGE CARTE PRODUIT
-                            ═══════════════════════════════════════════════ */}
-                        {previewImages.length > 0 && previewImages[primaryIndex] && (
-                            <div className="mt-4 border border-blue-100 bg-blue-50/30 rounded-xl p-4 space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <h4 className="text-sm font-bold text-[#333] flex items-center gap-2">
-                                        🖼️ Cadrage carte produit
-                                    </h4>
-                                    <button
-                                        type="button"
-                                        onClick={() => setForm(f => ({ ...f, cardZoom: 1.0, cardFocalX: 50, cardFocalY: 50 }))}
-                                        className="text-xs text-[var(--yp-blue)] hover:underline"
-                                    >
-                                        Réinitialiser
-                                    </button>
-                                </div>
 
-                                {/* Live card preview */}
-                                <div className="flex justify-center">
-                                    <div className="w-[160px] h-[200px] rounded-xl overflow-hidden border-2 border-gray-200 shadow-inner bg-[#F5F5F5]">
-                                        <img
-                                            src={getImageUrl(previewImages[primaryIndex].url)}
-                                            alt="Card preview"
-                                            className="w-full h-full object-cover"
-                                            style={{
-                                                objectPosition: `${form.cardFocalX}% ${form.cardFocalY}%`,
-                                                transform: `scale(${form.cardZoom})`,
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                                <p className="text-[10px] text-gray-400 text-center">Aperçu du rendu dans la grille catégorie</p>
-
-                                {/* Sliders */}
-                                <div className="space-y-3">
-                                    <div>
-                                        <div className="flex justify-between text-xs text-[#666] mb-1">
-                                            <span>Zoom</span>
-                                            <span className="font-mono">{Number(form.cardZoom).toFixed(2)}×</span>
-                                        </div>
-                                        <input type="range" min="0.8" max="2.0" step="0.05" value={form.cardZoom}
-                                            onChange={e => setForm(f => ({ ...f, cardZoom: parseFloat(e.target.value) }))}
-                                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[var(--yp-blue)]" />
-                                    </div>
-                                    <div>
-                                        <div className="flex justify-between text-xs text-[#666] mb-1">
-                                            <span>Position horizontale</span>
-                                            <span className="font-mono">{Math.round(form.cardFocalX)}%</span>
-                                        </div>
-                                        <input type="range" min="0" max="100" step="1" value={form.cardFocalX}
-                                            onChange={e => setForm(f => ({ ...f, cardFocalX: parseFloat(e.target.value) }))}
-                                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[var(--yp-blue)]" />
-                                    </div>
-                                    <div>
-                                        <div className="flex justify-between text-xs text-[#666] mb-1">
-                                            <span>Position verticale</span>
-                                            <span className="font-mono">{Math.round(form.cardFocalY)}%</span>
-                                        </div>
-                                        <input type="range" min="0" max="100" step="1" value={form.cardFocalY}
-                                            onChange={e => setForm(f => ({ ...f, cardFocalY: parseFloat(e.target.value) }))}
-                                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[var(--yp-blue)]" />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </div>
 
                     <div className="flex items-center justify-between mb-1">
@@ -601,32 +533,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                         <textarea rows={2} dir="rtl" value={form.descriptionAr} onChange={e => setForm(f => ({ ...f, descriptionAr: e.target.value }))} className={inputClass + " resize-none"} />
                     </div>
 
-                    {/* Tags Prédéfinis */}
-                    <div>
-                        <label className="block text-sm font-medium text-[#666] mb-2">Tags (Sélectionnez pour ajouter)</label>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                            {['nouveau', 'promo', 'tendance', 'populaire', 'cadeau', 'premium', 'soles'].map(tag => {
-                                const currentTags = (form.tags || '').split(',').map((t: string) => t.trim()).filter(Boolean);
-                                const isSelected = currentTags.includes(tag);
-                                return (
-                                    <button
-                                        key={tag}
-                                        type="button"
-                                        onClick={() => {
-                                            const newTags = isSelected
-                                                ? currentTags.filter((t: string) => t !== tag)
-                                                : [...currentTags, tag];
-                                            setForm(f => ({ ...f, tags: newTags.join(', ') }));
-                                        }}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${isSelected ? 'bg-[var(--yp-blue)]/10 text-[var(--yp-blue)] border-[var(--yp-blue)]/30' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'}`}
-                                    >
-                                        #{tag}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        <input type="text" value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} className={inputClass} placeholder="Ou tapez vos tags (séparés par virgule)" />
-                    </div>
+
 
                     {/* Caractéristiques Prédéfinies */}
                     <div>
@@ -877,17 +784,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                 <span className="text-sm text-[#666]">👁 Visible sur le site</span>
                             </label>
 
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" checked={form.isNew} onChange={e => setForm(f => ({ ...f, isNew: e.target.checked }))}
-                                    className="w-4 h-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500" />
-                                <span className="text-sm text-[#666]">✨ Nouveau</span>
-                            </label>
 
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" checked={form.isBestSeller} onChange={e => setForm(f => ({ ...f, isBestSeller: e.target.checked }))}
-                                    className="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-500" />
-                                <span className="text-sm text-[#666]">🔥 Best Seller</span>
-                            </label>
 
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" checked={form.isFeatured} onChange={e => setForm(f => ({ ...f, isFeatured: e.target.checked }))}
