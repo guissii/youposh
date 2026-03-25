@@ -19,12 +19,14 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const client_1 = require("@prisma/client");
+const prisma_1 = __importDefault(require("../utils/prisma"));
 const cache_1 = require("../utils/cache");
 const router = (0, express_1.Router)();
-const prisma = new client_1.PrismaClient();
 function slugify(input) {
     const s = String(input !== null && input !== void 0 ? input : '').trim().toLowerCase();
     return s
@@ -45,7 +47,7 @@ const categoryInclude = {
 // GET all categories
 router.get('/', (0, cache_1.cacheMiddleware)(60), (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const categories = yield prisma.category.findMany({
+        const categories = yield prisma_1.default.category.findMany({
             include: categoryInclude,
         });
         res.json(categories);
@@ -59,7 +61,7 @@ router.get('/', (0, cache_1.cacheMiddleware)(60), (_req, res) => __awaiter(void 
 router.get('/:id', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(String(req.params.id));
-        const category = yield prisma.category.findUnique({
+        const category = yield prisma_1.default.category.findUnique({
             where: { id },
             include: categoryInclude,
         });
@@ -77,7 +79,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         const _b = (_a = req.body) !== null && _a !== void 0 ? _a : {}, { attributes } = _b, categoryData = __rest(_b, ["attributes"]);
-        const created = yield prisma.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        const created = yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
             var _a, _b, _c;
             const category = yield tx.category.create({ data: categoryData });
             if (Array.isArray(attributes) && attributes.length) {
@@ -130,7 +132,7 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         const id = parseInt(String(req.params.id));
         const _b = (_a = req.body) !== null && _a !== void 0 ? _a : {}, { attributes } = _b, categoryData = __rest(_b, ["attributes"]);
-        const updated = yield prisma.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        const updated = yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
             var _a, _b, _c, _d, _e, _f, _g, _h, _j;
             yield tx.category.update({
                 where: { id },
@@ -227,7 +229,7 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 // DELETE category
 router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield prisma.category.delete({
+        yield prisma_1.default.category.delete({
             where: { id: parseInt(String(req.params.id)) },
         });
         (0, cache_1.clearCache)();

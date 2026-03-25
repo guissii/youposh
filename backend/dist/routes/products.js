@@ -24,12 +24,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const client_1 = require("@prisma/client");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const prisma_1 = __importDefault(require("../utils/prisma"));
 const cache_1 = require("../utils/cache");
 const router = (0, express_1.Router)();
-const prisma = new client_1.PrismaClient();
 function isActive(p) {
     return p.status === 'published' && p.isVisible === true && p.inStock === true;
 }
@@ -153,7 +152,10 @@ router.get('/', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0
             // On s'assure au moins que originalPrice n'est pas nul. Le filtrage strict se fera en post-DB.
             where.originalPrice = { not: null };
         }
-        const products = yield prisma.product.findMany({
+        else if (badgeKey === 'featured') {
+            where.isFeatured = true;
+        }
+        const products = yield prisma_1.default.product.findMany({
             where,
             orderBy,
             take: prismaTake,
@@ -173,9 +175,8 @@ router.get('/', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0
         // Si aucun filtre complexe, on n'a pas besoin de calculer les scores pour TOUTE la BDD, juste pour les produits retournés.
         // Cela résout le problème de lenteur dans le panneau d'administration (O(n) evité).
         let popularIds = new Set();
-        let featuredIds = new Set();
         if (sortKey === 'popular' || badgeKey === 'popular' || badgeKey === 'new') {
-            const activeProducts = yield prisma.product.findMany({
+            const activeProducts = yield prisma_1.default.product.findMany({
                 where: { status: 'published', isVisible: true, inStock: true },
                 orderBy: [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }],
                 take: 300,
@@ -193,17 +194,9 @@ router.get('/', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0
                 .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
                 .slice(0, 8)
                 .map(p => p.id));
-            featuredIds = new Set([...activeProducts]
-                .sort((a, b) => {
-                const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-                const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-                return db - da;
-            })
-                .slice(0, 8)
-                .map(p => p.id));
         }
         const withComputed = products.map(p => {
-            const computed = Object.assign(Object.assign({}, p), { badge: computeBadge(p), isNew: isNewProduct(p), isBestSeller: isBestSellerProduct(p), isPopular: popularIds.has(p.id), isFeatured: featuredIds.has(p.id) });
+            const computed = Object.assign(Object.assign({}, p), { badge: computeBadge(p), isNew: isNewProduct(p), isBestSeller: isBestSellerProduct(p), isPopular: popularIds.has(p.id) });
             return computed;
         });
         let filtered = withComputed;
@@ -248,7 +241,7 @@ router.get('/', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0
 // GET single product
 router.get('/:id', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const product = yield prisma.product.findUnique({
+        const product = yield prisma_1.default.product.findUnique({
             where: { id: parseInt(String(req.params.id)) },
             include: {
                 category: true,
@@ -265,7 +258,7 @@ router.get('/:id', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(voi
         });
         if (!product)
             return res.status(404).json({ error: 'Product not found' });
-        const popularCandidates = yield prisma.product.findMany({
+        const popularCandidates = yield prisma_1.default.product.findMany({
             where: { status: 'published', isVisible: true, inStock: true },
             orderBy: [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }],
             take: 300,
@@ -283,14 +276,7 @@ router.get('/:id', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(voi
             .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
             .slice(0, 8)
             .map(p => p.id));
-        const featuredCandidates = yield prisma.product.findMany({
-            where: { status: 'published', isVisible: true, inStock: true },
-            orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
-            take: 8,
-            select: { id: true },
-        });
-        const featuredIds = new Set(featuredCandidates.map(p => p.id));
-        res.json(Object.assign(Object.assign({}, product), { badge: computeBadge(product), isNew: isNewProduct(product), isBestSeller: isBestSellerProduct(product), isPopular: popularIds.has(product.id), isFeatured: featuredIds.has(product.id) }));
+        res.json(Object.assign(Object.assign({}, product), { badge: computeBadge(product), isNew: isNewProduct(product), isBestSeller: isBestSellerProduct(product), isPopular: popularIds.has(product.id) }));
     }
     catch (error) {
         res.status(500).json({ error: 'Failed to fetch product' });
@@ -309,7 +295,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const ids = Array.isArray(attributeValueIds)
             ? attributeValueIds.map((n) => parseInt(String(n))).filter((n) => Number.isFinite(n))
             : [];
-        const product = yield prisma.product.create({
+        const product = yield prisma_1.default.product.create({
             data: {
                 name: data.name,
                 nameAr: data.nameAr || '',
@@ -369,7 +355,7 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const ids = Array.isArray(attributeValueIds)
             ? attributeValueIds.map((n) => parseInt(String(n))).filter((n) => Number.isFinite(n))
             : undefined;
-        const product = yield prisma.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        const product = yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
             const updated = yield tx.product.update({
                 where: { id },
                 data,
@@ -412,11 +398,11 @@ router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         if (isNaN(productId)) {
             return res.status(400).json({ error: 'Invalid product ID' });
         }
-        const product = yield prisma.product.findUnique({ where: { id: productId } });
+        const product = yield prisma_1.default.product.findUnique({ where: { id: productId } });
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
         }
-        yield prisma.productAttributeValue.deleteMany({ where: { productId } });
+        yield prisma_1.default.productAttributeValue.deleteMany({ where: { productId } });
         const driver = (process.env.UPLOADS_DRIVER || 'local').toLowerCase();
         if (driver === 'local') {
             const baseUploadsDir = process.env.UPLOADS_DIR || path_1.default.resolve(process.cwd(), 'uploads');
@@ -448,7 +434,7 @@ router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* 
             for (const img of product.images || [])
                 tryUnlink(img);
         }
-        yield prisma.product.delete({
+        yield prisma_1.default.product.delete({
             where: { id: productId },
         });
         (0, cache_1.clearCache)();
@@ -460,7 +446,7 @@ router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         if (error.code === 'P2003') {
             try {
                 // Soft delete / Archive instead
-                yield prisma.product.update({
+                yield prisma_1.default.product.update({
                     where: { id: parseInt(String(req.params.id)) },
                     data: {
                         status: 'archived',

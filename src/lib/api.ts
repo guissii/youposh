@@ -44,9 +44,44 @@ export interface DashboardStats {
     uniqueVisitors?: number;
 }
 
+export interface VpsStatus {
+    memory: {
+        total: number;
+        used: number;
+        free: number;
+        percent: number;
+    };
+    cpu: {
+        loadAvg: number[];
+        cores: number;
+        percent: number;
+    };
+    disk: {
+        total: number;
+        used: number;
+        percent: number;
+    };
+    uptime: number;
+    nginx: 'active' | 'down' | 'unknown';
+    postgresql: 'active' | 'down' | 'unknown';
+    pm2: Array<{
+        name: string;
+        status: string;
+        cpu: number;
+        memory: number;
+    }>;
+    uploads: {
+        size: string;
+        count: number;
+    };
+    nodeVersion: string;
+    timestamp: string;
+}
+
 export const fetchDashboardStats = () => apiFetch<DashboardStats>('/dashboard/stats');
 export const fetchRecentOrders = () => apiFetch<any[]>('/dashboard/recent-orders');
 export const fetchTopProducts = () => apiFetch<any[]>('/dashboard/top-products');
+export const fetchVpsStatus = () => apiFetch<VpsStatus>('/dashboard/vps-status');
 
 // ─── Products ──────────────────────────────────────────────────
 export const fetchProducts = (params?: string) =>

@@ -6,7 +6,7 @@ import {
   LogOut, Search, Bell, DollarSign, Clock, CheckCircle,
   Eye, EyeOff, Plus, Pencil, Trash2, X,
   TrendingUp, RefreshCw, ChevronDown, Ticket, FolderOpen, Save, Check, Stamp,
-  Flame, FileSpreadsheet, Menu, Upload, Loader2, Download, UploadCloud
+  Flame, FileSpreadsheet, Menu, Upload, Loader2, Download, UploadCloud, Server, Activity, HardDrive, Cpu
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -15,7 +15,7 @@ import {
   fetchOrders, updateOrderStatus, deleteOrder, syncOrderToSheets,
   fetchCategories, deleteCategory,
   fetchPromoCodes, deletePromoCode,
-  type DashboardStats, setWatermarkStatusAPI, uploadVideo,
+  type DashboardStats, type VpsStatus, fetchVpsStatus, setWatermarkStatusAPI, uploadVideo,
   exportBackupAPI, importBackupAPI
 } from '@/lib/api';
 import {
@@ -34,7 +34,7 @@ import { loadHeroSettings, saveHeroSettings, fetchHeroSettingsGlobal } from '@/d
 import { getImageUrl } from '@/lib/utils';
 import * as XLSX from 'xlsx';
 
-type TabId = 'dashboard' | 'orders' | 'products' | 'categories' | 'promos' | 'watermark' | 'hero' | 'settings';
+type TabId = 'dashboard' | 'orders' | 'products' | 'categories' | 'promos' | 'watermark' | 'hero' | 'server' | 'settings';
 
 const AdminPage = () => {
   const { t } = useTranslation();
@@ -44,6 +44,7 @@ const AdminPage = () => {
   const [loading, setLoading] = useState(false);
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [vpsStatus, setVpsStatus] = useState<VpsStatus | null>(null);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [topProducts, setTopProducts] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
@@ -56,6 +57,7 @@ const AdminPage = () => {
   const [productCategoryFilter, setProductCategoryFilter] = useState<string>('all');
   const [showArchivedProducts, setShowArchivedProducts] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [serverLoading, setServerLoading] = useState(false);
 
   const [productModal, setProductModal] = useState<{ open: boolean; product?: any }>({ open: false });
   const [promoModal, setPromoModal] = useState<{ open: boolean; promo?: any }>({ open: false });
@@ -161,6 +163,18 @@ const AdminPage = () => {
     setLoading(false);
   }, []);
 
+  const loadServerStatus = useCallback(async () => {
+    setServerLoading(true);
+    try {
+      const data = await fetchVpsStatus();
+      setVpsStatus(data);
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || "Impossible de charger l'état du serveur");
+    }
+    setServerLoading(false);
+  }, []);
+
   useEffect(() => {
     // Initial load for sidebar branding
     fetchStoreSettingsGlobal().then(setStoreForm);
@@ -173,6 +187,7 @@ const AdminPage = () => {
     if (activeTab === 'orders') loadOrders();
     if (activeTab === 'categories') loadCategories();
     if (activeTab === 'promos') loadPromoCodes();
+    if (activeTab === 'server') loadServerStatus();
 
     // Refresh settings when entering relevant tabs
     if (activeTab === 'settings' || activeTab === 'watermark') {
@@ -182,7 +197,7 @@ const AdminPage = () => {
     if (activeTab === 'hero') {
       fetchHeroSettingsGlobal().then(setHeroForm);
     }
-  }, [activeTab, loadCategories, loadDashboard, loadOrders, loadProducts, loadPromoCodes]);
+  }, [activeTab, loadCategories, loadDashboard, loadOrders, loadProducts, loadPromoCodes, loadServerStatus]);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -1415,6 +1430,143 @@ const AdminPage = () => {
     </div>
   );
 
+  // ─── Server (VPS) Status ────────────────────────────────────
+  const renderServerStatus = () => {
+    const formatBytes = (bytes?: number) => {
+      if (!bytes || bytes <= 0) return '0 B';
+      const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+      let value = bytes;
+      let i = 0;
+      while (value >= 1024 && i < units.length - 1) {
+        value /= 1024;
+        i += 1;
+      }
+      return `${value.toFixed(value >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+    };
+
+    const formatDuration = (seconds?: number) => {
+      if (!seconds || seconds <= 0) return '0m';
+      const total = Math.floor(seconds);
+      const d = Math.floor(total / 86400);
+      const h = Math.floor((total % 86400) / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      return `${d}j ${h}h ${m}m`;
+    };
+
+    const pm2Total = vpsStatus?.pm2?.length ?? 0;
+    const pm2Online = (vpsStatus?.pm2 ?? []).filter(p => p.status === 'online').length;
+    const memoryPercent = Math.max(0, Math.min(100, vpsStatus?.memory?.percent ?? 0));
+    const diskPercent = Math.max(0, Math.min(100, vpsStatus?.disk?.percent ?? 0));
+    const cpuPercent = Math.max(0, Math.min(100, vpsStatus?.cpu?.percent ?? 0));
+
+    const statusCards = [
+      { label: 'Nginx', ok: vpsStatus?.nginx === 'active', text: vpsStatus?.nginx === 'active' ? 'Active' : 'Down' },
+      { label: 'PostgreSQL', ok: vpsStatus?.postgresql === 'active', text: vpsStatus?.postgresql === 'active' ? 'Connected' : 'Down' },
+      { label: 'PM2', ok: pm2Total > 0 && pm2Online === pm2Total, text: `${pm2Online}/${pm2Total} online` },
+    ];
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-[#333]">Serveur (VPS)</h2>
+          <button
+            onClick={loadServerStatus}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--yp-blue)] text-white hover:bg-[var(--yp-blue-dark)] transition-colors text-sm font-medium"
+          >
+            <RefreshCw className={`w-4 h-4 ${serverLoading ? 'animate-spin' : ''}`} />
+            Actualiser
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {statusCards.map(card => (
+            <div key={card.label} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-[#333]">{card.label}</p>
+                <div className={`w-3 h-3 rounded-full ${card.ok ? 'bg-emerald-500' : 'bg-red-500'}`} />
+              </div>
+              <p className={`mt-3 text-sm font-medium ${card.ok ? 'text-emerald-600' : 'text-red-600'}`}>{card.text}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-[#333]">RAM</p>
+              <Activity className="w-4 h-4 text-[var(--yp-blue)]" />
+            </div>
+            <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full" style={{ width: `${memoryPercent}%` }} />
+            </div>
+            <p className="mt-2 text-sm text-[#666]">{formatBytes(vpsStatus?.memory?.used)} / {formatBytes(vpsStatus?.memory?.total)} ({memoryPercent}%)</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-[#333]">Disque</p>
+              <HardDrive className="w-4 h-4 text-[var(--yp-blue)]" />
+            </div>
+            <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full" style={{ width: `${diskPercent}%` }} />
+            </div>
+            <p className="mt-2 text-sm text-[#666]">{formatBytes(vpsStatus?.disk?.used)} / {formatBytes(vpsStatus?.disk?.total)} ({diskPercent}%)</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-[#333]">CPU</p>
+              <Cpu className="w-4 h-4 text-[var(--yp-blue)]" />
+            </div>
+            <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full" style={{ width: `${cpuPercent}%` }} />
+            </div>
+            <p className="mt-2 text-sm text-[#666]">Load: {(vpsStatus?.cpu?.loadAvg ?? []).join(', ') || '0, 0, 0'} ({cpuPercent}%)</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <p className="text-sm font-semibold text-[#333]">Uptime API</p>
+            <p className="mt-3 text-xl font-bold text-[var(--yp-blue)]">{formatDuration(vpsStatus?.uptime)}</p>
+          </div>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <p className="text-sm font-semibold text-[#333]">Node.js</p>
+            <p className="mt-3 text-xl font-bold text-[var(--yp-blue)]">{vpsStatus?.nodeVersion || '—'}</p>
+          </div>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <p className="text-sm font-semibold text-[#333]">Uploads</p>
+            <p className="mt-3 text-xl font-bold text-[var(--yp-blue)]">{vpsStatus?.uploads?.size || '0'}</p>
+            <p className="text-xs text-[#999] mt-1">{vpsStatus?.uploads?.count ?? 0} fichiers</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Server className="w-4 h-4 text-[var(--yp-blue)]" />
+            <h3 className="font-semibold text-[#333]">Processus PM2</h3>
+          </div>
+          {(vpsStatus?.pm2?.length ?? 0) === 0 ? (
+            <p className="text-sm text-[#999]">Aucun processus détecté</p>
+          ) : (
+            <div className="space-y-2">
+              {(vpsStatus?.pm2 ?? []).map((proc, index) => (
+                <div key={`${proc.name}-${index}`} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2.5 h-2.5 rounded-full ${proc.status === 'online' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                    <span className="font-medium text-sm text-[#333]">{proc.name}</span>
+                    <span className={`text-[11px] px-2 py-0.5 rounded-full ${proc.status === 'online' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>{proc.status}</span>
+                  </div>
+                  <div className="text-xs text-[#666]">CPU {proc.cpu}% • RAM {formatBytes(proc.memory)}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   // ─── Order Detail Modal ─────────────────────────────────────
   const renderOrderDetail = () => {
     if (!orderDetail) return null;
@@ -1463,10 +1615,11 @@ const AdminPage = () => {
     { id: 'promos', label: 'Codes Promo', icon: Ticket },
     { id: 'watermark', label: 'Watermark', icon: Stamp },
     { id: 'hero', label: 'Accueil (Hero)', icon: Flame },
+    { id: 'server', label: 'Serveur (VPS)', icon: Server },
     { id: 'settings', label: t('settings'), icon: Settings },
   ];
 
-  const tabTitles: Record<TabId, string> = { dashboard: t('dashboard'), orders: t('orders'), products: t('products'), categories: 'Catégories', promos: 'Codes Promo', watermark: 'Watermark', hero: 'Configuration Accueil', settings: t('settings') };
+  const tabTitles: Record<TabId, string> = { dashboard: t('dashboard'), orders: t('orders'), products: t('products'), categories: 'Catégories', promos: 'Codes Promo', watermark: 'Watermark', hero: 'Configuration Accueil', server: 'Serveur (VPS)', settings: t('settings') };
 
   const handleLogout = () => {
     localStorage.removeItem('yp_admin_token');
@@ -1552,6 +1705,7 @@ const AdminPage = () => {
           {activeTab === 'promos' && renderPromoCodes()}
           {activeTab === 'watermark' && renderWatermark()}
           {activeTab === 'hero' && renderHeroSettings()}
+          {activeTab === 'server' && renderServerStatus()}
           {activeTab === 'settings' && renderSettings()}
         </div>
       </main>

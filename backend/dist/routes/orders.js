@@ -8,12 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const client_1 = require("@prisma/client");
+const prisma_1 = __importDefault(require("../utils/prisma"));
 const googleapis_1 = require("googleapis");
 const router = (0, express_1.Router)();
-const prisma = new client_1.PrismaClient();
 const SHEETS_SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 let didWarnSheetsEnvMissing = false;
 function warnSheetsEnvMissing() {
@@ -629,7 +631,7 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 { id: { contains: search, mode: 'insensitive' } },
             ];
         }
-        const orders = yield prisma.order.findMany({
+        const orders = yield prisma_1.default.order.findMany({
             where,
             orderBy: { createdAt: 'desc' },
             include: {
@@ -648,7 +650,7 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 // GET single order
 router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const order = yield prisma.order.findUnique({
+        const order = yield prisma_1.default.order.findUnique({
             where: { id: req.params.id },
             include: {
                 items: { include: { product: true } },
@@ -684,7 +686,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             .filter(Boolean)
             .join('\n');
         const finalNotes = [notes, extraNotes].filter((s) => typeof s === 'string' && s.trim()).join('\n');
-        const order = yield prisma.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        const order = yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
             var _a, _b, _c, _d;
             const productIds = [...new Set(normalizedItems.map((it) => it.productId))];
             const products = yield tx.product.findMany({
@@ -849,7 +851,7 @@ router.put('/:id/status', (req, res) => __awaiter(void 0, void 0, void 0, functi
         if (!validStatuses.includes(status)) {
             return res.status(400).json({ error: 'Invalid status' });
         }
-        const order = yield prisma.order.update({
+        const order = yield prisma_1.default.order.update({
             where: { id: req.params.id },
             data: { status },
             include: {
@@ -873,13 +875,13 @@ router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     try {
         const { removeFromSheets } = req.query;
         const shouldRemoveFromSheets = String(removeFromSheets !== null && removeFromSheets !== void 0 ? removeFromSheets : '') === '1' || String(removeFromSheets !== null && removeFromSheets !== void 0 ? removeFromSheets : '').toLowerCase() === 'true';
-        const existing = yield prisma.order.findUnique({
+        const existing = yield prisma_1.default.order.findUnique({
             where: { id: req.params.id },
             select: { id: true, createdAt: true },
         });
         if (!existing)
             return res.status(404).json({ error: 'Order not found' });
-        yield prisma.order.delete({
+        yield prisma_1.default.order.delete({
             where: { id: req.params.id },
         });
         let sheets = undefined;
@@ -902,7 +904,7 @@ router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* 
 router.post('/:id/sync', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c, _d, _e;
     try {
-        const order = yield prisma.order.findUnique({
+        const order = yield prisma_1.default.order.findUnique({
             where: { id: req.params.id },
             include: {
                 items: { include: { product: true } },
