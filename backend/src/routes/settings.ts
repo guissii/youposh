@@ -21,8 +21,9 @@ function requireAdmin(req: express.Request, res: express.Response): boolean {
             return false;
         }
         return true;
-    } catch {
-        res.status(401).json({ error: 'Token invalide' });
+    } catch (e: any) {
+        console.error('JWT Error in requireAdmin:', e);
+        res.status(401).json({ error: `Token invalide (${e?.message || 'erreur inconnue'})` });
         return false;
     }
 }
