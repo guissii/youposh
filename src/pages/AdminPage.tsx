@@ -173,7 +173,7 @@ const AdminPage = () => {
     if (activeTab === 'orders') loadOrders();
     if (activeTab === 'categories') loadCategories();
     if (activeTab === 'promos') loadPromoCodes();
-    
+
     // Refresh settings when entering relevant tabs
     if (activeTab === 'settings' || activeTab === 'watermark') {
       loadPromoCodes(); // For global coupon selector
@@ -216,7 +216,7 @@ const AdminPage = () => {
       if (deleteConfirm.type === 'product') {
         const id = Number(deleteConfirm.id);
         if (isNaN(id)) throw new Error('ID produit invalide');
-        
+
         const result = await deleteProduct(id);
         if (result?.action === 'archived') {
           toast.success(result.message || 'Produit archivé');
@@ -345,13 +345,13 @@ const AdminPage = () => {
 
   const handleSyncOrder = async (oid: string) => {
     try {
-        toast.promise(syncOrderToSheets(oid), {
-            loading: 'Synchronisation en cours...',
-            success: 'Commande synchronisée avec Google Sheets !',
-            error: (err) => `Erreur sync: ${err.message}`
-        });
+      toast.promise(syncOrderToSheets(oid), {
+        loading: 'Synchronisation en cours...',
+        success: 'Commande synchronisée avec Google Sheets !',
+        error: (err) => `Erreur sync: ${err.message}`
+      });
     } catch (e) {
-        console.error(e);
+      console.error(e);
     }
   };
 
@@ -496,91 +496,91 @@ const AdminPage = () => {
                   </tr>
                   {g.orders.map(o => (
                     <tr key={o.id} className="hover:bg-blue-50/30 transition-colors group">
-                  <td className="px-6 py-4">
-                    <span className="font-mono text-xs font-medium text-gray-400 bg-gray-50 p-1.5 rounded-md border border-gray-100" title={o.id}>
-                      #{o.id.slice(0, 6)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-900">{new Date(o.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>
-                      <span className="text-xs text-gray-500">{new Date(o.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm shrink-0">
-                        {o.customerName ? o.customerName.charAt(0).toUpperCase() : '?'}
-                      </div>
-                      <div>
-                        <p className="font-bold text-gray-900 text-sm max-w-[150px] truncate" title={o.customerName}>{o.customerName}</p>
-                        <p className="text-xs text-gray-500">{o.items?.length || 0} article(s)</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-sm font-medium text-gray-700 font-mono tracking-tight">{o.phone}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-gray-800">{o.city}</span>
-                      <span className="text-xs text-gray-500 max-w-[180px] truncate" title={o.address}>{o.address || 'Aucune adresse'}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="font-black text-[var(--yp-blue)] text-base whitespace-nowrap">
-                      {o.total.toFixed(2)} MAD
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col gap-2 items-start">
-                      <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wide uppercase border ${getOrderStatusColor(o.status)}`}>
-                        {getOrderStatusLabel(o.status)}
-                      </span>
-                      <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wide uppercase border ${getDeliveryStatusColor(getDeliveryStatusFromOrderStatus(o.status))}`}>
-                        {getDeliveryStatusLabel(getDeliveryStatusFromOrderStatus(o.status))}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => setOrderDetail(o)}
-                        className="p-2 bg-gray-50 hover:bg-blue-100 rounded-xl text-gray-500 hover:text-blue-700 transition-colors border border-gray-100 hover:border-blue-200 shadow-sm"
-                        title="Détails"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
+                      <td className="px-6 py-4">
+                        <span className="font-mono text-xs font-medium text-gray-400 bg-gray-50 p-1.5 rounded-md border border-gray-100" title={o.id}>
+                          #{o.id.slice(0, 6)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-900">{new Date(o.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>
+                          <span className="text-xs text-gray-500">{new Date(o.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm shrink-0">
+                            {o.customerName ? o.customerName.charAt(0).toUpperCase() : '?'}
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900 text-sm max-w-[150px] truncate" title={o.customerName}>{o.customerName}</p>
+                            <p className="text-xs text-gray-500">{o.items?.length || 0} article(s)</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-sm font-medium text-gray-700 font-mono tracking-tight">{o.phone}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-semibold text-gray-800">{o.city}</span>
+                          <span className="text-xs text-gray-500 max-w-[180px] truncate" title={o.address}>{o.address || 'Aucune adresse'}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-black text-[var(--yp-blue)] text-base whitespace-nowrap">
+                          {o.total.toFixed(2)} MAD
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-2 items-start">
+                          <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wide uppercase border ${getOrderStatusColor(o.status)}`}>
+                            {getOrderStatusLabel(o.status)}
+                          </span>
+                          <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wide uppercase border ${getDeliveryStatusColor(getDeliveryStatusFromOrderStatus(o.status))}`}>
+                            {getDeliveryStatusLabel(getDeliveryStatusFromOrderStatus(o.status))}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => setOrderDetail(o)}
+                            className="p-2 bg-gray-50 hover:bg-blue-100 rounded-xl text-gray-500 hover:text-blue-700 transition-colors border border-gray-100 hover:border-blue-200 shadow-sm"
+                            title="Détails"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
 
-                      {o.status === 'pending' && (
-                        <button
-                          onClick={() => handleStatusChange(o.id, 'processing')}
-                          className="p-2 bg-green-50 hover:bg-green-100 rounded-xl text-green-600 hover:text-green-700 transition-colors border border-green-100 hover:border-green-300 shadow-sm"
-                          title="Accepter la commande"
-                        >
-                          <CheckCircle className="w-4 h-4" />
-                        </button>
-                      )}
+                          {o.status === 'pending' && (
+                            <button
+                              onClick={() => handleStatusChange(o.id, 'processing')}
+                              className="p-2 bg-green-50 hover:bg-green-100 rounded-xl text-green-600 hover:text-green-700 transition-colors border border-green-100 hover:border-green-300 shadow-sm"
+                              title="Accepter la commande"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                            </button>
+                          )}
 
-                      <button
-                        onClick={() => handleSyncOrder(o.id)}
-                        className="p-2 bg-green-50 hover:bg-green-100 rounded-xl text-green-600 hover:text-green-700 transition-colors border border-green-100 hover:border-green-300 shadow-sm"
-                        title="Synchroniser vers Google Sheets"
-                      >
-                        <FileSpreadsheet className="w-4 h-4" />
-                      </button>
+                          <button
+                            onClick={() => handleSyncOrder(o.id)}
+                            className="p-2 bg-green-50 hover:bg-green-100 rounded-xl text-green-600 hover:text-green-700 transition-colors border border-green-100 hover:border-green-300 shadow-sm"
+                            title="Synchroniser vers Google Sheets"
+                          >
+                            <FileSpreadsheet className="w-4 h-4" />
+                          </button>
 
-                      <button
-                        onClick={() => setDeleteConfirm({ type: 'order', id: o.id })}
-                        className="p-2 bg-red-50 hover:bg-red-100 rounded-xl text-red-500 hover:text-red-700 transition-colors border border-red-100 hover:border-red-300 shadow-sm"
-                        title="Supprimer"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+                          <button
+                            onClick={() => setDeleteConfirm({ type: 'order', id: o.id })}
+                            className="p-2 bg-red-50 hover:bg-red-100 rounded-xl text-red-500 hover:text-red-700 transition-colors border border-red-100 hover:border-red-300 shadow-sm"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </Fragment>
@@ -887,7 +887,7 @@ const AdminPage = () => {
             <p className="text-sm font-semibold text-[#333]">Aperçu en direct</p>
             <span className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Glisser pour déplacer</span>
           </div>
-          
+
           <div
             className="relative w-full aspect-square bg-gray-100 rounded-2xl overflow-hidden select-none border border-gray-200 shadow-inner group cursor-crosshair"
             onMouseDown={(e) => {
@@ -912,7 +912,7 @@ const AdminPage = () => {
               className="absolute inset-0 w-full h-full object-cover"
               onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
             />
-            
+
             {/* Grid lines for alignment help */}
             <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <div className="absolute top-1/2 left-0 right-0 h-px bg-white/30 border-t border-dashed border-gray-400/50"></div>
@@ -934,7 +934,7 @@ const AdminPage = () => {
                 }}
               />
             )}
-            
+
             {!storeForm.watermarkEnabled && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/5 backdrop-blur-[1px]">
                 <div className="bg-white/90 px-4 py-2 rounded-lg shadow-sm text-xs font-medium text-gray-500 flex items-center gap-2">
@@ -944,7 +944,7 @@ const AdminPage = () => {
               </div>
             )}
           </div>
-          
+
           <div className="mt-6 flex justify-end">
             <button onClick={handleStoreSave} className="px-8 py-3 bg-[var(--yp-blue)] text-white rounded-xl hover:bg-[var(--yp-blue-dark)] font-semibold flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all active:scale-95">
               {storeSaved ? <Check className="w-5 h-5" /> : <Save className="w-5 h-5" />}
@@ -1015,7 +1015,7 @@ const AdminPage = () => {
             </button>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <div>
@@ -1028,7 +1028,7 @@ const AdminPage = () => {
                   className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
                   placeholder="/videos/hero video.mp4"
                 />
-                <label className={`flex-shrink-0 flex items-center justify-center px-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 cursor-pointer hover:bg-gray-100 transition-colors ${isUploadingVideo ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                <label className={`flex-shrink-0 flex items-center justify-center px-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 cursor-pointer hover:bg-gray-100 transition-colors ${isUploadingVideo ? 'opacity-50 cursor-not-allowed' : ''}`} title="Uploader une nouvelle vidéo">
                   {isUploadingVideo ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
                   <input
                     type="file"
@@ -1038,6 +1038,16 @@ const AdminPage = () => {
                     disabled={isUploadingVideo}
                   />
                 </label>
+                {heroForm.videoUrl && (
+                  <button
+                    type="button"
+                    title="Supprimer la vidéo"
+                    onClick={() => setHeroForm(f => ({ ...f, videoUrl: '' }))}
+                    className="flex-shrink-0 flex items-center justify-center px-4 rounded-xl border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                )}
               </div>
             </div>
             <div>
@@ -1073,11 +1083,11 @@ const AdminPage = () => {
 
           <div>
             <label className="block text-sm font-medium text-[#666] mb-1">Texte du Badge (ex: N°1 au Maroc)</label>
-            <input 
-              type="text" 
-              value={heroForm.badgeText || ''} 
-              onChange={e => setHeroForm(f => ({ ...f, badgeText: e.target.value }))} 
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" 
+            <input
+              type="text"
+              value={heroForm.badgeText || ''}
+              onChange={e => setHeroForm(f => ({ ...f, badgeText: e.target.value }))}
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
             />
           </div>
 
@@ -1085,17 +1095,17 @@ const AdminPage = () => {
             <div>
               <label className="block text-sm font-medium text-[#666] mb-1">Couleur de fond du Badge</label>
               <div className="flex items-center gap-2">
-                <input 
-                  type="color" 
-                  value={heroForm.badgeColor?.startsWith('#') ? heroForm.badgeColor : '#ffffff'} 
-                  onChange={e => setHeroForm(f => ({ ...f, badgeColor: e.target.value }))} 
-                  className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white" 
+                <input
+                  type="color"
+                  value={heroForm.badgeColor?.startsWith('#') ? heroForm.badgeColor : '#ffffff'}
+                  onChange={e => setHeroForm(f => ({ ...f, badgeColor: e.target.value }))}
+                  className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white"
                 />
-                <input 
-                  type="text" 
-                  value={heroForm.badgeColor || ''} 
-                  onChange={e => setHeroForm(f => ({ ...f, badgeColor: e.target.value }))} 
-                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" 
+                <input
+                  type="text"
+                  value={heroForm.badgeColor || ''}
+                  onChange={e => setHeroForm(f => ({ ...f, badgeColor: e.target.value }))}
+                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
                   placeholder="rgba(255,255,255,0.1) ou #FFFFFF"
                 />
               </div>
@@ -1103,17 +1113,17 @@ const AdminPage = () => {
             <div>
               <label className="block text-sm font-medium text-[#666] mb-1">Couleur du texte du Badge</label>
               <div className="flex items-center gap-2">
-                <input 
-                  type="color" 
-                  value={heroForm.badgeTextColor || '#ffffff'} 
-                  onChange={e => setHeroForm(f => ({ ...f, badgeTextColor: e.target.value }))} 
-                  className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white" 
+                <input
+                  type="color"
+                  value={heroForm.badgeTextColor || '#ffffff'}
+                  onChange={e => setHeroForm(f => ({ ...f, badgeTextColor: e.target.value }))}
+                  className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white"
                 />
-                <input 
-                  type="text" 
-                  value={heroForm.badgeTextColor || ''} 
-                  onChange={e => setHeroForm(f => ({ ...f, badgeTextColor: e.target.value }))} 
-                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" 
+                <input
+                  type="text"
+                  value={heroForm.badgeTextColor || ''}
+                  onChange={e => setHeroForm(f => ({ ...f, badgeTextColor: e.target.value }))}
+                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
                   placeholder="#FFFFFF"
                 />
               </div>
@@ -1124,17 +1134,17 @@ const AdminPage = () => {
             <div>
               <label className="block text-sm font-medium text-[#666] mb-1">Couleur "YOU"</label>
               <div className="flex items-center gap-2">
-                <input 
-                  type="color" 
-                  value={heroForm.titleColorYou?.startsWith('#') ? heroForm.titleColorYou : '#2563EB'} 
-                  onChange={e => setHeroForm(f => ({ ...f, titleColorYou: e.target.value }))} 
-                  className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white" 
+                <input
+                  type="color"
+                  value={heroForm.titleColorYou?.startsWith('#') ? heroForm.titleColorYou : '#2563EB'}
+                  onChange={e => setHeroForm(f => ({ ...f, titleColorYou: e.target.value }))}
+                  className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white"
                 />
-                <input 
-                  type="text" 
-                  value={heroForm.titleColorYou || ''} 
-                  onChange={e => setHeroForm(f => ({ ...f, titleColorYou: e.target.value }))} 
-                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" 
+                <input
+                  type="text"
+                  value={heroForm.titleColorYou || ''}
+                  onChange={e => setHeroForm(f => ({ ...f, titleColorYou: e.target.value }))}
+                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
                   placeholder="#2563EB"
                 />
               </div>
@@ -1142,17 +1152,17 @@ const AdminPage = () => {
             <div>
               <label className="block text-sm font-medium text-[#666] mb-1">Couleur "POSH"</label>
               <div className="flex items-center gap-2">
-                <input 
-                  type="color" 
-                  value={heroForm.titleColorPosh?.startsWith('#') ? heroForm.titleColorPosh : '#DC2626'} 
-                  onChange={e => setHeroForm(f => ({ ...f, titleColorPosh: e.target.value }))} 
-                  className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white" 
+                <input
+                  type="color"
+                  value={heroForm.titleColorPosh?.startsWith('#') ? heroForm.titleColorPosh : '#DC2626'}
+                  onChange={e => setHeroForm(f => ({ ...f, titleColorPosh: e.target.value }))}
+                  className="w-12 h-11 border border-gray-200 rounded-xl p-1 bg-white"
                 />
-                <input 
-                  type="text" 
-                  value={heroForm.titleColorPosh || ''} 
-                  onChange={e => setHeroForm(f => ({ ...f, titleColorPosh: e.target.value }))} 
-                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" 
+                <input
+                  type="text"
+                  value={heroForm.titleColorPosh || ''}
+                  onChange={e => setHeroForm(f => ({ ...f, titleColorPosh: e.target.value }))}
+                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
                   placeholder="#DC2626"
                 />
               </div>
@@ -1161,20 +1171,20 @@ const AdminPage = () => {
 
           <div>
             <label className="block text-sm font-medium text-[#666] mb-1">Titre Principal</label>
-            <input 
-              type="text" 
-              value={heroForm.title || ''} 
-              onChange={e => setHeroForm(f => ({ ...f, title: e.target.value }))} 
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]" 
+            <input
+              type="text"
+              value={heroForm.title || ''}
+              onChange={e => setHeroForm(f => ({ ...f, title: e.target.value }))}
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-[#666] mb-1">Sous-titre</label>
-            <textarea 
-              value={heroForm.subtitle || ''} 
-              onChange={e => setHeroForm(f => ({ ...f, subtitle: e.target.value }))} 
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)] h-24" 
+            <textarea
+              value={heroForm.subtitle || ''}
+              onChange={e => setHeroForm(f => ({ ...f, subtitle: e.target.value }))}
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)] h-24"
             />
           </div>
         </div>
@@ -1266,7 +1276,7 @@ const AdminPage = () => {
             {isExporting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
             {isExporting ? 'Création en cours...' : 'Télécharger une Sauvegarde'}
           </button>
-          
+
           <label className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 border-2 border-dashed border-[var(--yp-blue)] text-[var(--yp-blue)] bg-blue-50 rounded-xl font-medium transition-all cursor-pointer ${isImporting ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-100'}`}>
             {isImporting ? <Loader2 className="w-5 h-5 animate-spin" /> : <UploadCloud className="w-5 h-5" />}
             {isImporting ? 'Restauration en cours...' : 'Restaurer une Sauvegarde'}
@@ -1364,7 +1374,7 @@ const AdminPage = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h3 className="font-semibold text-[#333] mb-4">Coupon Global (Pop-up)</h3>
         <p className="text-sm text-[#666] mb-4">Sélectionnez un code promo à afficher sous forme de pop-up sur le site pour tous les visiteurs.</p>
-        
+
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => setStoreForm((f: any) => ({ ...f, globalCouponEnabled: !f.globalCouponEnabled }))}
