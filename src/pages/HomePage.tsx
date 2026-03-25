@@ -33,9 +33,9 @@ export default function HomePage() {
   const discoverRef = useScrollReveal();
 
   // Use React Query for data fetching
-  const { data: promosRaw = [], isError: promoError } = useQuery({
-    queryKey: ['products', 'promo'],
-    queryFn: () => fetchProducts('limit=12'),
+  const { data: featuredRaw = [], isError: featuredError } = useQuery({
+    queryKey: ['products', 'featured'],
+    queryFn: () => fetchProducts('badge=featured&limit=8'),
   });
 
   const { data: popularRaw = [], isError: popularError } = useQuery({
@@ -48,7 +48,20 @@ export default function HomePage() {
     queryFn: () => fetchProducts('sort=newest&limit=8'),
   });
 
-  const promoProducts = promosRaw.filter((p: any) => p.isVisible !== false).slice(0, 6);
+  // Priorité 1: Produits sélectionnés manuellement "Offres du jour" (isFeatured === true)
+  let promoProducts = featuredRaw.filter((p: any) => p.isVisible !== false);
+
+  // Workflow Fallback: Si l'admin a oublié ou n'a pas sélectionné assez de produits (< 4),
+  // on remplit la section dynamiquement avec les produits populaires pour éviter une section vide.
+  if (promoProducts.length < 4) {
+    const fillerProducts = popularRaw
+      .filter((p: any) => p.isVisible !== false && !promoProducts.some((fp: any) => fp.id === p.id))
+      .slice(0, 4 - promoProducts.length);
+    promoProducts = [...promoProducts, ...fillerProducts];
+  }
+
+  promoProducts = promoProducts.slice(0, 6); // Max 6 (4 en affichage bureau, scroll sur mobile)
+
   const bestsellers = popularRaw.filter((p: any) => p.isVisible !== false).slice(0, 4);
   const newArrivals = latestRaw.filter((p: any) => p.isVisible !== false).slice(0, 4);
   const isHeroVideoEnabled = heroSettings.videoEnabled !== false;
@@ -57,7 +70,7 @@ export default function HomePage() {
     setIsHeroVideoReady(false);
   }, [heroSettings.videoUrl, isHeroVideoEnabled]);
 
-  const error = (popularError || newError || promoError) ? "Impossible de charger les produits. Veuillez vérifier votre connexion." : null;
+  const error = (popularError || newError || featuredError) ? "Impossible de charger les produits. Veuillez vérifier votre connexion." : null;
 
   if (error) {
     return (
@@ -67,8 +80,8 @@ export default function HomePage() {
           <div className="text-center bg-white p-8 rounded-2xl shadow-sm max-w-md w-full">
             <h2 className="text-xl font-bold text-red-600 mb-2">Oups !</h2>
             <p className="text-gray-600">{error}</p>
-            <button 
-              onClick={() => window.location.reload()} 
+            <button
+              onClick={() => window.location.reload()}
               className="mt-6 bg-blue-600 text-white px-6 py-2 rounded-xl font-medium"
             >
               Réessayer
@@ -89,7 +102,7 @@ export default function HomePage() {
             HERO — Minimalist Blue Gradient Design
             ══════════════════════════════════════════════ */}
         <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
-          
+
           {/* Hero Video Background */}
           <div
             className="absolute inset-0 w-full h-full overflow-hidden"
@@ -100,7 +113,7 @@ export default function HomePage() {
               style={{ background: 'radial-gradient(circle at 20% 20%, #3B82F6 0%, transparent 40%), radial-gradient(circle at 80% 10%, #1E40AF 0%, transparent 35%), linear-gradient(145deg, #04153A 0%, #0A2D73 45%, #1D4ED8 100%)' }}
             />
             {isHeroVideoEnabled ? (
-              <video 
+              <video
                 autoPlay={heroSettings.videoAutoplay !== false}
                 loop={heroSettings.videoLoop !== false}
                 muted={heroSettings.videoMuted !== false}
@@ -112,9 +125,9 @@ export default function HomePage() {
                 <source src={heroSettings.videoUrl || "/videos/hero video.mp4"} type="video/mp4" />
               </video>
             ) : heroSettings.videoPosterUrl ? (
-              <img 
-                src={heroSettings.videoPosterUrl} 
-                alt="Hero Background" 
+              <img
+                src={heroSettings.videoPosterUrl}
+                alt="Hero Background"
                 className="w-full h-full object-cover opacity-60"
               />
             ) : null}
@@ -130,7 +143,7 @@ export default function HomePage() {
 
           {/* Content Container */}
           <div className="relative z-10 w-full max-w-5xl mx-auto px-6 sm:px-8 text-center flex flex-col items-center">
-            
+
             {/* Badge: "Favorite Room 1" / N°1 au Maroc */}
             <div className="mb-8 animate-fade-in-up">
               <span

@@ -119,6 +119,8 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
             // Prisma ne supporte pas la comparaison de deux colonnes (originalPrice > price) directement dans le `where` standard.
             // On s'assure au moins que originalPrice n'est pas nul. Le filtrage strict se fera en post-DB.
             where.originalPrice = { not: null };
+        } else if (badgeKey === 'featured') {
+            where.isFeatured = true;
         }
 
         const products = await prisma.product.findMany({
@@ -142,7 +144,6 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
         // Si aucun filtre complexe, on n'a pas besoin de calculer les scores pour TOUTE la BDD, juste pour les produits retournés.
         // Cela résout le problème de lenteur dans le panneau d'administration (O(n) evité).
         let popularIds = new Set<number>();
-        let featuredIds = new Set<number>();
 
         if (sortKey === 'popular' || badgeKey === 'popular' || badgeKey === 'new') {
             const activeProducts = await prisma.product.findMany({
@@ -166,17 +167,6 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
                     .slice(0, 8)
                     .map(p => p.id)
             );
-
-            featuredIds = new Set(
-                [...activeProducts]
-                    .sort((a, b) => {
-                        const da = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-                        const db = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-                        return db - da;
-                    })
-                    .slice(0, 8)
-                    .map(p => p.id)
-            );
         }
 
         const withComputed = products.map(p => {
@@ -185,8 +175,7 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
                 badge: computeBadge(p),
                 isNew: isNewProduct(p),
                 isBestSeller: isBestSellerProduct(p),
-                isPopular: popularIds.has(p.id),
-                isFeatured: featuredIds.has(p.id),
+                isPopular: popularIds.has(p.id)
             };
             return computed;
         });
@@ -273,24 +262,12 @@ router.get('/:id', cacheMiddleware(60), async (req, res) => {
                 .map(p => p.id)
         );
 
-        const featuredCandidates = await prisma.product.findMany({
-            where: { status: 'published', isVisible: true, inStock: true },
-            orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
-            take: 8,
-            select: { id: true },
-        });
-
-        const featuredIds = new Set(
-            featuredCandidates.map(p => p.id)
-        );
-
         res.json({
             ...product,
             badge: computeBadge(product),
             isNew: isNewProduct(product),
             isBestSeller: isBestSellerProduct(product),
-            isPopular: popularIds.has(product.id),
-            isFeatured: featuredIds.has(product.id),
+            isPopular: popularIds.has(product.id)
         });
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch product' });

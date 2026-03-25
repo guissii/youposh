@@ -235,7 +235,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                 isBestSeller: form.isBestSeller,
                 isPopular: form.isPopular
             };
-            
+
             if (isEdit) {
                 const id = Number(product.id);
                 if (isNaN(id)) throw new Error("ID produit invalide");
@@ -876,7 +876,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                     className="w-4 h-4 rounded border-gray-300 text-[var(--yp-blue)] focus:ring-[var(--yp-blue)]" />
                                 <span className="text-sm text-[#666]">👁 Visible sur le site</span>
                             </label>
-                            
+
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" checked={form.isNew} onChange={e => setForm(f => ({ ...f, isNew: e.target.checked }))}
                                     className="w-4 h-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500" />
@@ -892,7 +892,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" checked={form.isFeatured} onChange={e => setForm(f => ({ ...f, isFeatured: e.target.checked }))}
                                     className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-500" />
-                                <span className="text-sm text-[#666]">⭐ Mis en avant</span>
+                                <span className="text-sm text-[#666]">⭐ Offres du jour (Accueil)</span>
                             </label>
                         </div>
                     </div>
