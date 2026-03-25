@@ -45,6 +45,10 @@ function ProductCard({
   const visibleThumbs = allImages.slice(0, MAX_THUMBS);
   const extraCount = allImages.length - MAX_THUMBS;
   const activeImage = allImages[activeThumb] || product.image;
+  const cardZoomValue = Number(product.cardZoom ?? 1);
+  const safeCardZoom = Number.isFinite(cardZoomValue) ? Math.max(0.8, Math.min(2.5, cardZoomValue)) : 1;
+  const smartBaseZoom = variant === 'horizontal' ? 1.06 : 1.14;
+  const effectiveZoom = Math.min(2.8, safeCardZoom * smartBaseZoom);
 
   const handleNavigate = () => {
     navigate(`/product/${product.id}`);
@@ -90,7 +94,11 @@ function ProductCard({
               src={getImageUrl(product.image)}
               alt={name}
               effect="blur"
-              className="w-full h-full object-contain p-1"
+              className="w-full h-full object-cover"
+              style={{
+                objectPosition: `${product.cardFocalX ?? 50}% ${product.cardFocalY ?? 50}%`,
+                transform: `scale(${effectiveZoom})`,
+              }}
               onError={() => setImgError(true)}
               wrapperClassName="w-full h-full"
             />
@@ -193,10 +201,10 @@ function ProductCard({
               alt={name}
               effect="blur"
               wrapperClassName="w-full h-full"
-              className={`w-full h-full object-contain transition-transform duration-500 hover:scale-105 p-3 ${isOutOfStock ? 'grayscale' : ''}`}
+              className={`w-full h-full object-cover transition-transform duration-500 ${isOutOfStock ? 'grayscale' : ''}`}
               style={{
                 objectPosition: `${product.cardFocalX ?? 50}% ${product.cardFocalY ?? 50}%`,
-                transform: `scale(${product.cardZoom ?? 1})`,
+                transform: `scale(${effectiveZoom})`,
               }}
               onError={() => setImgError(true)}
             />
@@ -355,10 +363,10 @@ function ProductCard({
             alt={name}
             effect="blur"
             wrapperClassName="w-full h-full flex items-center justify-center"
-            className={`w-full h-full object-cover transition-transform duration-500 hover:scale-105 ${isOutOfStock ? 'grayscale' : ''}`}
+            className={`w-full h-full object-cover transition-transform duration-500 ${isOutOfStock ? 'grayscale' : ''}`}
             style={{
               objectPosition: `${product.cardFocalX ?? 50}% ${product.cardFocalY ?? 50}%`,
-              transform: `scale(${product.cardZoom ?? 1})`,
+              transform: `scale(${effectiveZoom})`,
             }}
             onError={() => setImgError(true)}
           />
