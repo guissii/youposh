@@ -171,9 +171,9 @@ export default function HomePage() {
         </section>
 
         {/* ══════════════════════════════════════════════
-            CATÉGORIES RAPIDES (Horizontal Scroll)
+            CATÉGORIES RAPIDES (Horizontal Scroll) - Desktop Only
             ══════════════════════════════════════════════ */}
-        <section className="py-4 bg-white">
+        <section className="py-4 bg-white hidden sm:block">
           <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
             <div className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory px-4 gap-4">
               {[
@@ -204,9 +204,9 @@ export default function HomePage() {
         </section>
 
         {/* ══════════════════════════════════════════════
-            BANDEAU DE CONFIANCE
+            BANDEAU DE CONFIANCE - Desktop Only
             ══════════════════════════════════════════════ */}
-        <section className="bg-[var(--yp-blue-50)] py-3 sm:py-4">
+        <section className="bg-[var(--yp-blue-50)] py-3 sm:py-4 hidden sm:block">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
               {[
