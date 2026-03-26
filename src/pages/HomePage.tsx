@@ -256,56 +256,6 @@ export default function HomePage() {
         {storeSettings.promoSectionEnabled !== false && <PromoCodeSection />}
 
         {/* ══════════════════════════════════════════════
-            QUICK HIGHLIGHTS — 3 blocks: Promos / Nouveautés / Best-sellers
-            ══════════════════════════════════════════════ */}
-        <section className="py-4 sm:py-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-3 gap-2 sm:gap-4">
-              {[
-                {
-                  title: t('promotions') || 'Promos',
-                  desc: "Jusqu'à -40%",
-                  icon: Percent,
-                  color: 'var(--yp-red)',
-                  bg: 'bg-[var(--yp-red-50)]',
-                  border: 'border-[var(--yp-red)]/10',
-                  link: '/shop?filter=promo'
-                },
-                {
-                  title: t('newArrivals') || 'Nouveautés',
-                  desc: 'Fraîchement ajoutés',
-                  icon: Sparkles,
-                  color: 'var(--yp-blue)',
-                  bg: 'bg-[var(--yp-blue-50)]',
-                  border: 'border-[var(--yp-blue)]/10',
-                  link: '/shop?filter=new'
-                },
-                {
-                  title: t('bestsellers') || 'Best-sellers',
-                  desc: 'Les plus appréciés',
-                  icon: TrendingUp,
-                  color: 'var(--yp-dark)',
-                  bg: 'bg-[var(--yp-gray-200)]',
-                  border: 'border-[var(--yp-gray-300)]',
-                  link: '/shop?sort=popular'
-                },
-              ].map((item, i) => (
-                <button
-                  key={i}
-                  onClick={() => navigate(item.link)}
-                  className={`${item.bg} border ${item.border} rounded-xl sm:rounded-2xl p-2.5 sm:p-6 text-left group hover:shadow-md transition-all`}
-                >
-                  <item.icon className="w-4 h-4 sm:w-6 sm:h-6 mb-1.5 sm:mb-3" style={{ color: item.color }} />
-                  <h3 className="font-bold text-[var(--yp-dark)] text-[11px] sm:text-base font-heading leading-tight">{item.title}</h3>
-                  <p className="text-[9px] sm:text-sm text-[var(--yp-gray-600)] mt-0.5 sm:mt-1 hidden sm:block">{item.desc}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-
-
-        {/* ══════════════════════════════════════════════
             FLASH SALES — Red Gradient 3D Premium Card
             ══════════════════════════════════════════════ */}
         <section className="py-4 sm:py-8" ref={flashRef}>
