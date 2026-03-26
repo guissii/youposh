@@ -129,15 +129,16 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
             take: prismaTake,
             include: {
                 category: true,
-                attributeValues: {
-                    include: {
-                        attributeValue: {
-                            include: {
-                                attribute: true,
+                // OPTIMISATION : On charge les attributs uniquement pour l'admin (all=true)
+                ...(showAll ? {
+                    attributeValues: {
+                        include: {
+                            attributeValue: {
+                                include: { attribute: true },
                             },
                         },
                     },
-                },
+                } : {})
             },
         });
 
