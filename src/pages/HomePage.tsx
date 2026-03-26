@@ -172,81 +172,28 @@ export default function HomePage() {
         </section>
 
         {/* ══════════════════════════════════════════════
-            CATÉGORIES RAPIDES (Horizontal Scroll) - Desktop Only
+            BANDEAU DE CONFIANCE (Responsive Carousel/Grid)
             ══════════════════════════════════════════════ */}
-        <section className="py-4 bg-white hidden sm:block">
+        <section className="bg-white py-4 sm:py-6 border-b border-[var(--yp-gray-200)] overflow-hidden">
           <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
-            <div className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory px-4 gap-4">
+            <div className="flex sm:grid sm:grid-cols-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4 sm:px-0 gap-4">
               {[
-                { name: 'iPhone', icon: '📱', link: '/category/iphone' },
-                { name: 'Samsung', icon: '📱', link: '/category/samsung' },
-                { name: 'Xiaomi', icon: '📱', link: '/category/xiaomi' },
-                { name: 'Écouteurs', icon: '🎧', link: '/category/audio' },
-                { name: 'Batteries', icon: '🔋', link: '/category/power' },
-                { name: 'Tablettes', icon: '💻', link: '/category/tablets' },
-                { name: 'Accessoires', icon: '📷', link: '/category/accessories' },
-                { name: 'Coques', icon: '🛡️', link: '/category/cases' },
-              ].map((cat, i) => (
-                <button
-                  key={i}
-                  onClick={() => navigate(cat.link)}
-                  className="snap-start shrink-0 flex flex-col items-center gap-2 w-[72px]"
-                >
-                  <div className="w-14 h-14 bg-[var(--yp-blue-50)] rounded-full flex items-center justify-center text-2xl shadow-sm">
-                    {cat.icon}
+                { title: "Shop Facilement", desc: "Trouvez tout en un clic.", icon: ShoppingCart },
+                { title: "Garantie Confiance", desc: "Retour et remboursement faciles.", icon: RefreshCcw },
+                { title: "Paiement Sécurisé", desc: "À la livraison ou en ligne.", icon: ShieldCheck },
+                { title: "Support Client", desc: "À votre écoute 7j/7.", icon: HeadphonesIcon }
+              ].map((item, i) => (
+                <div key={i} className="snap-center shrink-0 w-[85vw] sm:w-auto max-w-[300px] sm:max-w-none flex items-center gap-3 bg-[var(--yp-gray-50)] p-3 sm:p-4 rounded-xl border border-[var(--yp-gray-200)]">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                    <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--yp-blue)]" />
                   </div>
-                  <span className="text-[11px] font-medium text-[var(--yp-dark)] text-center leading-tight">
-                    {cat.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ══════════════════════════════════════════════
-            BANDEAU DE CONFIANCE - Desktop Only
-            ══════════════════════════════════════════════ */}
-        <section className="bg-[var(--yp-blue-50)] py-3 sm:py-4 hidden sm:block">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
-              {[
-                "Livraison partout au Maroc 35 Dhs",
-                "Paiement à la livraison",
-                "Retour 7 jours",
-                "Produits garantis"
-              ].map((text, i) => (
-                <div key={i} className="flex items-center gap-1.5 sm:gap-2 justify-center sm:justify-start">
-                  <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[var(--yp-blue)] text-white flex items-center justify-center text-[10px] sm:text-xs">✓</div>
-                  <span className="text-[10px] sm:text-xs font-semibold text-[var(--yp-dark)]">{text}</span>
+                  <div className="flex-1">
+                    <h4 className="text-[13px] sm:text-[15px] font-bold text-[var(--yp-dark)] leading-tight">{item.title}</h4>
+                    <p className="text-[11px] sm:text-[13px] text-[var(--yp-gray-600)] leading-snug mt-0.5">{item.desc}</p>
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-
-        {/* ══════════════════════════════════════════════
-            BANDEAU DE CONFIANCE (Mobile - Carousel)
-            ══════════════════════════════════════════════ */}
-        <section className="bg-white py-4 border-b border-[var(--yp-gray-200)] sm:hidden overflow-hidden">
-          <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4 gap-4">
-            {[
-              { title: "Shop Facilement", desc: "Trouvez tout en un clic.", icon: ShoppingCart },
-              { title: "Garantie Confiance", desc: "Retour et remboursement faciles.", icon: RefreshCcw },
-              { title: "Paiement Sécurisé", desc: "À la livraison ou en ligne.", icon: ShieldCheck },
-              { title: "Support Client", desc: "À votre écoute 7j/7.", icon: HeadphonesIcon }
-            ].map((item, i) => (
-              <div key={i} className="snap-center shrink-0 w-[85vw] max-w-[300px] flex items-center gap-3 bg-[var(--yp-gray-50)] p-3 rounded-xl border border-[var(--yp-gray-200)]">
-                <div className="w-10 h-10 shrink-0 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                  <item.icon className="w-5 h-5 text-[var(--yp-blue)]" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-[13px] font-bold text-[var(--yp-dark)] leading-tight">{item.title}</h4>
-                  <p className="text-[11px] text-[var(--yp-gray-600)] leading-snug mt-0.5">{item.desc}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </section>
 
