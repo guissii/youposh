@@ -2,7 +2,7 @@ import { Router } from 'express';
 import fs from 'fs';
 import path from 'path';
 import prisma from '../utils/prisma';
-import { cacheMiddleware, clearCache } from '../utils/cache';
+import { cache, cacheMiddleware, clearCache } from '../utils/cache';
 
 const router = Router();
 
