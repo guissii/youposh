@@ -85,7 +85,7 @@ export default function ShopPage() {
     return queryParams.toString();
   }, [categoryParam, filterParam, searchQuery, selectedAvIds, sortParam]);
 
-  const { data: productsData = [], isLoading: loading } = useQuery({
+  const { data: productsData = [], isFetching: loading } = useQuery({
     queryKey: ['products', queryParamsStr],
     queryFn: () => fetchProducts(queryParamsStr),
   });

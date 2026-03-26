@@ -33,20 +33,22 @@ export default function HomePage() {
   const discoverRef = useScrollReveal();
 
   // Use React Query for data fetching
-  const { data: featuredRaw = [], isError: featuredError } = useQuery({
+  const { data: featuredRaw = [], isFetching: featuredLoading, isError: featuredError } = useQuery({
     queryKey: ['products', 'featured'],
     queryFn: () => fetchProducts('badge=featured&limit=8'),
   });
 
-  const { data: popularRaw = [], isError: popularError } = useQuery({
+  const { data: popularRaw = [], isFetching: popularLoading, isError: popularError } = useQuery({
     queryKey: ['products', 'popular'],
     queryFn: () => fetchProducts('sort=popular&limit=8'),
   });
 
-  const { data: latestRaw = [], isError: newError } = useQuery({
+  const { data: latestRaw = [], isFetching: newLoading, isError: newError } = useQuery({
     queryKey: ['products', 'newest'],
     queryFn: () => fetchProducts('sort=newest&limit=8'),
   });
+
+  const isAnyLoading = featuredLoading || popularLoading || newLoading;
 
   // Priorité 1: Produits sélectionnés manuellement "Offres du jour" (isFeatured === true)
   let promoProducts = featuredRaw.filter((p: any) => p.isVisible !== false);
@@ -296,7 +298,11 @@ export default function HomePage() {
                 </div>
 
                 <div className="mt-2 sm:mt-4">
-                  {promoProducts.length === 0 ? (
+                  {isAnyLoading ? (
+                    <div className="flex justify-center py-12">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                    </div>
+                  ) : promoProducts.length === 0 ? (
                     <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-8 text-center">
                       <p className="text-base font-semibold text-white">Aucune offre flash pour le moment</p>
                       <p className="text-sm text-white/70 mt-1">Revenez bientôt, de nouvelles promos arrivent.</p>
@@ -355,11 +361,19 @@ export default function HomePage() {
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
-              {bestsellers.map(product => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+            {isAnyLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--yp-blue)]"></div>
+              </div>
+            ) : bestsellers.length > 0 ? (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
+                {bestsellers.map(product => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-[var(--yp-gray-500)] py-8">{t('noProducts') || "Aucun produit trouvé."}</p>
+            )}
           </div>
         </section>
 
@@ -396,12 +410,19 @@ export default function HomePage() {
               </button>
             </div>
 
-            {/* Grille 2x2 pour mobile et desktop */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
-              {newArrivals.map(product => (
-                <ProductCard key={product.id} product={product} variant="compact" />
-              ))}
-            </div>
+            {isAnyLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--yp-blue)]"></div>
+              </div>
+            ) : newArrivals.length > 0 ? (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
+                {newArrivals.map(product => (
+                  <ProductCard key={product.id} product={product} variant="compact" />
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-[var(--yp-gray-500)] py-8">{t('noProducts') || "Aucun produit trouvé."}</p>
+            )}
           </div>
         </section>
 
