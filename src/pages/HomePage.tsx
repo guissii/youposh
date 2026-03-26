@@ -210,7 +210,7 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
               {[
-                "Livraison rapide",
+                "Livraison partout au Maroc 35 Dhs",
                 "Paiement à la livraison",
                 "Retour 7 jours",
                 "Produits garantis"

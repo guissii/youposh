@@ -66,7 +66,7 @@ export default function Header() {
         dir="ltr"
       >
         <div className="max-w-7xl mx-auto flex justify-center items-center gap-2">
-          <span className="text-center font-medium">Livraison Casablanca 15 Dhs | Gratuite dès 599 Dhs ✓</span>
+          <span className="text-center font-medium">Livraison partout au Maroc 35 Dhs | Gratuite dès 599 Dhs ✓</span>
         </div>
       </div>
 
