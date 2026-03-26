@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { X, Save, Eye, TrendingUp, ShoppingCart, BarChart3, Plus, Upload, Loader2, Star } from 'lucide-react';
+import { X, Save, Eye, TrendingUp, ShoppingCart, BarChart3, Plus, Upload, Loader2, Star, AlertCircle } from 'lucide-react';
 import { createProduct, updateProduct, fetchCategories, fetchAttributeLibrary, uploadProductImage } from '@/lib/api';
 import { loadStoreSettings } from '@/data/storeSettings';
 import { getImageUrl } from '@/lib/utils';
@@ -47,8 +47,8 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [applyWatermark, setApplyWatermark] = useState<boolean>(true);
     const [watermarkPos, setWatermarkPos] = useState({ x: 50, y: 50 });
-    const [previewImages, setPreviewImages] = useState<Array<{ url: string, file?: File, isExisting: boolean }>>(() => {
-        const initial: Array<{ url: string, file?: File, isExisting: boolean }> = [];
+    const [previewImages, setPreviewImages] = useState<Array<{ url: string, file?: File, isExisting: boolean, isBroken?: boolean }>>(() => {
+        const initial: Array<{ url: string, file?: File, isExisting: boolean, isBroken?: boolean }> = [];
         if (product?.image) initial.push({ url: product.image, isExisting: true });
         if (product?.images?.length) product.images.forEach((img: string) => initial.push({ url: img, isExisting: true }));
         return initial;
@@ -448,10 +448,25 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                             className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 cursor-pointer transition-all ${primaryIndex === idx ? 'border-[var(--yp-blue)] shadow-md scale-105' : 'border-gray-200 hover:border-gray-300 opacity-70 hover:opacity-100'}`}
                                             onClick={() => setPrimaryIndex(idx)}
                                         >
-                                            <img src={getImageUrl(img.url)} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                                            <img
+                                                src={getImageUrl(img.url)}
+                                                alt={`Preview ${idx}`}
+                                                className={`w-full h-full object-cover transition-opacity duration-300 ${img.isBroken ? 'opacity-20 grayscale' : 'opacity-100'}`}
+                                                onError={() => {
+                                                    setPreviewImages(prev => prev.map((p, i) => i === idx ? { ...p, isBroken: true } : p));
+                                                }}
+                                            />
+
+                                            {/* Broken Image Warning */}
+                                            {img.isBroken && (
+                                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-500/10 backdrop-blur-[2px]">
+                                                    <AlertCircle className="w-6 h-6 text-red-600 drop-shadow-md mb-1" />
+                                                    <span className="text-[9px] font-bold text-red-700 bg-white/90 px-1.5 py-0.5 rounded shadow-sm text-center leading-tight">IMAGE<br />FANTÔME</span>
+                                                </div>
+                                            )}
 
                                             {/* Primary Badge */}
-                                            {primaryIndex === idx && (
+                                            {primaryIndex === idx && !img.isBroken && (
                                                 <div className="absolute top-1 left-1 bg-[var(--yp-blue)] text-white p-0.5 rounded shadow">
                                                     <Star className="w-3 h-3 fill-current" />
                                                 </div>
