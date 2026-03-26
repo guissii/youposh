@@ -159,7 +159,7 @@ function ProductCard({
         className="product-card group w-full bg-white rounded-[12px] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.07)] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] flex flex-col"
       >
         {/* Image area */}
-        <div className="relative bg-[#F5F5F5] aspect-[4/5] w-full overflow-hidden shrink-0">
+        <div className="relative bg-[#F5F5F5] aspect-square w-full overflow-hidden shrink-0">
           {/* Animated Arabic Badge */}
           {(badge || discount > 0) && (
             <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1.5 align-start">
@@ -292,7 +292,7 @@ function ProductCard({
       className="product-card group w-full bg-white rounded-[12px] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.07)] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] flex flex-col"
     >
       {/* ── Image area ── */}
-      <div className="relative bg-[#F5F5F5] aspect-[4/5] w-full flex items-center justify-center overflow-hidden shrink-0">
+      <div className="relative bg-[#F5F5F5] aspect-square w-full flex items-center justify-center overflow-hidden shrink-0">
         {/* Animated Arabic Badge */}
         {(badge || discount > 0) && (
           <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 flex flex-col gap-1.5 align-start">

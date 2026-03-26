@@ -360,8 +360,8 @@ export default function HomePage() {
                       <div className="sm:hidden -mx-4 px-4 overflow-x-auto scrollbar-hide pb-4">
                         <div className="flex gap-3 snap-x snap-mandatory">
                           {promoProducts.map(product => (
-                            <div key={product.id} className="snap-start shrink-0 w-[160px]">
-                              <div className="bg-white rounded-2xl overflow-hidden shadow-lg h-full transform transition-transform hover:scale-[1.02]">
+                            <div key={product.id} className="snap-start shrink-0 w-[85vw] max-w-[320px]">
+                              <div className="bg-white rounded-[12px] overflow-hidden shadow-lg h-full transform transition-transform hover:scale-[1.02]">
                                 <ProductCard product={product} variant="compact" />
                               </div>
                             </div>
@@ -413,7 +413,7 @@ export default function HomePage() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--yp-blue)]"></div>
               </div>
             ) : bestsellers.length > 0 ? (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                 {bestsellers.map(product => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -462,7 +462,7 @@ export default function HomePage() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--yp-blue)]"></div>
               </div>
             ) : newArrivals.length > 0 ? (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                 {newArrivals.map(product => (
                   <ProductCard key={product.id} product={product} variant="compact" />
                 ))}

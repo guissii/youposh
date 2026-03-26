@@ -369,7 +369,7 @@ export default function ShopPage() {
                 </div>
               ) : (
                 <div className={`grid gap-3 sm:gap-4 lg:gap-6 ${viewMode === 'grid'
-                  ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4'
+                  ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4'
                   : 'grid-cols-1'
                   }`}>
                   {products.map(product => (
