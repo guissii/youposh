@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   ShoppingBag, Search, X, ChevronDown, Heart,
-  Phone, Globe,
+  Phone, Globe, Menu,
   Home, Percent, TrendingUp, Sparkles, Grid3X3,
   Truck, MessageCircle, CircleHelp,
   Smartphone, Home as HomeIcon, Sparkles as SparklesIcon, Shirt, Car, Gamepad2, Gift, Baby
@@ -80,8 +80,16 @@ export default function Header() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[56px] sm:h-[70px]">
-            {/* Left — Logo (No hamburger on mobile) */}
-            <div className="flex items-center">
+            {/* Left — Logo and Menu */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="lg:hidden p-1.5 hover:bg-[var(--yp-blue-50)] rounded-xl transition-colors"
+                aria-label="Menu"
+              >
+                <Menu className="w-6 h-6 text-[var(--yp-dark)]" />
+              </button>
+
               <button
                 onClick={() => navigate('/')}
                 className="flex items-center gap-1.5 sm:gap-2 group"
