@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
-  ArrowLeft, // Changed to ArrowLeft as requested
   ArrowRight,
   Flame, TrendingUp, Percent, Sparkles,
 } from 'lucide-react';

@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  ShoppingBag, Search, Menu, X, ChevronDown, Heart,
-  MapPin, Phone, ArrowLeft, Globe,
+  ShoppingBag, Search, X, ChevronDown, Heart,
+  Phone, Globe,
   Home, Percent, TrendingUp, Sparkles, Grid3X3,
-  Truck, MessageCircle, CircleHelp, Instagram, Music2,
+  Truck, MessageCircle, CircleHelp,
   Smartphone, Home as HomeIcon, Sparkles as SparklesIcon, Shirt, Car, Gamepad2, Gift, Baby
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
@@ -55,8 +55,6 @@ export default function Header() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
-
-  const isHome = location.pathname === '/';
 
   return (
     <>

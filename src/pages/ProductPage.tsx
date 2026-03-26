@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  ArrowLeft, Heart, Star, Plus, Minus, MessageCircle,
-  ShoppingCart, Truck, Shield, Check, ChevronRight,
-  X, ArrowRight, User, Phone, MapPin, FileText, Package, Ticket, ImageOff
+  Heart, Star, Minus, Plus, ArrowLeft,
+  Truck, Shield, Check, ChevronRight, MessageCircle,
+  X, User, Phone, MapPin, FileText, Package, Ticket, ImageOff
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
 import { fetchProduct, fetchProducts, createOrder, validatePromoCode } from '@/lib/api';
@@ -29,7 +29,7 @@ export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { addToCart, addToWishlist, isInWishlist, promoCode, applyPromoCode, removePromoCode } = useStore();
+  const { addToWishlist, isInWishlist, promoCode, applyPromoCode, removePromoCode } = useStore();
   const settings = useStoreSettings();
   const { phone } = settings;
 
@@ -300,10 +300,6 @@ export default function ProductPage() {
         isSubmittingWhatsAppRef.current = false;
       }, 3000);
     }
-  };
-
-  const handleAddToCart = () => {
-    addToCart(product, quantity, selectedVariantLabel || undefined);
   };
 
   return (

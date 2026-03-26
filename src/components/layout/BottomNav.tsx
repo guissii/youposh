@@ -1,7 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Home, Smartphone, Search, Heart, User } from 'lucide-react';
-import { useStore } from '@/contexts/StoreContext';
 
 export default function BottomNav() {
   const { t } = useTranslation();
