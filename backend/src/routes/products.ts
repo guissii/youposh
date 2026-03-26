@@ -146,27 +146,36 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
         let popularIds = new Set<number>();
 
         if (sortKey === 'popular' || badgeKey === 'popular' || badgeKey === 'new') {
-            const activeProducts = await prisma.product.findMany({
-                where: { status: 'published', isVisible: true, inStock: true },
-                orderBy: [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }],
-                take: 300,
-                select: {
-                    id: true,
-                    price: true,
-                    originalPrice: true,
-                    publishedAt: true,
-                    salesCount: true,
-                    viewsCount: true,
-                    cartAddCount: true,
-                },
-            });
+            // OPTIMIZATION: Cache popularIds to avoid heavy DB queries on every request
+            const cacheKey = 'popular_product_ids';
+            const cachedPopularIds = cache.get<number[]>(cacheKey);
+            
+            if (cachedPopularIds) {
+                popularIds = new Set(cachedPopularIds);
+            } else {
+                const activeProducts = await prisma.product.findMany({
+                    where: { status: 'published', isVisible: true, inStock: true },
+                    orderBy: [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }],
+                    take: 300,
+                    select: {
+                        id: true,
+                        price: true,
+                        originalPrice: true,
+                        publishedAt: true,
+                        salesCount: true,
+                        viewsCount: true,
+                        cartAddCount: true,
+                    },
+                });
 
-            popularIds = new Set(
-                [...activeProducts]
-                    .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
-                    .slice(0, 8)
-                    .map(p => p.id)
-            );
+                const computedPopularIds = [...activeProducts]
+                        .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
+                        .slice(0, 8)
+                        .map(p => p.id);
+                        
+                popularIds = new Set(computedPopularIds);
+                cache.set(cacheKey, computedPopularIds, 300); // Cache for 5 minutes
+            }
         }
 
         const withComputed = products.map(p => {
@@ -240,27 +249,37 @@ router.get('/:id', cacheMiddleware(60), async (req, res) => {
         });
         if (!product) return res.status(404).json({ error: 'Product not found' });
 
-        const popularCandidates = await prisma.product.findMany({
-            where: { status: 'published', isVisible: true, inStock: true },
-            orderBy: [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }],
-            take: 300,
-            select: {
-                id: true,
-                price: true,
-                originalPrice: true,
-                publishedAt: true,
-                salesCount: true,
-                viewsCount: true,
-                cartAddCount: true,
-            },
-        });
+        // OPTIMIZATION: Cache popularIds to avoid heavy DB queries on every request
+        const cacheKey = 'popular_product_ids';
+        const cachedPopularIds = cache.get<number[]>(cacheKey);
+        let popularIds: Set<number>;
+        
+        if (cachedPopularIds) {
+            popularIds = new Set(cachedPopularIds);
+        } else {
+            const popularCandidates = await prisma.product.findMany({
+                where: { status: 'published', isVisible: true, inStock: true },
+                orderBy: [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }],
+                take: 300,
+                select: {
+                    id: true,
+                    price: true,
+                    originalPrice: true,
+                    publishedAt: true,
+                    salesCount: true,
+                    viewsCount: true,
+                    cartAddCount: true,
+                },
+            });
 
-        const popularIds = new Set(
-            [...popularCandidates]
-                .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
-                .slice(0, 8)
-                .map(p => p.id)
-        );
+            const computedPopularIds = [...popularCandidates]
+                    .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
+                    .slice(0, 8)
+                    .map(p => p.id);
+                    
+            popularIds = new Set(computedPopularIds);
+            cache.set(cacheKey, computedPopularIds, 300); // Cache for 5 minutes
+        }
 
         res.json({
             ...product,
