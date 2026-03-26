@@ -12,6 +12,7 @@ import { GlobalCouponNotification } from '@/components/ui/GlobalCouponNotificati
 import PremiumLoader from '@/components/ui/PremiumLoader';
 import ScrollToTop from '@/components/ScrollToTop';
 import Tracker from '@/components/Tracker';
+import BottomNav from '@/components/layout/BottomNav';
 
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 
@@ -93,6 +94,7 @@ function App() {
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </Suspense>
+              <BottomNav />
             </ErrorBoundary>
           </Router>
         </StoreProvider>

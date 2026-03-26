@@ -101,9 +101,9 @@ export default function HomePage() {
 
       <main className="pb-20">
         {/* ══════════════════════════════════════════════
-            HERO — Minimalist Blue Gradient Design
+            HERO — Compact Mobile-First
             ══════════════════════════════════════════════ */}
-        <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
+        <section className="relative h-[220px] sm:h-[400px] flex items-center justify-center overflow-hidden">
 
           {/* Hero Video Background */}
           <div
@@ -141,64 +141,87 @@ export default function HomePage() {
             )}
           </div>
 
-
-
           {/* Content Container */}
-          <div className="relative z-10 w-full max-w-5xl mx-auto px-6 sm:px-8 text-center flex flex-col items-center">
-
-            {/* Badge: "Favorite Room 1" / N°1 au Maroc */}
-            <div className="mb-8 animate-fade-in-up">
-              <span
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold font-heading tracking-wide border border-white/20 shadow-lg hover:brightness-110 transition-colors cursor-default"
-                style={{
-                  backgroundColor: heroSettings.badgeColor || 'rgba(255, 255, 255, 0.1)',
-                  color: heroSettings.badgeTextColor || 'white',
-                  backdropFilter: 'blur(12px)'
-                }}
-              >
-                <span className="flex items-center justify-center w-5 h-5 bg-white rounded-full text-[var(--yp-red)]">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-red-600">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                </span>
-                {t('heroBadgeTitle')}
+          <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-8 text-center flex flex-col items-center">
+            
+            {/* Badge: "PROMO" */}
+            <div className="mb-2 sm:mb-4 animate-fade-in-up">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-sm font-bold bg-[var(--yp-red)] text-white shadow-lg">
+                PROMO
               </span>
             </div>
 
             {/* Main Title */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black font-heading text-blue-50 leading-[1.06] mb-6 tracking-tight animate-[hero-text_0.85s_ease-out_forwards] opacity-0 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
-              <span className="drop-shadow-[0_2px_2px_rgba(255,255,255,0.2)] tracking-tight" style={{ color: heroSettings.titleColorYou || 'var(--yp-blue)' }}>YOU</span>
-              <span className="drop-shadow-[0_2px_2px_rgba(255,255,255,0.2)] tracking-tight" style={{ color: heroSettings.titleColorPosh || 'var(--yp-red)' }}>POSH</span> <br className="hidden sm:block" />
-              <span className="text-3xl sm:text-4xl lg:text-5xl font-extrabold block mt-4 text-blue-50 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] leading-tight">
-                {t('heroTitle').replace('YOUPOSH ', '')}
-              </span>
+            <h1 className="text-2xl sm:text-5xl font-black font-heading text-white leading-tight mb-2 sm:mb-4 drop-shadow-md">
+              {t('heroTitle').replace('YOUPOSH ', '')}
             </h1>
 
             {/* Subtitle */}
-            <p className="text-lg sm:text-xl text-blue-50 font-semibold font-heading max-w-3xl mx-auto leading-relaxed tracking-wide mb-10 animate-[hero-text_1.1s_ease-out_forwards] opacity-0 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] bg-blue-950/35 backdrop-blur-[2px] rounded-xl p-4 border border-blue-200/20">
+            <p className="text-[12px] sm:text-xl text-white/90 font-medium max-w-xl mx-auto mb-4 sm:mb-8 drop-shadow-md">
               {t('heroSubtitle')}
             </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-5 w-full animate-fade-in-up delay-300">
-              {/* Primary: White with Blue text */}
-              <button
-                onClick={() => navigate(heroSettings.primaryCtaLink)}
-                className="group w-full sm:w-auto bg-white hover:bg-blue-50 text-blue-700 px-8 py-4 rounded-full font-bold text-base sm:text-lg shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2"
-              >
-                {t('heroPrimaryCta')}
-              </button>
+            {/* CTA Button */}
+            <button
+              onClick={() => navigate(heroSettings.primaryCtaLink)}
+              className="bg-white text-[var(--yp-blue)] px-6 py-2 sm:px-8 sm:py-3 rounded-full font-bold text-sm sm:text-lg shadow-lg hover:bg-blue-50 transition-all"
+            >
+              Voir l'offre
+            </button>
+          </div>
+        </section>
 
-              {/* Secondary: Transparent Blue with White text */}
-              <button
-                onClick={() => navigate(heroSettings.secondaryCtaLink)}
-                className="group w-full sm:w-auto bg-blue-700/35 hover:bg-blue-700/50 text-blue-50 px-8 py-4 rounded-full font-medium text-base sm:text-lg border border-blue-100/30 backdrop-blur-sm transition-all duration-300 flex items-center justify-center gap-2"
-              >
-                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                {t('heroSecondaryCta')}
-              </button>
+        {/* ══════════════════════════════════════════════
+            CATÉGORIES RAPIDES (Horizontal Scroll)
+            ══════════════════════════════════════════════ */}
+        <section className="py-4 bg-white">
+          <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
+            <div className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory px-4 gap-4">
+              {[
+                { name: 'iPhone', icon: '📱', link: '/category/iphone' },
+                { name: 'Samsung', icon: '📱', link: '/category/samsung' },
+                { name: 'Xiaomi', icon: '📱', link: '/category/xiaomi' },
+                { name: 'Écouteurs', icon: '🎧', link: '/category/audio' },
+                { name: 'Batteries', icon: '🔋', link: '/category/power' },
+                { name: 'Tablettes', icon: '💻', link: '/category/tablets' },
+                { name: 'Accessoires', icon: '📷', link: '/category/accessories' },
+                { name: 'Coques', icon: '🛡️', link: '/category/cases' },
+              ].map((cat, i) => (
+                <button
+                  key={i}
+                  onClick={() => navigate(cat.link)}
+                  className="snap-start shrink-0 flex flex-col items-center gap-2 w-[72px]"
+                >
+                  <div className="w-14 h-14 bg-[var(--yp-blue-50)] rounded-full flex items-center justify-center text-2xl shadow-sm">
+                    {cat.icon}
+                  </div>
+                  <span className="text-[11px] font-medium text-[var(--yp-dark)] text-center leading-tight">
+                    {cat.name}
+                  </span>
+                </button>
+              ))}
             </div>
+          </div>
+        </section>
 
+        {/* ══════════════════════════════════════════════
+            BANDEAU DE CONFIANCE
+            ══════════════════════════════════════════════ */}
+        <section className="bg-[var(--yp-blue-50)] py-3 sm:py-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+              {[
+                "Livraison rapide",
+                "Paiement à la livraison",
+                "Retour 7 jours",
+                "Produits garantis"
+              ].map((text, i) => (
+                <div key={i} className="flex items-center gap-1.5 sm:gap-2 justify-center sm:justify-start">
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[var(--yp-blue)] text-white flex items-center justify-center text-[10px] sm:text-xs">✓</div>
+                  <span className="text-[10px] sm:text-xs font-semibold text-[var(--yp-dark)]">{text}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 

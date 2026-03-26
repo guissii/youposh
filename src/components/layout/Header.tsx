@@ -31,6 +31,8 @@ export default function Header() {
   const waPhone = toWhatsAppPhone(phone);
 
   const [isScrolled, setIsScrolled] = useState(false);
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
+  const [lastScrollY, setLastScrollY] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
@@ -40,114 +42,82 @@ export default function Header() {
   useEffect(() => {
     fetchCategories().then(setCategories).catch(console.error);
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      const currentScrollY = window.scrollY;
+      setIsScrolled(currentScrollY > 10);
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setScrollDirection('down');
+      } else if (currentScrollY < lastScrollY) {
+        setScrollDirection('up');
+      }
+      setLastScrollY(currentScrollY);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [lastScrollY]);
 
   const isHome = location.pathname === '/';
 
   return (
     <>
-      {/* Top Bar — Premium dark bar with blue accent */}
+      {/* Top Bar — Collapsible on scroll down */}
       <div
-        className="bg-[var(--yp-dark)] text-white text-xs py-2 px-4 sm:py-2.5 sm:px-6 lg:px-8 border-b border-white/5 pt-[max(0.5rem,env(safe-area-inset-top))]"
+        className={`bg-[var(--yp-blue)] text-white text-[12px] py-1.5 px-4 sm:py-2.5 sm:px-6 lg:px-8 transition-transform duration-300 ${
+          scrollDirection === 'down' ? '-translate-y-full absolute w-full' : 'translate-y-0 relative'
+        } z-[45] pt-[max(0.5rem,env(safe-area-inset-top))]`}
         dir="ltr"
       >
-        <div className="max-w-7xl mx-auto flex justify-between items-center gap-2">
-          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[var(--yp-blue-light)] shrink-0" />
-            <span className="hidden sm:inline text-gray-300 truncate">{t('deliveryAllMorocco')}</span>
-            <span className="sm:hidden text-gray-300 text-[10px] truncate">{t('deliveryShort')}</span>
-          </div>
-          <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
-            <div className="flex items-center gap-3 mr-1">
-              <a href={`https://wa.me/${waPhone}`} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#25D366] transition-colors">
-                <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </a>
-              <a href="https://www.instagram.com/youposh_officiel/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#E4405F] transition-colors">
-                <Instagram className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </a>
-              <a href="https://www.tiktok.com/@youposh_officiel?_r=1&_t=ZS-94ioAGNfjdv" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">
-                <Music2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </a>
-            </div>
-            <div className="w-px h-3 bg-white/20" />
-            <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className="flex items-center gap-1 sm:gap-1.5 text-gray-300 hover:text-[var(--yp-blue-light)] transition-colors">
-              <Phone className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-              <span className="hidden xs:inline text-[10px] sm:text-xs">{phone}</span>
-            </a>
-            <div className="w-px h-3 bg-white/20" />
-            <button
-              onClick={toggleLanguage}
-              className="flex items-center gap-1 sm:gap-1.5 text-gray-300 hover:text-[var(--yp-blue-light)] transition-colors"
-            >
-              <Globe className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-              <span className="font-medium text-[10px] sm:text-xs">{language === 'fr' ? 'العربية' : 'FR'}</span>
-            </button>
-          </div>
+        <div className="max-w-7xl mx-auto flex justify-center items-center gap-2">
+          <span className="text-center font-medium">Livraison Casablanca 15 Dhs | Gratuite dès 599 Dhs ✓</span>
         </div>
       </div>
 
-      {/* Main Header — Glass effect on scroll */}
+      {/* Main Header */}
       <header
-        className={`sticky top-0 z-40 transition-all duration-500 ${isScrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200'
-          : 'bg-white'
-          }`}
+        className={`sticky top-0 z-40 transition-all duration-300 ${
+          isScrolled || scrollDirection === 'down'
+            ? 'bg-white/95 backdrop-blur-md shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-b border-gray-200'
+            : 'bg-white'
+        } ${scrollDirection === 'down' ? '-mt-[32px] sm:-mt-[40px]' : ''}`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-[60px] sm:h-[72px]">
-            {/* Left — Menu / Back */}
-            <div className="flex items-center gap-1 sm:gap-2 min-w-[60px] sm:min-w-[80px]">
-              {!isHome ? (
-                <button
-                  onClick={() => navigate(-1)}
-                  className="p-2 sm:p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl transition-colors"
-                >
-                  <ArrowLeft className="w-5 h-5 text-[var(--yp-dark)]" />
-                </button>
-              ) : (
-                <button
-                  onClick={() => setIsMobileMenuOpen(true)}
-                  className="lg:hidden p-2 sm:p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl transition-colors"
-                >
-                  <Menu className="w-5 h-5 text-[var(--yp-dark)]" />
-                </button>
-              )}
+          <div className="flex items-center justify-between h-[56px] sm:h-[70px]">
+            {/* Left — Logo (No hamburger on mobile) */}
+            <div className="flex items-center">
+              <button
+                onClick={() => navigate('/')}
+                className="flex items-center gap-1.5 sm:gap-2 group"
+                dir="ltr"
+              >
+                <img
+                  src="/images/categories/logo final.png"
+                  alt={storeSettings.storeName}
+                  className="h-7 sm:h-9 w-auto object-contain group-hover:scale-105 transition-transform"
+                />
+                <div className="flex items-baseline hidden xs:flex">
+                  <span
+                    className="font-bold text-lg sm:text-2xl tracking-tight font-heading"
+                  >
+                    <span className="text-[var(--yp-blue)]">YOU</span>
+                    <span className="text-[var(--yp-red)]">POSH</span>
+                  </span>
+                </div>
+              </button>
             </div>
 
-            {/* Center — Logo + Brand */}
-            <button
-              onClick={() => navigate('/')}
-              className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 sm:gap-2 group"
-              dir="ltr"
-            >
-              <img
-                src="/images/categories/logo final.png"
-                alt={storeSettings.storeName}
-                className="h-8 xs:h-9 sm:h-12 w-auto object-contain group-hover:scale-105 transition-transform"
-              />
-              <div className="flex items-baseline">
-                <span
-                  className="font-bold text-lg xs:text-xl sm:text-2xl tracking-tight font-heading"
-                >
-                  <span className="text-[#01b3e9]">YOU</span>
-                  <span className="text-[#ff5757]">POSH</span>
-                </span>
-              </div>
-
-            </button>
+            {/* Center — Desktop Search & Nav (Hidden on mobile) */}
+            <div className="hidden lg:flex flex-1 items-center justify-center px-8">
+              {/* Mega menu placeholder / Categories */}
+            </div>
 
             {/* Right — Actions */}
-            <div className="flex items-center gap-0.5 sm:gap-2 min-w-[60px] sm:min-w-[80px] justify-end">
+            <div className="flex items-center gap-2 sm:gap-4 justify-end">
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="p-2 sm:p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl transition-colors"
+                className="p-1.5 sm:p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl transition-colors"
                 aria-label={t('search')}
               >
-                <Search className="w-5 h-5 text-[var(--yp-dark)]" />
+                <Search className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--yp-blue)]" />
               </button>
 
               <button
@@ -159,11 +129,11 @@ export default function Header() {
 
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="p-2 sm:p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl relative transition-colors"
+                className="p-1.5 sm:p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl relative transition-colors"
               >
-                <ShoppingBag className="w-5 h-5 text-[var(--yp-dark)]" />
+                <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--yp-dark)]" />
                 {cartCount > 0 && (
-                  <span className="absolute top-1 right-1 sm:-top-0.5 sm:-right-0.5 w-4 h-4 sm:w-5 sm:h-5 bg-[var(--yp-red)] text-white text-[9px] sm:text-[10px] rounded-full flex items-center justify-center font-bold shadow-sm animate-scale-in">
+                  <span className="absolute top-0 right-0 sm:top-1 sm:right-1 w-4 h-4 sm:w-5 sm:h-5 bg-[var(--yp-red)] text-white text-[10px] rounded-full flex items-center justify-center font-bold shadow-sm animate-scale-in">
                     {cartCount > 9 ? '9+' : cartCount}
                   </span>
                 )}

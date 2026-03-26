@@ -27,43 +27,38 @@
     --ring: 217 91% 53%;
     --radius: 0.75rem;
 
-    /* Brand Colors — YouPosh Official Palette */
-    /* Primary Brand Colors (Text / Main Branding) */
-    --yp-blue: #01b3e9; /* Blue for "YOU" */
-    --yp-red: #ff5757;  /* Red for "POSH" */
-
-    /* Individual Color Overrides */
-    --yp-color-you: var(--yp-blue);
-    --yp-color-posh: var(--yp-red);
-    --yp-color-cart: var(--yp-blue);
-
-    /* Secondary Brand Colors (Pictogram / Accents) */
-    --yp-blue-alt: #01b3e9;
-    --yp-red-alt: #ff5757;
-
-    /* Derived Shades for UI States (Hover, Light Backgrounds) */
-    --yp-blue-dark: #009acb; /* Slightly darker for hover */
-    --yp-blue-light: #60A5FA;
-    --yp-blue-50: #EFF6FF;
+    /* Brand Colors — YouPosh Official Palette (Updated Mobile-First) */
+    --yp-blue: #1A3C8F; /* Primary Blue */
+    --yp-blue-light: #2D55C8;
+    --yp-blue-dark: #102A6B;
+    --yp-blue-50: #EEF3FB;
     --yp-blue-100: #DBEAFE;
-    --yp-blue-rgb: 1 179 233;
+    --yp-blue-rgb: 26 60 143;
 
-    --yp-red-dark: #e04545; /* Slightly darker for hover */
-    --yp-red-light: #EF4444;
+    --yp-red: #E02020; /* Accent Red */
+    --yp-red-light: #FF4444;
+    --yp-red-dark: #B91C1C;
     --yp-red-50: #FEF2F2;
-    --yp-red-rgb: 255 87 87;
+    --yp-red-rgb: 224 32 32;
 
     /* Neutrals */
-    --yp-dark: #0F172A;
-    --yp-gray-900: #1E293B;
-    --yp-gray-800: #334155;
-    --yp-gray-700: #475569;
-    --yp-gray-600: #64748B;
-    --yp-gray-500: #94A3B8;
-    --yp-gray-400: #CBD5E1;
-    --yp-gray-300: #E2E8F0;
-    --yp-gray-200: #F1F5F9;
-    --yp-gray-100: #F8FAFC;
+    --yp-bg: #FFFFFF;
+    --yp-bg-secondary: #F5F5F5;
+    --yp-text-primary: #111111;
+    --yp-text-secondary: #555555;
+    --yp-text-muted: #9E9E9E;
+    --yp-border-color: #E0E0E0;
+
+    --yp-dark: #111111;
+    --yp-gray-900: #111111;
+    --yp-gray-800: #333333;
+    --yp-gray-700: #555555;
+    --yp-gray-600: #777777;
+    --yp-gray-500: #9E9E9E;
+    --yp-gray-400: #BDBDBD;
+    --yp-gray-300: #E0E0E0;
+    --yp-gray-200: #EEEEEE;
+    --yp-gray-100: #F5F5F5;
 
     /* Functional */
     --yp-whatsapp: #25D366;

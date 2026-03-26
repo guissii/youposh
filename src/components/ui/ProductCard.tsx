@@ -156,7 +156,7 @@ function ProductCard({
     return (
       <div
         onClick={handleNavigate}
-        className="product-card group w-full bg-white rounded-[16px] overflow-hidden border border-[#E8E8E8] shadow-[0_2px_12px_rgba(0,0,0,0.06)] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] flex flex-col"
+        className="product-card group w-full bg-white rounded-[12px] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.07)] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] flex flex-col"
       >
         {/* Image area */}
         <div className="relative bg-[#F5F5F5] aspect-[4/5] w-full overflow-hidden shrink-0">
@@ -262,14 +262,14 @@ function ProductCard({
           <button
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className={`flex-1 h-9 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-1.5 ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-color-cart)] text-white hover:opacity-90'}`}
+            className={`flex-1 h-10 rounded-[12px] text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-1.5 ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-color-cart)] text-white hover:opacity-90'}`}
           >
             {!isOutOfStock && <ShoppingBag className="w-3.5 h-3.5" />}
             {isOutOfStock ? compactOutLabel : (t('addToCart') || 'Ajouter')}
           </button>
           <button
             onClick={handleWishlistToggle}
-            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 border-2 ${isFavorite
+            className={`w-10 h-10 rounded-[12px] flex items-center justify-center transition-all duration-200 border-2 ${isFavorite
               ? 'bg-red-50 border-[#D92C2C]'
               : 'bg-white border-[#E8E8E8] hover:border-[#D92C2C]'
               }`}
@@ -289,7 +289,7 @@ function ProductCard({
   return (
     <div
       onClick={handleNavigate}
-      className="product-card group w-full bg-white rounded-[16px] overflow-hidden border border-[#E8E8E8] shadow-[0_2px_12px_rgba(0,0,0,0.06)] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] flex flex-col"
+      className="product-card group w-full bg-white rounded-[12px] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.07)] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] flex flex-col"
     >
       {/* ── Image area ── */}
       <div className="relative bg-[#F5F5F5] aspect-[4/5] w-full flex items-center justify-center overflow-hidden shrink-0">
@@ -432,14 +432,14 @@ function ProductCard({
         <button
           onClick={handleAddToCart}
           disabled={isOutOfStock}
-          className={`flex-1 h-9 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-1.5 ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-color-cart)] text-white hover:opacity-90'}`}
+          className={`flex-1 h-10 rounded-[12px] text-[11px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-1.5 ${isOutOfStock ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[var(--yp-color-cart)] text-white hover:opacity-90'}`}
         >
           {!isOutOfStock && <ShoppingBag className="w-3.5 h-3.5" />}
           {isOutOfStock ? (t('outOfStock') || 'Rupture') : (t('addToCart') || 'Ajouter')}
         </button>
         <button
           onClick={handleWishlistToggle}
-          className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 border-2 ${isFavorite
+          className={`w-10 h-10 rounded-[12px] flex items-center justify-center transition-all duration-200 border-2 ${isFavorite
             ? 'bg-red-50 border-[#D92C2C]'
             : 'bg-white border-[#E8E8E8] hover:border-[#D92C2C]'
             }`}

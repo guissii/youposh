@@ -556,42 +556,32 @@ export default function ProductPage() {
                   </div>
                 </div>
 
-                {/* ═══ Actions ═══ */}
-                <div className="space-y-3 pt-2">
+                {/* ═══ Actions (Sticky on Mobile) ═══ */}
+                <div className="space-y-3 pt-2 fixed bottom-[60px] left-0 right-0 bg-white p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-[40] lg:relative lg:bottom-0 lg:p-0 lg:shadow-none lg:bg-transparent lg:z-auto">
                   {isOutOfStock && (
                     <div className="bg-[var(--yp-red-50)] border border-[var(--yp-red)]/20 text-[var(--yp-red)] rounded-xl px-4 py-3 text-sm font-semibold">
                       {t('outOfStock') || 'Rupture de stock'} — {isAr ? 'غير متوفر حاليا' : 'Actuellement indisponible. Revenez bientôt.'}
                     </div>
                   )}
-                  {/* Primary CTA — Continuer la commande */}
-                  <button
-                    onClick={() => setShowOrderForm(true)}
-                    disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
-                    className="w-full bg-[var(--yp-color-cart)] text-white hover:opacity-90 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2.5 transition-all shadow-lg shadow-[var(--yp-color-cart)]/20 active:scale-[0.98]"
-                  >
-                    {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('continueOrder') || 'Continuer la commande')}
-                    {!isOutOfStock && <ArrowRight className="w-5 h-5" />}
-                  </button>
-
-                  {/* Secondary — Cart + Wishlist */}
                   <div className="flex gap-3">
+                    {/* Primary CTA — Continuer la commande */}
                     <button
-                      onClick={handleAddToCart}
+                      onClick={() => setShowOrderForm(true)}
                       disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
-                      className="flex-1 bg-white border-2 border-[var(--yp-color-cart)] text-[var(--yp-color-cart)] hover:bg-[var(--yp-color-cart)] hover:text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98]"
+                      className="flex-1 bg-[var(--yp-color-cart)] text-white hover:opacity-90 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-[var(--yp-color-cart)]/20 active:scale-[0.98]"
                     >
-                      <ShoppingCart className="w-5 h-5" />
-                      {t('addToCart')}
+                      {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('continueOrder') || 'Commander maintenant')}
                     </button>
+
                     <button
                       onClick={() => addToWishlist(product)}
-                      className={`w-14 flex-shrink-0 border-2 rounded-xl flex items-center justify-center transition-all ${isInWishlist(product.id)
+                      className={`w-12 sm:w-14 flex-shrink-0 border-2 rounded-xl flex items-center justify-center transition-all ${isInWishlist(product.id)
                         ? 'border-[var(--yp-red)] text-[var(--yp-red)] bg-[var(--yp-red-50)]'
-                        : 'border-[var(--yp-gray-300)] hover:border-[var(--yp-red)] hover:text-[var(--yp-red)] text-[var(--yp-gray-500)]'
+                        : 'border-[var(--yp-gray-300)] hover:border-[var(--yp-red)] hover:text-[var(--yp-red)] text-[var(--yp-gray-500)] bg-white'
                         }`}
                       aria-label={t('addToWishlist')}
                     >
-                      <Heart className={`w-6 h-6 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+                      <Heart className={`w-5 h-5 sm:w-6 sm:h-6 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
                     </button>
                   </div>
                 </div>
