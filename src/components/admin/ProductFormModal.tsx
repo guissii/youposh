@@ -500,7 +500,12 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                         src={previewImages[primaryIndex].file ? getImageUrl(previewImages[primaryIndex].url) : getImageUrl(previewImages[primaryIndex].url)}
                                         crossOrigin="anonymous"
                                         alt="Aperçu du produit"
-                                        className="w-full h-full object-contain pointer-events-none"
+                                        className="w-full h-full pointer-events-none transition-all duration-200"
+                                        style={{
+                                            objectFit: 'cover',
+                                            objectPosition: `${form.cardFocalX}% ${form.cardFocalY}%`,
+                                            transform: `scale(${form.cardZoom})`
+                                        }}
                                     />
 
                                     {/* Watermark Overlay (CSS Client-side only) */}
@@ -527,6 +532,72 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                     <span className="text-[10px] text-gray-500 font-medium">
                                         {applyWatermark ? 'Glissez le logo sur l\'image pour changer sa position.' : 'Filigrane désactivé pour cette image.'}
                                     </span>
+                                </div>
+
+                                {/* Controls for Card Zoom & Focal Point */}
+                                <div className="mt-4 p-4 bg-white border border-gray-200 shadow-sm rounded-xl space-y-4">
+                                    <h4 className="text-sm font-semibold text-[#333]">Cadrage & Zoom (Aperçu Boutique)</h4>
+                                    <p className="text-xs text-[#666] leading-tight">Ajustez comment l'image s'affiche sur les cartes produits de la boutique (Accueil, Boutique, Recherche...).</p>
+                                    
+                                    <div className="space-y-4">
+                                        <div>
+                                            <div className="flex justify-between text-xs mb-1.5">
+                                                <span className="font-medium text-[#666]">Niveau de zoom</span>
+                                                <span className="text-[var(--yp-blue)] font-bold">{form.cardZoom}x</span>
+                                            </div>
+                                            <input 
+                                                type="range" 
+                                                min="0.5" 
+                                                max="2.5" 
+                                                step="0.05" 
+                                                value={form.cardZoom} 
+                                                onChange={(e) => setForm(f => ({ ...f, cardZoom: parseFloat(e.target.value) }))}
+                                                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[var(--yp-blue)]"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <div className="flex justify-between text-xs mb-1.5">
+                                                <span className="font-medium text-[#666]">Position Horizontale (X)</span>
+                                                <span className="text-[var(--yp-blue)] font-bold">{form.cardFocalX}%</span>
+                                            </div>
+                                            <input 
+                                                type="range" 
+                                                min="0" 
+                                                max="100" 
+                                                step="1" 
+                                                value={form.cardFocalX} 
+                                                onChange={(e) => setForm(f => ({ ...f, cardFocalX: parseInt(e.target.value) }))}
+                                                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[var(--yp-blue)]"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <div className="flex justify-between text-xs mb-1.5">
+                                                <span className="font-medium text-[#666]">Position Verticale (Y)</span>
+                                                <span className="text-[var(--yp-blue)] font-bold">{form.cardFocalY}%</span>
+                                            </div>
+                                            <input 
+                                                type="range" 
+                                                min="0" 
+                                                max="100" 
+                                                step="1" 
+                                                value={form.cardFocalY} 
+                                                onChange={(e) => setForm(f => ({ ...f, cardFocalY: parseInt(e.target.value) }))}
+                                                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[var(--yp-blue)]"
+                                            />
+                                        </div>
+                                        
+                                        <div className="flex justify-end pt-1">
+                                            <button 
+                                                type="button" 
+                                                onClick={() => setForm(f => ({ ...f, cardZoom: 1, cardFocalX: 50, cardFocalY: 50 }))}
+                                                className="text-xs text-red-500 hover:text-red-700 hover:underline font-medium transition-colors"
+                                            >
+                                                Réinitialiser le zoom
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}
