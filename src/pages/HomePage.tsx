@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
-  Flame, TrendingUp, Percent, Sparkles,
+  Flame, TrendingUp, Sparkles,
   ShoppingCart, RefreshCcw, ShieldCheck, HeadphonesIcon
 } from 'lucide-react';
 import { fetchProducts } from '@/lib/api';
