@@ -6,12 +6,33 @@ import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import { promisify } from 'util';
 import { Request } from 'express';
+import sharp from 'sharp';
 
 dotenv.config();
 
 const router = Router();
 
 const driver = (process.env.UPLOADS_DRIVER || 'local').toLowerCase();
+
+const optimizeImage = async (filePath: string) => {
+    try {
+        const metadata = await sharp(filePath).metadata();
+        const s = sharp(filePath).resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true });
+
+        if (metadata.format === 'png') {
+            s.png({ quality: 80, compressionLevel: 8 });
+        } else if (metadata.format === 'webp') {
+            s.webp({ quality: 80 });
+        } else {
+            s.jpeg({ quality: 80, progressive: true });
+        }
+
+        const buffer = await s.toBuffer();
+        await promisify(fs.writeFile)(filePath, buffer);
+    } catch (e) {
+        console.error('Failed to optimize image:', e);
+    }
+};
 
 const ensureDir = (p: string) => {
     if (!fs.existsSync(p)) {
@@ -86,9 +107,9 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase =
     supabaseUrl && supabaseServiceKey
         ? createClient(supabaseUrl, supabaseServiceKey, {
-              auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
-              global: { headers: { Authorization: `Bearer ${supabaseServiceKey}` } }
-          })
+            auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+            global: { headers: { Authorization: `Bearer ${supabaseServiceKey}` } }
+        })
         : null;
 
 const uploadToSupabase = async (file: Express.Multer.File, folder: string) => {
@@ -119,6 +140,7 @@ router.post('/category', (req, res, next) => {
             const url = await uploadToSupabase(f, 'categories');
             return res.json({ url });
         } else {
+            await optimizeImage(f.path);
             const base = getPublicBase(req);
             const url = `${base}/uploads/categories/${path.basename(f.path)}`;
             return res.json({ url });
@@ -143,6 +165,7 @@ router.post('/product', (req, res, next) => {
             const url = await uploadToSupabase(f, 'products');
             return res.json({ url });
         } else {
+            await optimizeImage(f.path);
             const base = getPublicBase(req);
             const url = `${base}/uploads/products/${path.basename(f.path)}`;
             return res.json({ url });
