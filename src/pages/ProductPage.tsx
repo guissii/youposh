@@ -104,7 +104,8 @@ export default function ProductPage() {
           attributeValues: Array.isArray(p?.attributeValues) ? p.attributeValues : [],
         };
         setProduct(normalized);
-        setSelectedImage(0);
+        const nextGallery = [normalized?.image, ...(Array.isArray(normalized?.images) ? normalized.images : [])].filter(Boolean);
+        setSelectedImage(nextGallery.length > 1 ? 1 : 0);
         const nextSelected: Record<string, string> = {};
         (Array.isArray(normalized?.variants) ? normalized.variants : []).forEach((v: any) => {
           const opts = Array.isArray(v?.options) ? v.options : [];
@@ -211,6 +212,7 @@ export default function ProductPage() {
 
   const variantsArray = product.variants;
   const galleryImages = [product.image, ...product.images].filter(Boolean);
+  const thumbnailImages = galleryImages.slice(1);
 
   const discount = product.originalPrice
     ? Math.round((1 - product.price / product.originalPrice) * 100)
@@ -426,11 +428,13 @@ export default function ProductPage() {
 
                 {/* Thumbnails */}
                 <div className="flex gap-2 overflow-x-auto pb-2">
-                  {galleryImages.map((img: string, i: number) => (
+                  {thumbnailImages.map((img: string, i: number) => {
+                    const imageIndex = i + 1;
+                    return (
                     <button
-                      key={i}
-                      onClick={() => setSelectedImage(i)}
-                      className={`w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === i ? 'border-[var(--yp-blue)] shadow-md' : 'border-transparent hover:border-[var(--yp-gray-400)]'
+                      key={`${img}-${i}`}
+                      onClick={() => setSelectedImage(imageIndex)}
+                      className={`w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === imageIndex ? 'border-[var(--yp-blue)] shadow-md' : 'border-transparent hover:border-[var(--yp-gray-400)]'
                         }`}
                     >
                       <LazyLoadImage
@@ -441,7 +445,8 @@ export default function ProductPage() {
                         wrapperClassName="w-full h-full block"
                       />
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
