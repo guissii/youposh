@@ -3,10 +3,10 @@ import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Grid3X3, List, ChevronDown, X, SlidersHorizontal,
-  ArrowUpDown, Flame, Percent, Sparkles, Star, Tag, Package
+  ArrowUpDown, Flame, Percent, Sparkles, Star, Tag, Package, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCategories, fetchProducts } from '@/lib/api';
+import { fetchCategories, fetchProductsPaginated } from '@/lib/api';
 import ProductCard from '@/components/ui/ProductCard';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -26,6 +26,9 @@ export default function ShopPage() {
   const sortParam = (searchParams.get('sort') as SortOption) || 'popular';
   const filterParam = (searchParams.get('filter') as FilterOption) || 'all';
   const avParam = searchParams.get('av') || '';
+  const pageParamRaw = Number(searchParams.get('page') || '1');
+  const currentPageParam = Number.isFinite(pageParamRaw) && pageParamRaw > 0 ? Math.floor(pageParamRaw) : 1;
+  const PER_PAGE = 12;
   const selectedAvIds = useMemo(() => {
     if (!avParam) return [];
     return avParam.split(',').map(s => parseInt(s.trim())).filter(n => Number.isFinite(n));
@@ -51,6 +54,10 @@ export default function ShopPage() {
 
   const updateParams = useCallback((updates: Record<string, string | undefined>) => {
     const newParams = new URLSearchParams(searchParams);
+    const hasNonPageUpdate = Object.keys(updates).some(key => key !== 'page');
+    if (hasNonPageUpdate && !Object.prototype.hasOwnProperty.call(updates, 'page')) {
+      newParams.set('page', '1');
+    }
     Object.entries(updates).forEach(([key, value]) => {
       if (value) {
         newParams.set(key, value);
@@ -82,16 +89,27 @@ export default function ShopPage() {
     if (sortParam) queryParams.set('sort', sortParam);
     if (filterParam && filterParam !== 'all') queryParams.set('badge', filterParam);
     if (selectedAvIds.length) queryParams.set('av', selectedAvIds.join(','));
+    queryParams.set('page', String(currentPageParam));
+    queryParams.set('perPage', String(PER_PAGE));
     return queryParams.toString();
-  }, [categoryParam, filterParam, searchQuery, selectedAvIds, sortParam]);
+  }, [categoryParam, currentPageParam, filterParam, searchQuery, selectedAvIds, sortParam]);
 
-  const { data: productsData = [], isFetching: loading } = useQuery({
+  const { data: productsData, isFetching: loading } = useQuery({
     queryKey: ['products', queryParamsStr],
-    queryFn: () => fetchProducts(queryParamsStr),
+    queryFn: () => fetchProductsPaginated(queryParamsStr),
   });
 
-  // Keep backward compatibility for local state variable name
-  const products = Array.isArray(productsData) ? productsData : [];
+  const products: any[] = Array.isArray(productsData?.items) ? productsData.items : [];
+  const totalProducts = Number(productsData?.total ?? products.length);
+  const totalPages = Math.max(1, Number(productsData?.totalPages ?? 1));
+  const activePage = Math.max(1, Number(productsData?.page ?? currentPageParam));
+  const visiblePageNumbers = useMemo(() => {
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    const start = Math.max(1, activePage - 2);
+    const end = Math.min(totalPages, start + 4);
+    const adjustedStart = Math.max(1, end - 4);
+    return Array.from({ length: end - adjustedStart + 1 }, (_, i) => adjustedStart + i);
+  }, [activePage, totalPages]);
 
   const toggleAttributeValue = (id: number) => {
     const set = new Set(selectedAvIds);
@@ -119,8 +137,8 @@ export default function ShopPage() {
     if (isPromoPage) return t('promoSubtitle') || 'Découvrez nos meilleures offres du moment';
     if (isNewPage) return t('newSubtitle') || 'Les derniers produits ajoutés à notre catalogue';
     if (isBestsellerPage) return t('bestsellerSubtitle') || 'Les produits les plus appréciés par nos clients';
-    if (searchQuery) return `${products.length} ${t('productsFound')}`;
-    return `${products.length} ${t('productsFound')}`;
+    if (searchQuery) return `${totalProducts} ${t('productsFound')}`;
+    return `${totalProducts} ${t('productsFound')}`;
   };
 
   const sortOptions: { value: SortOption; label: string; icon: React.ElementType }[] = [
@@ -379,6 +397,42 @@ export default function ShopPage() {
                       variant={viewMode === 'list' ? 'horizontal' : 'default'}
                     />
                   ))}
+                </div>
+              )}
+              {totalPages > 1 && (
+                <div className="mt-8 flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => updateParams({ page: String(Math.max(1, activePage - 1)) })}
+                    disabled={activePage <= 1}
+                    className="h-9 px-3 rounded-lg border border-[var(--yp-gray-300)] bg-white text-sm font-semibold text-[var(--yp-dark)] disabled:opacity-40 disabled:cursor-not-allowed hover:border-[var(--yp-blue)] transition-colors"
+                  >
+                    <span className="flex items-center gap-1">
+                      <ChevronLeft className="w-4 h-4" />
+                      {t('previous') || 'Précédent'}
+                    </span>
+                  </button>
+                  {visiblePageNumbers.map(page => (
+                    <button
+                      key={page}
+                      onClick={() => updateParams({ page: String(page) })}
+                      className={`h-9 min-w-9 px-3 rounded-lg border text-sm font-semibold transition-colors ${activePage === page
+                        ? 'bg-[var(--yp-dark)] text-white border-[var(--yp-dark)]'
+                        : 'bg-white text-[var(--yp-dark)] border-[var(--yp-gray-300)] hover:border-[var(--yp-blue)]'
+                        }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => updateParams({ page: String(Math.min(totalPages, activePage + 1)) })}
+                    disabled={activePage >= totalPages}
+                    className="h-9 px-3 rounded-lg border border-[var(--yp-gray-300)] bg-white text-sm font-semibold text-[var(--yp-dark)] disabled:opacity-40 disabled:cursor-not-allowed hover:border-[var(--yp-blue)] transition-colors"
+                  >
+                    <span className="flex items-center gap-1">
+                      {t('next') || 'Suivant'}
+                      <ChevronRight className="w-4 h-4" />
+                    </span>
+                  </button>
                 </div>
               )}
             </div>

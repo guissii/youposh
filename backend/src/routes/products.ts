@@ -48,7 +48,7 @@ function parsePositiveInt(value: unknown): number | undefined {
 // GET all products with optional filters
 router.get('/', cacheMiddleware(60), async (req, res) => {
     try {
-        const { category, badge, search, sort, inStock, all, av, limit, includeArchived } = req.query;
+        const { category, badge, search, sort, inStock, all, av, limit, includeArchived, page, perPage } = req.query;
         // Check if "all" is true OR if the request comes from the admin panel (implied by logic)
         // But to be safe, let's trust the "all" parameter more.
         const showAll = all === 'true';
@@ -93,9 +93,14 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
 
         const sortKey = (sort as string | undefined) ?? 'popular';
         const badgeKey = badge as string | undefined;
+        const requestedPage = parsePositiveInt(page) ?? 1;
+        const requestedPerPage = Math.min(parsePositiveInt(perPage) ?? 12, 60);
+        const usePagination = page !== undefined || perPage !== undefined;
         const requestedLimit = parsePositiveInt(limit);
         const baseLimit = showAll ? 200 : 48;
-        const safeLimit = Math.min(requestedLimit ?? baseLimit, 500);
+        const safeLimit = usePagination
+            ? Math.min(Math.max(requestedPerPage * 20, 120), 1000)
+            : Math.min(requestedLimit ?? baseLimit, 500);
         const requiresPostProcessing = badgeKey === 'promo' || sortKey === 'popular' || sortKey === 'promo' || badgeKey === 'popular';
         const prismaTake = requiresPostProcessing ? Math.min(safeLimit * 3, 1000) : safeLimit;
         let orderBy: any = [{ sortOrder: 'desc' }, { salesCount: 'desc' }]; // Default sort now respects manual sortOrder
@@ -123,58 +128,91 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
             where.isFeatured = true;
         }
 
+        const productSelect: any = {
+            id: true,
+            name: true,
+            nameAr: true,
+            price: true,
+            originalPrice: true,
+            image: true,
+            images: true,
+            badge: true,
+            rating: true,
+            reviews: true,
+            categorySlug: true,
+            description: true,
+            descriptionAr: true,
+            inStock: true,
+            isVisible: true,
+            sku: true,
+            tags: true,
+            features: true,
+            variants: true,
+            isPopular: true,
+            isNew: true,
+            isBestSeller: true,
+            isFeatured: true,
+            status: true,
+            publishedAt: true,
+            sortOrder: true,
+            viewsCount: true,
+            cartAddCount: true,
+            salesCount: true,
+            stock: true,
+            cardZoom: true,
+            cardFocalX: true,
+            cardFocalY: true,
+            createdAt: true,
+            updatedAt: true,
+            category: true,
+            ...(showAll ? {
+                attributeValues: {
+                    include: {
+                        attributeValue: {
+                            include: { attribute: true },
+                        },
+                    },
+                },
+            } : {})
+        };
+
+        const canUseDbPagination = usePagination && !requiresPostProcessing;
+        if (canUseDbPagination) {
+            const total = await prisma.product.count({ where });
+            const totalPages = Math.max(1, Math.ceil(total / requestedPerPage));
+            const normalizedPage = Math.min(requestedPage, totalPages);
+            const offset = (normalizedPage - 1) * requestedPerPage;
+            const pageProducts = await prisma.product.findMany({
+                where,
+                orderBy,
+                skip: offset,
+                take: requestedPerPage,
+                select: productSelect,
+            });
+
+            const items = pageProducts.map((p: any) => ({
+                ...p,
+                badge: computeBadge(p),
+                isNew: isNewProduct(p),
+                isBestSeller: isBestSellerProduct(p),
+                isPopular: false
+            }));
+
+            res.json({
+                items,
+                total,
+                page: normalizedPage,
+                perPage: requestedPerPage,
+                totalPages
+            });
+            return;
+        }
+
         const products = await prisma.product.findMany({
             where,
             orderBy,
             take: prismaTake,
-            select: {
-                id: true,
-                name: true,
-                nameAr: true,
-                price: true,
-                originalPrice: true,
-                image: true,
-                images: true,
-                badge: true,
-                rating: true,
-                reviews: true,
-                categorySlug: true,
-                description: true,
-                descriptionAr: true,
-                inStock: true,
-                isVisible: true,
-                sku: true,
-                tags: true,
-                features: true,
-                variants: true,
-                isPopular: true,
-                isNew: true,
-                isBestSeller: true,
-                isFeatured: true,
-                status: true,
-                publishedAt: true,
-                sortOrder: true,
-                viewsCount: true,
-                cartAddCount: true,
-                salesCount: true,
-                stock: true,
-                cardZoom: true,
-                cardFocalX: true,
-                cardFocalY: true,
-                createdAt: true,
-                updatedAt: true,
-                category: true,
-                // OPTIMISATION : On charge les attributs uniquement pour l'admin (all=true)
-                ...(showAll ? {
-                    attributeValues: {
-                        include: {
-                            attributeValue: {
-                                include: { attribute: true },
-                            },
-                        },
-                    },
-                } : {})
-            },
+            select: productSelect,
         });
 
         // Si aucun filtre complexe, on n'a pas besoin de calculer les scores pour TOUTE la BDD, juste pour les produits retournés.
@@ -214,7 +252,7 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
             }
         }
 
-        const withComputed = products.map(p => {
+        const withComputed: any[] = products.map((p: any) => {
             const computed = {
                 ...p,
                 badge: computeBadge(p),
@@ -225,7 +263,7 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
             return computed;
         });
 
-        let filtered = withComputed;
+        let filtered: any[] = withComputed;
 
         // Post-DB filtering for dynamic properties
         if (badgeKey === 'promo') {
@@ -256,8 +294,23 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
             filtered = [...filtered].sort((a, b) => Number(b.salesCount ?? 0) - Number(a.salesCount ?? 0));
         }
 
-        filtered = filtered.slice(0, safeLimit);
+        if (usePagination) {
+            const total = filtered.length;
+            const totalPages = Math.max(1, Math.ceil(total / requestedPerPage));
+            const normalizedPage = Math.min(requestedPage, totalPages);
+            const offset = (normalizedPage - 1) * requestedPerPage;
+            const items = filtered.slice(offset, offset + requestedPerPage);
+            res.json({
+                items,
+                total,
+                page: normalizedPage,
+                perPage: requestedPerPage,
+                totalPages
+            });
+            return;
+        }
 
+        filtered = filtered.slice(0, safeLimit);
         res.json(filtered);
     } catch (error) {
         console.error('Error fetching products:', error);

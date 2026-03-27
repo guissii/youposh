@@ -84,8 +84,17 @@ export const fetchTopProducts = () => apiFetch<any[]>('/dashboard/top-products')
 export const fetchVpsStatus = () => apiFetch<VpsStatus>('/dashboard/vps-status');
 
 // ─── Products ──────────────────────────────────────────────────
+export interface PaginatedProductsResponse {
+    items: any[];
+    total: number;
+    page: number;
+    perPage: number;
+    totalPages: number;
+}
 export const fetchProducts = (params?: string) =>
     apiFetch<any[]>(`/products${params ? `?${params}` : ''}`);
+export const fetchProductsPaginated = (params?: string) =>
+    apiFetch<PaginatedProductsResponse>(`/products${params ? `?${params}` : ''}`);
 export const fetchProduct = (id: number) => apiFetch<any>(`/products/${id}`);
 export const createProduct = (data: any) =>
     apiFetch<any>('/products', { method: 'POST', body: JSON.stringify(data) });
