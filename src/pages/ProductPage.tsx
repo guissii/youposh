@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Heart, Star, Minus, Plus, ArrowLeft,
-  Truck, Shield, Check, ChevronRight, MessageCircle,
+  Truck, Shield, Check, ChevronRight, MessageCircle, PhoneCall,
   X, User, Phone, MapPin, FileText, Package, Ticket, ImageOff
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
@@ -598,6 +598,50 @@ export default function ProductPage() {
                 {/* SKU */}
                 <p className="text-sm text-[var(--yp-gray-500)]">{t('sku')}: {product.sku}</p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════
+            HOW TO ORDER SECTION (طريقة الطلب جد سهلة)
+            ══════════════════════════════════════════════ */}
+        <section className="py-8 bg-[var(--yp-gray-100)]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h3 className="text-2xl font-bold text-[var(--yp-dark)] mb-6 font-heading text-center">
+              {isAr ? 'طريقة الطلب جد سهلة' : 'Comment commander facilement ?'}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+              {[
+                {
+                  icon: FileText,
+                  textAr: 'إملأ النموذج عن طريق كتابة اسمك ورقم الهاتف بالإضافة إلى المدينة',
+                  textFr: 'Remplissez le formulaire avec votre nom, numéro de téléphone et ville.'
+                },
+                {
+                  icon: PhoneCall,
+                  textAr: 'سيتم الإتصال بكم في أقرب وقت لتأكيد طلبكم وتزويدكم بالمزيد من المعلومات',
+                  textFr: 'Nous vous contacterons rapidement pour confirmer votre commande.'
+                },
+                {
+                  icon: Truck,
+                  textAr: 'لن تضطر لدفع أي دفعة حتى تتوصل بالمنتج بباب منزلك',
+                  textFr: "Paiement à la livraison. Vous ne payez qu'à la réception."
+                }
+              ].map((step, i) => (
+                <div key={i} className="flex items-center gap-4 bg-white border-2 border-[var(--yp-red)] rounded-2xl p-4 shadow-sm relative overflow-hidden">
+                  {/* Petit accent décoratif rouge */}
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-[var(--yp-red-50)] rounded-bl-[100px] -z-0 opacity-50" />
+                  
+                  <div className="w-14 h-14 shrink-0 bg-[var(--yp-red-50)] rounded-xl flex items-center justify-center relative z-10">
+                    <step.icon className="w-7 h-7 text-[var(--yp-red)]" />
+                  </div>
+                  <div className="flex-1 relative z-10">
+                    <p className={`font-semibold text-[var(--yp-dark)] leading-snug ${isAr ? 'text-base' : 'text-sm'}`}>
+                      {isAr ? step.textAr : step.textFr}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
