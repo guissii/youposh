@@ -21,11 +21,13 @@ import { useStoreSettings } from '@/data/storeSettings';
 
 
 export default function HomePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const heroSettings = useHeroSettings();
   const storeSettings = useStoreSettings();
   const [isHeroVideoReady, setIsHeroVideoReady] = useState(false);
+  const [isDiscoverCtaHovered, setIsDiscoverCtaHovered] = useState(false);
+  const [hoveredDiscoverTag, setHoveredDiscoverTag] = useState(-1);
 
   const flashRef = useScrollReveal();
   const bestsellersRef = useScrollReveal();
@@ -73,6 +75,17 @@ export default function HomePage() {
   }, [heroSettings.videoUrl, isHeroVideoEnabled]);
 
   const error = (popularError || newError || featuredError) ? "Impossible de charger les produits. Veuillez vérifier votre connexion." : null;
+  const isAr = i18n.language === 'ar';
+  const discoverTitle = isAr
+    ? 'لم تشاهد بعد أفضل عروضنا'
+    : "Vous n'avez pas encore vu nos meilleures offres";
+  const discoverSubtitle = isAr
+    ? 'اكتشف منتجات بأسعار جذابة، توصيل سريع، والدفع عند الاستلام.'
+    : 'Découvrez des produits qui convertissent le plus chez nos clients: prix attractifs, livraison rapide et paiement à la réception.';
+  const discoverTags = isAr
+    ? ['الأكثر رواجًا', 'مخزون محدود', 'دفع آمن']
+    : ['Tendance du moment', 'Stock limité', 'Paiement sécurisé'];
+  const discoverCta = isAr ? 'استكشف المتجر' : 'Explorer la boutique';
 
   if (error) {
     return (
@@ -379,33 +392,94 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="border-t border-[var(--yp-gray-300)]" />
             <div className="pt-6 sm:pt-10 pb-2">
-              <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[var(--yp-blue)]/20 bg-gradient-to-r from-[#0f1e5a] via-[#1a2e7e] to-[#2563eb] px-4 sm:px-8 py-5 sm:py-7 shadow-[0_16px_40px_rgba(37,99,235,0.22)]">
-                <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full bg-white/10 blur-2xl" />
-                <div className="absolute -bottom-12 -left-10 w-40 h-40 rounded-full bg-cyan-300/20 blur-3xl" />
-                <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
-                  <div>
-                    <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-white/80 mb-2">
-                      YOUPOSH Collection
-                    </p>
-                    <h2 className="text-lg sm:text-2xl font-extrabold text-white leading-tight">
-                      Vous n'avez pas encore vu nos meilleures offres
-                    </h2>
-                    <p className="text-sm sm:text-base text-white/90 mt-2 max-w-2xl">
-                      Découvrez des produits qui convertissent le plus chez nos clients: prix attractifs, livraison rapide et paiement à la réception.
-                    </p>
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      <span className="px-3 py-1 rounded-full bg-white/15 text-white text-xs sm:text-sm font-medium">Tendance du moment</span>
-                      <span className="px-3 py-1 rounded-full bg-white/15 text-white text-xs sm:text-sm font-medium">Stock limité</span>
-                      <span className="px-3 py-1 rounded-full bg-white/15 text-white text-xs sm:text-sm font-medium">Paiement sécurisé</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => navigate('/shop')}
-                    className="bg-white text-[#12308f] hover:bg-[#f3f7ff] px-5 sm:px-6 py-3 rounded-xl font-bold text-sm sm:text-base transition-all active:scale-[0.97] inline-flex items-center justify-center gap-2 shadow-lg whitespace-nowrap"
+              <style>{`
+                @keyframes ypDiscoverGradient {
+                  0% { background-position: 0% 50%; }
+                  50% { background-position: 100% 50%; }
+                  100% { background-position: 0% 50%; }
+                }
+                @keyframes ypDiscoverShimmer {
+                  0% { transform: translateX(-130%); }
+                  100% { transform: translateX(130%); }
+                }
+                @keyframes ypDiscoverTwinkle {
+                  0%, 100% { opacity: 0.35; transform: scale(0.9) rotate(0deg); }
+                  50% { opacity: 1; transform: scale(1.08) rotate(8deg); }
+                }
+              `}</style>
+              <div className="w-full max-w-[380px] sm:max-w-none">
+                <div
+                  className="relative overflow-hidden rounded-2xl border border-white/20 px-4 sm:px-8 py-5 sm:py-7 shadow-[0_18px_40px_rgba(26,42,108,0.45)]"
+                  style={{
+                    background: 'linear-gradient(120deg, #1a2a6c 0%, #1f3fa5 35%, #b21f1f 68%, #fdbb2d 100%)',
+                    backgroundSize: '220% 220%',
+                    animation: 'ypDiscoverGradient 10s ease infinite'
+                  }}
+                >
+                  <div
+                    className="pointer-events-none absolute inset-y-0 left-[-40%] w-[42%]"
+                    style={{
+                      background: 'linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.26) 45%, transparent 100%)',
+                      animation: 'ypDiscoverShimmer 3.2s linear infinite'
+                    }}
+                  />
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="pointer-events-none absolute right-4 top-4 h-6 w-6 text-[#fdbb2d]"
+                    fill="currentColor"
+                    style={{ animation: 'ypDiscoverTwinkle 1.8s ease-in-out infinite' }}
                   >
-                    Explorer la boutique
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                    <path d="M12 1.8l2.2 5.5 5.8.5-4.4 3.8 1.4 5.7L12 14.2 7 17.3l1.4-5.7L4 7.8l5.8-.5L12 1.8z" />
+                  </svg>
+                  <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5" dir={isAr ? 'rtl' : 'ltr'}>
+                    <div>
+                      <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-white/90">
+                        YOUPOSH COLLECTION
+                      </p>
+                      <div className="mt-1 h-[2px] w-20 bg-gradient-to-r from-[#fdbb2d] via-white/80 to-transparent" />
+                      <h2
+                        className="font-extrabold text-white leading-[1.2] mt-3"
+                        style={{ fontFamily: '"Playfair Display", serif', fontSize: '28px' }}
+                      >
+                        {discoverTitle}
+                      </h2>
+                      <p className="mt-2 leading-relaxed text-white/80" style={{ fontSize: '14px' }}>
+                        {discoverSubtitle}
+                      </p>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {discoverTags.map((tag, index) => (
+                          <span
+                            key={tag}
+                            onMouseEnter={() => setHoveredDiscoverTag(index)}
+                            onMouseLeave={() => setHoveredDiscoverTag(-1)}
+                            className="rounded-full border border-white/30 px-3 py-1 text-xs sm:text-sm font-medium text-white backdrop-blur-sm transition-all duration-300"
+                            style={{
+                              background: 'rgba(255, 255, 255, 0.12)',
+                              boxShadow: hoveredDiscoverTag === index
+                                ? '0 0 0 1px rgba(253,187,45,0.45), 0 0 16px rgba(253,187,45,0.55)'
+                                : '0 2px 8px rgba(0,0,0,0.18)'
+                            }}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <button
+                      onMouseEnter={() => setIsDiscoverCtaHovered(true)}
+                      onMouseLeave={() => setIsDiscoverCtaHovered(false)}
+                      onClick={() => navigate('/shop')}
+                      className="bg-white text-[#1a2a6c] px-5 sm:px-6 py-3 rounded-full font-bold text-sm sm:text-base transition-all active:scale-[0.97] inline-flex items-center justify-center gap-2 shadow-[0_10px_22px_rgba(0,0,0,0.2)] hover:shadow-[0_14px_30px_rgba(0,0,0,0.28)] whitespace-nowrap"
+                    >
+                      {discoverCta}
+                      <span
+                        className="inline-block transition-transform duration-300"
+                        style={{ transform: isDiscoverCtaHovered ? 'translateX(4px)' : 'translateX(0px)' }}
+                      >
+                        →
+                      </span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
