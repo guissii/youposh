@@ -558,37 +558,32 @@ export default function ProductPage() {
                 </div>
 
                 {/* ═══ Actions (Sticky on Mobile) ═══ */}
-                <div className="space-y-3 pt-2 fixed bottom-0 left-0 right-0 bg-white p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-[40] lg:relative lg:bottom-0 lg:p-0 lg:shadow-none lg:bg-transparent lg:z-auto">
+                <div className="space-y-3 pt-2 fixed bottom-0 left-0 right-0 bg-white p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-[60] lg:relative lg:bottom-0 lg:p-0 lg:shadow-none lg:bg-transparent lg:z-auto pb-[calc(1rem+env(safe-area-inset-bottom))]">
                   {isOutOfStock && (
                     <div className="bg-[var(--yp-red-50)] border border-[var(--yp-red)]/20 text-[var(--yp-red)] rounded-xl px-4 py-3 text-sm font-semibold">
                       {t('outOfStock') || 'Rupture de stock'} — {isAr ? 'غير متوفر حاليا' : 'Actuellement indisponible. Revenez bientôt.'}
                     </div>
                   )}
-                  <div className="flex gap-2.5">
-                    {/* Primary CTA — Commander maintenant */}
-                    <button
-                      onClick={() => setShowOrderForm(true)}
-                      disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
-                      className="flex-[2] bg-[var(--yp-color-cart)] text-white hover:opacity-90 py-3 sm:py-3.5 rounded-xl font-bold text-[13px] sm:text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-[var(--yp-color-cart)]/20 active:scale-[0.98]"
-                    >
-                      {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('continueOrder') || 'متابعة الطلب')}
-                    </button>
+                    <div className="flex gap-0 sm:gap-2.5 items-stretch h-[48px] sm:h-[56px] relative">
+                      {/* Primary CTA — Commander maintenant */}
+                      <button
+                        onClick={() => setShowOrderForm(true)}
+                        disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
+                        className="flex-1 bg-[var(--yp-color-cart)] text-white hover:opacity-90 rounded-r-none sm:rounded-r-xl rounded-l-xl font-bold text-[13px] sm:text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-[var(--yp-color-cart)]/20 active:scale-[0.98] z-10"
+                      >
+                        {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('continueOrder') || 'متابعة الطلب')}
+                      </button>
 
-                    {/* Secondary CTA — Ajouter au panier (Superposé avec animation) */}
-                    <div className="relative group">
+                      {/* Secondary CTA — Ajouter au panier (Superposé) */}
                       <button
                         onClick={handleAddToCart}
                         disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
-                        className="w-[80px] sm:w-[120px] h-full bg-[#10B981] hover:bg-[#059669] text-white py-2 sm:py-3 rounded-xl font-bold text-[10px] sm:text-sm flex flex-col items-center justify-center gap-0.5 sm:gap-1 transition-all shadow-md shadow-[#10B981]/20 active:scale-[0.98] leading-tight"
+                        className="w-[90px] sm:w-[120px] bg-[#10B981] hover:bg-[#059669] text-white rounded-l-none sm:rounded-l-xl rounded-r-xl font-bold text-[10px] sm:text-sm flex flex-col items-center justify-center gap-0.5 transition-all shadow-md shadow-[#10B981]/20 active:scale-[0.98] leading-tight z-20 relative -ml-4 sm:ml-0"
                       >
                         <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span className="text-center">{isAr ? 'أضف إلى السلة' : 'Ajouter'}</span>
                       </button>
-                      
-                      {/* Fake background layer for superposition effect as in screenshot */}
-                      <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-10 bg-[#10B981] rounded-l-xl -z-10 opacity-50 hidden sm:block"></div>
                     </div>
-                  </div>
                 </div>
 
                 {/* Trust badges */}
