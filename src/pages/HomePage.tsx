@@ -37,21 +37,21 @@ export default function HomePage() {
   // Use React Query for data fetching
   const { data: featuredRaw = [], isFetching: featuredLoading, isError: featuredError } = useQuery({
     queryKey: ['products', 'featured'],
-    queryFn: () => fetchProducts('badge=featured&limit=8'),
+    queryFn: () => fetchProducts('badge=featured&limit=12'),
   });
 
   const { data: popularRaw = [], isFetching: popularLoading, isError: popularError } = useQuery({
     queryKey: ['products', 'popular'],
-    queryFn: () => fetchProducts('sort=popular&limit=8'),
+    queryFn: () => fetchProducts('sort=popular&limit=12'),
   });
 
   const { data: latestRaw = [], isFetching: newLoading, isError: newError } = useQuery({
     queryKey: ['products', 'newest'],
-    queryFn: () => fetchProducts('sort=newest&limit=8'),
+    queryFn: () => fetchProducts('sort=newest&limit=12'),
   });
 
   const isAnyLoading = featuredLoading || popularLoading || newLoading;
-  const HOME_MAX_PRODUCTS = 8;
+  const HOME_MAX_PRODUCTS = 12;
   const fillHomeSlots = (base: any[], candidates: any[], max: number) => {
     const used = new Set(base.map((p: any) => p.id));
     const extra = candidates.filter((p: any) => p?.isVisible !== false && !used.has(p.id));
@@ -61,7 +61,7 @@ export default function HomePage() {
   // Priorité 1: Produits sélectionnés manuellement "Offres du jour" (isFeatured === true)
   let promoProducts = featuredRaw.filter((p: any) => p.isVisible !== false);
 
-  // Workflow: max 8 produits, avec fallback progressif pour toujours remplir la section.
+  // Workflow: max 12 produits, avec fallback progressif pour toujours remplir la section.
   if (promoProducts.length < HOME_MAX_PRODUCTS) {
     promoProducts = fillHomeSlots(promoProducts, popularRaw, HOME_MAX_PRODUCTS);
   }
