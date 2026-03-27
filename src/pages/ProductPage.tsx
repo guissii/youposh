@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  Heart, Star, Minus, Plus, ArrowLeft, ShoppingCart,
+  Star, Minus, Plus, ArrowLeft, ShoppingCart,
   Truck, Shield, Check, ChevronRight, MessageCircle, PhoneCall,
   X, User, Phone, MapPin, FileText, Package, Ticket, ImageOff
 } from 'lucide-react';
@@ -29,7 +29,7 @@ export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { addToCart, setIsCartOpen, addToWishlist, isInWishlist, promoCode, applyPromoCode, removePromoCode } = useStore();
+  const { addToCart, setIsCartOpen, promoCode, applyPromoCode, removePromoCode } = useStore();
   const settings = useStoreSettings();
   const { phone } = settings;
 
@@ -564,38 +564,31 @@ export default function ProductPage() {
                       {t('outOfStock') || 'Rupture de stock'} — {isAr ? 'غير متوفر حاليا' : 'Actuellement indisponible. Revenez bientôt.'}
                     </div>
                   )}
-                    <div className="flex gap-2.5">
-                      {/* Primary CTA — Commander maintenant */}
-                      <button
-                        onClick={() => setShowOrderForm(true)}
-                        disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
-                        className="flex-[2] bg-[var(--yp-color-cart)] text-white hover:opacity-90 py-3 sm:py-3.5 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-[var(--yp-color-cart)]/20 active:scale-[0.98]"
-                      >
-                        {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('continueOrder') || 'متابعة الطلب')}
-                      </button>
+                  <div className="flex gap-2.5">
+                    {/* Primary CTA — Commander maintenant */}
+                    <button
+                      onClick={() => setShowOrderForm(true)}
+                      disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
+                      className="flex-[2] bg-[var(--yp-color-cart)] text-white hover:opacity-90 py-3 sm:py-3.5 rounded-xl font-bold text-[13px] sm:text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-[var(--yp-color-cart)]/20 active:scale-[0.98]"
+                    >
+                      {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('continueOrder') || 'متابعة الطلب')}
+                    </button>
 
-                      {/* Secondary CTA — Ajouter au panier */}
+                    {/* Secondary CTA — Ajouter au panier (Superposé avec animation) */}
+                    <div className="relative group">
                       <button
                         onClick={handleAddToCart}
                         disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
-                        className="flex-1 bg-[#10B981] hover:bg-[#059669] text-white py-3 sm:py-3.5 rounded-xl font-bold text-[11px] sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all shadow-md shadow-[#10B981]/20 active:scale-[0.98] leading-tight"
+                        className="w-[80px] sm:w-[120px] h-full bg-[#10B981] hover:bg-[#059669] text-white py-2 sm:py-3 rounded-xl font-bold text-[10px] sm:text-sm flex flex-col items-center justify-center gap-0.5 sm:gap-1 transition-all shadow-md shadow-[#10B981]/20 active:scale-[0.98] leading-tight"
                       >
                         <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span>{isAr ? 'أضف إلى السلة' : 'Ajouter'}</span>
+                        <span className="text-center">{isAr ? 'أضف إلى السلة' : 'Ajouter'}</span>
                       </button>
-
-                      {/* Wishlist */}
-                      <button
-                        onClick={() => addToWishlist(product)}
-                        className={`w-12 sm:w-14 flex-shrink-0 border-2 rounded-xl flex items-center justify-center transition-all ${isInWishlist(product.id)
-                          ? 'border-[var(--yp-red)] text-[var(--yp-red)] bg-[var(--yp-red-50)]'
-                          : 'border-[var(--yp-gray-300)] hover:border-[var(--yp-red)] hover:text-[var(--yp-red)] text-[var(--yp-gray-500)] bg-white'
-                          }`}
-                        aria-label={t('addToWishlist')}
-                      >
-                        <Heart className={`w-5 h-5 sm:w-6 sm:h-6 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
-                      </button>
+                      
+                      {/* Fake background layer for superposition effect as in screenshot */}
+                      <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-10 bg-[#10B981] rounded-l-xl -z-10 opacity-50 hidden sm:block"></div>
                     </div>
+                  </div>
                 </div>
 
                 {/* Trust badges */}
@@ -693,12 +686,22 @@ export default function ProductPage() {
         {relatedProducts.length > 0 && (
           <section className="py-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <h2 className="text-xl font-bold text-[var(--yp-dark)] mb-6 flex items-center gap-2 font-heading">
-                <ChevronRight className="w-5 h-5 text-[var(--yp-blue)]" />
-                {t('relatedProducts')}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-                {relatedProducts.map(p => (
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-[var(--yp-dark)] flex items-center gap-2 font-heading">
+                  <ChevronRight className="w-5 h-5 text-[var(--yp-blue)]" />
+                  {isAr ? 'منتجات مشابهة' : t('relatedProducts')}
+                </h2>
+                <button
+                  onClick={() => navigate('/shop')}
+                  className="text-sm font-semibold text-[var(--yp-blue)] hover:underline"
+                >
+                  {isAr ? 'عرض المزيد' : 'Voir plus'}
+                </button>
+              </div>
+              {/* Force 1 column on mobile, 2 on tablet, 4 on desktop */}
+              {/* Slice to 3 items max on mobile for better UX */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+                {relatedProducts.slice(0, window.innerWidth < 640 ? 3 : 4).map(p => (
                   <ProductCard key={p.id} product={p} />
                 ))}
               </div>
