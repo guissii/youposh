@@ -558,14 +558,14 @@ export default function ProductPage() {
                 </div>
 
                 {/* ═══ Actions (Sticky on Mobile) ═══ */}
-                <div className="space-y-3 pt-2 fixed bottom-0 left-0 right-0 bg-white p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-[60] lg:relative lg:bottom-0 lg:p-0 lg:shadow-none lg:bg-transparent lg:z-auto pb-[calc(1rem+env(safe-area-inset-bottom))]">
+                <div className="space-y-3 pt-2 fixed bottom-0 left-0 right-0 bg-white p-3 sm:p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-[100] lg:relative lg:bottom-0 lg:p-0 lg:shadow-none lg:bg-transparent lg:z-auto pb-[calc(0.75rem+env(safe-area-inset-bottom))] border-t border-[var(--yp-gray-200)] lg:border-none">
                   {isOutOfStock && (
                     <div className="bg-[var(--yp-red-50)] border border-[var(--yp-red)]/20 text-[var(--yp-red)] rounded-xl px-4 py-3 text-sm font-semibold">
                       {t('outOfStock') || 'Rupture de stock'} — {isAr ? 'غير متوفر حاليا' : 'Actuellement indisponible. Revenez bientôt.'}
                     </div>
                   )}
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 flex items-stretch h-[48px] sm:h-[56px] relative shadow-[0_4px_14px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex-1 flex items-stretch h-[50px] sm:h-[56px] relative shadow-[0_4px_14px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden">
                       {/* Primary CTA — Commander maintenant */}
                       <button
                         onClick={() => setShowOrderForm(true)}
@@ -579,7 +579,7 @@ export default function ProductPage() {
                       <button
                         onClick={handleAddToCart}
                         disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
-                        className="w-[90px] sm:w-[120px] bg-[#10B981] hover:bg-[#059669] text-white font-bold text-[10px] sm:text-sm flex flex-col items-center justify-center gap-0.5 transition-all active:scale-[0.98] leading-tight z-20"
+                        className="w-[100px] sm:w-[130px] bg-[#10B981] hover:bg-[#059669] text-white font-bold text-[11px] sm:text-sm flex flex-col items-center justify-center gap-0.5 transition-all active:scale-[0.98] leading-tight z-20"
                       >
                         <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span className="text-center">{isAr ? 'أضف إلى السلة' : 'Ajouter'}</span>
@@ -589,7 +589,7 @@ export default function ProductPage() {
                     {/* Wishlist Button (À côté du bloc combiné) */}
                     <button
                       onClick={() => addToWishlist(product)}
-                      className={`w-[48px] h-[48px] sm:w-[56px] sm:h-[56px] shrink-0 border-2 rounded-xl flex items-center justify-center transition-all shadow-sm ${isInWishlist(product.id)
+                      className={`w-[50px] h-[50px] sm:w-[56px] sm:h-[56px] shrink-0 border-2 rounded-xl flex items-center justify-center transition-all shadow-sm ${isInWishlist(product.id)
                         ? 'border-[var(--yp-red)] text-[var(--yp-red)] bg-[var(--yp-red-50)]'
                         : 'border-[var(--yp-gray-200)] hover:border-[var(--yp-red)] hover:text-[var(--yp-red)] text-[var(--yp-gray-500)] bg-white'
                         }`}
