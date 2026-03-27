@@ -27,12 +27,6 @@ export default function Footer() {
       { label: t('bestsellers'), href: '/bestsellers' },
       { label: t('newArrivals'), href: '/new' },
     ],
-    help: [
-      { label: t('faq'), href: '/faq' },
-      { label: t('delivery'), href: '/delivery' },
-      { label: t('returns'), href: '/returns' },
-      { label: t('trackOrder'), href: '/track-order' },
-    ],
     about: [
       { label: t('aboutUs'), href: '/about' },
       { label: t('contact'), href: '/contact' },
@@ -43,7 +37,6 @@ export default function Footer() {
 
   const linkSections = [
     { key: 'shop', title: t('shop'), links: footerLinks.shop },
-    { key: 'help', title: t('help'), links: footerLinks.help },
     { key: 'about', title: t('about'), links: footerLinks.about },
   ];
 

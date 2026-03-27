@@ -375,19 +375,6 @@ export default function Header() {
               {/* ZONE 2 — Services */}
               <div className="px-2 py-1">
                 <p className="px-4 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--yp-gray-500)]">Services</p>
-                {[
-                  { path: '/faq', label: t('faq') || 'FAQ', icon: CircleHelp, action: 'navigate' as const },
-                  { path: '/shipping', label: t('deliveryInfo') || 'Livraison', icon: Truck, action: 'navigate' as const },
-                ].map(item => (
-                  <button
-                    key={item.path}
-                    onClick={() => { navigate(item.path); setIsMobileMenuOpen(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-[var(--yp-gray-700)] hover:bg-[var(--yp-gray-200)] font-medium transition-colors"
-                  >
-                    <item.icon className="w-[18px] h-[18px] text-[var(--yp-gray-500)] flex-shrink-0" />
-                    <span className="flex-1 text-left">{item.label}</span>
-                  </button>
-                ))}
                 {/* WhatsApp — Simple line */}
                 <button
                   onClick={() => {
