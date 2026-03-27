@@ -557,6 +557,45 @@ export default function ProductPage() {
                   </div>
                 </div>
 
+                {/* ══════════════════════════════════════════════
+                    HOW TO ORDER SECTION (طريقة الطلب جد سهلة)
+                    ══════════════════════════════════════════════ */}
+                <div className="py-4 border-t border-[var(--yp-gray-200)] mt-6">
+                  <h3 className="text-xl font-bold text-[var(--yp-dark)] mb-4 font-heading text-center">
+                    {isAr ? 'طريقة الطلب جد سهلة' : 'Comment commander facilement ?'}
+                  </h3>
+                  <div className="flex flex-col gap-3">
+                    {[
+                      {
+                        icon: FileText,
+                        textAr: 'إملأ النموذج عن طريق كتابة اسمك ورقم الهاتف بالإضافة إلى المدينة',
+                        textFr: 'Remplissez le formulaire avec votre nom, numéro de téléphone et ville.'
+                      },
+                      {
+                        icon: PhoneCall,
+                        textAr: 'سيتم الإتصال بكم في أقرب وقت لتأكيد طلبكم وتزويدكم بالمزيد من المعلومات',
+                        textFr: 'Nous vous contacterons rapidement pour confirmer votre commande.'
+                      },
+                      {
+                        icon: Truck,
+                        textAr: 'لن تضطر لدفع أي دفعة حتى تتوصل بالمنتج بباب منزلك',
+                        textFr: "Paiement à la livraison. Vous ne payez qu'à la réception."
+                      }
+                    ].map((step, i) => (
+                      <div key={i} className="flex items-center gap-3 bg-[#FEF2F2] border-2 border-[var(--yp-red)] rounded-2xl p-3 shadow-sm relative overflow-hidden">
+                        <div className="w-12 h-12 shrink-0 bg-white rounded-xl flex items-center justify-center relative z-10 shadow-sm border border-[var(--yp-red)]/20">
+                          <step.icon className="w-6 h-6 text-[var(--yp-red)]" />
+                        </div>
+                        <div className="flex-1 relative z-10">
+                          <p className={`font-semibold text-[var(--yp-dark)] leading-snug ${isAr ? 'text-sm' : 'text-xs'}`}>
+                            {isAr ? step.textAr : step.textFr}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* ═══ Actions (Sticky on Mobile) ═══ */}
                 <div className="space-y-3 pt-2 fixed bottom-0 left-0 right-0 bg-white p-3 sm:p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-[100] lg:relative lg:bottom-0 lg:p-0 lg:shadow-none lg:bg-transparent lg:z-auto pb-[calc(0.75rem+env(safe-area-inset-bottom))] border-t border-[var(--yp-gray-200)] lg:border-none">
                   {isOutOfStock && (
@@ -616,50 +655,6 @@ export default function ProductPage() {
                 {/* SKU */}
                 <p className="text-sm text-[var(--yp-gray-500)]">{t('sku')}: {product.sku}</p>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ══════════════════════════════════════════════
-            HOW TO ORDER SECTION (طريقة الطلب جد سهلة)
-            ══════════════════════════════════════════════ */}
-        <section className="py-8 bg-[var(--yp-gray-100)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h3 className="text-2xl font-bold text-[var(--yp-dark)] mb-6 font-heading text-center">
-              {isAr ? 'طريقة الطلب جد سهلة' : 'Comment commander facilement ?'}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-              {[
-                {
-                  icon: FileText,
-                  textAr: 'إملأ النموذج عن طريق كتابة اسمك ورقم الهاتف بالإضافة إلى المدينة',
-                  textFr: 'Remplissez le formulaire avec votre nom, numéro de téléphone et ville.'
-                },
-                {
-                  icon: PhoneCall,
-                  textAr: 'سيتم الإتصال بكم في أقرب وقت لتأكيد طلبكم وتزويدكم بالمزيد من المعلومات',
-                  textFr: 'Nous vous contacterons rapidement pour confirmer votre commande.'
-                },
-                {
-                  icon: Truck,
-                  textAr: 'لن تضطر لدفع أي دفعة حتى تتوصل بالمنتج بباب منزلك',
-                  textFr: "Paiement à la livraison. Vous ne payez qu'à la réception."
-                }
-              ].map((step, i) => (
-                <div key={i} className="flex items-center gap-4 bg-white border-2 border-[var(--yp-red)] rounded-2xl p-4 shadow-sm relative overflow-hidden">
-                  {/* Petit accent décoratif rouge */}
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-[var(--yp-red-50)] rounded-bl-[100px] -z-0 opacity-50" />
-                  
-                  <div className="w-14 h-14 shrink-0 bg-[var(--yp-red-50)] rounded-xl flex items-center justify-center relative z-10">
-                    <step.icon className="w-7 h-7 text-[var(--yp-red)]" />
-                  </div>
-                  <div className="flex-1 relative z-10">
-                    <p className={`font-semibold text-[var(--yp-dark)] leading-snug ${isAr ? 'text-base' : 'text-sm'}`}>
-                      {isAr ? step.textAr : step.textFr}
-                    </p>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </section>
