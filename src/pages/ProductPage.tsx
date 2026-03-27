@@ -558,31 +558,30 @@ export default function ProductPage() {
                 </div>
 
                 {/* ═══ Actions (Sticky on Mobile) ═══ */}
-                <div className="space-y-3 pt-2 fixed bottom-[60px] left-0 right-0 bg-white p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-[40] lg:relative lg:bottom-0 lg:p-0 lg:shadow-none lg:bg-transparent lg:z-auto">
+                <div className="space-y-3 pt-2 fixed bottom-0 left-0 right-0 bg-white p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-[40] lg:relative lg:bottom-0 lg:p-0 lg:shadow-none lg:bg-transparent lg:z-auto">
                   {isOutOfStock && (
                     <div className="bg-[var(--yp-red-50)] border border-[var(--yp-red)]/20 text-[var(--yp-red)] rounded-xl px-4 py-3 text-sm font-semibold">
                       {t('outOfStock') || 'Rupture de stock'} — {isAr ? 'غير متوفر حاليا' : 'Actuellement indisponible. Revenez bientôt.'}
                     </div>
                   )}
-                  <div className="flex flex-col gap-2.5">
-                    {/* Primary CTA — Commander maintenant */}
-                    <button
-                      onClick={() => setShowOrderForm(true)}
-                      disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
-                      className="w-full bg-[var(--yp-color-cart)] text-white hover:opacity-90 py-3.5 sm:py-4 rounded-xl font-bold text-sm sm:text-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-[var(--yp-color-cart)]/20 active:scale-[0.98]"
-                    >
-                      {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('continueOrder') || 'Commander maintenant')}
-                    </button>
-
                     <div className="flex gap-2.5">
+                      {/* Primary CTA — Commander maintenant */}
+                      <button
+                        onClick={() => setShowOrderForm(true)}
+                        disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
+                        className="flex-[2] bg-[var(--yp-color-cart)] text-white hover:opacity-90 py-3 sm:py-3.5 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-[var(--yp-color-cart)]/20 active:scale-[0.98]"
+                      >
+                        {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('continueOrder') || 'متابعة الطلب')}
+                      </button>
+
                       {/* Secondary CTA — Ajouter au panier */}
                       <button
                         onClick={handleAddToCart}
                         disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
-                        className="flex-1 bg-white border-2 border-[var(--yp-color-cart)] text-[var(--yp-color-cart)] hover:bg-[var(--yp-color-cart)] hover:text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                        className="flex-1 bg-[#10B981] hover:bg-[#059669] text-white py-3 sm:py-3.5 rounded-xl font-bold text-[11px] sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all shadow-md shadow-[#10B981]/20 active:scale-[0.98] leading-tight"
                       >
-                        <ShoppingCart className="w-5 h-5" />
-                        {t('addToCart') || 'Ajouter au panier'}
+                        <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span>{isAr ? 'أضف إلى السلة' : 'Ajouter'}</span>
                       </button>
 
                       {/* Wishlist */}
@@ -597,7 +596,6 @@ export default function ProductPage() {
                         <Heart className={`w-5 h-5 sm:w-6 sm:h-6 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
                       </button>
                     </div>
-                  </div>
                 </div>
 
                 {/* Trust badges */}
@@ -699,7 +697,7 @@ export default function ProductPage() {
                 <ChevronRight className="w-5 h-5 text-[var(--yp-blue)]" />
                 {t('relatedProducts')}
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
                 {relatedProducts.map(p => (
                   <ProductCard key={p.id} product={p} />
                 ))}
