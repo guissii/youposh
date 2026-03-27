@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  Star, Minus, Plus, ArrowLeft, ShoppingCart,
+  Heart, Star, Minus, Plus, ArrowLeft, ShoppingCart,
   Truck, Shield, Check, ChevronRight, MessageCircle, PhoneCall,
   X, User, Phone, MapPin, FileText, Package, Ticket, ImageOff
 } from 'lucide-react';
@@ -29,7 +29,7 @@ export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { addToCart, setIsCartOpen, promoCode, applyPromoCode, removePromoCode } = useStore();
+  const { addToCart, setIsCartOpen, addToWishlist, isInWishlist, promoCode, applyPromoCode, removePromoCode } = useStore();
   const settings = useStoreSettings();
   const { phone } = settings;
 
@@ -564,26 +564,40 @@ export default function ProductPage() {
                       {t('outOfStock') || 'Rupture de stock'} — {isAr ? 'غير متوفر حاليا' : 'Actuellement indisponible. Revenez bientôt.'}
                     </div>
                   )}
-                    <div className="flex gap-0 sm:gap-2.5 items-stretch h-[48px] sm:h-[56px] relative">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 flex items-stretch h-[48px] sm:h-[56px] relative shadow-[0_4px_14px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden">
                       {/* Primary CTA — Commander maintenant */}
                       <button
                         onClick={() => setShowOrderForm(true)}
                         disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
-                        className="flex-1 bg-[var(--yp-color-cart)] text-white hover:opacity-90 rounded-r-none sm:rounded-r-xl rounded-l-xl font-bold text-[13px] sm:text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-[var(--yp-color-cart)]/20 active:scale-[0.98] z-10"
+                        className="flex-1 bg-[var(--yp-color-cart)] text-white hover:opacity-90 font-bold text-[13px] sm:text-base flex items-center justify-center gap-2 transition-all active:scale-[0.98] z-10"
                       >
                         {isOutOfStock ? (t('outOfStock') || 'Rupture de stock') : (t('continueOrder') || 'متابعة الطلب')}
                       </button>
 
-                      {/* Secondary CTA — Ajouter au panier (Superposé) */}
+                      {/* Secondary CTA — Ajouter au panier (Aligné à droite, bord droit) */}
                       <button
                         onClick={handleAddToCart}
                         disabled={isOutOfStock || !isVariantSelectionComplete || quantity > maxQty}
-                        className="w-[90px] sm:w-[120px] bg-[#10B981] hover:bg-[#059669] text-white rounded-l-none sm:rounded-l-xl rounded-r-xl font-bold text-[10px] sm:text-sm flex flex-col items-center justify-center gap-0.5 transition-all shadow-md shadow-[#10B981]/20 active:scale-[0.98] leading-tight z-20 relative -ml-4 sm:ml-0"
+                        className="w-[90px] sm:w-[120px] bg-[#10B981] hover:bg-[#059669] text-white font-bold text-[10px] sm:text-sm flex flex-col items-center justify-center gap-0.5 transition-all active:scale-[0.98] leading-tight z-20"
                       >
                         <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
                         <span className="text-center">{isAr ? 'أضف إلى السلة' : 'Ajouter'}</span>
                       </button>
                     </div>
+
+                    {/* Wishlist Button (À côté du bloc combiné) */}
+                    <button
+                      onClick={() => addToWishlist(product)}
+                      className={`w-[48px] h-[48px] sm:w-[56px] sm:h-[56px] shrink-0 border-2 rounded-xl flex items-center justify-center transition-all shadow-sm ${isInWishlist(product.id)
+                        ? 'border-[var(--yp-red)] text-[var(--yp-red)] bg-[var(--yp-red-50)]'
+                        : 'border-[var(--yp-gray-200)] hover:border-[var(--yp-red)] hover:text-[var(--yp-red)] text-[var(--yp-gray-500)] bg-white'
+                        }`}
+                      aria-label={t('addToWishlist')}
+                    >
+                      <Heart className={`w-5 h-5 sm:w-6 sm:h-6 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Trust badges */}
