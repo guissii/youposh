@@ -669,26 +669,36 @@ export default function ProductPage() {
         <section className="py-8 border-t bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h3 className="text-xl font-bold text-[var(--yp-dark)] mb-6 font-heading">{t('reviews') || 'Avis Clients'}</h3>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { name: "Salma B.", text: "J'étais sceptique au début mais franchement la qualité est top. Ça change la vie pour le rangement !" },
-                { name: "Mohammed A.", text: "Reçu en 24h à Casa, super bien emballé. Le produit est conforme, je vais en recommander." },
-                { name: "Houda T.", text: "Rien à dire, service client réactif et produit solide. C'est exactement ce qu'il me fallait." },
-                { name: "Yassine K.", text: "Très satisfait de mon achat. Le rapport qualité/prix est imbattable sur le marché." }
-              ].map((review, i) => (
-                <div key={i} className="bg-[var(--yp-gray-50)] rounded-xl p-4 border border-[var(--yp-gray-200)]">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-sm text-[var(--yp-dark)]">{review.name}</span>
-                    <div className="flex gap-0.5">
-                      {[...Array(5)].map((_, j) => (
-                        <Star key={j} className="w-3 h-3 fill-[var(--yp-star)] text-[var(--yp-star)]" />
-                      ))}
+            <Carousel
+              opts={{
+                align: "start",
+                containScroll: "trimSnaps"
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-3">
+                {[
+                  { name: "Salma B.", text: "J'étais sceptique au début mais franchement la qualité est top. Ça change la vie pour le rangement !" },
+                  { name: "Mohammed A.", text: "Reçu en 24h à Casa, super bien emballé. Le produit est conforme, je vais en recommander." },
+                  { name: "Houda T.", text: "Rien à dire, service client réactif et produit solide. C'est exactement ce qu'il me fallait." },
+                  { name: "Yassine K.", text: "Très satisfait de mon achat. Le rapport qualité/prix est imbattable sur le marché." }
+                ].map((review, i) => (
+                  <CarouselItem key={i} className="pl-3 basis-[88%] sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                    <div className="h-full bg-[var(--yp-gray-50)] rounded-xl p-4 border border-[var(--yp-gray-200)]">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-bold text-sm text-[var(--yp-dark)]">{review.name}</span>
+                        <div className="flex gap-0.5">
+                          {[...Array(5)].map((_, j) => (
+                            <Star key={j} className="w-3 h-3 fill-[var(--yp-star)] text-[var(--yp-star)]" />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-sm text-[var(--yp-gray-600)] italic">"{review.text}"</p>
                     </div>
-                  </div>
-                  <p className="text-sm text-[var(--yp-gray-600)] italic">"{review.text}"</p>
-                </div>
-              ))}
-            </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
           </div>
         </section>
 
