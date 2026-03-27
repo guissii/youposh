@@ -93,9 +93,9 @@ export default function Header() {
         } ${scrollDirection === 'down' ? '-mt-[32px] sm:-mt-[40px]' : ''}`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-[56px] sm:h-[70px]" dir="ltr">
-            {/* Left — Logo and Menu */}
-            <div className="flex items-center gap-2">
+          <div className="grid grid-cols-[auto_1fr_auto] items-center h-[56px] sm:h-[70px]" dir="ltr">
+            {/* Left — Hamburger Menu */}
+            <div className="flex items-center justify-start">
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
                 className="lg:hidden p-1.5 hover:bg-[var(--yp-blue-50)] rounded-xl transition-colors"
@@ -103,7 +103,10 @@ export default function Header() {
               >
                 <Menu className="w-6 h-6 text-[var(--yp-dark)]" />
               </button>
+            </div>
 
+            {/* Center — Logo + YOUPOSH (always centered) */}
+            <div className="flex items-center justify-center">
               <button
                 onClick={() => navigate('/')}
                 className="flex items-center gap-1.5 sm:gap-2 group"
@@ -114,28 +117,21 @@ export default function Header() {
                   alt={storeSettings.storeName}
                   className="h-7 sm:h-9 w-auto object-contain group-hover:scale-105 transition-transform"
                 />
-                <div className="flex items-baseline hidden xs:flex">
-                  <span
-                    className="font-bold text-lg sm:text-2xl tracking-tight font-heading"
-                  >
-                    <span className="text-[var(--yp-blue)]">YOU</span>
-                    <span className="text-[var(--yp-red)]">POSH</span>
-                  </span>
-                </div>
+                <span
+                  className="font-bold text-lg sm:text-2xl tracking-tight font-heading"
+                >
+                  <span className="text-[var(--yp-blue)]">YOU</span>
+                  <span className="text-[var(--yp-red)]">POSH</span>
+                </span>
               </button>
             </div>
 
-            {/* Center — Desktop Search & Nav (Hidden on mobile) */}
-            <div className="hidden lg:flex flex-1 items-center justify-center px-8">
-              {/* Mega menu placeholder / Categories */}
-            </div>
-
             {/* Right — Actions */}
-            <div className="flex items-center gap-2 sm:gap-4 justify-end">
+            <div className="flex items-center gap-1 sm:gap-3 justify-end">
               {/* Language Switcher */}
               <button
                 onClick={toggleLanguage}
-                className="flex items-center gap-1.5 p-1.5 sm:p-2 hover:bg-[var(--yp-gray-100)] rounded-xl transition-colors font-semibold text-xs sm:text-sm text-[var(--yp-gray-700)]"
+                className="flex items-center gap-1 p-1.5 sm:p-2 hover:bg-[var(--yp-gray-100)] rounded-xl transition-colors font-semibold text-xs sm:text-sm text-[var(--yp-gray-700)]"
               >
                 <Globe className="w-4 h-4 text-[var(--yp-blue)]" />
                 {language === 'fr' ? 'AR' : 'FR'}
