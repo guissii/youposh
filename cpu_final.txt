@@ -1,0 +1,5 @@
+﻿    PID CMD                         %CPU
+ 341310 ps -eo pid,cmd,%cpu --sort=  200
+ 340719 /sbin/audispd               29.4
+ 341242 /usr/lib/systemd/systemd --  9.0
+ 341208 sshd: root@notty             0.9

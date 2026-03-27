@@ -1,0 +1,12 @@
+﻿    PID CMD                         %CPU
+ 340459 ps -eo pid,cmd,%cpu --sort=  200
+ 143876 [mm_percpu_wq]               106
+ 340370 /usr/lib/systemd/systemd --  7.5
+ 340344 sshd: root@notty             1.3
+     30 [ksoftirqd/2]                0.7
+ 203738 /usr/bin/python3 /usr/bin/f  0.6
+ 203478 node /var/www/youposh/backe  0.4
+ 203463 node /var/www/youposh/backe  0.4
+ 203464 node /var/www/youposh/backe  0.4
+ 203477 node /var/www/youposh/backe  0.4
+ 203452 node /root/.pm2/modules/pm2  0.4

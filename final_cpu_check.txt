@@ -1,0 +1,10 @@
+﻿    PID CMD                         %CPU
+ 340719 /sbin/audispd                226
+ 348429 ps -eo pid,cmd,%cpu --sort=  200
+ 343164 node /var/www/youposh/backe  1.0
+ 343141 node /var/www/youposh/backe  1.0
+ 343157 node /var/www/youposh/backe  1.0
+ 343142 node /var/www/youposh/backe  1.0
+ 348304 sshd: root@notty             0.8
+     30 [ksoftirqd/2]                0.7
+ 203738 /usr/bin/python3 /usr/bin/f  0.6

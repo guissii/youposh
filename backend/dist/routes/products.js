@@ -74,9 +74,9 @@ function parsePositiveInt(value) {
 }
 // GET all products with optional filters
 router.get('/', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _a, _b, _c;
     try {
-        const { category, badge, search, sort, inStock, all, av, limit, includeArchived } = req.query;
+        const { category, badge, search, sort, inStock, all, av, limit, includeArchived, page, perPage } = req.query;
         // Check if "all" is true OR if the request comes from the admin panel (implied by logic)
         // But to be safe, let's trust the "all" parameter more.
         const showAll = all === 'true';
@@ -119,9 +119,14 @@ router.get('/', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0
         }
         const sortKey = (_a = sort) !== null && _a !== void 0 ? _a : 'popular';
         const badgeKey = badge;
+        const requestedPage = (_b = parsePositiveInt(page)) !== null && _b !== void 0 ? _b : 1;
+        const requestedPerPage = Math.min((_c = parsePositiveInt(perPage)) !== null && _c !== void 0 ? _c : 12, 60);
+        const usePagination = page !== undefined || perPage !== undefined;
         const requestedLimit = parsePositiveInt(limit);
         const baseLimit = showAll ? 200 : 48;
-        const safeLimit = Math.min(requestedLimit !== null && requestedLimit !== void 0 ? requestedLimit : baseLimit, 500);
+        const safeLimit = usePagination
+            ? Math.min(Math.max(requestedPerPage * 20, 120), 1000)
+            : Math.min(requestedLimit !== null && requestedLimit !== void 0 ? requestedLimit : baseLimit, 500);
         const requiresPostProcessing = badgeKey === 'promo' || sortKey === 'popular' || sortKey === 'promo' || badgeKey === 'popular';
         const prismaTake = requiresPostProcessing ? Math.min(safeLimit * 3, 1000) : safeLimit;
         let orderBy = [{ sortOrder: 'desc' }, { salesCount: 'desc' }]; // Default sort now respects manual sortOrder
@@ -155,47 +160,78 @@ router.get('/', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0
         else if (badgeKey === 'featured') {
             where.isFeatured = true;
         }
+        const productSelect = Object.assign({ id: true, name: true, nameAr: true, price: true, originalPrice: true, image: true, images: true, badge: true, rating: true, reviews: true, categorySlug: true, description: true, descriptionAr: true, inStock: true, isVisible: true, sku: true, tags: true, features: true, variants: true, isPopular: true, isNew: true, isBestSeller: true, isFeatured: true, status: true, publishedAt: true, sortOrder: true, viewsCount: true, cartAddCount: true, salesCount: true, stock: true, cardZoom: true, cardFocalX: true, cardFocalY: true, createdAt: true, updatedAt: true, category: true }, (showAll ? {
+            attributeValues: {
+                include: {
+                    attributeValue: {
+                        include: { attribute: true },
+                    },
+                },
+            },
+        } : {}));
+        const canUseDbPagination = usePagination && !requiresPostProcessing;
+        if (canUseDbPagination) {
+            const total = yield prisma_1.default.product.count({ where });
+            const totalPages = Math.max(1, Math.ceil(total / requestedPerPage));
+            const normalizedPage = Math.min(requestedPage, totalPages);
+            const offset = (normalizedPage - 1) * requestedPerPage;
+            const pageProducts = yield prisma_1.default.product.findMany({
+                where,
+                orderBy,
+                skip: offset,
+                take: requestedPerPage,
+                select: productSelect,
+            });
+            const items = pageProducts.map((p) => (Object.assign(Object.assign({}, p), { badge: computeBadge(p), isNew: isNewProduct(p), isBestSeller: isBestSellerProduct(p), isPopular: false })));
+            res.json({
+                items,
+                total,
+                page: normalizedPage,
+                perPage: requestedPerPage,
+                totalPages
+            });
+            return;
+        }
         const products = yield prisma_1.default.product.findMany({
             where,
             orderBy,
             take: prismaTake,
-            include: {
-                category: true,
-                attributeValues: {
-                    include: {
-                        attributeValue: {
-                            include: {
-                                attribute: true,
-                            },
-                        },
-                    },
-                },
-            },
+            select: productSelect,
         });
         // Si aucun filtre complexe, on n'a pas besoin de calculer les scores pour TOUTE la BDD, juste pour les produits retournés.
         // Cela résout le problème de lenteur dans le panneau d'administration (O(n) evité).
         let popularIds = new Set();
         if (sortKey === 'popular' || badgeKey === 'popular' || badgeKey === 'new') {
-            const activeProducts = yield prisma_1.default.product.findMany({
-                where: { status: 'published', isVisible: true, inStock: true },
-                orderBy: [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }],
-                take: 300,
-                select: {
-                    id: true,
-                    price: true,
-                    originalPrice: true,
-                    publishedAt: true,
-                    salesCount: true,
-                    viewsCount: true,
-                    cartAddCount: true,
-                },
-            });
-            popularIds = new Set([...activeProducts]
-                .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
-                .slice(0, 8)
-                .map(p => p.id));
+            // OPTIMIZATION: Cache popularIds to avoid heavy DB queries on every request
+            const cacheKey = 'popular_product_ids';
+            const cachedPopularIds = cache_1.cache.get(cacheKey);
+            if (cachedPopularIds) {
+                popularIds = new Set(cachedPopularIds);
+            }
+            else {
+                const activeProducts = yield prisma_1.default.product.findMany({
+                    where: { status: 'published', isVisible: true, inStock: true },
+                    orderBy: [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }],
+                    take: 300,
+                    select: {
+                        id: true,
+                        price: true,
+                        originalPrice: true,
+                        publishedAt: true,
+                        salesCount: true,
+                        viewsCount: true,
+                        cartAddCount: true,
+                    },
+                });
+                const computedPopularIds = [...activeProducts]
+                    .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
+                    .slice(0, 8)
+                    .map(p => p.id);
+                popularIds = new Set(computedPopularIds);
+                cache_1.cache.set(cacheKey, computedPopularIds, 300); // Cache for 5 minutes
+            }
         }
-        const withComputed = products.map(p => {
+        const withComputed = products.map((p) => {
             const computed = Object.assign(Object.assign({}, p), { badge: computeBadge(p), isNew: isNewProduct(p), isBestSeller: isBestSellerProduct(p), isPopular: popularIds.has(p.id) });
             return computed;
         });
@@ -230,6 +266,21 @@ router.get('/', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0
         else if (sortKey === 'bestsellers') {
             filtered = [...filtered].sort((a, b) => { var _a, _b; return Number((_a = b.salesCount) !== null && _a !== void 0 ? _a : 0) - Number((_b = a.salesCount) !== null && _b !== void 0 ? _b : 0); });
         }
+        if (usePagination) {
+            const total = filtered.length;
+            const totalPages = Math.max(1, Math.ceil(total / requestedPerPage));
+            const normalizedPage = Math.min(requestedPage, totalPages);
+            const offset = (normalizedPage - 1) * requestedPerPage;
+            const items = filtered.slice(offset, offset + requestedPerPage);
+            res.json({
+                items,
+                total,
+                page: normalizedPage,
+                perPage: requestedPerPage,
+                totalPages
+            });
+            return;
+        }
         filtered = filtered.slice(0, safeLimit);
         res.json(filtered);
     }
@@ -258,24 +309,35 @@ router.get('/:id', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(voi
         });
         if (!product)
             return res.status(404).json({ error: 'Product not found' });
-        const popularCandidates = yield prisma_1.default.product.findMany({
-            where: { status: 'published', isVisible: true, inStock: true },
-            orderBy: [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }],
-            take: 300,
-            select: {
-                id: true,
-                price: true,
-                originalPrice: true,
-                publishedAt: true,
-                salesCount: true,
-                viewsCount: true,
-                cartAddCount: true,
-            },
-        });
-        const popularIds = new Set([...popularCandidates]
-            .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
-            .slice(0, 8)
-            .map(p => p.id));
+        // OPTIMIZATION: Cache popularIds to avoid heavy DB queries on every request
+        const cacheKey = 'popular_product_ids';
+        const cachedPopularIds = cache_1.cache.get(cacheKey);
+        let popularIds;
+        if (cachedPopularIds) {
+            popularIds = new Set(cachedPopularIds);
+        }
+        else {
+            const popularCandidates = yield prisma_1.default.product.findMany({
+                where: { status: 'published', isVisible: true, inStock: true },
+                orderBy: [{ salesCount: 'desc' }, { viewsCount: 'desc' }, { cartAddCount: 'desc' }],
+                take: 300,
+                select: {
+                    id: true,
+                    price: true,
+                    originalPrice: true,
+                    publishedAt: true,
+                    salesCount: true,
+                    viewsCount: true,
+                    cartAddCount: true,
+                },
+            });
+            const computedPopularIds = [...popularCandidates]
+                .sort((a, b) => getPopularityScore(b) - getPopularityScore(a))
+                .slice(0, 8)
+                .map(p => p.id);
+            popularIds = new Set(computedPopularIds);
+            cache_1.cache.set(cacheKey, computedPopularIds, 300); // Cache for 5 minutes
+        }
         res.json(Object.assign(Object.assign({}, product), { badge: computeBadge(product), isNew: isNewProduct(product), isBestSeller: isBestSellerProduct(product), isPopular: popularIds.has(product.id) }));
     }
     catch (error) {

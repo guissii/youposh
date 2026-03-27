@@ -37,21 +37,21 @@ export default function HomePage() {
   // Use React Query for data fetching
   const { data: featuredRaw = [], isFetching: featuredLoading, isError: featuredError } = useQuery({
     queryKey: ['products', 'featured'],
-    queryFn: () => fetchProducts('badge=featured&limit=12'),
+    queryFn: () => fetchProducts('badge=featured&limit=4'),
   });
 
   const { data: popularRaw = [], isFetching: popularLoading, isError: popularError } = useQuery({
     queryKey: ['products', 'popular'],
-    queryFn: () => fetchProducts('sort=popular&limit=12'),
+    queryFn: () => fetchProducts('sort=popular&limit=4'),
   });
 
   const { data: latestRaw = [], isFetching: newLoading, isError: newError } = useQuery({
     queryKey: ['products', 'newest'],
-    queryFn: () => fetchProducts('sort=newest&limit=12'),
+    queryFn: () => fetchProducts('sort=newest&limit=4'),
   });
 
   const isAnyLoading = featuredLoading || popularLoading || newLoading;
-  const HOME_MAX_PRODUCTS = 12;
+  const HOME_MAX_PRODUCTS = 4;
   const fillHomeSlots = (base: any[], candidates: any[], max: number) => {
     const used = new Set(base.map((p: any) => p.id));
     const extra = candidates.filter((p: any) => p?.isVisible !== false && !used.has(p.id));

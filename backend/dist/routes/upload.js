@@ -19,9 +19,30 @@ const fs_1 = __importDefault(require("fs"));
 const supabase_js_1 = require("@supabase/supabase-js");
 const dotenv_1 = __importDefault(require("dotenv"));
 const util_1 = require("util");
+const sharp_1 = __importDefault(require("sharp"));
 dotenv_1.default.config();
 const router = (0, express_1.Router)();
 const driver = (process.env.UPLOADS_DRIVER || 'local').toLowerCase();
+const optimizeImage = (filePath) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const metadata = yield (0, sharp_1.default)(filePath).metadata();
+        const s = (0, sharp_1.default)(filePath).resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true });
+        if (metadata.format === 'png') {
+            s.png({ quality: 80, compressionLevel: 8 });
+        }
+        else if (metadata.format === 'webp') {
+            s.webp({ quality: 80 });
+        }
+        else {
+            s.jpeg({ quality: 80, progressive: true });
+        }
+        const buffer = yield s.toBuffer();
+        yield (0, util_1.promisify)(fs_1.default.writeFile)(filePath, buffer);
+    }
+    catch (e) {
+        console.error('Failed to optimize image:', e);
+    }
+});
 const ensureDir = (p) => {
     if (!fs_1.default.existsSync(p)) {
         fs_1.default.mkdirSync(p, { recursive: true });
@@ -124,6 +145,7 @@ router.post('/category', (req, res, next) => {
             return res.json({ url });
         }
         else {
+            yield optimizeImage(f.path);
             const base = getPublicBase(req);
             const url = `${base}/uploads/categories/${path_1.default.basename(f.path)}`;
             return res.json({ url });
@@ -151,6 +173,7 @@ router.post('/product', (req, res, next) => {
             return res.json({ url });
         }
         else {
+            yield optimizeImage(f.path);
             const base = getPublicBase(req);
             const url = `${base}/uploads/products/${path_1.default.basename(f.path)}`;
             return res.json({ url });
