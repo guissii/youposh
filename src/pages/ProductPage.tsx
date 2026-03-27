@@ -560,7 +560,7 @@ export default function ProductPage() {
                 {/* ══════════════════════════════════════════════
                     HOW TO ORDER SECTION (طريقة الطلب جد سهلة)
                     ══════════════════════════════════════════════ */}
-                <div className="py-4 border-t border-[var(--yp-gray-200)] mt-6">
+                <div className="py-4 border-t border-[var(--yp-gray-200)]">
                   <h3 className="text-xl font-bold text-[var(--yp-dark)] mb-4 font-heading text-center">
                     {isAr ? 'طريقة الطلب جد سهلة' : 'Comment commander facilement ?'}
                   </h3>
