@@ -602,8 +602,8 @@ export default function ProductPage() {
                   </div>
                 </div>
 
-                {/* ═══ Actions (Sticky on Mobile) ═══ */}
-                <div className="space-y-3 pt-2 fixed bottom-0 left-0 right-0 bg-white p-3 sm:p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-[100] lg:relative lg:bottom-0 lg:p-0 lg:shadow-none lg:bg-transparent lg:z-auto pb-[calc(0.75rem+env(safe-area-inset-bottom))] border-t border-[var(--yp-gray-200)] lg:border-none">
+                {/* ═══ Actions ═══ */}
+                <div className="space-y-3 pt-2 border-t border-[var(--yp-gray-200)]">
                   {isOutOfStock && (
                     <div className="bg-[var(--yp-red-50)] border border-[var(--yp-red)]/20 text-[var(--yp-red)] rounded-xl px-4 py-3 text-sm font-semibold">
                       {t('outOfStock') || 'Rupture de stock'} — {isAr ? 'غير متوفر حاليا' : 'Actuellement indisponible. Revenez bientôt.'}
