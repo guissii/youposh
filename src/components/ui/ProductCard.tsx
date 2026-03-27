@@ -84,7 +84,7 @@ function ProductCard({
     return (
       <div
         onClick={handleNavigate}
-        className="flex gap-3 bg-white rounded-2xl p-3 border border-gray-200 cursor-pointer"
+        className="group flex gap-3 bg-white rounded-2xl p-3 border border-gray-100 cursor-pointer shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
       >
         <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-[#F5F5F5]">
           {imgError ? (
@@ -156,7 +156,7 @@ function ProductCard({
     return (
       <div
         onClick={handleNavigate}
-        className="product-card group w-full bg-white rounded-[12px] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.07)] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] flex flex-col"
+        className="group w-full h-full bg-white rounded-2xl overflow-hidden cursor-pointer flex flex-col shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
       >
         {/* Image area */}
         <div className="relative bg-[#F5F5F5] aspect-square w-full overflow-hidden shrink-0">
@@ -285,11 +285,11 @@ function ProductCard({
     );
   }
 
-  // ── Default variant — Nike-style card ──
+  // ── Default variant ──
   return (
     <div
       onClick={handleNavigate}
-      className="product-card group w-full bg-white rounded-[12px] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.07)] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] flex flex-col"
+      className="group w-full bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl flex flex-col"
     >
       {/* ── Image area ── */}
       <div className="relative bg-[#F5F5F5] aspect-square w-full flex items-center justify-center overflow-hidden shrink-0">

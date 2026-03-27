@@ -323,9 +323,9 @@ export default function HomePage() {
         {/* ══════════════════════════════════════════════
             BESTSELLERS
             ══════════════════════════════════════════════ */}
-        <section className="py-4 sm:py-6" ref={bestsellersRef}>
+        <section className="py-8 sm:py-12 bg-gradient-to-b from-white to-[var(--yp-bg-secondary)]" ref={bestsellersRef}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 reveal">
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <div className="flex items-center justify-between mb-6 sm:mb-8">
               <div className="flex items-center gap-2.5 sm:gap-3">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[var(--yp-blue-50)] rounded-lg sm:rounded-xl flex items-center justify-center">
                   <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--yp-blue)]" />
@@ -348,7 +348,18 @@ export default function HomePage() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--yp-blue)]"></div>
               </div>
             ) : bestsellers.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 reveal-stagger" ref={(el) => {
+                if (el) {
+                  const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                      if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                      }
+                    });
+                  }, { threshold: 0.1 });
+                  observer.observe(el);
+                }
+              }}>
                 {bestsellers.map(product => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -369,9 +380,9 @@ export default function HomePage() {
             ══════════════════════════════════════════════ */}
 
         {/* Section 1: Exclusivités YOUPOSH */}
-        <section className="py-5 sm:py-8 reveal" ref={exclusivesRef}>
+        <section className="py-8 sm:py-12 bg-[var(--yp-bg-secondary)] border-t border-gray-100 reveal" ref={exclusivesRef}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <div className="flex items-center justify-between mb-6 sm:mb-8">
               <div className="flex items-center gap-2.5 sm:gap-3">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[var(--yp-blue)] to-[var(--yp-blue-dark)] rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
                   <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -397,7 +408,18 @@ export default function HomePage() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--yp-blue)]"></div>
               </div>
             ) : newArrivals.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 reveal-stagger" ref={(el) => {
+                if (el) {
+                  const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                      if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                      }
+                    });
+                  }, { threshold: 0.1 });
+                  observer.observe(el);
+                }
+              }}>
                 {newArrivals.map(product => (
                   <ProductCard key={product.id} product={product} variant="compact" />
                 ))}
