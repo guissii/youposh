@@ -104,8 +104,7 @@ export default function ProductPage() {
           attributeValues: Array.isArray(p?.attributeValues) ? p.attributeValues : [],
         };
         setProduct(normalized);
-        const nextGallery = [normalized?.image, ...(Array.isArray(normalized?.images) ? normalized.images : [])].filter(Boolean);
-        setSelectedImage(nextGallery.length > 1 ? 1 : 0);
+        setSelectedImage(0);
         const nextSelected: Record<string, string> = {};
         (Array.isArray(normalized?.variants) ? normalized.variants : []).forEach((v: any) => {
           const opts = Array.isArray(v?.options) ? v.options : [];
@@ -211,9 +210,9 @@ export default function ProductPage() {
   }
 
   const variantsArray = product.variants;
-  const galleryImages = [product.image, ...product.images].filter(Boolean);
-  const thumbnailImages = galleryImages.slice(1);
-  const defaultImageIndex = galleryImages.length > 1 ? 1 : 0;
+  const galleryImagesRaw = [product.image, ...product.images].filter(Boolean);
+  const galleryImages = galleryImagesRaw.length > 1 ? galleryImagesRaw.slice(1) : galleryImagesRaw;
+  const thumbnailImages = galleryImages;
 
   const discount = product.originalPrice
     ? Math.round((1 - product.price / product.originalPrice) * 100)
@@ -346,11 +345,10 @@ export default function ProductPage() {
               <div className="space-y-4">
                 <div className="relative aspect-square bg-white rounded-2xl overflow-hidden shadow-card flex items-center justify-center bg-gray-100">
                   <Carousel
-                    key={`gallery-${product.id}-${defaultImageIndex}`}
+                    key={`gallery-${product.id}`}
                     setApi={setApi}
                     className="w-full h-full"
                     opts={{
-                      startIndex: defaultImageIndex,
                       loop: true,
                       align: "start",
                       containScroll: "trimSnaps"
@@ -432,7 +430,7 @@ export default function ProductPage() {
                 {/* Thumbnails */}
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {thumbnailImages.map((img: string, i: number) => {
-                    const imageIndex = i + 1;
+                    const imageIndex = i;
                     return (
                     <button
                       key={`${img}-${i}`}
