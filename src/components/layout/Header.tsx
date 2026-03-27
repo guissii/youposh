@@ -93,7 +93,7 @@ export default function Header() {
         } ${scrollDirection === 'down' ? '-mt-[32px] sm:-mt-[40px]' : ''}`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-[56px] sm:h-[70px]">
+          <div className="flex items-center justify-between h-[56px] sm:h-[70px]" dir="ltr">
             {/* Left — Logo and Menu */}
             <div className="flex items-center gap-2">
               <button
