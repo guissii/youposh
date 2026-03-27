@@ -59,15 +59,16 @@ export default function Header() {
     <>
       {/* Top Bar — Collapsible on scroll down */}
       <div
-        className={`bg-[#0A0F1C] text-[#9CA3AF] text-[12px] sm:text-[13px] py-2 px-4 sm:px-6 lg:px-8 transition-transform duration-300 ${
+        className={`bg-[var(--yp-color-you)] text-white/80 text-[12px] sm:text-[13px] py-2 px-4 sm:px-6 lg:px-8 transition-transform duration-300 ${
           scrollDirection === 'down' ? '-translate-y-full absolute w-full' : 'translate-y-0 relative'
-        } z-[45] pt-[max(0.5rem,env(safe-area-inset-top))]`}
+        } z-[45] pt-[max(0.5rem,env(safe-area-inset-top))] relative overflow-hidden`}
         dir="ltr"
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="absolute inset-0 bg-black/80"></div>
+        <div className="max-w-7xl mx-auto flex items-center justify-between relative z-10">
           {/* Left: Location & Text */}
           <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-[#3B82F6]" />
+            <MapPin className="w-4 h-4 text-[var(--yp-color-you)] brightness-150" />
             <span className="font-medium text-white tracking-wide font-arabic">توصيل</span>
           </div>
 
@@ -147,8 +148,8 @@ export default function Header() {
                 <span
                   className="font-bold text-lg sm:text-2xl tracking-tight font-heading"
                 >
-                  <span className="text-[var(--yp-blue)]">YOU</span>
-                  <span className="text-[var(--yp-red)]">POSH</span>
+                  <span className="text-[var(--yp-color-you)]">YOU</span>
+                  <span className="text-[var(--yp-color-posh)]">POSH</span>
                 </span>
               </button>
             </div>
