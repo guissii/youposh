@@ -5,7 +5,7 @@ import {
   ShoppingBag, Search, X, ChevronDown, Heart,
   Phone, Globe, Menu,
   Home, Percent, TrendingUp, Sparkles, Grid3X3,
-  Truck, MessageCircle, CircleHelp, MapPin, Instagram,
+  MessageCircle, MapPin, Instagram,
   Smartphone, Home as HomeIcon, Sparkles as SparklesIcon, Shirt, Car, Gamepad2, Gift, Baby
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
