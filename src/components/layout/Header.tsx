@@ -65,8 +65,22 @@ export default function Header() {
         } z-[45] pt-[max(0.5rem,env(safe-area-inset-top))]`}
         dir="ltr"
       >
-        <div className="max-w-7xl mx-auto flex justify-center items-center gap-2">
-          <span className="text-center font-medium">Livraison partout au Maroc 35 Dhs | Gratuite dès 599 Dhs ✓</span>
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Truck className="w-3.5 h-3.5 shrink-0" />
+            <span className="font-medium truncate">Livraison partout au Maroc 35 Dhs ✓</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-3 text-white/90 shrink-0">
+            <a href={`tel:${phone}`} className="flex items-center gap-1.5 hover:text-white transition-colors">
+              <Phone className="w-3.5 h-3.5" />
+              <span className="font-semibold">{phone}</span>
+            </a>
+            <span className="text-white/40">|</span>
+            <button onClick={toggleLanguage} className="flex items-center gap-1.5 hover:text-white transition-colors font-semibold">
+              <Globe className="w-3.5 h-3.5" />
+              {language === 'fr' ? 'AR' : 'FR'}
+            </button>
+          </div>
         </div>
       </div>
 
