@@ -51,23 +51,28 @@ export default function HomePage() {
   });
 
   const isAnyLoading = featuredLoading || popularLoading || newLoading;
+  const HOME_MAX_PRODUCTS = 8;
+  const fillHomeSlots = (base: any[], candidates: any[], max: number) => {
+    const used = new Set(base.map((p: any) => p.id));
+    const extra = candidates.filter((p: any) => p?.isVisible !== false && !used.has(p.id));
+    return [...base, ...extra].slice(0, max);
+  };
 
   // Priorité 1: Produits sélectionnés manuellement "Offres du jour" (isFeatured === true)
   let promoProducts = featuredRaw.filter((p: any) => p.isVisible !== false);
 
-  // Workflow Fallback: Si l'admin a oublié ou n'a pas sélectionné assez de produits (< 4),
-  // on remplit la section dynamiquement avec les produits populaires pour éviter une section vide.
-  if (promoProducts.length < 4) {
-    const fillerProducts = popularRaw
-      .filter((p: any) => p.isVisible !== false && !promoProducts.some((fp: any) => fp.id === p.id))
-      .slice(0, 4 - promoProducts.length);
-    promoProducts = [...promoProducts, ...fillerProducts];
+  // Workflow: max 8 produits, avec fallback progressif pour toujours remplir la section.
+  if (promoProducts.length < HOME_MAX_PRODUCTS) {
+    promoProducts = fillHomeSlots(promoProducts, popularRaw, HOME_MAX_PRODUCTS);
+  }
+  if (promoProducts.length < HOME_MAX_PRODUCTS) {
+    promoProducts = fillHomeSlots(promoProducts, latestRaw, HOME_MAX_PRODUCTS);
   }
 
-  promoProducts = promoProducts.slice(0, 6); // Max 6 (4 en affichage bureau, scroll sur mobile)
+  promoProducts = promoProducts.slice(0, HOME_MAX_PRODUCTS);
 
-  const bestsellers = popularRaw.filter((p: any) => p.isVisible !== false).slice(0, 4);
-  const newArrivals = latestRaw.filter((p: any) => p.isVisible !== false).slice(0, 4);
+  const bestsellers = popularRaw.filter((p: any) => p.isVisible !== false).slice(0, HOME_MAX_PRODUCTS);
+  const newArrivals = latestRaw.filter((p: any) => p.isVisible !== false).slice(0, HOME_MAX_PRODUCTS);
   const isHeroVideoEnabled = heroSettings.videoEnabled !== false;
 
   useEffect(() => {
@@ -281,7 +286,7 @@ export default function HomePage() {
 
                       {/* Desktop Grid */}
                       <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-                        {promoProducts.slice(0, 4).map(product => (
+                        {promoProducts.slice(0, HOME_MAX_PRODUCTS).map(product => (
                           <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                             <ProductCard product={product} variant="compact" />
                           </div>
