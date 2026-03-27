@@ -224,7 +224,7 @@ export default function Header() {
 
               {showCategories && (
                 <div className="absolute top-full left-0 mt-4 w-64 bg-white rounded-2xl shadow-xl border border-[var(--yp-gray-300)] p-2 z-50 animate-fade-in">
-                  {categories.map(cat => (
+                  {categories.map((cat: any) => (
                     <button
                       key={cat.id}
                       onClick={() => {
@@ -345,7 +345,7 @@ export default function Header() {
                 {/* Sub-categories */}
                 <div className={`overflow-hidden transition-all duration-250 ease-out ${mobileCatsOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}>
                   <div className="ml-10 mr-2 py-1 space-y-0.5">
-                    {categories.map((cat) => {
+                    {categories.map((cat: any) => {
                       const CatIcon = categoryIconMap[cat.icon] || Smartphone;
                       return (
                         <button
