@@ -118,6 +118,15 @@ export default function Header() {
 
             {/* Right — Actions */}
             <div className="flex items-center gap-2 sm:gap-4 justify-end">
+              {/* Language Switcher */}
+              <button
+                onClick={toggleLanguage}
+                className="hidden xs:flex items-center gap-1.5 p-1.5 sm:p-2 hover:bg-[var(--yp-gray-100)] rounded-xl transition-colors font-semibold text-xs sm:text-sm text-[var(--yp-gray-700)]"
+              >
+                <Globe className="w-4 h-4 text-[var(--yp-blue)]" />
+                {language === 'fr' ? 'AR' : 'FR'}
+              </button>
+
               <button
                 onClick={() => setIsSearchOpen(true)}
                 className="p-1.5 sm:p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl transition-colors"
