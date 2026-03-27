@@ -213,6 +213,7 @@ export default function ProductPage() {
   const variantsArray = product.variants;
   const galleryImages = [product.image, ...product.images].filter(Boolean);
   const thumbnailImages = galleryImages.slice(1);
+  const defaultImageIndex = galleryImages.length > 1 ? 1 : 0;
 
   const discount = product.originalPrice
     ? Math.round((1 - product.price / product.originalPrice) * 100)
@@ -345,9 +346,11 @@ export default function ProductPage() {
               <div className="space-y-4">
                 <div className="relative aspect-square bg-white rounded-2xl overflow-hidden shadow-card flex items-center justify-center bg-gray-100">
                   <Carousel
+                    key={`gallery-${product.id}-${defaultImageIndex}`}
                     setApi={setApi}
                     className="w-full h-full"
                     opts={{
+                      startIndex: defaultImageIndex,
                       loop: true,
                       align: "start",
                       containScroll: "trimSnaps"
