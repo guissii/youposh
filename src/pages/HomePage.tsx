@@ -378,25 +378,36 @@ export default function HomePage() {
         <section className="py-6 sm:py-12 reveal" ref={discoverRef}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="border-t border-[var(--yp-gray-300)]" />
-            <div className="pt-6 sm:pt-10 pb-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-5">
-              <div>
-                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-[var(--yp-blue)] mb-1">
-                  YOUPOSH Collection
-                </p>
-                <h2 className="text-base sm:text-xl font-bold text-[var(--yp-dark)] leading-snug">
-                  Vous n'avez pas encore tout vu
-                </h2>
-                <p className="text-sm text-[var(--yp-gray-600)] mt-1.5 max-w-md">
-                  Découvrez le reste de notre collection et trouvez ce qu'il vous faut.
-                </p>
+            <div className="pt-6 sm:pt-10 pb-2">
+              <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[var(--yp-blue)]/20 bg-gradient-to-r from-[#0f1e5a] via-[#1a2e7e] to-[#2563eb] px-4 sm:px-8 py-5 sm:py-7 shadow-[0_16px_40px_rgba(37,99,235,0.22)]">
+                <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full bg-white/10 blur-2xl" />
+                <div className="absolute -bottom-12 -left-10 w-40 h-40 rounded-full bg-cyan-300/20 blur-3xl" />
+                <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+                  <div>
+                    <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-white/80 mb-2">
+                      YOUPOSH Collection
+                    </p>
+                    <h2 className="text-lg sm:text-2xl font-extrabold text-white leading-tight">
+                      Vous n'avez pas encore vu nos meilleures offres
+                    </h2>
+                    <p className="text-sm sm:text-base text-white/90 mt-2 max-w-2xl">
+                      Découvrez des produits qui convertissent le plus chez nos clients: prix attractifs, livraison rapide et paiement à la réception.
+                    </p>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      <span className="px-3 py-1 rounded-full bg-white/15 text-white text-xs sm:text-sm font-medium">Tendance du moment</span>
+                      <span className="px-3 py-1 rounded-full bg-white/15 text-white text-xs sm:text-sm font-medium">Stock limité</span>
+                      <span className="px-3 py-1 rounded-full bg-white/15 text-white text-xs sm:text-sm font-medium">Paiement sécurisé</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => navigate('/shop')}
+                    className="bg-white text-[#12308f] hover:bg-[#f3f7ff] px-5 sm:px-6 py-3 rounded-xl font-bold text-sm sm:text-base transition-all active:scale-[0.97] inline-flex items-center justify-center gap-2 shadow-lg whitespace-nowrap"
+                  >
+                    Explorer la boutique
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <button
-                onClick={() => navigate('/shop')}
-                className="bg-[#202442] hover:bg-[#1A1D38] text-white pl-5 sm:pl-6 pr-4 sm:pr-5 py-2.5 sm:py-3 rounded-xl font-semibold text-[13px] sm:text-sm transition-all active:scale-[0.97] inline-flex items-center gap-2 sm:gap-2.5 shadow-sm whitespace-nowrap"
-              >
-                Explorer la boutique
-                <ArrowRight className="w-4 h-4" />
-              </button>
             </div>
           </div>
         </section>
