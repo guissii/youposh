@@ -20,6 +20,8 @@ import { useStoreSettings } from '@/data/storeSettings';
 
 
 
+const HOME_MAX_PRODUCTS = 12;
+
 export default function HomePage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -35,44 +37,62 @@ export default function HomePage() {
   const discoverRef = useScrollReveal();
 
   // Use React Query for data fetching
+  // Fetch up to 12 items for each to give us a good pool of distinct items
   const { data: featuredRaw = [], isFetching: featuredLoading, isError: featuredError } = useQuery({
     queryKey: ['products', 'featured'],
-    queryFn: () => fetchProducts('badge=featured&limit=4'),
+    queryFn: () => fetchProducts('badge=featured&limit=12'),
   });
 
   const { data: popularRaw = [], isFetching: popularLoading, isError: popularError } = useQuery({
     queryKey: ['products', 'popular'],
-    queryFn: () => fetchProducts('sort=popular&limit=4'),
+    queryFn: () => fetchProducts('sort=popular&limit=12'),
   });
 
   const { data: latestRaw = [], isFetching: newLoading, isError: newError } = useQuery({
     queryKey: ['products', 'newest'],
-    queryFn: () => fetchProducts('sort=newest&limit=4'),
+    queryFn: () => fetchProducts('sort=newest&limit=12'),
   });
 
   const isAnyLoading = featuredLoading || popularLoading || newLoading;
-  const HOME_MAX_PRODUCTS = 4;
-  const fillHomeSlots = (base: any[], candidates: any[], max: number) => {
+  
+  // Workflow: Max 12 products TOTAL across all 3 sections on the Home Page
+  const TOTAL_MAX_PRODUCTS = 12;
+  const SECTION_MAX = 4;
+
+  const getVisible = (arr: any[]) => arr.filter((p: any) => p?.isVisible !== false);
+  const featured = getVisible(featuredRaw);
+  const popular = getVisible(popularRaw);
+  const latest = getVisible(latestRaw);
+
+  const fillHomeSlots = (base: any[], candidates: any[], max: number, globalUsed: Set<number>) => {
     const used = new Set(base.map((p: any) => p.id));
-    const extra = candidates.filter((p: any) => p?.isVisible !== false && !used.has(p.id));
+    const extra = candidates.filter((p: any) => !used.has(p.id) && !globalUsed.has(p.id));
     return [...base, ...extra].slice(0, max);
   };
 
-  // Priorité 1: Produits sélectionnés manuellement "Offres du jour" (isFeatured === true)
-  let promoProducts = featuredRaw.filter((p: any) => p.isVisible !== false);
+  const globalUsed = new Set<number>();
 
-  // Workflow: max 12 produits, avec fallback progressif pour toujours remplir la section.
-  if (promoProducts.length < HOME_MAX_PRODUCTS) {
-    promoProducts = fillHomeSlots(promoProducts, popularRaw, HOME_MAX_PRODUCTS);
+  // 1. Promo Section (Max 4)
+  let promoProducts = featured.slice(0, SECTION_MAX);
+  if (promoProducts.length < SECTION_MAX) {
+    promoProducts = fillHomeSlots(promoProducts, popular, SECTION_MAX, globalUsed);
   }
-  if (promoProducts.length < HOME_MAX_PRODUCTS) {
-    promoProducts = fillHomeSlots(promoProducts, latestRaw, HOME_MAX_PRODUCTS);
+  if (promoProducts.length < SECTION_MAX) {
+    promoProducts = fillHomeSlots(promoProducts, latest, SECTION_MAX, globalUsed);
   }
+  promoProducts.forEach((p: any) => globalUsed.add(p.id));
 
-  promoProducts = promoProducts.slice(0, HOME_MAX_PRODUCTS);
+  // 2. Bestsellers Section (Remaining up to 4)
+  let bestsellers = popular.filter((p: any) => !globalUsed.has(p.id)).slice(0, SECTION_MAX);
+  if (bestsellers.length < SECTION_MAX) {
+    bestsellers = fillHomeSlots(bestsellers, latest, SECTION_MAX, globalUsed);
+  }
+  bestsellers.forEach((p: any) => globalUsed.add(p.id));
 
-  const bestsellers = popularRaw.filter((p: any) => p.isVisible !== false).slice(0, HOME_MAX_PRODUCTS);
-  const newArrivals = latestRaw.filter((p: any) => p.isVisible !== false).slice(0, HOME_MAX_PRODUCTS);
+  // 3. New Arrivals (Remaining up to 4, capping total at 12)
+  const remainingSlots = TOTAL_MAX_PRODUCTS - globalUsed.size;
+  let newArrivals = latest.filter((p: any) => !globalUsed.has(p.id)).slice(0, Math.min(SECTION_MAX, remainingSlots));
+  newArrivals.forEach((p: any) => globalUsed.add(p.id));
   const isHeroVideoEnabled = heroSettings.videoEnabled !== false;
 
   useEffect(() => {

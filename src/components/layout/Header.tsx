@@ -5,13 +5,13 @@ import {
   ShoppingBag, Search, X, ChevronDown, Heart,
   Phone, Globe, Menu,
   Home, Percent, TrendingUp, Sparkles, Grid3X3,
-  Truck, MessageCircle, CircleHelp,
+  Truck, MessageCircle, CircleHelp, MapPin, Instagram,
   Smartphone, Home as HomeIcon, Sparkles as SparklesIcon, Shirt, Car, Gamepad2, Gift, Baby
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useStoreSettings } from '@/data/storeSettings';
-import { fetchCategories } from '@/lib/api';
+import { useCategories } from '@/hooks/useCategories';
 import { toWhatsAppPhone } from '@/lib/utils';
 import SearchModal from './SearchModal';
 
@@ -37,10 +37,9 @@ export default function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
   const [mobileCatsOpen, setMobileCatsOpen] = useState(false);
-  const [categories, setCategories] = useState<any[]>([]);
+  const { data: categories = [] } = useCategories();
 
   useEffect(() => {
-    fetchCategories().then(setCategories).catch(console.error);
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       setIsScrolled(currentScrollY > 10);
@@ -60,25 +59,53 @@ export default function Header() {
     <>
       {/* Top Bar — Collapsible on scroll down */}
       <div
-        className={`bg-[var(--yp-blue)] text-white text-[12px] py-1.5 px-4 sm:py-2.5 sm:px-6 lg:px-8 transition-transform duration-300 ${
+        className={`bg-[#0A0F1C] text-[#9CA3AF] text-[12px] sm:text-[13px] py-2 px-4 sm:px-6 lg:px-8 transition-transform duration-300 ${
           scrollDirection === 'down' ? '-translate-y-full absolute w-full' : 'translate-y-0 relative'
         } z-[45] pt-[max(0.5rem,env(safe-area-inset-top))]`}
         dir="ltr"
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <Truck className="w-3.5 h-3.5 shrink-0" />
-            <span className="font-medium truncate">Livraison partout au Maroc 35 Dhs ✓</span>
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          {/* Left: Location & Text */}
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-[#3B82F6]" />
+            <span className="font-medium text-white tracking-wide font-arabic">توصيل</span>
           </div>
-          <div className="hidden sm:flex items-center gap-3 text-white/90 shrink-0">
-            <a href={`tel:${phone}`} className="flex items-center gap-1.5 hover:text-white transition-colors">
-              <Phone className="w-3.5 h-3.5" />
-              <span className="font-semibold">{phone}</span>
+
+          {/* Right: Social, Phone, Lang */}
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+            {/* Social Icons */}
+            <div className="flex items-center gap-2.5 sm:gap-3.5">
+              <a href={`https://wa.me/${waPhone}`} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">
+                <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </a>
+              <a href="https://www.instagram.com/youposh_officiel/" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">
+                <Instagram className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </a>
+              <a href="https://www.tiktok.com/@youposh_officiel" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                </svg>
+              </a>
+            </div>
+
+            <span className="text-white/20">|</span>
+
+            {/* Phone */}
+            <a href={`tel:${phone}`} className="hidden sm:flex items-center gap-1.5 hover:text-white transition-colors">
+              <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="font-medium tracking-wide">{phone}</span>
             </a>
-            <span className="text-white/40">|</span>
-            <button onClick={toggleLanguage} className="flex items-center gap-1.5 hover:text-white transition-colors font-semibold">
-              <Globe className="w-3.5 h-3.5" />
-              {language === 'fr' ? 'AR' : 'FR'}
+            
+            <a href={`tel:${phone}`} className="sm:hidden flex items-center hover:text-white transition-colors">
+              <Phone className="w-3.5 h-3.5" />
+            </a>
+
+            <span className="text-white/20">|</span>
+
+            {/* Language */}
+            <button onClick={toggleLanguage} className="flex items-center gap-1 sm:gap-1.5 hover:text-white transition-colors font-medium">
+              <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="uppercase">{language === 'fr' ? 'AR' : 'FR'}</span>
             </button>
           </div>
         </div>

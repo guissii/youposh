@@ -49,7 +49,7 @@ const UPDATE_EVENT = 'youposh_store_settings_updated';
 const OFFICIAL_STORE_PHONE = '+212 690-939090';
 
 let cachedStoreSettings: StoreSettings | null = null;
-let isStoreSettingsLoading = false;
+let storeSettingsPromise: Promise<StoreSettings> | null = null;
 
 function clampInt(n: number): number {
     return Math.max(0, Math.min(255, Math.round(n)));
@@ -134,24 +134,28 @@ export function loadStoreSettings(): StoreSettings {
     return cachedStoreSettings || { ...defaultStoreSettings };
 }
 
-export async function fetchStoreSettingsGlobal(): Promise<StoreSettings> {
-    if (isStoreSettingsLoading && cachedStoreSettings) return cachedStoreSettings;
-    isStoreSettingsLoading = true;
-    try {
-        const settings = await fetchStoreSettingsAPI();
-        // Fallback to default email if empty
-        const email = settings.email || defaultStoreSettings.email;
-        cachedStoreSettings = { ...defaultStoreSettings, ...settings, phone: OFFICIAL_STORE_PHONE, email };
-        applyBrandTheme(cachedStoreSettings as StoreSettings);
-        window.dispatchEvent(new CustomEvent(UPDATE_EVENT, { detail: cachedStoreSettings }));
-        return cachedStoreSettings as StoreSettings;
-    } catch (e) {
-        console.warn('Failed to fetch store settings:', e);
-        applyBrandTheme(cachedStoreSettings || { ...defaultStoreSettings });
-        return cachedStoreSettings || { ...defaultStoreSettings };
-    } finally {
-        isStoreSettingsLoading = false;
-    }
+export function fetchStoreSettingsGlobal(): Promise<StoreSettings> {
+    if (storeSettingsPromise) return storeSettingsPromise;
+    
+    storeSettingsPromise = (async () => {
+        try {
+            const settings = await fetchStoreSettingsAPI();
+            const email = settings.email || defaultStoreSettings.email;
+            cachedStoreSettings = { ...defaultStoreSettings, ...settings, phone: OFFICIAL_STORE_PHONE, email };
+            applyBrandTheme(cachedStoreSettings as StoreSettings);
+            window.dispatchEvent(new CustomEvent(UPDATE_EVENT, { detail: cachedStoreSettings }));
+            return cachedStoreSettings as StoreSettings;
+        } catch (e) {
+            console.warn('Failed to fetch store settings:', e);
+            applyBrandTheme(cachedStoreSettings || { ...defaultStoreSettings });
+            return cachedStoreSettings || { ...defaultStoreSettings };
+        } finally {
+            // Keep the promise cached for 5 minutes, then clear it to allow fresh network fetch later
+            setTimeout(() => { storeSettingsPromise = null; }, 5 * 60 * 1000);
+        }
+    })();
+    
+    return storeSettingsPromise;
 }
 
 export async function saveStoreSettings(settings: Partial<StoreSettings>): Promise<StoreSettings> {
