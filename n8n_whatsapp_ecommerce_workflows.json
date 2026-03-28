@@ -1,0 +1,143 @@
+{
+  "name": "WhatsApp E-commerce Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-webhook",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-whatsapp",
+      "name": "Meta Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "whatsapp-ecommerce-webhook-id"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "10zPN1OLAnJreKp6nXnKWq_o0Z42QIY_Ewj4XIbXqeKE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Clients_Commandes",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Numero_WA": "={{$json.body.entry[0].changes[0].value.messages[0].from}}",
+            "Date_Conversation": "={{new Date().toISOString()}}"
+          }
+        },
+        "options": {}
+      },
+      "id": "google-sheets-client",
+      "name": "Google Sheets (Clients)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={{$env.GEMINI_API_KEY}}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "contents",
+              "value": "=[{\"parts\":[{\"text\":\"Tu es un vendeur. Le message du client est : \" + $json.body.entry[0].changes[0].value.messages[0].text.body}]}]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "gemini-api",
+      "name": "Gemini 2.0 Flash (Vibe Coder)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{$env.META_PHONE_NUMBER_ID}}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "messaging_product",
+              "value": "whatsapp"
+            },
+            {
+              "name": "to",
+              "value": "={{ $('Meta Webhook').item.json.body.entry[0].changes[0].value.messages[0].from }}"
+            },
+            {
+              "name": "type",
+              "value": "text"
+            },
+            {
+              "name": "text",
+              "value": "={ \"body\": \"{{$json.candidates[0].content.parts[0].text}}\" }"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "whatsapp-send",
+      "name": "Envoyer Message WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1000, 300]
+    }
+  ],
+  "connections": {
+    "Meta Webhook": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets (Clients)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets (Clients)": {
+      "main": [
+        [
+          {
+            "node": "Gemini 2.0 Flash (Vibe Coder)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2.0 Flash (Vibe Coder)": {
+      "main": [
+        [
+          {
+            "node": "Envoyer Message WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "triggerCount": 1,
+  "versionId": "f000b000-0000-0000-0000-000000000000",
+  "id": "whatsapp-ecommerce-workflow",
+  "active": false
+}

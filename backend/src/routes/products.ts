@@ -318,6 +318,48 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
     }
 });
 
+// GET whatsapp-sync (n8n API)
+router.get('/whatsapp-sync', cacheMiddleware(60), async (req, res) => {
+    try {
+        const products = await prisma.product.findMany({
+            where: {
+                status: 'published',
+                isVisible: true,
+                inStock: true
+            },
+            include: {
+                category: true,
+            }
+        });
+
+        const backendUrl = process.env.VITE_API_URL || `${req.protocol}://${req.get('host')}`;
+
+        const formattedProducts = products.map((p: any) => {
+            let imageUrl = p.image || '';
+            if (imageUrl && !imageUrl.startsWith('http')) {
+                imageUrl = `${backendUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+            }
+
+            return {
+                id: String(p.id),
+                nom: p.name || "",
+                categorie: p.category ? p.category.name : (p.categorySlug || ""),
+                sous_categorie: "",
+                prix: Number(p.price),
+                description: p.description || "",
+                stock: Number(p.stock) || 0,
+                image_url: imageUrl,
+                actif: p.inStock && p.isVisible && p.status === 'published'
+            };
+        });
+
+        res.json(formattedProducts);
+    } catch (error) {
+        console.error('Error fetching whatsapp-sync products:', error);
+        res.status(500).json({ error: 'Failed to fetch products for WhatsApp sync' });
+    }
+});
+
 // GET single product
 router.get('/:id', cacheMiddleware(60), async (req, res) => {
     try {

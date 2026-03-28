@@ -1,0 +1,249 @@
+
+--- KILL umbrvnnnzw miner (PID 733) ---
+Killed umbrvnnnzw
+
+
+--- KILL mingetty ---
+Killed mingetty
+
+
+--- Find miner binary location ---
+
+
+--- Check /usr/bin for suspicious ---
+ls: cannot access '/usr/bin/umbrvnnnzw': No such file or directory
+ls: cannot access '/sbin/mingetty': No such file or directory
+ls: cannot access '/usr/bin/mingetty': No such file or directory
+ls: cannot access '/usr/bin/hawsjhnort': No such file or directory
+
+
+--- Delete miner binaries ---
+Binaries deleted
+
+
+--- Check systemd for persistence ---
+  UNIT                        LOAD      ACTIVE SUB     DESCRIPTION
+  getty@tty1.service          loaded    active running Getty on tty1
+  serial-getty@ttyS0.service  loaded    active running Serial Getty on ttyS0
+● umbrvnnnzw.service          not-found active running umbrvnnnzw.service
+  user@0.service              loaded    active running User Manager for UID 0
+
+Legend: LOAD   → Reflects whether the unit definition was properly loaded.
+        ACTIVE → The high-level unit activation state, i.e. generalization of SUB.
+        SUB    → The low-level unit activation state, values depend on unit type.
+
+25 loaded units listed.
+
+
+--- Check systemd timers ---
+NEXT                                  LEFT LAST                              PASSED UNIT                           ACTIVATES
+Fri 2026-03-27 07:30:00 CET           5min Fri 2026-03-27 07:20:00 CET 4min 36s ago sysstat-collect.timer          sysstat-collect.service
+Fri 2026-03-27 08:57:20 CET       1h 32min Fri 2026-03-27 07:22:18 CET 2min 18s ago fwupd-refresh.timer            fwupd-refresh.service
+Fri 2026-03-27 13:09:58 CET       5h 45min Fri 2026-03-27 07:22:18 CET 2min 18s ago certbot.timer                  certbot.service
+Fri 2026-03-27 14:24:45 CET             7h Fri 2026-03-27 06:47:09 CET    37min ago motd-news.timer                motd-news.service
+Fri 2026-03-27 17:04:10 CET             9h Fri 2026-03-27 01:09:58 CET            - apt-daily.timer                apt-daily.service
+Sat 2026-03-28 00:00:00 CET            16h Fri 2026-03-27 00:00:01 CET            - dpkg-db-backup.timer           dpkg-db-backup.service
+Sat 2026-03-28 00:00:00 CET            16h Fri 2026-03-27 00:00:01 CET            - logrotate.timer                logrotate.service
+Sat 2026-03-28 00:07:00 CET            16h -                                      - sysstat-summary.timer          sysstat-summary.service
+Sat 2026-03-28 05:48:48 CET            22h Fri 2026-03-27 05:48:48 CET 1h 35min ago update-notifier-download.timer update-notifier-download.service
+Sat 2026-03-28 05:58:45 CET            22h Fri 2026-03-27 05:58:45 CET 1h 25min ago systemd-tmpfiles-clean.timer   systemd-tmpfiles-clean.service
+Sat 2026-03-28 06:38:36 CET            23h Fri 2026-03-27 06:39:27 CET    45min ago apt-daily-upgrade.timer        apt-daily-upgrade.service
+Sat 2026-03-28 07:40:08 CET            24h Fri 2026-03-27 03:55:23 CET            - man-db.timer                   man-db.service
+Sun 2026-03-29 03:10:41 CEST     1 day 18h Sun 2026-03-22 03:29:50 CET            - e2scrub_all.timer              e2scrub_all.service
+Mon 2026-03-30 01:30:02 CEST        2 days Mon 2026-03-23 00:25:41 CET            - fstrim.timer                   fstrim.service
+Fri 2026-04-03 21:40:40 CEST 1 week 0 days Tue 2026-03-24 15:20:53 CET            - update-notifier-motd.timer     update-notifier-motd.service
+
+15 timers listed.
+Pass --all to see loaded but inactive timers, too.
+
+
+--- Check ALL crontabs ---
+==root==
+no crontab for root
+==daemon==
+no crontab for daemon
+==bin==
+no crontab for bin
+==sys==
+no crontab for sys
+==sync==
+no crontab for sync
+==games==
+no crontab for games
+==man==
+no crontab for man
+==lp==
+no crontab for lp
+==mail==
+no crontab for mail
+==news==
+no crontab for news
+==uucp==
+no crontab for uucp
+==proxy==
+no crontab for proxy
+==www-data==
+no crontab for www-data
+==backup==
+no crontab for backup
+==list==
+no crontab for list
+==irc==
+no crontab for irc
+==_apt==
+no crontab for _apt
+==nobody==
+no crontab for nobody
+==systemd-network==
+no crontab for systemd-network
+==systemd-timesync==
+no crontab for systemd-timesync
+==dhcpcd==
+no crontab for dhcpcd
+==messagebus==
+no crontab for messagebus
+==syslog==
+no crontab for syslog
+==systemd-resolve==
+no crontab for systemd-resolve
+==uuidd==
+no crontab for uuidd
+==tss==
+no crontab for tss
+==sshd==
+no crontab for sshd
+==pollinate==
+no crontab for pollinate
+==tcpdump==
+no crontab for tcpdump
+==landscape==
+no crontab for landscape
+==fwupd-refresh==
+no crontab for fwupd-refresh
+==polkitd==
+no crontab for polkitd
+==postgres==
+no crontab for postgres
+==vnstat==
+no crontab for vnstat
+
+
+--- Check /etc/cron.d ---
+total 28
+drwxr-xr-x   2 root root 4096 Mar 22 04:19 .
+drwxr-xr-x 112 root root 4096 Mar 27 07:22 ..
+-rw-r--r--   1 root root  102 Mar 31  2024 .placeholder
+-rw-r--r--   1 root root  802 Apr 16  2023 certbot
+-rw-r--r--   1 root root  201 Apr  8  2024 e2scrub_all
+-rw-r--r--   1 root root  263 Mar 22 03:29 staticroute
+-rw-r--r--   1 root root  396 Jan  9  2024 sysstat
+# /etc/cron.d/certbot: crontab entries for the certbot package
+#
+# Upstream recommends attempting renewal twice a day
+#
+# Eventually, this will be an opportunity to validate certificates
+# haven't been revoked, etc.  Renewal will only occur if expiration
+# is within 30 days.
+#
+# Important Note!  This cronjob will NOT be executed if you are
+# running systemd as your init system.  If you are running systemd,
+# the cronjob.timer function takes precedence over this cronjob.  For
+# more details, see the systemd.timer manpage, or use systemctl show
+# certbot.timer.
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+0 */12 * * * root test -x /usr/bin/certbot -a \! -d /run/systemd/system && perl -e 'sleep int(rand(43200))' && certbot -q renew --no-random-sleep-on-renew
+30 3 * * 0 root test -e /run/systemd/system || SERVICE_MODE=1 /usr/lib/x86_64-linux-gnu/e2fsprogs/e2scrub_all_cron
+10 3 * * * root test -e /run/systemd/system || SERVICE_MODE=1 /sbin/e2scrub_all -A -r
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+@reboot root ip route replace $(ip route list dev eth0 scope link | head -n1 | awk '{ print $1 }') via $(ip route list dev eth0 | awk '/default/{ print $3 }') dev eth0 &>/dev/null
+# The first element of the path is a directory where the debian-sa1
+# script is located
+PATH=/usr/lib/sysstat:/usr/sbin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Activity reports every 10 minutes everyday
+5-55/10 * * * * root command -v debian-sa1 > /dev/null && debian-sa1 1 1
+
+# Additional run at 23:59 to rotate the statistics file
+59 23 * * * root command -v debian-sa1 > /dev/null && debian-sa1 60 2
+
+
+--- Check rc.local ---
+No rc.local
+
+
+--- Check /root/.bashrc for malware ---
+# some more ls aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Alias definitions.
+# You may want to put all your additions into a separate file like
+# ~/.bash_aliases, instead of adding them here directly.
+# See /usr/share/doc/bash-doc/examples in the bash-doc package.
+
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+#if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
+#    . /etc/bash_completion
+#fi
+
+
+--- Check /root/.profile for malware ---
+# ~/.profile: executed by Bourne-compatible login shells.
+
+if [ "$BASH" ]; then
+  if [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+  fi
+fi
+
+mesg n 2> /dev/null || true
+
+
+--- Check known malware dirs ---
+/dev/shm/:
+total 1052
+drwxrwxrwt  2 root     root          80 Mar 27 05:43 .
+drwxr-xr-x 18 root     root        3860 Mar 27 05:43 ..
+-rw-------  1 postgres postgres 1048576 Mar 27 05:43 PostgreSQL.1470547278
+-rw-------  1 postgres postgres   26976 Mar 27 05:43 PostgreSQL.2274749238
+
+/var/tmp/:
+total 40
+drwxrwxrwt 10 root root 4096 Mar 27 07:22 .
+drwxr-xr-x 14 root root 4096 Mar 22 04:05 ..
+drwxrwxrwt  2 root root 4096 Mar 22 03:29 cloud-init
+drwx------  3 root root 4096 Mar 27 05:43 systemd-private-883d8972639944aeac1d95180149a88c-ModemManager.service-nYS2NJ
+drwx------  3 root root 4096 Mar 27 07:22 systemd-private-883d8972639944aeac1d95180149a88c-fwupd.service-dSc3sO
+drwx------  3 root root 4096 Mar 27 05:43 systemd-private-883d8972639944aeac1d95180149a88c-polkit.service-oABjsJ
+drwx------  3 root root 4096 Mar 27 05:43 systemd-private-883d8972639944aeac1d95180149a88c-systemd-logind.service-0ZwcSm
+drwx------  3 root root 4096 Mar 27 05:43 systemd-private-883d8972639944aeac1d95180149a88c-systemd-resolved.service-7PmMfG
+drwx------  3 root root 4096 Mar 27 05:43 systemd-private-883d8972639944aeac1d95180149a88c-systemd-timesyncd.service-l9HoOQ
+drwx------  3 root root 4096 Mar 27 05:43 systemd-private-883d8972639944aeac1d95180149a88c-vnstat.service-WmcGeZ
+
+
+--- VERIFY CPU after cleanup ---
+    PID COMMAND         %CPU
+  31057 shzwnqkzby       191
+  32397 ps               100
+  31199 node /var/www/y  3.6
+  31177 node /var/www/y  3.3
+  31178 node /var/www/y  3.3
+  31193 node /var/www/y  3.3
+     30 ksoftirqd/2      3.2
+  31979 systemd          0.5
+   1027 PM2 v6.0.14: Go  0.4
+
+
+--- LOAD AVERAGE ---
+2.84 3.23 3.09 1/261 32399
+

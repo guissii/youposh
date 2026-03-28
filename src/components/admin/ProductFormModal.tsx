@@ -1,7 +1,8 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { X, Save, Eye, TrendingUp, ShoppingCart, BarChart3, Plus, Upload, Loader2, Star, AlertCircle } from 'lucide-react';
-import { createProduct, updateProduct, fetchCategories, fetchAttributeLibrary, uploadProductImage } from '@/lib/api';
+import { createProduct, updateProduct, fetchAttributeLibrary, uploadProductImage } from '@/lib/api';
+import { useCategories } from '@/hooks/useCategories';
 import { loadStoreSettings } from '@/data/storeSettings';
 import { getImageUrl } from '@/lib/utils';
 
@@ -13,7 +14,7 @@ interface Props {
 
 export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
     const isEdit = !!product;
-    const [categories, setCategories] = useState<any[]>([]);
+    const { data: categories = [] } = useCategories();
     const [form, setForm] = useState({
         name: product?.name || '', nameAr: product?.nameAr || '',
         price: product?.price || 0, originalPrice: product?.originalPrice || '',
@@ -60,7 +61,6 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
     const [variantLibraryQuery, setVariantLibraryQuery] = useState('');
 
     useEffect(() => {
-        fetchCategories().then(setCategories).catch(() => { });
         fetchAttributeLibrary().then(setAttributeLibrary).catch(() => { });
         const settings = loadStoreSettings();
         setApplyWatermark(settings.watermarkEnabled);

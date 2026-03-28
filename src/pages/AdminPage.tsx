@@ -18,6 +18,7 @@ import {
   type DashboardStats, type VpsStatus, fetchVpsStatus, setWatermarkStatusAPI, uploadVideo,
   exportBackupAPI, importBackupAPI
 } from '@/lib/api';
+import { queryClient } from '@/App';
 import {
   ConfirmModal,
   getOrderStatusColor,
@@ -252,6 +253,7 @@ const AdminPage = () => {
       else if (deleteConfirm.type === 'category') {
         await deleteCategory(deleteConfirm.id);
         toast.success('Catégorie supprimée avec succès');
+        queryClient.invalidateQueries({ queryKey: ['categories'] });
         loadCategories();
       }
       else if (deleteConfirm.type === 'promo') {

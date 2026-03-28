@@ -1,0 +1,108 @@
+
+--- KILL all miner processes ---
+All miners killed
+
+
+--- DELETE /etc/init.d malware ---
+init.d cleaned
+
+
+--- DELETE /usr/bin malware ---
+Binaries deleted
+
+
+--- DISABLE malware systemd links ---
+Systemd cleaned
+
+
+--- CHECK suspicious systemd services ---
+=== YDService ===
+# Unit YDService.service is masked.
+=== tat_agent ===
+# Unit tat_agent.service is masked.
+=== aegis ===
+# Unit aegis.service is masked.
+
+
+--- BLOCK miner C2 IP 141.98.10.115 ---
+Rule added
+C2 IP blocked
+
+
+--- KILL deleted-binary processes ---
+Deleted-exe processes killed
+
+
+--- CLEAN temp directories ---
+Temp cleaned
+
+
+--- RELOAD systemd and restart services ---
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [all](ids: [ 1, 2, 3, 4 ])
+[PM2] [youshop-api](1) ✓
+[PM2] [youshop-api](2) ✓
+[PM2] [youshop-api](3) ✓
+[PM2] [youshop-api](4) ✓
+┌────┬──────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name             │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼──────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 1  │ youshop-api      │ default     │ 1.0.0   │ cluster │ 34151    │ 0s     │ 3    │ online    │ 0%       │ 54.9mb   │ root     │ disabled │
+│ 2  │ youshop-api      │ default     │ 1.0.0   │ cluster │ 34152    │ 0s     │ 3    │ online    │ 0%       │ 55.6mb   │ root     │ disabled │
+│ 3  │ youshop-api      │ default     │ 1.0.0   │ cluster │ 34177    │ 0s     │ 3    │ online    │ 0%       │ 46.5mb   │ root     │ disabled │
+│ 4  │ youshop-api      │ default     │ 1.0.0   │ cluster │ 34188    │ 0s     │ 3    │ online    │ 0%       │ 38.9mb   │ root     │ disabled │
+└────┴──────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+Module
+┌────┬──────────────────────────────┬───────────────┬──────────┬──────────┬──────┬──────────┬──────────┬──────────┐
+│ id │ module                       │ version       │ pid      │ status   │ ↺    │ cpu      │ mem      │ user     │
+├────┼──────────────────────────────┼───────────────┼──────────┼──────────┼──────┼──────────┼──────────┼──────────┤
+│ 0  │ pm2-logrotate                │ 3.0.0         │ 1041     │ online   │ 0    │ 0%       │ 63.8mb   │ root     │
+└────┴──────────────────────────────┴───────────────┴──────────┴──────────┴──────┴──────────┴──────────┴──────────┘
+Services restarted
+
+
+--- VERIFY - Wait and check CPU ---
+    PID COMMAND         %CPU
+  34238 ps               200
+  34177 node /var/www/y 58.6
+  34188 node /var/www/y 58.4
+  34151 node /var/www/y 57.2
+  34152 node /var/www/y 56.4
+     30 ksoftirqd/2      3.2
+  33224 systemd          1.2
+  33219 sshd             0.6
+  33255 sshd             0.5
+
+
+--- VERIFY - Load average ---
+2.93 3.24 3.12 1/252 34243
+
+
+--- VERIFY - Check init.d is clean ---
+total 132
+drwxr-xr-x   2 root root 4096 Mar 27 07:27 .
+drwxr-xr-x 112 root root 4096 Mar 27 07:27 ..
+-rwxr-xr-x   1 root root 3740 Aug 15  2025 apparmor
+-rwxr-xr-x   1 root root 2275 Jul  8  2025 apport
+-rwxr-xr-x   1 root root  323 Mar 27 07:27 cjvwgmyqua
+-rwxr-xr-x   1 root root 1235 Feb 26  2024 console-setup.sh
+-rwxr-xr-x   1 root root 3103 Feb 27  2024 cron
+-rwxr-xr-x   1 root root  937 Jun  5  2024 cryptdisks
+-rwxr-xr-x   1 root root  896 Jun  5  2024 cryptdisks-early
+-rwxr-xr-x   1 root root 3152 Dec  5  2023 dbus
+-rwxr-xr-x   1 root root 7013 Jun 10  2024 fail2ban
+-rwxr-xr-x   1 root root  985 Mar 17  2025 grub-common
+-rwxr-xr-x   1 root root 1511 Feb 11  2025 iscsid
+-rwxr-xr-x   1 root root 1482 Feb 26  2024 keyboard-setup.sh
+
+
+--- VERIFY - No more suspicious in /usr/bin ---
+
+
+--- VERIFY - No deleted exe processes ---
+No deleted-exe processes
+
+
+--- VERIFY - No miner network connections ---
+No miner connections
+

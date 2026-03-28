@@ -6,7 +6,8 @@ import {
   ArrowUpDown, Flame, Percent, Sparkles, Star, Tag, Package, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCategories, fetchProductsPaginated } from '@/lib/api';
+import { fetchProductsPaginated } from '@/lib/api';
+import { useCategories } from '@/hooks/useCategories';
 import ProductCard from '@/components/ui/ProductCard';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -40,10 +41,7 @@ export default function ShopPage() {
   const isBestsellerPage = filterParam === 'bestseller';
 
   // Load categories with React Query
-  const { data: categories = [] } = useQuery({
-    queryKey: ['categories'],
-    queryFn: fetchCategories,
-  });
+  const { data: categories = [] } = useCategories();
 
   const selectedCategory = categoryParam ? categories.find((c: any) => c.slug === categoryParam) : undefined;
 

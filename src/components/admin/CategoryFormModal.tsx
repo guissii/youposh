@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { X, Save, FolderOpen, Upload, Image as ImageIcon, Plus } from 'lucide-react';
 import { createAttributeLibraryItem, createCategory, fetchAttributeLibrary, updateCategory, uploadCategoryImage } from '@/lib/api';
 import { loadStoreSettings } from '@/data/storeSettings';
+import { queryClient } from '@/App';
 
 interface Props {
     category?: any;
@@ -118,6 +119,10 @@ export const CategoryFormModal = ({ category, onClose, onSave }: Props) => {
                 await updateCategory(id, data);
             }
             else await createCategory(data);
+            
+            // Invalidate categories query so that frontend cache re-fetches
+            queryClient.invalidateQueries({ queryKey: ['categories'] });
+            
             onSave();
         } catch (error: any) {
             console.error('Error saving category:', error);

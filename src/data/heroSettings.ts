@@ -58,26 +58,29 @@ import { fetchHeroSettingsAPI, updateHeroSettingsAPI } from '@/lib/api';
 const UPDATE_EVENT = 'youposh_hero_settings_updated';
 
 let cachedHeroSettings: HeroSettings | null = null;
-let isHeroSettingsLoading = false;
+let heroSettingsPromise: Promise<HeroSettings> | null = null;
 
 export function loadHeroSettings(): HeroSettings {
     return cachedHeroSettings || { ...defaultHeroSettings };
 }
 
-export async function fetchHeroSettingsGlobal(): Promise<HeroSettings> {
-    if (isHeroSettingsLoading && cachedHeroSettings) return cachedHeroSettings;
-    isHeroSettingsLoading = true;
-    try {
-        const settings = await fetchHeroSettingsAPI();
-        cachedHeroSettings = { ...defaultHeroSettings, ...settings };
-        window.dispatchEvent(new Event(UPDATE_EVENT));
-        return cachedHeroSettings as HeroSettings;
-    } catch (e) {
-        console.warn('Failed to fetch hero settings:', e);
-        return cachedHeroSettings || { ...defaultHeroSettings };
-    } finally {
-        isHeroSettingsLoading = false;
-    }
+export function fetchHeroSettingsGlobal(): Promise<HeroSettings> {
+    if (heroSettingsPromise) return heroSettingsPromise;
+    heroSettingsPromise = (async () => {
+        try {
+            const settings = await fetchHeroSettingsAPI();
+            cachedHeroSettings = { ...defaultHeroSettings, ...settings };
+            window.dispatchEvent(new Event(UPDATE_EVENT));
+            return cachedHeroSettings as HeroSettings;
+        } catch (e) {
+            console.warn('Failed to fetch hero settings:', e);
+            return cachedHeroSettings || { ...defaultHeroSettings };
+        } finally {
+            // Keep the promise cached for 5 minutes
+            setTimeout(() => { heroSettingsPromise = null; }, 5 * 60 * 1000);
+        }
+    })();
+    return heroSettingsPromise;
 }
 
 export async function saveHeroSettings(settings: HeroSettings): Promise<void> {

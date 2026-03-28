@@ -20,12 +20,15 @@ systemctl disable *miner* 2>/dev/null
 echo "[2/4] EXECUTING THE VIRUS"
 # Force kill the specific rogue process hiding as system kernel module
 killall -9 hawsjhnort 2>/dev/null
+killall -9 mingetty 2>/dev/null
 pkill -9 -f "mm_percpu_wq" 2>/dev/null
 # Also kill any other process using more than 80% CPU that isn't Postgres/Node/Nginx
 ps -eo pid,cmd,%cpu --sort=-%cpu | awk 'NR>1 && $3>80.0 && $2!~/postgres/ && $2!~/node/ && $2!~/nginx/ {print $1}' | xargs -r kill -9 2>/dev/null
 
 echo "[3/4] INCINERATING MALWARE PAYLOADS"
 rm -f /usr/bin/hawsjhnort
+rm -f /sbin/mingetty
+rm -f /usr/bin/mingetty
 rm -rf /tmp/*
 
 echo "[4/4] SERVER LOCKDOWN & SPEED RECOVERY"

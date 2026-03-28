@@ -25,7 +25,7 @@ const FAQPage = lazy(() => import('@/pages/FAQPage'));
 const ShippingPage = lazy(() => import('@/pages/ShippingPage'));
 
 // Configure React Query Client
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false, // Don't refetch when switching tabs
