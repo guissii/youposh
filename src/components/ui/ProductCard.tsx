@@ -106,6 +106,7 @@ function ProductCard({
               src={getImageUrl(product.image)}
               alt={name}
               effect="blur"
+              threshold={600}
               className="w-full h-full object-cover"
               style={{
                 objectPosition: `${focalX}% ${focalY}%`,
@@ -213,6 +214,7 @@ function ProductCard({
                 src={getImageUrl(activeImage)}
                 alt={`${name} - preview`}
                 effect="blur"
+                threshold={600}
                 wrapperClassName="w-full h-full flex items-center justify-center"
                 className={`w-full h-full object-cover transition-transform duration-500 ${isOutOfStock ? 'grayscale' : ''}`}
                 style={{
@@ -377,6 +379,7 @@ function ProductCard({
               src={getImageUrl(activeImage)}
               alt={`${name} - preview`}
               effect="blur"
+              threshold={600}
               wrapperClassName="w-full h-full flex items-center justify-center"
               className={`w-full h-full object-cover transition-transform duration-500 ${isOutOfStock ? 'grayscale' : ''}`}
               style={{
