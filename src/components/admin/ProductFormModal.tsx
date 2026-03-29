@@ -545,8 +545,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                     onTouchStart={applyWatermark ? handleDragStart : undefined}
                                 >
                                     <img
-                                        src={previewImages[primaryIndex].file ? getImageUrl(previewImages[primaryIndex].url) : getImageUrl(previewImages[primaryIndex].url)}
-                                        crossOrigin="anonymous"
+                                        src={getImageUrl(previewImages[primaryIndex].url)}
                                         alt="Aperçu du produit"
                                         className="w-full h-full pointer-events-none transition-all duration-200"
                                         style={{
