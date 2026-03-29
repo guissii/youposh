@@ -16,7 +16,7 @@ import {
   fetchCategories, deleteCategory,
   fetchPromoCodes, deletePromoCode,
   type DashboardStats, type VpsStatus, fetchVpsStatus, setWatermarkStatusAPI, uploadVideo,
-  exportBackupAPI, importBackupAPI
+  exportBackupAPI, importBackupAPI, bulkUpdateProductTags
 } from '@/lib/api';
 import { queryClient } from '@/App';
 import {
@@ -609,6 +609,16 @@ const AdminPage = () => {
     );
   };
 
+  const handleBulkTags = async (action: 'clear' | 'auto') => {
+      try {
+          await bulkUpdateProductTags(action);
+          toast.success(action === 'clear' ? 'Tous les tags Accueil ont été effacés' : 'Tags Accueil générés aléatoirement (max 4)');
+          loadProducts();
+      } catch (err: any) {
+          toast.error(err.message || 'Erreur lors de la mise à jour des tags');
+      }
+  };
+
   const renderProducts = () => {
     const filteredProducts = products.filter(p =>
       productCategoryFilter === 'all' || p.categorySlug === productCategoryFilter || p.category?.slug === productCategoryFilter
@@ -620,6 +630,20 @@ const AdminPage = () => {
           <h3 className="font-semibold text-[#333]">Produits ({filteredProducts.length})</h3>
           <div className="flex gap-3">
             <div className="relative"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Rechercher..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--yp-blue)]" /></div>
+            <button
+              onClick={() => handleBulkTags('clear')}
+              className={`px-3 py-2 rounded-xl text-sm font-medium border bg-white text-[#666] border-gray-200 hover:bg-gray-100 flex items-center gap-1`}
+              title="Désélectionner les tags Accueil de tous les produits"
+            >
+              <X className="w-4 h-4" /> Effacer tags
+            </button>
+            <button
+              onClick={() => handleBulkTags('auto')}
+              className={`px-3 py-2 rounded-xl text-sm font-medium border bg-white text-[var(--yp-blue)] border-[var(--yp-blue)]/30 hover:bg-[var(--yp-blue)]/5 flex items-center gap-1`}
+              title="Sélectionner aléatoirement max 4 produits pour chaque tag Accueil"
+            >
+              <RefreshCw className="w-4 h-4" /> Auto tags (4 max)
+            </button>
             <button
               onClick={() => setShowArchivedProducts(v => !v)}
               className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${showArchivedProducts ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-[#666] border-gray-200 hover:bg-gray-100'}`}
@@ -1504,7 +1528,7 @@ const AdminPage = () => {
     };
 
     const pm2Total = vpsStatus?.pm2?.length ?? 0;
-    const pm2Online = (vpsStatus?.pm2 ?? []).filter(p => p.status === 'online').length;
+    const pm2Online = (vpsStatus?.pm2 ?? []).filter((p: any) => p.status === 'online').length;
     const memoryPercent = Math.max(0, Math.min(100, vpsStatus?.memory?.percent ?? 0));
     const diskPercent = Math.max(0, Math.min(100, vpsStatus?.disk?.percent ?? 0));
     const cpuPercent = Math.max(0, Math.min(100, vpsStatus?.cpu?.percent ?? 0));
@@ -1600,7 +1624,7 @@ const AdminPage = () => {
             <p className="text-sm text-[#999]">Aucun processus détecté</p>
           ) : (
             <div className="space-y-2">
-              {(vpsStatus?.pm2 ?? []).map((proc, index) => (
+              {(vpsStatus?.pm2 ?? []).map((proc: any, index: number) => (
                 <div key={`${proc.name}-${index}`} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-xl bg-gray-50 border border-gray-100">
                   <div className="flex items-center gap-2">
                     <div className={`w-2.5 h-2.5 rounded-full ${proc.status === 'online' ? 'bg-emerald-500' : 'bg-red-500'}`} />

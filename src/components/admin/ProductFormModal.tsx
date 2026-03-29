@@ -60,6 +60,8 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
     const [attributeLibrary, setAttributeLibrary] = useState<any[]>([]);
     const [variantLibraryQuery, setVariantLibraryQuery] = useState('');
     const [featuredCount, setFeaturedCount] = useState(0);
+    const [bestSellerCount, setBestSellerCount] = useState(0);
+    const [newCount, setNewCount] = useState(0);
 
     useEffect(() => {
         fetchAttributeLibrary().then(setAttributeLibrary).catch(() => { });
@@ -68,10 +70,11 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
         setStoreSettingsConfig(settings);
         fetchProducts('all=true&limit=500')
             .then((products: any[]) => {
-                const count = products.filter((p: any) => p?.isFeatured === true).length;
-                setFeaturedCount(count);
+                setFeaturedCount(products.filter((p: any) => p?.isFeatured === true).length);
+                setBestSellerCount(products.filter((p: any) => p?.isBestSeller === true).length);
+                setNewCount(products.filter((p: any) => p?.isNew === true).length);
             })
-            .catch(() => setFeaturedCount(0));
+            .catch(() => { setFeaturedCount(0); setBestSellerCount(0); setNewCount(0); });
     }, []);
 
     const selectedCategory = categories.find(c => c.slug === form.categorySlug);
@@ -195,11 +198,19 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
         setSaving(true);
         try {
             const isAlreadyFeatured = Boolean(isEdit && product?.isFeatured);
-            if (form.isFeatured && !isAlreadyFeatured) {
+            const isAlreadyBestSeller = Boolean(isEdit && product?.isBestSeller);
+            const isAlreadyNew = Boolean(isEdit && product?.isNew);
+
+            if ((form.isFeatured && !isAlreadyFeatured) || (form.isBestSeller && !isAlreadyBestSeller) || (form.isNew && !isAlreadyNew)) {
                 const products = await fetchProducts('all=true&limit=500');
-                const count = products.filter((p: any) => p?.isFeatured === true).length;
-                if (count >= 4) {
-                    throw new Error("Maximum 4 produits autorisés en 'Offres du jour'. Désactivez un produit avant d'en ajouter un nouveau.");
+                if (form.isFeatured && !isAlreadyFeatured && products.filter((p: any) => p?.isFeatured === true).length >= 4) {
+                    throw new Error("Maximum 4 produits autorisés en 'Offres du jour'.");
+                }
+                if (form.isBestSeller && !isAlreadyBestSeller && products.filter((p: any) => p?.isBestSeller === true).length >= 4) {
+                    throw new Error("Maximum 4 produits autorisés en 'Le plus vendu ce mois'.");
+                }
+                if (form.isNew && !isAlreadyNew && products.filter((p: any) => p?.isNew === true).length >= 4) {
+                    throw new Error("Maximum 4 produits autorisés en 'Exclusivité YouPosh'.");
                 }
             }
 
@@ -905,23 +916,43 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                 <span className="text-xs text-[#888] ml-2">({Math.min(featuredCount, 4)}/4)</span>
                             </div>
 
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={form.isBestSeller}
-                                    onChange={e => setForm(f => ({ ...f, isBestSeller: e.target.checked }))}
-                                    className="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500" />
-                                <span className="text-sm text-[#666]">🔥 Le plus vendu ce mois (Accueil)</span>
-                            </label>
+                            <div className="flex items-center gap-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={form.isBestSeller}
+                                        disabled={!form.isBestSeller && bestSellerCount >= 4}
+                                        onChange={e => {
+                                            if (e.target.checked && !form.isBestSeller && bestSellerCount >= 4) {
+                                                toast.error("Maximum 4 produits autorisés en 'Le plus vendu ce mois'.");
+                                                return;
+                                            }
+                                            setForm(f => ({ ...f, isBestSeller: e.target.checked }));
+                                        }}
+                                        className="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500" />
+                                    <span className="text-sm text-[#666]">🔥 Le plus vendu ce mois (Accueil)</span>
+                                </label>
+                                <span className="text-xs text-[#888] ml-2">({Math.min(bestSellerCount, 4)}/4)</span>
+                            </div>
 
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={form.isNew}
-                                    onChange={e => setForm(f => ({ ...f, isNew: e.target.checked }))}
-                                    className="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-500" />
-                                <span className="text-sm text-[#666]">✨ Exclusivité YouPosh (Accueil)</span>
-                            </label>
+                            <div className="flex items-center gap-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={form.isNew}
+                                        disabled={!form.isNew && newCount >= 4}
+                                        onChange={e => {
+                                            if (e.target.checked && !form.isNew && newCount >= 4) {
+                                                toast.error("Maximum 4 produits autorisés en 'Exclusivité YouPosh'.");
+                                                return;
+                                            }
+                                            setForm(f => ({ ...f, isNew: e.target.checked }));
+                                        }}
+                                        className="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-500" />
+                                    <span className="text-sm text-[#666]">✨ Exclusivité YouPosh (Accueil)</span>
+                                </label>
+                                <span className="text-xs text-[#888] ml-2">({Math.min(newCount, 4)}/4)</span>
+                            </div>
                         </div>
                     </div>
 

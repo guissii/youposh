@@ -424,6 +424,39 @@ router.get('/:id', cacheMiddleware(60), async (req, res) => {
     }
 });
 
+// POST bulk update tags
+router.post('/bulk-tags', async (req, res) => {
+    try {
+        const { action } = req.body;
+        if (action === 'clear') {
+            await prisma.product.updateMany({
+                data: { isFeatured: false, isBestSeller: false, isNew: false }
+            });
+        } else if (action === 'auto') {
+            await prisma.product.updateMany({
+                data: { isFeatured: false, isBestSeller: false, isNew: false }
+            });
+            const activeProducts = await prisma.product.findMany({
+                where: { status: 'published', isVisible: true, inStock: true },
+                select: { id: true }
+            });
+            const shuffled = [...activeProducts].sort(() => Math.random() - 0.5);
+            const featuredIds = shuffled.slice(0, 4).map(p => p.id);
+            const bestSellerIds = shuffled.slice(4, 8).map(p => p.id);
+            const newIds = shuffled.slice(8, 12).map(p => p.id);
+            
+            if (featuredIds.length) await prisma.product.updateMany({ where: { id: { in: featuredIds } }, data: { isFeatured: true } });
+            if (bestSellerIds.length) await prisma.product.updateMany({ where: { id: { in: bestSellerIds } }, data: { isBestSeller: true } });
+            if (newIds.length) await prisma.product.updateMany({ where: { id: { in: newIds } }, data: { isNew: true } });
+        }
+        clearCache();
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error in bulk-tags:', error);
+        res.status(500).json({ error: 'Failed' });
+    }
+});
+
 // POST create product
 router.post('/', async (req, res) => {
     try {
