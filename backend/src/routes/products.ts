@@ -167,8 +167,6 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
                 tags: true,
                 sku: true,
                 status: true,
-                costPrice: true,
-                profitMargin: true,
                 attributeValues: {
                     include: {
                         attributeValue: {
