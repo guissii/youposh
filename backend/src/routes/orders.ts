@@ -160,7 +160,6 @@ function getExpectedSheetHeaders(): string[] {
         'Statut livraison',
         'Produits',
         'Total',
-        'Statut commande',
         'Quantité totale',
         'ID commande',
         'Date création',
@@ -168,6 +167,7 @@ function getExpectedSheetHeaders(): string[] {
         'Remise',
         'Remarque',
         'Dernière mise à jour',
+        'URL Produit',
     ];
 }
 
@@ -180,7 +180,6 @@ async function ensureSheetFormatting(
     const endRowIndex = 5000;
     const endColumnIndex = 15;
 
-    const orderStatusValues = ['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
     const deliveryStatusValues = ['not_shipped', 'shipped', 'delivered'];
 
     const includeDeliveryConditionalFormatting = options?.includeDeliveryConditionalFormatting !== false;
@@ -205,26 +204,6 @@ async function ensureSheetFormatting(
                         startColumnIndex: 0,
                         endColumnIndex,
                     },
-                },
-            },
-        },
-        // Updated DataValidation ranges for new column order
-        {
-            setDataValidation: {
-                range: {
-                    sheetId,
-                    startRowIndex: 1,
-                    endRowIndex,
-                    startColumnIndex: 7, // H: Statut commande (index 7)
-                    endColumnIndex: 8,
-                },
-                rule: {
-                    condition: {
-                        type: 'ONE_OF_LIST',
-                        values: orderStatusValues.map(v => ({ userEnteredValue: v })),
-                    },
-                    strict: true,
-                    showCustomUi: true,
                 },
             },
         },
@@ -399,6 +378,11 @@ async function appendOrderToGoogleSheet(order: OrderForSheet) {
         .join(', ');
     const qtyTotal = items.reduce((sum, it) => sum + Number(it.quantity ?? 0), 0);
 
+    const baseUrl = (process.env.YOUPOSH_BASE_URL || 'https://www.youposhmaroc.com').replace(/\/+$/, '');
+    const productUrls = items
+        .map(it => `${baseUrl}/product/${it.productId}`)
+        .join('\n');
+
     const deliveryStatus = getDeliveryStatusFromOrderStatus(order.status);
 
     const row = [
@@ -409,7 +393,6 @@ async function appendOrderToGoogleSheet(order: OrderForSheet) {
         deliveryStatus,
         productsLabel,
         order.total ?? 0,
-        order.status ?? '',
         qtyTotal,
         order.id,
         createdAt.toISOString(),
@@ -417,6 +400,7 @@ async function appendOrderToGoogleSheet(order: OrderForSheet) {
         order.discount ?? 0,
         order.notes ?? '',
         new Date().toISOString(),
+        productUrls,
     ];
 
     await sheets.spreadsheets.values.append({
@@ -450,7 +434,7 @@ async function updateOrderInGoogleSheet(order: OrderForSheet) {
     await ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetId, hasDeliveryFormatting);
     const colId = await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: `'${sheetTitle}'!J:J`,
+        range: `'${sheetTitle}'!I:I`,
     });
     const values = (colId.data.values ?? []) as any[][];
     let rowIndex = -1;
@@ -469,6 +453,12 @@ async function updateOrderInGoogleSheet(order: OrderForSheet) {
         })
         .join(', ');
     const qtyTotal = items.reduce((sum, it) => sum + Number(it.quantity ?? 0), 0);
+
+    const baseUrl = (process.env.YOUPOSH_BASE_URL || 'https://www.youposhmaroc.com').replace(/\/+$/, '');
+    const productUrls = items
+        .map(it => `${baseUrl}/product/${it.productId}`)
+        .join('\n');
+
     const deliveryStatus = getDeliveryStatusFromOrderStatus(order.status);
     const row = [
         order.customerName ?? '',
@@ -478,7 +468,6 @@ async function updateOrderInGoogleSheet(order: OrderForSheet) {
         deliveryStatus,
         productsLabel,
         order.total ?? 0,
-        order.status ?? '',
         qtyTotal,
         order.id,
         createdAt.toISOString(),
@@ -486,6 +475,7 @@ async function updateOrderInGoogleSheet(order: OrderForSheet) {
         order.discount ?? 0,
         order.notes ?? '',
         new Date().toISOString(),
+        productUrls,
     ];
     if (rowIndex === -1) {
         // Strategy: Insert a new empty row at index 1 (row 2), then update it.
@@ -563,7 +553,7 @@ async function deleteOrderFromGoogleSheet(orderId: string, createdAt: Date) {
 
     const colId = await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: `'${sheetTitle}'!J:J`,
+        range: `'${sheetTitle}'!I:I`,
     });
     const values = (colId.data.values ?? []) as any[][];
     let rowIndex = -1;

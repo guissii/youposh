@@ -140,12 +140,12 @@ The server expects Google Sheets with the following column structure:
 7. Produits
 8. Quantité totale
 9. Total
-10. Statut commande
-11. Statut livraison
-12. Code promo
-13. Remise
-14. Remarque
-15. Dernière mise à jour
+10. Statut livraison
+11. Code promo
+12. Remise
+13. Remarque
+14. Dernière mise à jour
+15. URL Produit
 
 Sheets are organized by month with the naming convention: `Commandes_YYYY_MM`
 

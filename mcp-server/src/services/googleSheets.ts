@@ -31,12 +31,12 @@ export class GoogleSheetsService {
       'Produits',
       'Quantité totale',
       'Total',
-      'Statut commande',
       'Statut livraison',
       'Code promo',
       'Remise',
       'Remarque',
-      'Dernière mise à jour'
+      'Dernière mise à jour',
+      'URL Produit'
     ];
   }
 
@@ -126,12 +126,12 @@ export class GoogleSheetsService {
       orderData.products,
       orderData.quantity,
       orderData.total,
-      orderData.status,
       deliveryStatus,
       orderData.promoCode || '',
       orderData.discount || '',
       orderData.note || '',
-      lastUpdate
+      lastUpdate,
+      orderData.productUrl || ''
     ];
 
     if (existingRow) {
@@ -190,7 +190,7 @@ export class GoogleSheetsService {
       range: `${sheetName}!J${row}:O${row}`,
       valueInputOption: 'RAW',
       requestBody: {
-        values: [[status, deliveryStatus, '', '', '', lastUpdate]]
+        values: [[deliveryStatus, '', '', '', lastUpdate, '']]
       }
     });
   }
