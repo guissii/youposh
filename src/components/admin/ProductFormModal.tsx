@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { X, Save, Eye, TrendingUp, ShoppingCart, BarChart3, Plus, Upload, Loader2, Star, AlertCircle } from 'lucide-react';
-import { createProduct, updateProduct, fetchAttributeLibrary, uploadProductImage } from '@/lib/api';
+import { createProduct, updateProduct, fetchAttributeLibrary, uploadProductImage, fetchProducts } from '@/lib/api';
 import { useCategories } from '@/hooks/useCategories';
 import { loadStoreSettings } from '@/data/storeSettings';
 import { getImageUrl } from '@/lib/utils';
@@ -59,12 +59,19 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
     const [storeSettingsConfig, setStoreSettingsConfig] = useState<any>(null);
     const [attributeLibrary, setAttributeLibrary] = useState<any[]>([]);
     const [variantLibraryQuery, setVariantLibraryQuery] = useState('');
+    const [featuredCount, setFeaturedCount] = useState(0);
 
     useEffect(() => {
         fetchAttributeLibrary().then(setAttributeLibrary).catch(() => { });
         const settings = loadStoreSettings();
         setApplyWatermark(settings.watermarkEnabled);
         setStoreSettingsConfig(settings);
+        fetchProducts('all=true&limit=500')
+            .then((products: any[]) => {
+                const count = products.filter((p: any) => p?.isFeatured === true).length;
+                setFeaturedCount(count);
+            })
+            .catch(() => setFeaturedCount(0));
     }, []);
 
     const selectedCategory = categories.find(c => c.slug === form.categorySlug);
@@ -187,6 +194,15 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
         e.preventDefault();
         setSaving(true);
         try {
+            const isAlreadyFeatured = Boolean(isEdit && product?.isFeatured);
+            if (form.isFeatured && !isAlreadyFeatured) {
+                const products = await fetchProducts('all=true&limit=500');
+                const count = products.filter((p: any) => p?.isFeatured === true).length;
+                if (count >= 4) {
+                    throw new Error("Maximum 4 produits autorisés en 'Offres du jour'. Désactivez un produit avant d'en ajouter un nouveau.");
+                }
+            }
+
             const finalUrls: string[] = [];
 
             for (const img of previewImages) {
@@ -873,10 +889,21 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
 
 
                             <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" checked={form.isFeatured} onChange={e => setForm(f => ({ ...f, isFeatured: e.target.checked }))}
+                                <input
+                                    type="checkbox"
+                                    checked={form.isFeatured}
+                                    disabled={!form.isFeatured && featuredCount >= 4}
+                                    onChange={e => {
+                                        if (e.target.checked && !form.isFeatured && featuredCount >= 4) {
+                                            toast.error("Maximum 4 produits autorisés en 'Offres du jour'.");
+                                            return;
+                                        }
+                                        setForm(f => ({ ...f, isFeatured: e.target.checked }));
+                                    }}
                                     className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-500" />
                                 <span className="text-sm text-[#666]">⭐ Offres du jour (Accueil)</span>
                             </label>
+                            <span className="text-xs text-[#888]">{Math.min(featuredCount, 4)}/4 sélectionnés</span>
                         </div>
                     </div>
 

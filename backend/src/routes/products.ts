@@ -448,6 +448,13 @@ router.post('/', async (req, res) => {
             ? attributeValueIds.map((n: any) => parseInt(String(n))).filter((n: any) => Number.isFinite(n))
             : [];
 
+        if (isFeatured === true) {
+            const featuredCount = await prisma.product.count({ where: { isFeatured: true } });
+            if (featuredCount >= 4) {
+                return res.status(400).json({ error: "Maximum 4 produits autorisés en 'Offres du jour'." });
+            }
+        }
+
         const product = await prisma.product.create({
             data: {
                 name: data.name,
@@ -464,6 +471,10 @@ router.post('/', async (req, res) => {
                 status: data.status || 'published',
                 isVisible: data.isVisible ?? true,
                 inStock: data.inStock ?? true,
+                isFeatured: Boolean(isFeatured),
+                isNew: typeof isNew === 'boolean' ? isNew : false,
+                isPopular: typeof isPopular === 'boolean' ? isPopular : false,
+                isBestSeller: typeof isBestSeller === 'boolean' ? isBestSeller : false,
                 tags: Array.isArray(data.tags) ? data.tags : [],
                 features: Array.isArray(data.features) ? data.features : [],
                 variants: Array.isArray(data.variants) ? data.variants : [],
@@ -512,8 +523,22 @@ router.put('/:id', async (req, res) => {
         if (data.categorySlug === "") {
             data.categorySlug = null;
         }
+        if (typeof isFeatured === 'boolean') data.isFeatured = isFeatured;
+        if (typeof isNew === 'boolean') data.isNew = isNew;
+        if (typeof isPopular === 'boolean') data.isPopular = isPopular;
+        if (typeof isBestSeller === 'boolean') data.isBestSeller = isBestSeller;
 
         const id = parseInt(String(req.params.id));
+        const current = await prisma.product.findUnique({ where: { id }, select: { id: true, isFeatured: true } });
+        if (!current) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+        if (isFeatured === true && !current.isFeatured) {
+            const featuredCount = await prisma.product.count({ where: { isFeatured: true } });
+            if (featuredCount >= 4) {
+                return res.status(400).json({ error: "Maximum 4 produits autorisés en 'Offres du jour'." });
+            }
+        }
         const ids = Array.isArray(attributeValueIds)
             ? attributeValueIds.map((n: any) => parseInt(String(n))).filter((n: any) => Number.isFinite(n))
             : undefined;

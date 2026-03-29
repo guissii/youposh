@@ -1,0 +1,216 @@
+{
+  "apiBaseUrl": "https://api.youposhmaroc.com/api",
+  "rootFolder": "C:\\Users\\MSI\\Pictures\\chat gpt\\prob3\\9moool\\tiroire\\ch3r lahrech\\zeema rani zwina\\sokar halalwa\\papier couisson\\epices\\tabouret\\rjilat\\chakoch\\tsbaan\\tension\\glose\\recho\\shiiit\\lforma\\sechouar\\linge\\picala",
+  "defaultStock": 99,
+  "defaultStatus": "published",
+  "defaultVisibility": true,
+  "defaultInStock": true,
+  "products": [
+    {
+      "folder": "149 250",
+      "name": "Mini Pédalier d’Exercice Réglable avec Compteur",
+      "nameAr": "بدّال تمارين صغير قابل للتعديل مع عدّاد",
+      "price": 149,
+      "originalPrice": 250,
+      "categorySlug": "رياضة و صحة",
+      "description": "Mini pédalier compact pour entraîner bras et jambes à la maison. Résistance réglable, compteur intégré, base stable antidérapante.",
+      "descriptionAr": "بدّال صغير وعملي بزاف 💪 كيخليك تدير تمارين الرجلين واليدين فالدار بلا تعب. فيه مقاومة كتتبدل حسب المستوى ديالك وشاشة كتوريك الوقت والحركات والسعرات 🔥.",
+      "features": [
+        "Résistance réglable",
+        "Compteur digital",
+        "Anti-dérapant",
+        "Format compact",
+        "Idéal maison/bureau"
+      ],
+      "isFeatured": true
+    },
+    {
+      "folder": "produit 1",
+      "name": "Ceinture de Maintien Post-Partum",
+      "nameAr": "حزام دعم ما بعد الولادة",
+      "price": 149,
+      "originalPrice": 220,
+      "categorySlug": "beaute-sante",
+      "description": "Ceinture de maintien confortable pour soutenir l’abdomen après l’accouchement. Ajustable, respirante et adaptée à un usage quotidien.",
+      "descriptionAr": "حزام ما بعد الولادة مريح بزاف 👶 كيساعد يشد البطن ويرجع القوام بشوية بشوية. خامتو ناعمة وماكتسخنش، وساهل يتشد على المقاس ديالك ✅.",
+      "features": [
+        "Maintien abdominal",
+        "Réglable",
+        "Tissu respirant",
+        "Confort quotidien",
+        "Fermeture pratique"
+      ]
+    },
+    {
+      "folder": "produit 2 19 50",
+      "name": "Peigne Fin Anti-Poux en Acier Inoxydable",
+      "nameAr": "مشط دقيق مضاد للقمل من الستانلس ستيل",
+      "price": 19,
+      "originalPrice": 50,
+      "categorySlug": "beaute",
+      "description": "Peigne fin haute précision pour retirer efficacement poux et lentes. Dents en acier inoxydable, manche ergonomique et nettoyage facile.",
+      "descriptionAr": "مشط دقيق ضد القمل والصيبان 🧼 كيعاونك تنظفي الشعر بسرعة وبفعالية. سنانو من الستانلس القوي وماكيصداهش، والقبضة ديالو مريحة فالاستعمال اليومي ✨.",
+      "features": [
+        "Dents acier inoxydable",
+        "Haute précision",
+        "Poignée ergonomique",
+        "Réutilisable",
+        "Facile à nettoyer"
+      ]
+    },
+    {
+      "folder": "produit 3 79 150",
+      "name": "Nettoyeur de Vitres Magnétique Double Face",
+      "nameAr": "منظف زجاج مغناطيسي مزدوج الجهة",
+      "price": 79,
+      "originalPrice": 150,
+      "categorySlug": "maison",
+      "description": "Nettoyeur magnétique double face pour vitres intérieures et extérieures. Nettoie rapidement sans traces et réduit le temps de ménage.",
+      "descriptionAr": "منظف زجاج مغناطيسي بجوج الجهات 🪟 كيخليك تنظفي الداخل والخارج بسهولة كبيرة. كيعطيك الزجاج لامع بلا خطوط وكيختاصر عليك الوقت والمجهود ⚡.",
+      "features": [
+        "Double face",
+        "Nettoyage rapide",
+        "Sans traces",
+        "Prise en main facile",
+        "Gain de temps"
+      ]
+    },
+    {
+      "folder": "produit 4 99 150",
+      "name": "Aspirateur Souffleur Sans Fil Multi-Embouts",
+      "nameAr": "مكنسة نفخ وشفط لاسلكية متعددة الرؤوس",
+      "price": 99,
+      "originalPrice": 150,
+      "categorySlug": "maison-cuisine",
+      "description": "Mini aspirateur/souffleur puissant pour clavier, voiture et recoins de la maison. Léger, rechargeable USB et livré avec embouts.",
+      "descriptionAr": "مكنسة صغيرة ولكن قوية 🚀 كتشفط وكتهز الغبرة حتى من الأماكن الضيقة فالطوموبيل ولا فالدار. كتتشحن بـ USB وجاية مع رؤوس مختلفة باش تخدم أي بلاصة 🔌.",
+      "features": [
+        "2-en-1 souffleur/aspirateur",
+        "Recharge USB",
+        "Embouts inclus",
+        "Compact et léger",
+        "Idéal voiture/maison"
+      ]
+    },
+    {
+      "folder": "produit 5 69 130",
+      "name": "Lampe Cristal LED RGB avec Télécommande",
+      "nameAr": "مصباح كريستال LED متعدد الألوان مع ريموت",
+      "price": 69,
+      "originalPrice": 130,
+      "categorySlug": "cadeaux",
+      "description": "Lampe d’ambiance effet cristal avec 16 couleurs, commande tactile et télécommande. Parfaite pour chambre, salon ou cadeau.",
+      "descriptionAr": "لامبة كريستال ديكور أنيقة بزاف ✨ فيها 16 لون كتبدل الجو فالغرفة فثواني. كتخدم باللمس ولا بالريموت، مناسبة للنوم والرومانسية وحتى هدية زوينة 🎁.",
+      "features": [
+        "16 couleurs",
+        "Télécommande",
+        "Commande tactile",
+        "Recharge USB",
+        "Design premium"
+      ],
+      "isFeatured": true
+    },
+    {
+      "folder": "produit 6 129 230",
+      "name": "Tournevis Électrique Multifonction + Coffret",
+      "nameAr": "مفك كهربائي متعدد الاستعمالات مع حقيبة",
+      "price": 129,
+      "originalPrice": 230,
+      "categorySlug": "maison-cuisine",
+      "description": "Tournevis électrique pratique pour montage et bricolage rapide. Livré avec embouts variés et coffret de rangement complet.",
+      "descriptionAr": "مفك كهربائي عملي للدار والخدمة 🛠️ كيسهل التركيب والفك بسرعة ودقة. كيجّي مع رؤوس بزاف وكوفر منظم باش كلشي يبقى مرتب وساهل فالحمل 👌.",
+      "features": [
+        "Moteur électrique",
+        "Embouts multiples",
+        "Coffret inclus",
+        "Prise en main confortable",
+        "Usage bricolage maison"
+      ]
+    },
+    {
+      "folder": "produit 7 69 130",
+      "name": "Support Mural Balais & Outils avec Crochets",
+      "nameAr": "حامل جداري للمكانس والأدوات مع خطافات",
+      "price": 69,
+      "originalPrice": 130,
+      "categorySlug": "maison",
+      "description": "Support mural gain de place pour ranger balais, serpillères et accessoires. Fixation solide, installation simple et crochets intégrés.",
+      "descriptionAr": "حامل جداري ذكي للمكانس وأدوات التنظيف 🧹 كيوفر المساحة وكيخلي كلشي منظم. التركيب ديالو ساهل والتثبيت قوي ومعاه خطافات عملية لأي حاجة إضافية ✅.",
+      "features": [
+        "Gain de place",
+        "Fixation murale solide",
+        "Crochets intégrés",
+        "Installation facile",
+        "Organisation rapide"
+      ]
+    },
+    {
+      "folder": "produit 8 79 150",
+      "name": "Chauffe-Tasse USB avec Mug Couvercle",
+      "nameAr": "قاعدة تسخين أكواب USB مع كوب وغطاء",
+      "price": 79,
+      "originalPrice": 150,
+      "categorySlug": "maison-cuisine",
+      "description": "Gardez votre café ou thé à température idéale grâce au chauffe-tasse USB. Livré avec mug stylé, couvercle et cuillère.",
+      "descriptionAr": "خلي القهوة ديالك سخونة ديما ☕ مع قاعدة تسخين USB. كيجّي مع كوب أنيق وغطاء وملعقة، مناسب للمكتب ولا الدار باش تستمتع بالمشروب ديالك براحة 😍.",
+      "features": [
+        "Chauffage constant",
+        "Alimentation USB",
+        "Mug inclus",
+        "Design élégant",
+        "Idéal bureau"
+      ]
+    },
+    {
+      "folder": "roduit 9 199 250",
+      "name": "Armoire Dressing en Tissu Grande Capacité",
+      "nameAr": "خزانة ملابس قماشية سعة كبيرة",
+      "price": 199,
+      "originalPrice": 250,
+      "categorySlug": "maison",
+      "description": "Armoire dressing en tissu avec grande capacité de rangement: penderie, étagères et compartiments. Solution idéale pour organiser la chambre.",
+      "descriptionAr": "خزانة قماشية كبيرة بزاف 👗 كتعاونك ترتب الملابس والأحذية والأغطية بلا صداع. فيها أماكن للتعليق ورفوف متعددة باش كلشي يبقى منظم ومهني 🏠.",
+      "features": [
+        "Grande capacité",
+        "Penderie + étagères",
+        "Structure légère",
+        "Montage rapide",
+        "Organisation chambre"
+      ]
+    },
+    {
+      "folder": "produi 10 99 200",
+      "name": "Organisateur Sous Évier Extensible",
+      "nameAr": "منظم قابل للتوسعة تحت المغسلة",
+      "price": 99,
+      "originalPrice": 200,
+      "categorySlug": "maison-cuisine",
+      "description": "Étagère extensible pour organiser casseroles, produits ménagers et accessoires sous évier. Optimise l’espace et facilite l’accès.",
+      "descriptionAr": "منظم تحت المغسلة قابل للتوسعة 🧺 كيعاونك ترتب الطناجر ومواد التنظيف بطريقة ذكية. كيعمر المساحة مزيان وكيسهل عليك توصل لأي حاجة بسرعة ⚡.",
+      "features": [
+        "Extensible",
+        "Optimise l’espace",
+        "Structure stable",
+        "Montage simple",
+        "Polyvalent cuisine/salle de bain"
+      ]
+    },
+    {
+      "folder": "produit 11 99 200",
+      "name": "Sac Bandoulière Antivol USB",
+      "nameAr": "حقيبة كتف مضادة للسرقة مع منفذ USB",
+      "price": 99,
+      "originalPrice": 200,
+      "categorySlug": "mode",
+      "description": "Sac bandoulière moderne, compact et sécurisé, parfait pour déplacements quotidiens. Design urbain avec rangement intelligent.",
+      "descriptionAr": "حقيبة كتف ستايل وعملية 🎒 مضادة للسرقة ومناسبة للتنقل اليومي والسفر الخفيف. فيها تقسيم داخلي مريح ومنفذ USB باش تبقى متشارج طول النهار 🔋.",
+      "features": [
+        "Design antivol",
+        "Port USB",
+        "Confort épaule",
+        "Compartiments intelligents",
+        "Style urbain"
+      ]
+    }
+  ]
+}
