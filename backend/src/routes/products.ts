@@ -140,19 +140,12 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
             rating: true,
             reviews: true,
             categorySlug: true,
-            description: true,
-            descriptionAr: true,
             inStock: true,
             isVisible: true,
-            sku: true,
-            tags: true,
-            features: true,
-            variants: true,
             isPopular: true,
             isNew: true,
             isBestSeller: true,
             isFeatured: true,
-            status: true,
             publishedAt: true,
             sortOrder: true,
             viewsCount: true,
@@ -167,6 +160,15 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
             updatedAt: true,
             category: true,
             ...(showAll ? {
+                description: true,
+                descriptionAr: true,
+                features: true,
+                variants: true,
+                tags: true,
+                sku: true,
+                status: true,
+                costPrice: true,
+                profitMargin: true,
                 attributeValues: {
                     include: {
                         attributeValue: {
@@ -316,6 +318,21 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
     } catch (error) {
         console.error('Error fetching products:', error);
         res.status(500).json({ error: 'Failed to fetch products' });
+    }
+});
+
+// GET product counts by marketing badges
+router.get('/marketing-counts', async (req, res) => {
+    try {
+        const [featured, bestSeller, newCount] = await Promise.all([
+            prisma.product.count({ where: { isFeatured: true, status: 'published' } }),
+            prisma.product.count({ where: { isBestSeller: true, status: 'published' } }),
+            prisma.product.count({ where: { isNew: true, status: 'published' } })
+        ]);
+        res.json({ featured, bestSeller, new: newCount });
+    } catch (error) {
+        console.error('marketing-counts error:', error);
+        res.status(500).json({ error: 'Failed to fetch counts' });
     }
 });
 
@@ -544,6 +561,7 @@ router.post('/', async (req, res) => {
 // PUT update product
 router.put('/:id', async (req, res) => {
     try {
+        const body = req.body ?? {};
         const {
             badge,
             isNew,
@@ -551,13 +569,41 @@ router.put('/:id', async (req, res) => {
             isBestSeller,
             isFeatured,
             attributeValueIds,
-            ...rest
-        } = req.body ?? {};
+        } = body;
 
-        const data = { ...rest };
-        if (data.categorySlug === "") {
-            data.categorySlug = null;
+        // Only pick fields that are valid Prisma Product scalar columns
+        const data: any = {};
+        if (body.name !== undefined) data.name = body.name;
+        if (body.nameAr !== undefined) data.nameAr = body.nameAr;
+        if (body.price !== undefined) data.price = parseFloat(String(body.price));
+        if (body.originalPrice !== undefined) data.originalPrice = body.originalPrice != null ? parseFloat(String(body.originalPrice)) : null;
+        if (body.image !== undefined) data.image = body.image;
+        if (body.images !== undefined) data.images = body.images;
+        if (body.rating !== undefined) data.rating = parseFloat(String(body.rating));
+        if (body.reviews !== undefined) data.reviews = parseInt(String(body.reviews));
+        if (body.description !== undefined) data.description = body.description;
+        if (body.descriptionAr !== undefined) data.descriptionAr = body.descriptionAr;
+        if (body.inStock !== undefined) data.inStock = Boolean(body.inStock);
+        if (body.isVisible !== undefined) data.isVisible = Boolean(body.isVisible);
+        if (body.sku !== undefined) data.sku = body.sku;
+        if (body.tags !== undefined) data.tags = Array.isArray(body.tags) ? body.tags : [];
+        if (body.features !== undefined) data.features = Array.isArray(body.features) ? body.features : [];
+        if (body.variants !== undefined) data.variants = Array.isArray(body.variants) ? body.variants : [];
+        if (body.status !== undefined) data.status = body.status;
+        if (body.publishedAt !== undefined) data.publishedAt = body.publishedAt ? new Date(body.publishedAt) : null;
+        if (body.sortOrder !== undefined) data.sortOrder = parseInt(String(body.sortOrder)) || 0;
+        if (body.stock !== undefined) data.stock = parseInt(String(body.stock)) || 0;
+        if (body.cardZoom !== undefined) data.cardZoom = parseFloat(String(body.cardZoom)) || 1.0;
+        if (body.cardFocalX !== undefined) data.cardFocalX = parseFloat(String(body.cardFocalX)) || 50;
+        if (body.cardFocalY !== undefined) data.cardFocalY = parseFloat(String(body.cardFocalY)) || 50;
+        if (body.imageSettings !== undefined) data.imageSettings = body.imageSettings ?? {};
+
+        // Handle categorySlug
+        if (body.categorySlug !== undefined) {
+            data.categorySlug = body.categorySlug === "" ? null : body.categorySlug;
         }
+
+        // Marketing flags
         if (typeof isFeatured === 'boolean') data.isFeatured = isFeatured;
         if (typeof isNew === 'boolean') data.isNew = isNew;
         if (typeof isPopular === 'boolean') data.isPopular = isPopular;

@@ -107,6 +107,7 @@ export const deleteProductImage = (productId: number, imageId: string) =>
     apiFetch<any>(`/products/${productId}/images/${imageId}`, { method: 'DELETE' });
 export const bulkUpdateProductTags = (action: 'clear' | 'auto') =>
     apiFetch<any>('/products/bulk-tags', { method: 'POST', body: JSON.stringify({ action }) });
+export const fetchMarketingCounts = () => apiFetch<{ featured: number; bestSeller: number; new: number }>('/products/marketing-counts');
 
 // ─── Orders ────────────────────────────────────────────────────
 export const fetchOrders = (params?: string) =>

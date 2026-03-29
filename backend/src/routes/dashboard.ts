@@ -31,6 +31,9 @@ function requireAdmin(req: Request, res: Response): boolean {
 // GET dashboard stats
 router.get('/stats', async (_req, res) => {
     try {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
         const [totalOrders, totalProducts, revenue, totalPageViews, statusCounts, uniqueVisitorCountRaw] = await Promise.all([
             prisma.order.count(),
             prisma.product.count(),
@@ -40,7 +43,7 @@ router.get('/stats', async (_req, res) => {
                 by: ['status'],
                 _count: { status: true },
             }),
-            prisma.$queryRaw<Array<{ count: bigint | number }>>`SELECT COUNT(DISTINCT "visitorId")::bigint AS count FROM "VisitorStat"`,
+            prisma.$queryRaw<Array<{ count: bigint | number }>>`SELECT COUNT(DISTINCT "visitorId")::bigint AS count FROM "VisitorStat" WHERE "timestamp" >= ${thirtyDaysAgo}`,
         ]);
 
         const statusMap = new Map<string, number>();

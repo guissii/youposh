@@ -208,39 +208,19 @@ function ProductCard({
           {imgError || allImages.length === 0 ? (
             <ImageFallback />
           ) : (
-            <div 
-              ref={scrollRef}
-              className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-              onScroll={(e) => {
-                const target = e.target as HTMLDivElement;
-                const index = Math.round(target.scrollLeft / target.clientWidth);
-                if (index !== activeThumb) setActiveThumb(index);
-              }}
-            >
-              {allImages.map((img, idx) => {
-                const iSettings = (product as any).imageSettings?.[img] || { zoom: product.cardZoom ?? 1, x: product.cardFocalX ?? 50, y: product.cardFocalY ?? 50 };
-                const cZoom = Number(iSettings.zoom ?? 1);
-                const sZoom = Number.isFinite(cZoom) ? Math.max(0.8, Math.min(2.5, cZoom)) : 1;
-                const effZoom = Math.min(2.8, sZoom * 1.14);
-                const fX = iSettings.x ?? 50;
-                const fY = iSettings.y ?? 50;
-                return (
-                  <div key={idx} className="w-full h-full flex-shrink-0 snap-center relative">
-                    <LazyLoadImage
-                      src={getImageUrl(img)}
-                      alt={`${name} - ${idx + 1}`}
-                      effect="blur"
-                      wrapperClassName="w-full h-full flex items-center justify-center"
-                      className={`w-full h-full object-cover transition-transform duration-500 ${isOutOfStock ? 'grayscale' : ''}`}
-                      style={{
-                        objectPosition: `${fX}% ${fY}%`,
-                        transform: `scale(${effZoom})`,
-                      }}
-                      onError={() => setImgError(true)}
-                    />
-                  </div>
-                );
-              })}
+            <div className="w-full h-full flex items-center justify-center relative">
+              <LazyLoadImage
+                src={getImageUrl(activeImage)}
+                alt={`${name} - preview`}
+                effect="blur"
+                wrapperClassName="w-full h-full flex items-center justify-center"
+                className={`w-full h-full object-cover transition-transform duration-500 ${isOutOfStock ? 'grayscale' : ''}`}
+                style={{
+                  objectPosition: `${focalX}% ${focalY}%`,
+                  transform: `scale(${effectiveZoom})`,
+                }}
+                onError={() => setImgError(true)}
+              />
             </div>
           )}
 
@@ -392,39 +372,19 @@ function ProductCard({
         {imgError || allImages.length === 0 ? (
           <ImageFallback />
         ) : (
-          <div 
-            ref={scrollRef}
-            className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-            onScroll={(e) => {
-              const target = e.target as HTMLDivElement;
-              const index = Math.round(target.scrollLeft / target.clientWidth);
-              if (index !== activeThumb) setActiveThumb(index);
-            }}
-          >
-            {allImages.map((img, idx) => {
-              const iSettings = (product as any).imageSettings?.[img] || { zoom: product.cardZoom ?? 1, x: product.cardFocalX ?? 50, y: product.cardFocalY ?? 50 };
-              const cZoom = Number(iSettings.zoom ?? 1);
-              const sZoom = Number.isFinite(cZoom) ? Math.max(0.8, Math.min(2.5, cZoom)) : 1;
-              const effZoom = Math.min(2.8, sZoom * 1.14);
-              const fX = iSettings.x ?? 50;
-              const fY = iSettings.y ?? 50;
-              return (
-                <div key={idx} className="w-full h-full flex-shrink-0 snap-center relative">
-                  <LazyLoadImage
-                    src={getImageUrl(img)}
-                    alt={`${name} - ${idx + 1}`}
-                    effect="blur"
-                    wrapperClassName="w-full h-full flex items-center justify-center"
-                    className={`w-full h-full object-cover transition-transform duration-500 ${isOutOfStock ? 'grayscale' : ''}`}
-                    style={{
-                      objectPosition: `${fX}% ${fY}%`,
-                      transform: `scale(${effZoom})`,
-                    }}
-                    onError={() => setImgError(true)}
-                  />
-                </div>
-              );
-            })}
+          <div className="w-full h-full flex items-center justify-center relative">
+            <LazyLoadImage
+              src={getImageUrl(activeImage)}
+              alt={`${name} - preview`}
+              effect="blur"
+              wrapperClassName="w-full h-full flex items-center justify-center"
+              className={`w-full h-full object-cover transition-transform duration-500 ${isOutOfStock ? 'grayscale' : ''}`}
+              style={{
+                objectPosition: `${focalX}% ${focalY}%`,
+                transform: `scale(${effectiveZoom})`,
+              }}
+              onError={() => setImgError(true)}
+            />
           </div>
         )}
 

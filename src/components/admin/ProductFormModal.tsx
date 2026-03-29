@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { X, Save, Eye, TrendingUp, ShoppingCart, BarChart3, Plus, Upload, Loader2, Star, AlertCircle } from 'lucide-react';
-import { createProduct, updateProduct, fetchAttributeLibrary, uploadProductImage, fetchProducts } from '@/lib/api';
+import { createProduct, updateProduct, fetchAttributeLibrary, uploadProductImage, fetchMarketingCounts } from '@/lib/api';
 import { useCategories } from '@/hooks/useCategories';
 import { loadStoreSettings } from '@/data/storeSettings';
 import { getImageUrl } from '@/lib/utils';
@@ -77,11 +77,11 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
         const settings = loadStoreSettings();
         setApplyWatermark(settings.watermarkEnabled);
         setStoreSettingsConfig(settings);
-        fetchProducts('all=true&limit=500')
-            .then((products: any[]) => {
-                setFeaturedCount(products.filter((p: any) => p?.isFeatured === true).length);
-                setBestSellerCount(products.filter((p: any) => p?.isBestSeller === true).length);
-                setNewCount(products.filter((p: any) => p?.isNew === true).length);
+        fetchMarketingCounts()
+            .then((counts) => {
+                setFeaturedCount(counts.featured || 0);
+                setBestSellerCount(counts.bestSeller || 0);
+                setNewCount(counts.new || 0);
             })
             .catch(() => { setFeaturedCount(0); setBestSellerCount(0); setNewCount(0); });
     }, []);
@@ -214,14 +214,14 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
             const isAlreadyNew = Boolean(isEdit && product?.isNew);
 
             if ((form.isFeatured && !isAlreadyFeatured) || (form.isBestSeller && !isAlreadyBestSeller) || (form.isNew && !isAlreadyNew)) {
-                const products = await fetchProducts('all=true&limit=500');
-                if (form.isFeatured && !isAlreadyFeatured && products.filter((p: any) => p?.isFeatured === true).length >= 4) {
+                const counts = await fetchMarketingCounts();
+                if (form.isFeatured && !isAlreadyFeatured && counts.featured >= 4) {
                     throw new Error("Maximum 4 produits autorisés en 'Offres du jour'.");
                 }
-                if (form.isBestSeller && !isAlreadyBestSeller && products.filter((p: any) => p?.isBestSeller === true).length >= 4) {
+                if (form.isBestSeller && !isAlreadyBestSeller && counts.bestSeller >= 4) {
                     throw new Error("Maximum 4 produits autorisés en 'Le plus vendu ce mois'.");
                 }
-                if (form.isNew && !isAlreadyNew && products.filter((p: any) => p?.isNew === true).length >= 4) {
+                if (form.isNew && !isAlreadyNew && counts.new >= 4) {
                     throw new Error("Maximum 4 produits autorisés en 'Exclusivité YouPosh'.");
                 }
             }
