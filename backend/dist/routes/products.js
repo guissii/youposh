@@ -289,6 +289,44 @@ router.get('/', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0
         res.status(500).json({ error: 'Failed to fetch products' });
     }
 }));
+// GET whatsapp-sync (n8n API)
+router.get('/whatsapp-sync', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const products = yield prisma_1.default.product.findMany({
+            where: {
+                status: 'published',
+                isVisible: true,
+                inStock: true
+            },
+            include: {
+                category: true,
+            }
+        });
+        const backendUrl = process.env.VITE_API_URL || `${req.protocol}://${req.get('host')}`;
+        const formattedProducts = products.map((p) => {
+            let imageUrl = p.image || '';
+            if (imageUrl && !imageUrl.startsWith('http')) {
+                imageUrl = `${backendUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+            }
+            return {
+                id: String(p.id),
+                nom: p.name || "",
+                categorie: p.category ? p.category.name : (p.categorySlug || ""),
+                sous_categorie: "",
+                prix: Number(p.price),
+                description: p.description || "",
+                stock: Number(p.stock) || 0,
+                image_url: imageUrl,
+                actif: p.inStock && p.isVisible && p.status === 'published'
+            };
+        });
+        res.json(formattedProducts);
+    }
+    catch (error) {
+        console.error('Error fetching whatsapp-sync products:', error);
+        res.status(500).json({ error: 'Failed to fetch products for WhatsApp sync' });
+    }
+}));
 // GET single product
 router.get('/:id', (0, cache_1.cacheMiddleware)(60), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -357,6 +395,12 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const ids = Array.isArray(attributeValueIds)
             ? attributeValueIds.map((n) => parseInt(String(n))).filter((n) => Number.isFinite(n))
             : [];
+        if (isFeatured === true) {
+            const featuredCount = yield prisma_1.default.product.count({ where: { isFeatured: true } });
+            if (featuredCount >= 4) {
+                return res.status(400).json({ error: "Maximum 4 produits autorisés en 'Offres du jour'." });
+            }
+        }
         const product = yield prisma_1.default.product.create({
             data: {
                 name: data.name,
@@ -373,6 +417,10 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 status: data.status || 'published',
                 isVisible: (_b = data.isVisible) !== null && _b !== void 0 ? _b : true,
                 inStock: (_c = data.inStock) !== null && _c !== void 0 ? _c : true,
+                isFeatured: Boolean(isFeatured),
+                isNew: typeof isNew === 'boolean' ? isNew : false,
+                isPopular: typeof isPopular === 'boolean' ? isPopular : false,
+                isBestSeller: typeof isBestSeller === 'boolean' ? isBestSeller : false,
                 tags: Array.isArray(data.tags) ? data.tags : [],
                 features: Array.isArray(data.features) ? data.features : [],
                 variants: Array.isArray(data.variants) ? data.variants : [],
@@ -413,7 +461,25 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         if (data.categorySlug === "") {
             data.categorySlug = null;
         }
+        if (typeof isFeatured === 'boolean')
+            data.isFeatured = isFeatured;
+        if (typeof isNew === 'boolean')
+            data.isNew = isNew;
+        if (typeof isPopular === 'boolean')
+            data.isPopular = isPopular;
+        if (typeof isBestSeller === 'boolean')
+            data.isBestSeller = isBestSeller;
         const id = parseInt(String(req.params.id));
+        const current = yield prisma_1.default.product.findUnique({ where: { id }, select: { id: true, isFeatured: true } });
+        if (!current) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+        if (isFeatured === true && !current.isFeatured) {
+            const featuredCount = yield prisma_1.default.product.count({ where: { isFeatured: true } });
+            if (featuredCount >= 4) {
+                return res.status(400).json({ error: "Maximum 4 produits autorisés en 'Offres du jour'." });
+            }
+        }
         const ids = Array.isArray(attributeValueIds)
             ? attributeValueIds.map((n) => parseInt(String(n))).filter((n) => Number.isFinite(n))
             : undefined;
