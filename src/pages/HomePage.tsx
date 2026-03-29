@@ -55,44 +55,10 @@ export default function HomePage() {
 
   const isAnyLoading = featuredLoading || popularLoading || newLoading;
   
-  // Workflow: Max 12 products TOTAL across all 3 sections on the Home Page
-  const TOTAL_MAX_PRODUCTS = 12;
-  const SECTION_MAX = 4;
-
   const getVisible = (arr: any[]) => arr.filter((p: any) => p?.isVisible !== false);
-  const featured = getVisible(featuredRaw);
-  const popular = getVisible(popularRaw);
-  const latest = getVisible(latestRaw);
-
-  const fillHomeSlots = (base: any[], candidates: any[], max: number, globalUsed: Set<number>) => {
-    const used = new Set(base.map((p: any) => p.id));
-    const extra = candidates.filter((p: any) => !used.has(p.id) && !globalUsed.has(p.id));
-    return [...base, ...extra].slice(0, max);
-  };
-
-  const globalUsed = new Set<number>();
-
-  // 1. Promo Section (Max 4)
-  let promoProducts = featured.slice(0, SECTION_MAX);
-  if (promoProducts.length < SECTION_MAX) {
-    promoProducts = fillHomeSlots(promoProducts, popular, SECTION_MAX, globalUsed);
-  }
-  if (promoProducts.length < SECTION_MAX) {
-    promoProducts = fillHomeSlots(promoProducts, latest, SECTION_MAX, globalUsed);
-  }
-  promoProducts.forEach((p: any) => globalUsed.add(p.id));
-
-  // 2. Bestsellers Section (Remaining up to 4)
-  let bestsellers = popular.filter((p: any) => !globalUsed.has(p.id)).slice(0, SECTION_MAX);
-  if (bestsellers.length < SECTION_MAX) {
-    bestsellers = fillHomeSlots(bestsellers, latest, SECTION_MAX, globalUsed);
-  }
-  bestsellers.forEach((p: any) => globalUsed.add(p.id));
-
-  // 3. New Arrivals (Remaining up to 4, capping total at 12)
-  const remainingSlots = TOTAL_MAX_PRODUCTS - globalUsed.size;
-  let newArrivals = latest.filter((p: any) => !globalUsed.has(p.id)).slice(0, Math.min(SECTION_MAX, remainingSlots));
-  newArrivals.forEach((p: any) => globalUsed.add(p.id));
+  const promoProducts = getVisible(featuredRaw);
+  const bestsellers = getVisible(popularRaw);
+  const newArrivals = getVisible(latestRaw);
   const isHeroVideoEnabled = heroSettings.videoEnabled !== false;
 
   useEffect(() => {
