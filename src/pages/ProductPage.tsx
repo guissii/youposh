@@ -210,8 +210,8 @@ export default function ProductPage() {
   }
 
   const variantsArray = product.variants;
-  const galleryImagesRaw = [product.image, ...product.images].filter(Boolean);
-  const galleryImages = galleryImagesRaw.length > 1 ? galleryImagesRaw.slice(1) : galleryImagesRaw;
+  // Ensure the main image is always included in the gallery and deduplicate
+  const galleryImages = Array.from(new Set([product.image, ...(product.images || [])].filter(Boolean)));
   const thumbnailImages = galleryImages;
 
   const discount = product.originalPrice
