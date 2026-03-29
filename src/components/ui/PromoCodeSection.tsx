@@ -141,51 +141,53 @@ const PromoCodeSection = () => {
 
             {/* Input & Button Area */}
             <div className="w-full md:w-auto min-w-[300px] flex flex-col gap-4">
-              <form onSubmit={handleSubmit} className="relative group">
-                <div className="relative flex items-center">
-                  <input
-                    type="text"
-                    value={inputCode}
-                    onChange={(e) => setInputCode(e.target.value)}
-                    placeholder="أدخل كود الترويج هنا"
-                    className="w-full h-14 pl-4 pr-6 rounded-xl border-2 border-deco-orange/30 bg-white/80 backdrop-blur-sm text-right text-lg font-arabic text-deco-blue placeholder:text-gray-400 focus:outline-none focus:border-deco-mint focus:ring-4 focus:ring-deco-mint/10 transition-all duration-300 shadow-inner"
-                    style={{ direction: 'rtl' }}
-                  />
-                  <div className="absolute left-2 top-1/2 -translate-y-1/2">
-                    <Sparkles className="w-5 h-5 text-deco-gold animate-pulse" />
+              {!(promoCode && promoStatus === 'applied') && (
+                <form onSubmit={handleSubmit} className="relative group">
+                  <div className="relative flex items-center">
+                    <input
+                      type="text"
+                      value={inputCode}
+                      onChange={(e) => setInputCode(e.target.value)}
+                      placeholder="أدخل كود الترويج هنا"
+                      className="w-full h-14 pl-4 pr-6 rounded-xl border-2 border-deco-orange/30 bg-white/80 backdrop-blur-sm text-right text-lg font-arabic text-deco-blue placeholder:text-gray-400 focus:outline-none focus:border-deco-mint focus:ring-4 focus:ring-deco-mint/10 transition-all duration-300 shadow-inner"
+                      style={{ direction: 'rtl' }}
+                    />
+                    <div className="absolute left-2 top-1/2 -translate-y-1/2">
+                      <Sparkles className="w-5 h-5 text-deco-gold animate-pulse" />
+                    </div>
                   </div>
-                </div>
 
-                <motion.button
-                  type="submit"
-                  disabled={promoStatus === 'loading'}
-                  className="mt-3 w-full h-12 bg-deco-orange text-white font-bold font-arabic text-lg rounded-xl shadow-lg shadow-deco-orange/30 flex items-center justify-center gap-2 overflow-hidden relative"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <span className="relative z-10 flex items-center gap-2">
-                    تأكيد
+                  <motion.button
+                    type="submit"
+                    disabled={promoStatus === 'loading'}
+                    className="mt-3 w-full h-12 bg-deco-orange text-white font-bold font-arabic text-lg rounded-xl shadow-lg shadow-deco-orange/30 flex items-center justify-center gap-2 overflow-hidden relative"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      تأكيد
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                      >
+                        {promoStatus === 'loading' ? (
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+                        ) : (
+                          <ArrowLeft className="w-5 h-5" />
+                        )}
+                      </motion.div>
+                    </span>
+                    
+                    {/* Shimmer Effect */}
                     <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                    >
-                      {promoStatus === 'loading' ? (
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
-                      ) : (
-                        <ArrowLeft className="w-5 h-5" />
-                      )}
-                    </motion.div>
-                  </span>
-                  
-                  {/* Shimmer Effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                    initial={{ x: "100%" }}
-                    whileHover={{ x: "-100%" }}
-                    transition={{ duration: 0.6 }}
-                  />
-                </motion.button>
-              </form>
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                      initial={{ x: "100%" }}
+                      whileHover={{ x: "-100%" }}
+                      transition={{ duration: 0.6 }}
+                    />
+                  </motion.button>
+                </form>
+              )}
 
               {/* Status Messages */}
               <AnimatePresence mode="wait">

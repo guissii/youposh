@@ -872,31 +872,33 @@ export default function ProductPage() {
                     )}
                   </div>
 
-                  <div className="mt-3 flex gap-2">
-                    <input
-                      type="text"
-                      value={promoInput}
-                      onChange={(e) => setPromoInput(e.target.value)}
-                      placeholder="Saisissez votre code"
-                      className="flex-1 px-4 py-3 bg-white border border-[var(--yp-gray-300)] rounded-xl text-[var(--yp-dark)] placeholder-[var(--yp-gray-500)] focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-[var(--yp-blue)]/20 transition-all"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const code = String(promoInput ?? '').trim();
-                        if (!code) return;
-                        // Update global store; the useEffect below will trigger local validation
-                        applyPromoCode(code, { silent: false });
-                      }}
-                      disabled={promoStatus === 'loading'}
-                      className={`px-4 py-3 rounded-xl font-bold text-sm ${promoStatus === 'loading'
-                        ? 'bg-[var(--yp-gray-300)] text-[var(--yp-gray-500)] cursor-not-allowed'
-                        : 'bg-[var(--yp-blue)] text-white hover:opacity-95'
-                        }`}
-                    >
-                      Appliquer le code
-                    </button>
-                  </div>
+                  {!(promoCode && promoStatus === 'applied') && (
+                    <div className="mt-3 flex gap-2">
+                      <input
+                        type="text"
+                        value={promoInput}
+                        onChange={(e) => setPromoInput(e.target.value)}
+                        placeholder="Saisissez votre code"
+                        className="flex-1 px-4 py-3 bg-white border border-[var(--yp-gray-300)] rounded-xl text-[var(--yp-dark)] placeholder-[var(--yp-gray-500)] focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-[var(--yp-blue)]/20 transition-all"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const code = String(promoInput ?? '').trim();
+                          if (!code) return;
+                          // Update global store; the useEffect below will trigger local validation
+                          applyPromoCode(code, { silent: false });
+                        }}
+                        disabled={promoStatus === 'loading'}
+                        className={`px-4 py-3 rounded-xl font-bold text-sm ${promoStatus === 'loading'
+                          ? 'bg-[var(--yp-gray-300)] text-[var(--yp-gray-500)] cursor-not-allowed'
+                          : 'bg-[var(--yp-blue)] text-white hover:opacity-95'
+                          }`}
+                      >
+                        Appliquer
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 

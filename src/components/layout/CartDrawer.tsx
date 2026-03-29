@@ -234,23 +234,25 @@ Merci !`;
                     </button>
                   )}
                 </div>
-                <div className="mt-3 flex gap-2">
-                  <input
-                    type="text"
-                    value={promoInput}
-                    onChange={e => setPromoInput(e.target.value)}
-                    placeholder="Saisissez votre code"
-                    className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)] text-sm"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => applyPromoCode(promoInput)}
-                    disabled={promoStatus === 'loading'}
-                    className={`px-4 py-2.5 rounded-xl text-sm font-semibold ${promoStatus === 'loading' ? 'bg-gray-200 text-gray-400' : 'bg-[var(--yp-blue)] text-white hover:opacity-95'}`}
-                  >
-                    Appliquer le code
-                  </button>
-                </div>
+                {!(promoCode && promoStatus === 'applied') && (
+                  <div className="mt-3 flex gap-2">
+                    <input
+                      type="text"
+                      value={promoInput}
+                      onChange={e => setPromoInput(e.target.value)}
+                      placeholder="Saisissez votre code"
+                      className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)] text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => applyPromoCode(promoInput)}
+                      disabled={promoStatus === 'loading'}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold ${promoStatus === 'loading' ? 'bg-gray-200 text-gray-400' : 'bg-[var(--yp-blue)] text-white hover:opacity-95'}`}
+                    >
+                      Appliquer
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Form fields */}
