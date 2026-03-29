@@ -138,7 +138,6 @@ function getExpectedSheetHeaders() {
         'Statut livraison',
         'Produits',
         'Total',
-        'Statut commande',
         'Quantité totale',
         'ID commande',
         'Date création',
@@ -146,13 +145,13 @@ function getExpectedSheetHeaders() {
         'Remise',
         'Remarque',
         'Dernière mise à jour',
+        'URL Produit',
     ];
 }
 function ensureSheetFormatting(sheets, spreadsheetId, sheetId, options) {
     return __awaiter(this, void 0, void 0, function* () {
         const endRowIndex = 5000;
         const endColumnIndex = 15;
-        const orderStatusValues = ['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
         const deliveryStatusValues = ['not_shipped', 'shipped', 'delivered'];
         const includeDeliveryConditionalFormatting = (options === null || options === void 0 ? void 0 : options.includeDeliveryConditionalFormatting) !== false;
         const requests = [
@@ -175,26 +174,6 @@ function ensureSheetFormatting(sheets, spreadsheetId, sheetId, options) {
                             startColumnIndex: 0,
                             endColumnIndex,
                         },
-                    },
-                },
-            },
-            // Updated DataValidation ranges for new column order
-            {
-                setDataValidation: {
-                    range: {
-                        sheetId,
-                        startRowIndex: 1,
-                        endRowIndex,
-                        startColumnIndex: 7, // H: Statut commande (index 7)
-                        endColumnIndex: 8,
-                    },
-                    rule: {
-                        condition: {
-                            type: 'ONE_OF_LIST',
-                            values: orderStatusValues.map(v => ({ userEnteredValue: v })),
-                        },
-                        strict: true,
-                        showCustomUi: true,
                     },
                 },
             },
@@ -325,7 +304,7 @@ function ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetId, hasDelivery
 }
 function appendOrderToGoogleSheet(order) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
         if (!process.env.GOOGLE_SHEETS_SPREADSHEET_ID ||
             !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
             !(process.env.GOOGLE_PRIVATE_KEY ||
@@ -349,6 +328,10 @@ function appendOrderToGoogleSheet(order) {
         })
             .join(', ');
         const qtyTotal = items.reduce((sum, it) => { var _a; return sum + Number((_a = it.quantity) !== null && _a !== void 0 ? _a : 0); }, 0);
+        const baseUrl = (process.env.YOUPOSH_BASE_URL || 'https://www.youposhmaroc.com').replace(/\/+$/, '');
+        const productUrls = items
+            .map(it => `${baseUrl}/product/${it.productId}`)
+            .join('\n');
         const deliveryStatus = getDeliveryStatusFromOrderStatus(order.status);
         const row = [
             (_b = order.customerName) !== null && _b !== void 0 ? _b : '',
@@ -358,14 +341,14 @@ function appendOrderToGoogleSheet(order) {
             deliveryStatus,
             productsLabel,
             (_f = order.total) !== null && _f !== void 0 ? _f : 0,
-            (_g = order.status) !== null && _g !== void 0 ? _g : '',
             qtyTotal,
             order.id,
             createdAt.toISOString(),
-            (_h = order.promoCode) !== null && _h !== void 0 ? _h : '',
-            (_j = order.discount) !== null && _j !== void 0 ? _j : 0,
-            (_k = order.notes) !== null && _k !== void 0 ? _k : '',
+            (_g = order.promoCode) !== null && _g !== void 0 ? _g : '',
+            (_h = order.discount) !== null && _h !== void 0 ? _h : 0,
+            (_j = order.notes) !== null && _j !== void 0 ? _j : '',
             new Date().toISOString(),
+            productUrls,
         ];
         yield sheets.spreadsheets.values.append({
             spreadsheetId,
@@ -378,7 +361,7 @@ function appendOrderToGoogleSheet(order) {
 }
 function updateOrderInGoogleSheet(order) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
         if (!process.env.GOOGLE_SHEETS_SPREADSHEET_ID ||
             !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
             !(process.env.GOOGLE_PRIVATE_KEY ||
@@ -396,7 +379,7 @@ function updateOrderInGoogleSheet(order) {
         yield ensureHeaderRow(sheets, spreadsheetId, sheetTitle, sheetId, hasDeliveryFormatting);
         const colId = yield sheets.spreadsheets.values.get({
             spreadsheetId,
-            range: `'${sheetTitle}'!J:J`,
+            range: `'${sheetTitle}'!I:I`,
         });
         const values = ((_a = colId.data.values) !== null && _a !== void 0 ? _a : []);
         let rowIndex = -1;
@@ -416,6 +399,10 @@ function updateOrderInGoogleSheet(order) {
         })
             .join(', ');
         const qtyTotal = items.reduce((sum, it) => { var _a; return sum + Number((_a = it.quantity) !== null && _a !== void 0 ? _a : 0); }, 0);
+        const baseUrl = (process.env.YOUPOSH_BASE_URL || 'https://www.youposhmaroc.com').replace(/\/+$/, '');
+        const productUrls = items
+            .map(it => `${baseUrl}/product/${it.productId}`)
+            .join('\n');
         const deliveryStatus = getDeliveryStatusFromOrderStatus(order.status);
         const row = [
             (_d = order.customerName) !== null && _d !== void 0 ? _d : '',
@@ -425,14 +412,14 @@ function updateOrderInGoogleSheet(order) {
             deliveryStatus,
             productsLabel,
             (_h = order.total) !== null && _h !== void 0 ? _h : 0,
-            (_j = order.status) !== null && _j !== void 0 ? _j : '',
             qtyTotal,
             order.id,
             createdAt.toISOString(),
-            (_k = order.promoCode) !== null && _k !== void 0 ? _k : '',
-            (_l = order.discount) !== null && _l !== void 0 ? _l : 0,
-            (_m = order.notes) !== null && _m !== void 0 ? _m : '',
+            (_j = order.promoCode) !== null && _j !== void 0 ? _j : '',
+            (_k = order.discount) !== null && _k !== void 0 ? _k : 0,
+            (_l = order.notes) !== null && _l !== void 0 ? _l : '',
             new Date().toISOString(),
+            productUrls,
         ];
         if (rowIndex === -1) {
             // Strategy: Insert a new empty row at index 1 (row 2), then update it.
@@ -502,7 +489,7 @@ function deleteOrderFromGoogleSheet(orderId, createdAt) {
         }
         const colId = yield sheets.spreadsheets.values.get({
             spreadsheetId,
-            range: `'${sheetTitle}'!J:J`,
+            range: `'${sheetTitle}'!I:I`,
         });
         const values = ((_c = colId.data.values) !== null && _c !== void 0 ? _c : []);
         let rowIndex = -1;

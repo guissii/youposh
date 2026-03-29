@@ -18,6 +18,8 @@ export interface StoreSettings {
     activeGlobalCoupon?: string; // Code promo à afficher globalement
     globalCouponEnabled: boolean; // Afficher/masquer la notification globale
     promoSectionEnabled: boolean;
+    autoFillHomeSections?: boolean; // Remplir automatiquement l'accueil si catégories vides
+    randomFillEmptySections?: boolean; // Choisir aléatoirement 4 produits
 }
 
 export const defaultStoreSettings: StoreSettings = {
@@ -40,6 +42,8 @@ export const defaultStoreSettings: StoreSettings = {
     activeGlobalCoupon: '',
     globalCouponEnabled: true,
     promoSectionEnabled: true,
+    autoFillHomeSections: true,
+    randomFillEmptySections: true,
 };
 
 import { useState, useEffect } from 'react';
@@ -167,7 +171,7 @@ export async function saveStoreSettings(settings: Partial<StoreSettings>): Promi
             'brandColorYou', 'brandColorPosh', 'brandColorCart',
             'shippingFeeLocal', 'shippingFeeNational',
             'watermarkEnabled', 'watermarkOpacity', 'watermarkSize', 'watermarkPosX', 'watermarkPosY',
-            'activeGlobalCoupon', 'globalCouponEnabled', 'promoSectionEnabled'
+            'activeGlobalCoupon', 'globalCouponEnabled', 'promoSectionEnabled', 'autoFillHomeSections', 'randomFillEmptySections'
         ];
         const cleanSettings: any = {};
         for (const key of Object.keys(settings)) {

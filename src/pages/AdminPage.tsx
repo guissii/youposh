@@ -1395,6 +1395,46 @@ const AdminPage = () => {
           </button>
         </div>
       </div>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 className="font-semibold text-[#333] mb-4">Remplissage automatique (Accueil)</h3>
+        <p className="text-sm text-[#666] mb-4">Si une catégorie ("Offres du jour", "Meilleures ventes", "Exclusivités") n'a pas été manuellement remplie avec au moins 4 produits, le système complétera automatiquement les emplacements vides pour un rendu parfait.</p>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setStoreForm((f: any) => ({ ...f, autoFillHomeSections: f.autoFillHomeSections === false ? true : false }))}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${storeForm.autoFillHomeSections !== false ? 'bg-green-500' : 'bg-gray-300'}`}
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${storeForm.autoFillHomeSections !== false ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
+          <span className="text-sm font-medium text-[#333]">
+            {storeForm.autoFillHomeSections !== false ? 'Remplissage activé' : 'Remplissage désactivé'}
+          </span>
+        </div>
+
+        {/* Random Fill Toggle */}
+        <div className="mt-6 pt-4 border-t border-gray-100">
+            <h4 className="font-semibold text-[#333] mb-2">Sélection Aléatoire (Absence de tags)</h4>
+            <p className="text-sm text-[#666] mb-4">Choisir aléatoirement 4 produits dans votre catalogue si aucune modification de tag (vedette, tendance) n'a été effectuée.</p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setStoreForm((f: any) => ({ ...f, randomFillEmptySections: !f.randomFillEmptySections }))}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${storeForm.randomFillEmptySections === true ? 'bg-[var(--yp-blue)]' : 'bg-gray-300'}`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${storeForm.randomFillEmptySections === true ? 'translate-x-6' : 'translate-x-1'}`} />
+              </button>
+              <span className="text-sm font-medium text-[#333]">
+                {storeForm.randomFillEmptySections === true ? 'Aléatoire activé' : 'Aléatoire désactivé'}
+              </span>
+            </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3 mt-6">
+          <button onClick={handleStoreSave} className="px-6 py-2.5 bg-[var(--yp-blue)] text-white rounded-xl hover:bg-[var(--yp-blue-dark)] font-medium flex items-center gap-2 transition-colors">
+            {storeSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {storeSaved ? 'Enregistré' : 'Enregistrer'}
+          </button>
+        </div>
+      </div>
+
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h3 className="font-semibold text-[#333] mb-4">Coupon Global (Pop-up)</h3>

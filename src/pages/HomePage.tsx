@@ -53,12 +53,59 @@ export default function HomePage() {
     queryFn: () => fetchProducts('badge=new&limit=12'),
   });
 
-  const isAnyLoading = featuredLoading || popularLoading || newLoading;
+  const { data: randomFillRaw = [], isFetching: randomFillLoading } = useQuery({
+    queryKey: ['products', 'random-fill'],
+    queryFn: () => fetchProducts('limit=30'),
+    enabled: storeSettings?.randomFillEmptySections === true || storeSettings?.autoFillHomeSections !== false,
+  });
+
+  const isAnyLoading = featuredLoading || popularLoading || newLoading || randomFillLoading;
   
   const getVisible = (arr: any[]) => arr.filter((p: any) => p?.isVisible !== false);
-  const promoProducts = getVisible(featuredRaw).slice(0, 4);
-  const bestsellers = getVisible(popularRaw).slice(0, 4);
-  const newArrivals = getVisible(latestRaw).slice(0, 4);
+  let promoProducts = getVisible(featuredRaw).slice(0, 4);
+  let bestsellers = getVisible(popularRaw).slice(0, 4);
+  let newArrivals = getVisible(latestRaw).slice(0, 4);
+
+  const autoFillEnabled = storeSettings?.autoFillHomeSections !== false;
+  const randomFillEnabled = storeSettings?.randomFillEmptySections === true;
+
+  if (autoFillEnabled || randomFillEnabled) {
+      // Si randomFill est forcé ou s'il manque des produits avec tags, on inclut le catalogue global
+      let candidates = randomFillEnabled 
+          ? [...getVisible(randomFillRaw)]
+          : [...getVisible(popularRaw), ...getVisible(latestRaw), ...getVisible(randomFillRaw)];
+          
+      // Dédupliquer les candidats par id
+      candidates = candidates.filter((v, i, a) => a.findIndex((t: any) => (t.id === v.id)) === i);
+
+      // Mélanger aléatoirement pour éviter que les sections affichent les mêmes substituts
+      const shuffled = [...candidates].sort(() => Math.random() - 0.5);
+      
+      const fillSlots = (base: any[], globalUsed: Set<number>) => {
+          if (base.length >= 4) return base;
+          
+          let result = [...base];
+          for (const item of shuffled) {
+              if (result.length >= 4) break;
+              // On ajoute seulement si l'item n'est pas déjà dans la base, ni déjà utilisé comme substitut ailleurs
+              if (!base.find(b => b.id === item.id) && !globalUsed.has(item.id)) {
+                  result.push(item);
+                  globalUsed.add(item.id);
+              }
+          }
+          return result;
+      };
+
+      // On enregistre d'abord tous les vrais produits affichés pour ne pas les dupliquer
+      const globalUsedIdList = new Set<number>();
+      promoProducts.forEach(p => globalUsedIdList.add(p.id));
+      bestsellers.forEach(p => globalUsedIdList.add(p.id));
+      newArrivals.forEach(p => globalUsedIdList.add(p.id));
+
+      promoProducts = fillSlots(promoProducts, globalUsedIdList);
+      bestsellers = fillSlots(bestsellers, globalUsedIdList);
+      newArrivals = fillSlots(newArrivals, globalUsedIdList);
+  }
   const isHeroVideoEnabled = heroSettings.videoEnabled !== false;
 
   useEffect(() => {
