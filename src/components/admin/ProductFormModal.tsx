@@ -48,10 +48,19 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [applyWatermark, setApplyWatermark] = useState<boolean>(true);
     const [watermarkPos, setWatermarkPos] = useState({ x: 50, y: 50 });
-    const [previewImages, setPreviewImages] = useState<Array<{ url: string, file?: File, isExisting: boolean, isBroken?: boolean }>>(() => {
-        const initial: Array<{ url: string, file?: File, isExisting: boolean, isBroken?: boolean }> = [];
-        if (product?.image) initial.push({ url: product.image, isExisting: true });
-        if (product?.images?.length) product.images.forEach((img: string) => initial.push({ url: img, isExisting: true }));
+    const [previewImages, setPreviewImages] = useState<Array<{ url: string, file?: File, isExisting: boolean, isBroken?: boolean, zoom: number, focalX: number, focalY: number }>>(() => {
+        const settings = product?.imageSettings || {};
+        const initial: Array<{ url: string, file?: File, isExisting: boolean, isBroken?: boolean, zoom: number, focalX: number, focalY: number }> = [];
+        if (product?.image) {
+            const s = settings[product.image] || { zoom: product.cardZoom ?? 1, x: product.cardFocalX ?? 50, y: product.cardFocalY ?? 50 };
+            initial.push({ url: product.image, isExisting: true, zoom: s.zoom, focalX: s.x, focalY: s.y });
+        }
+        if (product?.images?.length) {
+            product.images.forEach((img: string) => {
+                const s = settings[img] || { zoom: 1, x: 50, y: 50 };
+                initial.push({ url: img, isExisting: true, zoom: s.zoom, focalX: s.x, focalY: s.y });
+            });
+        }
         return initial;
     });
     const [primaryIndex, setPrimaryIndex] = useState(0);
@@ -171,7 +180,10 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
             const newPreviews = newFiles.map(file => ({
                 url: URL.createObjectURL(file),
                 file,
-                isExisting: false
+                isExisting: false,
+                zoom: 1,
+                focalX: 50,
+                focalY: 50
             }));
             setPreviewImages(prev => [...prev, ...newPreviews]);
         } finally {
@@ -215,30 +227,39 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
             }
 
             const finalUrls: string[] = [];
+            const newImageSettings: Record<string, any> = {};
 
             for (const img of previewImages) {
+                let finalUrl = img.url;
                 if (img.file) {
                     const result = await uploadProductImage(img.file);
-                    finalUrls.push(result.url);
-                } else {
-                    finalUrls.push(img.url);
+                    finalUrl = result.url;
                 }
+                finalUrls.push(finalUrl);
+                newImageSettings[finalUrl] = {
+                    zoom: img.zoom ?? 1,
+                    x: img.focalX ?? 50,
+                    y: img.focalY ?? 50
+                };
             }
 
             const finalImageUrl = finalUrls.length > 0 ? finalUrls[primaryIndex] : '';
             const finalImagesArray = finalUrls.filter((_, i) => i !== primaryIndex);
+            
+            const mainSettings = finalImageUrl ? newImageSettings[finalImageUrl] : { zoom: 1, x: 50, y: 50 };
 
             const data = {
                 ...form,
                 image: finalImageUrl,
                 images: finalImagesArray,
+                imageSettings: newImageSettings,
+                cardZoom: mainSettings.zoom,
+                cardFocalX: mainSettings.x,
+                cardFocalY: mainSettings.y,
                 price: Math.max(0, Number(form.price)),
                 originalPrice: form.originalPrice ? Math.max(0, Number(form.originalPrice)) : null,
                 stock: Math.max(0, Number(form.stock)),
                 sortOrder: Number(form.sortOrder),
-                cardZoom: Number(form.cardZoom),
-                cardFocalX: Number(form.cardFocalX),
-                cardFocalY: Number(form.cardFocalY),
                 publishedAt: form.publishedAt ? new Date(form.publishedAt).toISOString() : null,
                 tags: form.tags ? form.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
                 features: form.features ? form.features.split(',').map((f: string) => f.trim()).filter(Boolean) : [],
@@ -442,7 +463,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                             e.preventDefault();
                                             const val = e.currentTarget.value;
                                             if (val) {
-                                                setPreviewImages(prev => [...prev, { url: val, isExisting: false }]);
+                                                setPreviewImages(prev => [...prev, { url: val, isExisting: false, zoom: 1, focalX: 50, focalY: 50 }]);
                                                 e.currentTarget.value = '';
                                             }
                                         }
@@ -453,7 +474,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                     onClick={() => {
                                         const input = document.getElementById('url-input-temp') as HTMLInputElement;
                                         if (input && input.value) {
-                                            setPreviewImages(prev => [...prev, { url: input.value, isExisting: false }]);
+                                            setPreviewImages(prev => [...prev, { url: input.value, isExisting: false, zoom: 1, focalX: 50, focalY: 50 }]);
                                             input.value = '';
                                         }
                                     }}
@@ -530,8 +551,8 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                         className="w-full h-full pointer-events-none transition-all duration-200"
                                         style={{
                                             objectFit: 'cover',
-                                            objectPosition: `${form.cardFocalX}% ${form.cardFocalY}%`,
-                                            transform: `scale(${form.cardZoom})`
+                                        objectPosition: `${previewImages[primaryIndex].focalX ?? 50}% ${previewImages[primaryIndex].focalY ?? 50}%`,
+                                        transform: `scale(${previewImages[primaryIndex].zoom ?? 1})`
                                         }}
                                     />
 
@@ -570,15 +591,18 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                         <div>
                                             <div className="flex justify-between text-xs mb-1.5">
                                                 <span className="font-medium text-[#666]">Niveau de zoom</span>
-                                                <span className="text-[var(--yp-blue)] font-bold">{form.cardZoom}x</span>
+                                                <span className="text-[var(--yp-blue)] font-bold">{previewImages[primaryIndex].zoom ?? 1}x</span>
                                             </div>
                                             <input 
                                                 type="range" 
                                                 min="0.5" 
                                                 max="2.5" 
                                                 step="0.05" 
-                                                value={form.cardZoom} 
-                                                onChange={(e) => setForm(f => ({ ...f, cardZoom: parseFloat(e.target.value) }))}
+                                                value={previewImages[primaryIndex].zoom ?? 1} 
+                                                onChange={(e) => {
+                                                    const val = parseFloat(e.target.value);
+                                                    setPreviewImages(prev => prev.map((img, idx) => idx === primaryIndex ? { ...img, zoom: val } : img));
+                                                }}
                                                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[var(--yp-blue)]"
                                             />
                                         </div>
@@ -586,15 +610,18 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                         <div>
                                             <div className="flex justify-between text-xs mb-1.5">
                                                 <span className="font-medium text-[#666]">Position Horizontale (X)</span>
-                                                <span className="text-[var(--yp-blue)] font-bold">{form.cardFocalX}%</span>
+                                                <span className="text-[var(--yp-blue)] font-bold">{previewImages[primaryIndex].focalX ?? 50}%</span>
                                             </div>
                                             <input 
                                                 type="range" 
                                                 min="0" 
                                                 max="100" 
                                                 step="1" 
-                                                value={form.cardFocalX} 
-                                                onChange={(e) => setForm(f => ({ ...f, cardFocalX: parseInt(e.target.value) }))}
+                                                value={previewImages[primaryIndex].focalX ?? 50} 
+                                                onChange={(e) => {
+                                                    const val = parseInt(e.target.value);
+                                                    setPreviewImages(prev => prev.map((img, idx) => idx === primaryIndex ? { ...img, focalX: val } : img));
+                                                }}
                                                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[var(--yp-blue)]"
                                             />
                                         </div>
@@ -602,15 +629,18 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                         <div>
                                             <div className="flex justify-between text-xs mb-1.5">
                                                 <span className="font-medium text-[#666]">Position Verticale (Y)</span>
-                                                <span className="text-[var(--yp-blue)] font-bold">{form.cardFocalY}%</span>
+                                                <span className="text-[var(--yp-blue)] font-bold">{previewImages[primaryIndex].focalY ?? 50}%</span>
                                             </div>
                                             <input 
                                                 type="range" 
                                                 min="0" 
                                                 max="100" 
                                                 step="1" 
-                                                value={form.cardFocalY} 
-                                                onChange={(e) => setForm(f => ({ ...f, cardFocalY: parseInt(e.target.value) }))}
+                                                value={previewImages[primaryIndex].focalY ?? 50} 
+                                                onChange={(e) => {
+                                                    const val = parseInt(e.target.value);
+                                                    setPreviewImages(prev => prev.map((img, idx) => idx === primaryIndex ? { ...img, focalY: val } : img));
+                                                }}
                                                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[var(--yp-blue)]"
                                             />
                                         </div>
@@ -618,7 +648,9 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                                         <div className="flex justify-end pt-1">
                                             <button 
                                                 type="button" 
-                                                onClick={() => setForm(f => ({ ...f, cardZoom: 1, cardFocalX: 50, cardFocalY: 50 }))}
+                                                onClick={() => {
+                                                    setPreviewImages(prev => prev.map((img, idx) => idx === primaryIndex ? { ...img, zoom: 1, focalX: 50, focalY: 50 } : img));
+                                                }}
                                                 className="text-xs text-red-500 hover:text-red-700 hover:underline font-medium transition-colors"
                                             >
                                                 Réinitialiser le zoom

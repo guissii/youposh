@@ -162,6 +162,7 @@ router.get('/', cacheMiddleware(60), async (req, res) => {
             cardZoom: true,
             cardFocalX: true,
             cardFocalY: true,
+            imageSettings: true,
             createdAt: true,
             updatedAt: true,
             category: true,
@@ -515,6 +516,7 @@ router.post('/', async (req, res) => {
                 cardZoom: data.cardZoom ? parseFloat(String(data.cardZoom)) : 1.0,
                 cardFocalX: data.cardFocalX ? parseFloat(String(data.cardFocalX)) : 50.0,
                 cardFocalY: data.cardFocalY ? parseFloat(String(data.cardFocalY)) : 50.0,
+                imageSettings: data.imageSettings || {},
                 publishedAt: data.publishedAt ? new Date(data.publishedAt) : new Date(),
                 attributeValues: {
                     create: ids.map((id: number) => ({ attributeValueId: id }))

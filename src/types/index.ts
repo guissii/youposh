@@ -71,6 +71,7 @@ export interface Product {
   cardZoom: number;
   cardFocalX: number;
   cardFocalY: number;
+  imageSettings?: Record<string, { zoom: number; x: number; y: number }>;
 }
 
 export interface Category {

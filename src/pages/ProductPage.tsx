@@ -356,20 +356,26 @@ export default function ProductPage() {
                   >
                     <CarouselContent className="-ml-0 cursor-grab active:cursor-grabbing">
                       {galleryImages.length > 0 ? (
-                        galleryImages.map((img: string, index: number) => (
+                        galleryImages.map((img: string, index: number) => {
+                          const imgSettings = product?.imageSettings?.[img] || { zoom: 1, x: 50, y: 50 };
+                          return (
                           <CarouselItem key={index} className="pl-0 basis-full">
-                            <div className="w-full h-full flex items-center justify-center select-none">
+                            <div className="w-full h-full flex items-center justify-center select-none overflow-hidden">
                               <LazyLoadImage
                                 src={getImageUrl(img)}
                                 alt={isAr ? product.nameAr : product.name}
                                 effect="blur"
                                 className="w-full h-full object-cover"
+                                style={{
+                                  objectPosition: `${imgSettings.x ?? 50}% ${imgSettings.y ?? 50}%`,
+                                  transform: `scale(${imgSettings.zoom ?? 1})`
+                                }}
                                 wrapperClassName="w-full h-full block"
                                 draggable={false}
                               />
                             </div>
                           </CarouselItem>
-                        ))
+                        )})
                       ) : (
                         <CarouselItem className="pl-0">
                           <div className="flex flex-col items-center justify-center text-gray-400 w-full h-full">
@@ -988,7 +994,11 @@ export default function ProductPage() {
           <img
             src={getImageUrl(galleryImages[selectedImage])}
             alt=""
-            className="max-w-full max-h-[90vh] object-contain"
+            className="max-w-full max-h-[90vh] object-cover"
+            style={{
+              objectPosition: `${product?.imageSettings?.[galleryImages[selectedImage]]?.x ?? 50}% ${product?.imageSettings?.[galleryImages[selectedImage]]?.y ?? 50}%`,
+              transform: `scale(${product?.imageSettings?.[galleryImages[selectedImage]]?.zoom ?? 1})`
+            }}
             onClick={(e) => e.stopPropagation()}
           />
         </div>

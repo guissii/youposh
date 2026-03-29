@@ -739,8 +739,16 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Panier vide' });
         }
 
+        const baseUrl = (process.env.YOUPOSH_BASE_URL || 'https://www.youposhmaroc.com').replace(/\/+$/, '');
         const extraNotes = (items ?? [])
-            .map((item: any) => (typeof item?.variant === 'string' && item.variant.trim() ? `Produit ${item.productId}: ${item.variant.trim()}` : null))
+            .map((item: any) => {
+                const parts = [];
+                if (typeof item?.variant === 'string' && item.variant.trim()) {
+                    parts.push(`Produit ${item.productId}: ${item.variant.trim()}`);
+                }
+                parts.push(`URL: ${baseUrl}/product/${item.productId}`);
+                return parts.join(' | ');
+            })
             .filter(Boolean)
             .join('\n');
 

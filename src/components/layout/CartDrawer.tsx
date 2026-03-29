@@ -342,14 +342,20 @@ Merci !`;
           ) : (
             /* ═══ CART ITEMS ═══ */
             <div className="space-y-4">
-              {cart.map((item) => (
+              {cart.map((item) => {
+                const imgSettings = (item.product as any).imageSettings?.[item.product.image] || { zoom: item.product.cardZoom ?? 1, x: item.product.cardFocalX ?? 50, y: item.product.cardFocalY ?? 50 };
+                return (
                 <div key={`${item.product.id}-${item.variant || ''}`} className="flex gap-3 bg-gray-50 rounded-xl p-3">
                   <LazyLoadImage
                     src={getImageUrl(item.product.image)}
                     alt={i18n.language === 'ar' ? item.product.nameAr : item.product.name}
                     effect="blur"
                     className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                    wrapperClassName="w-20 h-20 flex-shrink-0 block"
+                    style={{
+                      objectPosition: `${imgSettings.x ?? 50}% ${imgSettings.y ?? 50}%`,
+                      transform: `scale(${imgSettings.zoom ?? 1})`
+                    }}
+                    wrapperClassName="w-20 h-20 flex-shrink-0 block overflow-hidden"
                   />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-[#333] line-clamp-2 text-sm">
@@ -388,7 +394,8 @@ Merci !`;
                     </div>
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>

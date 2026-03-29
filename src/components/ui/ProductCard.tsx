@@ -45,10 +45,14 @@ function ProductCard({
   const visibleThumbs = allImages.slice(0, MAX_THUMBS);
   const extraCount = allImages.length - MAX_THUMBS;
   const activeImage = allImages[activeThumb] || product.image;
-  const cardZoomValue = Number(product.cardZoom ?? 1);
+  
+  const imgSettings = (product as any).imageSettings?.[activeImage] || { zoom: product.cardZoom ?? 1, x: product.cardFocalX ?? 50, y: product.cardFocalY ?? 50 };
+  const cardZoomValue = Number(imgSettings.zoom ?? 1);
   const safeCardZoom = Number.isFinite(cardZoomValue) ? Math.max(0.8, Math.min(2.5, cardZoomValue)) : 1;
   const smartBaseZoom = variant === 'horizontal' ? 1.06 : 1.14;
   const effectiveZoom = Math.min(2.8, safeCardZoom * smartBaseZoom);
+  const focalX = imgSettings.x ?? 50;
+  const focalY = imgSettings.y ?? 50;
 
   const handleNavigate = () => {
     navigate(`/product/${product.id}`);
@@ -96,7 +100,7 @@ function ProductCard({
               effect="blur"
               className="w-full h-full object-cover"
               style={{
-                objectPosition: `${product.cardFocalX ?? 50}% ${product.cardFocalY ?? 50}%`,
+                objectPosition: `${focalX}% ${focalY}%`,
                 transform: `scale(${effectiveZoom})`,
               }}
               onError={() => setImgError(true)}
@@ -203,7 +207,7 @@ function ProductCard({
               wrapperClassName="w-full h-full"
               className={`w-full h-full object-cover transition-transform duration-500 ${isOutOfStock ? 'grayscale' : ''}`}
               style={{
-                objectPosition: `${product.cardFocalX ?? 50}% ${product.cardFocalY ?? 50}%`,
+                objectPosition: `${focalX}% ${focalY}%`,
                 transform: `scale(${effectiveZoom})`,
               }}
               onError={() => setImgError(true)}
@@ -365,7 +369,7 @@ function ProductCard({
             wrapperClassName="w-full h-full flex items-center justify-center"
             className={`w-full h-full object-cover transition-transform duration-500 ${isOutOfStock ? 'grayscale' : ''}`}
             style={{
-              objectPosition: `${product.cardFocalX ?? 50}% ${product.cardFocalY ?? 50}%`,
+              objectPosition: `${focalX}% ${focalY}%`,
               transform: `scale(${effectiveZoom})`,
             }}
             onError={() => setImgError(true)}

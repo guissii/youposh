@@ -78,6 +78,7 @@ model Product {
   cardZoom      Float       @default(1.0)
   cardFocalX    Float       @default(50)
   cardFocalY    Float       @default(50)
+  imageSettings Json?       @default("{}")
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   orderItems    OrderItem[]
