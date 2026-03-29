@@ -73,7 +73,7 @@ export default function ShopPage() {
       const id = Number(v?.id);
       if (Number.isFinite(id)) allowed.add(id);
     }));
-    const next = selectedAvIds.filter(id => allowed.has(id));
+    const next = selectedAvIds.filter((id: number) => allowed.has(id));
     if (next.length !== selectedAvIds.length) {
       updateParams({ av: next.length ? next.join(',') : undefined });
     }
