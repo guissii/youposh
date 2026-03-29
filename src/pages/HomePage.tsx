@@ -56,9 +56,9 @@ export default function HomePage() {
   const isAnyLoading = featuredLoading || popularLoading || newLoading;
   
   const getVisible = (arr: any[]) => arr.filter((p: any) => p?.isVisible !== false);
-  const promoProducts = getVisible(featuredRaw);
-  const bestsellers = getVisible(popularRaw);
-  const newArrivals = getVisible(latestRaw);
+  const promoProducts = getVisible(featuredRaw).slice(0, 4);
+  const bestsellers = getVisible(popularRaw).slice(0, 4);
+  const newArrivals = getVisible(latestRaw).slice(0, 4);
   const isHeroVideoEnabled = heroSettings.videoEnabled !== false;
 
   useEffect(() => {
