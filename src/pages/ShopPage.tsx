@@ -32,7 +32,7 @@ export default function ShopPage() {
   const PER_PAGE = 12;
   const selectedAvIds = useMemo(() => {
     if (!avParam) return [];
-    return avParam.split(',').map(s => parseInt(s.trim())).filter(n => Number.isFinite(n));
+    return avParam.split(',').map(s => parseInt(s.trim())).filter((n: number) => Number.isFinite(n));
   }, [avParam]);
 
   const isAr = i18n.language === 'ar';
