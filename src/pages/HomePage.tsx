@@ -45,12 +45,12 @@ export default function HomePage() {
 
   const { data: popularRaw = [], isFetching: popularLoading, isError: popularError } = useQuery({
     queryKey: ['products', 'popular'],
-    queryFn: () => fetchProducts('sort=popular&limit=12'),
+    queryFn: () => fetchProducts('badge=bestseller&limit=12'),
   });
 
   const { data: latestRaw = [], isFetching: newLoading, isError: newError } = useQuery({
     queryKey: ['products', 'newest'],
-    queryFn: () => fetchProducts('sort=newest&limit=12'),
+    queryFn: () => fetchProducts('badge=new&limit=12'),
   });
 
   const isAnyLoading = featuredLoading || popularLoading || newLoading;
@@ -141,7 +141,7 @@ export default function HomePage() {
         {/* ══════════════════════════════════════════════
             HERO — Compact Mobile-First
             ══════════════════════════════════════════════ */}
-        <section className="relative h-[220px] sm:h-[400px] flex items-center justify-center overflow-hidden">
+        <section className="relative h-[70vh] sm:h-[600px] max-h-[800px] min-h-[450px] flex items-center justify-center overflow-hidden">
 
           {/* Hero Video Background */}
           <div

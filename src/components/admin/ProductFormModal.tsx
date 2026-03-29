@@ -879,31 +879,49 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                             </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-x-5 gap-y-2 pt-1">
+                        <div className="flex flex-col gap-3 pt-2">
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" checked={form.isVisible} onChange={e => setForm(f => ({ ...f, isVisible: e.target.checked }))}
                                     className="w-4 h-4 rounded border-gray-300 text-[var(--yp-blue)] focus:ring-[var(--yp-blue)]" />
                                 <span className="text-sm text-[#666]">👁 Visible sur le site</span>
                             </label>
 
-
+                            <div className="flex items-center gap-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={form.isFeatured}
+                                        disabled={!form.isFeatured && featuredCount >= 4}
+                                        onChange={e => {
+                                            if (e.target.checked && !form.isFeatured && featuredCount >= 4) {
+                                                toast.error("Maximum 4 produits autorisés en 'Offres du jour'.");
+                                                return;
+                                            }
+                                            setForm(f => ({ ...f, isFeatured: e.target.checked }));
+                                        }}
+                                        className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-500" />
+                                    <span className="text-sm text-[#666]">⭐ Offres du jour (Accueil)</span>
+                                </label>
+                                <span className="text-xs text-[#888] ml-2">({Math.min(featuredCount, 4)}/4)</span>
+                            </div>
 
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input
                                     type="checkbox"
-                                    checked={form.isFeatured}
-                                    disabled={!form.isFeatured && featuredCount >= 4}
-                                    onChange={e => {
-                                        if (e.target.checked && !form.isFeatured && featuredCount >= 4) {
-                                            toast.error("Maximum 4 produits autorisés en 'Offres du jour'.");
-                                            return;
-                                        }
-                                        setForm(f => ({ ...f, isFeatured: e.target.checked }));
-                                    }}
-                                    className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-500" />
-                                <span className="text-sm text-[#666]">⭐ Offres du jour (Accueil)</span>
+                                    checked={form.isBestSeller}
+                                    onChange={e => setForm(f => ({ ...f, isBestSeller: e.target.checked }))}
+                                    className="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500" />
+                                <span className="text-sm text-[#666]">🔥 Le plus vendu ce mois (Accueil)</span>
                             </label>
-                            <span className="text-xs text-[#888]">{Math.min(featuredCount, 4)}/4 sélectionnés</span>
+
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={form.isNew}
+                                    onChange={e => setForm(f => ({ ...f, isNew: e.target.checked }))}
+                                    className="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-500" />
+                                <span className="text-sm text-[#666]">✨ Exclusivité YouPosh (Accueil)</span>
+                            </label>
                         </div>
                     </div>
 

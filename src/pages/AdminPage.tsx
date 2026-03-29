@@ -661,7 +661,15 @@ const AdminPage = () => {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       {p.image && <img src={getImageUrl(p.image)} alt="" className="w-10 h-10 rounded-lg object-cover bg-gray-100" />}
-                      <div><p className="font-medium text-[#333] text-sm">{p.name}</p><p className="text-xs text-[#999]">{p.sku}</p></div>
+                      <div>
+                          <p className="font-medium text-[#333] text-sm">{p.name}</p>
+                          <p className="text-xs text-[#999] mb-1">{p.sku}</p>
+                          <div className="flex flex-wrap gap-1">
+                              {p.isFeatured && <span className="inline-flex items-center gap-0.5 bg-amber-50 text-amber-600 text-[10px] font-medium px-1.5 py-0.5 rounded border border-amber-200" title="Offre du jour">⭐ Offre</span>}
+                              {p.isBestSeller && <span className="inline-flex items-center gap-0.5 bg-orange-50 text-orange-600 text-[10px] font-medium px-1.5 py-0.5 rounded border border-orange-200" title="Meilleures ventes">🔥 Vendu</span>}
+                              {p.isNew && <span className="inline-flex items-center gap-0.5 bg-purple-50 text-purple-600 text-[10px] font-medium px-1.5 py-0.5 rounded border border-purple-200" title="Exclusivité">✨ Exclusif</span>}
+                          </div>
+                      </div>
                     </div>
                   </td>
                   <td className="px-4 py-3"><span className="text-xs bg-gray-100 px-2 py-1 rounded-lg text-[#666]">{p.category?.name || p.categorySlug || '—'}</span></td>
