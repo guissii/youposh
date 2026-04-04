@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
+  ChevronLeft, ChevronRight,
   Flame, TrendingUp, Sparkles,
   ShoppingCart, RefreshCcw, ShieldCheck, HeadphonesIcon
 } from 'lucide-react';
@@ -350,10 +351,10 @@ export default function HomePage() {
               </div>
               <button
                 onClick={() => navigate('/shop?sort=popular')}
-                className="text-sm text-[var(--yp-blue)] font-semibold flex items-center gap-1.5 hover:gap-2.5 transition-all"
+                className="flex items-center gap-1 text-sm font-semibold text-[var(--yp-blue)] hover:text-[#1e3a8a] transition-colors"
               >
-                {t('seeAll')}
-                <ArrowRight className="w-4 h-4" />
+                <span>{t('seeAll')}</span>
+                {isAr ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
               </button>
             </div>
             {isAnyLoading ? (
@@ -361,22 +362,37 @@ export default function HomePage() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--yp-blue)]"></div>
               </div>
             ) : bestsellers.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 reveal-stagger" ref={(el) => {
-                if (el) {
-                  const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                      if (entry.isIntersecting) {
-                        entry.target.classList.add('active');
-                      }
-                    });
-                  }, { threshold: 0.1 });
-                  observer.observe(el);
-                }
-              }}>
-                {bestsellers.map(product => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 reveal-stagger" ref={(el) => {
+                  if (el) {
+                    const observer = new IntersectionObserver((entries) => {
+                      entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                          entry.target.classList.add('active');
+                        }
+                      });
+                    }, { threshold: 0.1 });
+                    observer.observe(el);
+                  }
+                }}>
+                  {bestsellers.map(product => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+                <div className="mt-8 flex justify-center">
+                  <button
+                    onClick={() => navigate('/shop?sort=popular')}
+                    className="group flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-[var(--yp-blue-50)] text-[var(--yp-blue)] border border-[var(--yp-blue)]/20 rounded-xl font-bold text-sm hover:bg-[var(--yp-blue)] hover:text-white transition-all duration-300 shadow-sm"
+                  >
+                    <span>{isAr ? 'عرض المزيد من المنتجات' : 'Voir plus de produits'}</span>
+                    {isAr ? (
+                      <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    )}
+                  </button>
+                </div>
+              </>
             ) : (
               <p className="text-center text-[var(--yp-gray-500)] py-8">{t('noProducts') || "Aucun produit trouvé."}</p>
             )}
@@ -409,10 +425,10 @@ export default function HomePage() {
               </div>
               <button
                 onClick={() => navigate('/shop?filter=exclusive')}
-                className="text-sm text-[var(--yp-blue)] font-semibold flex items-center gap-1.5 hover:gap-2.5 transition-all"
+                className="flex items-center gap-1 text-sm font-semibold text-[var(--yp-blue)] hover:text-[#1e3a8a] transition-colors"
               >
-                Voir tout
-                <ArrowRight className="w-4 h-4" />
+                <span>{t('seeAll')}</span>
+                {isAr ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
               </button>
             </div>
 
@@ -421,22 +437,37 @@ export default function HomePage() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--yp-blue)]"></div>
               </div>
             ) : newArrivals.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 reveal-stagger" ref={(el) => {
-                if (el) {
-                  const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                      if (entry.isIntersecting) {
-                        entry.target.classList.add('active');
-                      }
-                    });
-                  }, { threshold: 0.1 });
-                  observer.observe(el);
-                }
-              }}>
-                {newArrivals.map(product => (
-                  <ProductCard key={product.id} product={product} variant="compact" />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 reveal-stagger" ref={(el) => {
+                  if (el) {
+                    const observer = new IntersectionObserver((entries) => {
+                      entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                          entry.target.classList.add('active');
+                        }
+                      });
+                    }, { threshold: 0.1 });
+                    observer.observe(el);
+                  }
+                }}>
+                  {newArrivals.map(product => (
+                    <ProductCard key={product.id} product={product} variant="compact" />
+                  ))}
+                </div>
+                <div className="mt-8 flex justify-center">
+                  <button
+                    onClick={() => navigate('/shop?filter=exclusive')}
+                    className="group flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-[var(--yp-blue-50)] text-[var(--yp-blue)] border border-[var(--yp-blue)]/20 rounded-xl font-bold text-sm hover:bg-[var(--yp-blue)] hover:text-white transition-all duration-300 shadow-sm"
+                  >
+                    <span>{isAr ? 'عرض المزيد من المنتجات' : 'Voir plus de produits'}</span>
+                    {isAr ? (
+                      <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    )}
+                  </button>
+                </div>
+              </>
             ) : (
               <p className="text-center text-[var(--yp-gray-500)] py-8">{t('noProducts') || "Aucun produit trouvé."}</p>
             )}

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Heart, Star, Minus, Plus, ArrowLeft, ShoppingCart,
-  Truck, Shield, Check, ChevronRight, MessageCircle, PhoneCall,
+  Truck, Shield, Check, ChevronRight, ChevronLeft, MessageCircle, PhoneCall,
   X, User, Phone, MapPin, FileText, Package, Ticket, ImageOff
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
@@ -710,26 +710,42 @@ export default function ProductPage() {
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
-          <section className="py-8">
+          <section className="py-8 sm:py-12 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              {/* HEADER TOP */}
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-[var(--yp-dark)] flex items-center gap-2 font-heading">
-                  <ChevronRight className="w-5 h-5 text-[var(--yp-blue)]" />
+                <h2 className="text-xl sm:text-2xl font-bold text-[var(--yp-dark)] font-heading">
                   {isAr ? 'منتجات مشابهة' : t('relatedProducts')}
                 </h2>
                 <button
                   onClick={() => navigate('/shop')}
-                  className="text-sm font-semibold text-[var(--yp-blue)] hover:underline"
+                  className="flex items-center gap-1 text-sm font-semibold text-[var(--yp-blue)] hover:text-[#1e3a8a] transition-colors"
                 >
-                  {isAr ? 'عرض المزيد' : 'Voir plus'}
+                  <span>{isAr ? 'عرض المزيد' : 'Voir plus'}</span>
+                  {isAr ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                 </button>
               </div>
-              {/* Force 1 column on mobile, 2 on tablet, 4 on desktop */}
-              {/* Slice to 3 items max on mobile for better UX */}
+              
+              {/* GRID */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
                 {relatedProducts.slice(0, window.innerWidth < 640 ? 3 : 4).map(p => (
                   <ProductCard key={p.id} product={p} />
                 ))}
+              </div>
+
+              {/* BUTTON BOTTOM */}
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={() => navigate('/shop')}
+                  className="group flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-[var(--yp-blue-50)] text-[var(--yp-blue)] border border-[var(--yp-blue)]/20 rounded-xl font-bold text-sm hover:bg-[var(--yp-blue)] hover:text-white transition-all duration-300 shadow-sm"
+                >
+                  <span>{isAr ? 'عرض المزيد من المنتجات' : 'Voir plus de produits'}</span>
+                  {isAr ? (
+                    <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  )}
+                </button>
               </div>
             </div>
           </section>
