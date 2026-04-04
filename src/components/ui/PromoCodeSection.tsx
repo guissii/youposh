@@ -6,10 +6,19 @@ import { useStore } from '@/contexts/StoreContext';
 const PromoCodeSection = () => {
   const { promoCode, promoStatus, promoMessage, applyPromoCode, removePromoCode } = useStore();
   const [inputCode, setInputCode] = useState('');
+  const rotatingMessages = ['توصيل سريع 24-48h', 'الدفع عند الاستلام', 'جودة مضمونة'];
+  const [rotatingIndex, setRotatingIndex] = useState(0);
 
   useEffect(() => {
     if (promoCode) setInputCode(promoCode);
   }, [promoCode]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setRotatingIndex((prev) => (prev + 1) % rotatingMessages.length);
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [rotatingMessages.length]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,32 +81,50 @@ const PromoCodeSection = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          animate={{ scale: [1, 1.04, 1] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
           className="bg-[#e11d48] text-white text-xs font-bold px-4 py-1.5 rounded-full mb-6 tracking-widest shadow-[0_0_15px_rgba(225,29,72,0.5)]"
+          style={{ fontFamily: "'Poppins', sans-serif" }}
         >
-          PROMO
+          PROMO LIMITÉE
         </motion.div>
 
-        {/* Text Content */}
         <motion.h2 
-          className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 leading-tight font-arabic"
+          className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-4 leading-tight font-arabic"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.1 }}
-          style={{ textShadow: "0 2px 10px rgba(0,0,0,0.3)" }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          style={{ textShadow: "0 0 16px rgba(255,255,255,0.18), 0 2px 10px rgba(0,0,0,0.35)", fontFamily: "'Cairo', 'Tajawal', sans-serif" }}
         >
-          الجودة والضمان بأقل ثمن
+          عروض قوية بثمن مناسب وضمان مضمون
         </motion.h2>
         
         <motion.p 
-          className="text-base sm:text-lg text-white/80 mb-10 max-w-2xl font-arabic leading-relaxed"
+          className="text-base sm:text-lg text-white/80 mb-5 max-w-2xl font-arabic leading-loose"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+          style={{ fontFamily: "'Cairo', 'Tajawal', sans-serif" }}
         >
-          إكسسوارات عملية، جديدة، ومعزولة بعناية باش توصلك تال باب الدار فأي مدينة فالمغرب
+          منتجات عملية وعصرية، التوصيل سريع والدفع عند الاستلام فكل مدن المغرب
         </motion.p>
+        <div className="h-7 mb-5">
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={rotatingMessages[rotatingIndex]}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35 }}
+              className="text-sm sm:text-base text-[#00d9d5] font-semibold"
+              style={{ fontFamily: "'Cairo', 'Tajawal', sans-serif" }}
+            >
+              {rotatingMessages[rotatingIndex]}
+            </motion.p>
+          </AnimatePresence>
+        </div>
 
         {/* Input & Action Area */}
         <motion.div 
@@ -123,14 +150,15 @@ const PromoCodeSection = () => {
               <motion.button
                 type="submit"
                 disabled={promoStatus === 'loading'}
-                className="h-12 sm:h-14 px-8 bg-white text-[#1e3a8a] font-bold font-arabic text-lg rounded-full shadow-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors shrink-0"
-                whileHover={{ scale: 1.02 }}
+                className="h-12 sm:h-14 px-8 bg-white text-[#1e3a8a] font-semibold text-lg rounded-full shadow-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors shrink-0"
+                whileHover={{ y: -2, boxShadow: '0 12px 26px rgba(37,99,235,0.35)' }}
                 whileTap={{ scale: 0.98 }}
+                style={{ fontFamily: "'Poppins', sans-serif" }}
               >
                 {promoStatus === 'loading' ? (
                   <div className="w-5 h-5 border-2 border-[#1e3a8a] border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  "Voir l'offre"
+                  "شوف العرض دابا / Voir l’offre"
                 )}
               </motion.button>
             </form>
