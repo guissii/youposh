@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  ShoppingBag, Search, X, ChevronDown, Heart,
+  ShoppingBag, X, ChevronDown, Heart,
   Phone, Globe, Menu,
   Home, Percent, TrendingUp, Sparkles, Grid3X3,
   MessageCircle, MapPin, Instagram,
@@ -13,7 +13,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useStoreSettings } from '@/data/storeSettings';
 import { useCategories } from '@/hooks/useCategories';
 import { toWhatsAppPhone } from '@/lib/utils';
-import SearchModal from './SearchModal';
 
 const categoryIconMap: Record<string, React.ElementType> = {
   Smartphone, Home: HomeIcon, Sparkles: SparklesIcon, Shirt, Car, Gamepad2, Gift, Baby
@@ -34,7 +33,6 @@ export default function Header() {
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
   const [mobileCatsOpen, setMobileCatsOpen] = useState(false);
   const { data: categories = [] } = useCategories();
@@ -156,23 +154,6 @@ export default function Header() {
 
             {/* Right — Actions */}
             <div className="flex items-center gap-1 sm:gap-3 justify-end">
-              {/* Language Switcher */}
-              <button
-                onClick={toggleLanguage}
-                className="flex items-center gap-1 p-1.5 sm:p-2 hover:bg-[var(--yp-gray-100)] rounded-xl transition-colors font-semibold text-xs sm:text-sm text-[var(--yp-gray-700)]"
-              >
-                <Globe className="w-4 h-4 text-[var(--yp-blue)]" />
-                {language === 'fr' ? 'AR' : 'FR'}
-              </button>
-
-              <button
-                onClick={() => setIsSearchOpen(true)}
-                className="p-1.5 sm:p-2.5 hover:bg-[var(--yp-blue-50)] rounded-xl transition-colors"
-                aria-label={t('search')}
-              >
-                <Search className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--yp-blue)]" />
-              </button>
-
               <button
                 onClick={() => navigate('/wishlist')}
                 className="hidden sm:flex p-2.5 hover:bg-[var(--yp-red-50)] rounded-xl transition-colors"
@@ -410,9 +391,6 @@ export default function Header() {
           </div>
         </div>
       )}
-
-      {/* Search Modal */}
-      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </>
   );
 }

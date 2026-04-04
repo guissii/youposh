@@ -49,7 +49,7 @@ export function GlobalCouponNotification() {
     // Small delay for better UX
     const timer = setTimeout(() => setIsVisible(true), 2000);
     return () => clearTimeout(timer);
-  }, [promoCode, promoStatus, location.pathname, isCartOpen, settings.globalCouponEnabled]);
+  }, [promoCode, promoStatus, location.pathname, isCartOpen, settings.globalCouponEnabled, settings.activeGlobalCoupon]);
 
   const handleApply = async () => {
     const code = couponInput.trim();

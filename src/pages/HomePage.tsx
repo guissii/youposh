@@ -84,7 +84,7 @@ export default function HomePage() {
       const fillSlots = (base: any[], globalUsed: Set<number>) => {
           if (base.length >= 4) return base;
           
-          let result = [...base];
+          const result = [...base];
           for (const item of shuffled) {
               if (result.length >= 4) break;
               // On ajoute seulement si l'item n'est pas déjà dans la base, ni déjà utilisé comme substitut ailleurs
