@@ -379,19 +379,6 @@ export default function HomePage() {
                     <ProductCard key={product.id} product={product} />
                   ))}
                 </div>
-                <div className="mt-8 flex justify-center">
-                  <button
-                    onClick={() => navigate('/shop?sort=popular')}
-                    className="group flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-[var(--yp-blue-50)] text-[var(--yp-blue)] border border-[var(--yp-blue)]/20 rounded-xl font-bold text-sm hover:bg-[var(--yp-blue)] hover:text-white transition-all duration-300 shadow-sm"
-                  >
-                    <span>{isAr ? 'عرض المزيد من المنتجات' : 'Voir plus de produits'}</span>
-                    {isAr ? (
-                      <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                    )}
-                  </button>
-                </div>
               </>
             ) : (
               <p className="text-center text-[var(--yp-gray-500)] py-8">{t('noProducts') || "Aucun produit trouvé."}</p>
@@ -453,19 +440,6 @@ export default function HomePage() {
                   {newArrivals.map(product => (
                     <ProductCard key={product.id} product={product} variant="compact" />
                   ))}
-                </div>
-                <div className="mt-8 flex justify-center">
-                  <button
-                    onClick={() => navigate('/shop?filter=exclusive')}
-                    className="group flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-[var(--yp-blue-50)] text-[var(--yp-blue)] border border-[var(--yp-blue)]/20 rounded-xl font-bold text-sm hover:bg-[var(--yp-blue)] hover:text-white transition-all duration-300 shadow-sm"
-                  >
-                    <span>{isAr ? 'عرض المزيد من المنتجات' : 'Voir plus de produits'}</span>
-                    {isAr ? (
-                      <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                    )}
-                  </button>
                 </div>
               </>
             ) : (
