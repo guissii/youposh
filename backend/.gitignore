@@ -1,8 +1,29 @@
 node_modules
 # Keep environment variables out of version control
 .env
+.env.*
+!.env.example
+!.env.sample
 
 /generated/prisma
 
 .vercel
 .env*.local
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.cache
+coverage
+.eslintcache
+*.tsbuildinfo
+.vscode
+.idea
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.jks
