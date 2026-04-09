@@ -63,7 +63,7 @@ const AdminPage = () => {
   const [productModal, setProductModal] = useState<{ open: boolean; product?: any }>({ open: false });
   const [promoModal, setPromoModal] = useState<{ open: boolean; promo?: any }>({ open: false });
   const [categoryModal, setCategoryModal] = useState<{ open: boolean; category?: any }>({ open: false });
-  const [categoryDeleteModal, setCategoryDeleteModal] = useState<{ open: boolean; category?: any; migrateToId?: number }>({ open: false });
+  const [categoryDeleteModal, setCategoryDeleteModal] = useState<{ open: boolean; category?: any; migrateToId: number | null }>({ open: false, migrateToId: null });
   const [orderDetail, setOrderDetail] = useState<any>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: string; id: any; label?: string } | null>(null);
 
@@ -276,26 +276,25 @@ const AdminPage = () => {
       const id = Number(category.id);
       if (isNaN(id)) throw new Error('ID catégorie invalide');
 
-      const productsCount = Number(category?._count?.products ?? 0);
       const otherCategories = categories.filter((c: any) => Number(c.id) !== id);
-      const migrateToId = categoryDeleteModal.migrateToId;
+      const migrateToId = categoryDeleteModal.migrateToId ?? (otherCategories.length ? Number(otherCategories[0].id) : null);
 
-      if (productsCount > 0 && otherCategories.length === 0) {
+      if (otherCategories.length === 0) {
         throw new Error('Impossible: aucune autre catégorie pour migrer les produits');
       }
-      if (productsCount > 0 && (typeof migrateToId !== 'number' || isNaN(migrateToId))) {
+      if (typeof migrateToId !== 'number' || isNaN(migrateToId)) {
         throw new Error('Choisissez la catégorie de destination');
       }
 
-      await deleteCategory(id, productsCount > 0 ? { migrateToId } : undefined);
-      toast.success(productsCount > 0 ? 'Catégorie supprimée + produits migrés' : 'Catégorie supprimée avec succès');
+      await deleteCategory(id, { migrateToId });
+      toast.success('Catégorie supprimée + produits migrés');
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       loadCategories();
     } catch (e: any) {
       console.error(e);
       toast.error(e.message || 'Erreur lors de la suppression');
     } finally {
-      setCategoryDeleteModal({ open: false });
+      setCategoryDeleteModal({ open: false, migrateToId: null });
     }
   };
 
@@ -783,7 +782,7 @@ const AdminPage = () => {
                   if (isNaN(id)) return;
                   const otherCategories = categories.filter((x: any) => Number(x.id) !== id);
                   const defaultTargetId = otherCategories.length ? Number(otherCategories[0].id) : undefined;
-                  setCategoryDeleteModal({ open: true, category: c, migrateToId: defaultTargetId });
+                  setCategoryDeleteModal({ open: true, category: c, migrateToId: typeof defaultTargetId === 'number' && !isNaN(defaultTargetId) ? defaultTargetId : null });
                 }} className="p-1.5 hover:bg-red-50 rounded-lg text-[#999] hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
               </div>
             </div>
@@ -1834,7 +1833,7 @@ const AdminPage = () => {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between p-5 border-b">
               <h3 className="text-lg font-bold text-[#333]">Supprimer une catégorie</h3>
-              <button onClick={() => setCategoryDeleteModal({ open: false })} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+              <button onClick={() => setCategoryDeleteModal({ open: false, migrateToId: null })} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-5 space-y-4">
               <div className="bg-red-50 border border-red-100 rounded-xl p-4">
@@ -1842,30 +1841,31 @@ const AdminPage = () => {
                 <p className="text-xs text-red-600 mt-1">Suppression irréversible.</p>
               </div>
 
-              {Number(categoryDeleteModal.category?._count?.products ?? 0) > 0 && (
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-[#666]">Migrer les produits vers</label>
-                  <select
-                    value={categoryDeleteModal.migrateToId ?? ''}
-                    onChange={e => setCategoryDeleteModal((p: any) => ({ ...p, migrateToId: Number(e.target.value) }))}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
-                  >
-                    {categories
-                      .filter((c: any) => Number(c.id) !== Number(categoryDeleteModal.category?.id))
-                      .map((c: any) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                  </select>
-                  <p className="text-xs text-[#999]">
-                    {Number(categoryDeleteModal.category?._count?.products ?? 0)} produits seront déplacés.
-                  </p>
-                </div>
-              )}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-[#666]">Migrer les produits vers</label>
+                <select
+                  value={categoryDeleteModal.migrateToId ?? ''}
+                  onChange={e => {
+                    const v = parseInt(e.target.value, 10);
+                    setCategoryDeleteModal((p: any) => ({ ...p, migrateToId: Number.isFinite(v) ? v : null }));
+                  }}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
+                >
+                  {categories
+                    .filter((c: any) => Number(c.id) !== Number(categoryDeleteModal.category?.id))
+                    .map((c: any) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                </select>
+                <p className="text-xs text-[#999]">
+                  Les produits de cette catégorie seront déplacés avant suppression.
+                </p>
+              </div>
             </div>
             <div className="p-5 border-t bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
-              <button onClick={() => setCategoryDeleteModal({ open: false })} className="px-4 py-2 text-sm font-medium text-[#666] hover:bg-gray-200 rounded-xl transition-colors">Annuler</button>
+              <button onClick={() => setCategoryDeleteModal({ open: false, migrateToId: null })} className="px-4 py-2 text-sm font-medium text-[#666] hover:bg-gray-200 rounded-xl transition-colors">Annuler</button>
               <button onClick={handleDeleteCategory} className="px-4 py-2 text-sm font-semibold bg-red-600 text-white hover:bg-red-700 rounded-xl transition-colors">Supprimer</button>
             </div>
           </div>
