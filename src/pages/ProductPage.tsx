@@ -727,8 +727,8 @@ export default function ProductPage() {
               </div>
               
               {/* GRID */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-                {relatedProducts.slice(0, window.innerWidth < 640 ? 3 : 4).map(p => (
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                {relatedProducts.slice(0, 4).map(p => (
                   <ProductCard key={p.id} product={p} />
                 ))}
               </div>

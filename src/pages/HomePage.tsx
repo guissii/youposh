@@ -427,7 +427,7 @@ export default function HomePage() {
               </div>
             ) : bestsellers.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 reveal-stagger" ref={(el) => {
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 reveal-stagger" ref={(el) => {
                   if (el) {
                     const observer = new IntersectionObserver((entries) => {
                       entries.forEach(entry => {
@@ -489,7 +489,7 @@ export default function HomePage() {
               </div>
             ) : newArrivals.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 reveal-stagger" ref={(el) => {
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 reveal-stagger" ref={(el) => {
                   if (el) {
                     const observer = new IntersectionObserver((entries) => {
                       entries.forEach(entry => {
