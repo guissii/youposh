@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 import {
   ArrowRight,
   ChevronLeft, ChevronRight,
@@ -115,6 +116,9 @@ export default function HomePage() {
 
   const error = (popularError || newError || featuredError) ? "Impossible de charger les produits. Veuillez vérifier votre connexion." : null;
   const isAr = i18n.language === 'ar';
+  const heroTitleText = t('heroTitle').replace('YOUPOSH ', '');
+  const heroSubtitleText = t('heroSubtitle');
+  const heroCtaText = isAr ? 'شوف العرض دابا' : "Voir l'offre";
   const discoverTitle = isAr
     ? 'لم تشاهد بعد أفضل عروضنا'
     : "Vous n'avez pas encore vu nos meilleures offres";
@@ -155,7 +159,7 @@ export default function HomePage() {
         {/* ══════════════════════════════════════════════
             HERO — Compact Mobile-First
             ══════════════════════════════════════════════ */}
-        <section className="relative h-[70vh] sm:h-[600px] max-h-[800px] min-h-[450px] flex items-center justify-center overflow-hidden">
+        <section className="relative h-[62vh] sm:h-[600px] max-h-[800px] min-h-[420px] flex items-center justify-center overflow-hidden">
 
           {/* Hero Video Background */}
           <div
@@ -194,32 +198,92 @@ export default function HomePage() {
           </div>
 
           {/* Content Container */}
-          <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-8 text-center flex flex-col items-center">
-            
-            {/* Badge: "PROMO" */}
-            <div className="mb-2 sm:mb-4 animate-fade-in-up">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-sm font-bold bg-[var(--yp-red)] text-white shadow-lg">
-                PROMO
-              </span>
-            </div>
+          <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-8 text-center flex flex-col items-center" dir={isAr ? 'rtl' : 'ltr'}>
+            <style>{`
+              @keyframes ypHeroShimmer {
+                0% { background-position: 0% 50%; opacity: 0.35; }
+                35% { opacity: 0.9; }
+                100% { background-position: 220% 50%; opacity: 0.35; }
+              }
+              @keyframes ypHeroFloat {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-6px); }
+              }
+              .yp-hero-shimmer {
+                background-image: linear-gradient(90deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.95) 18%, rgba(253,187,45,0.95) 50%, rgba(255,255,255,0.95) 82%, rgba(255,255,255,0.25) 100%);
+                background-size: 220% 100%;
+                animation: ypHeroShimmer 3.4s linear infinite;
+              }
+            `}</style>
 
-            {/* Main Title */}
-            <h1 className="text-2xl sm:text-5xl font-black font-heading text-white leading-tight mb-2 sm:mb-4 drop-shadow-md">
-              {t('heroTitle').replace('YOUPOSH ', '')}
-            </h1>
-
-            {/* Subtitle */}
-            <p className="text-[12px] sm:text-xl text-white/90 font-medium max-w-xl mx-auto mb-4 sm:mb-8 drop-shadow-md">
-              {t('heroSubtitle')}
-            </p>
-
-            {/* CTA Button */}
-            <button
-              onClick={() => navigate(heroSettings.primaryCtaLink)}
-              className="bg-white text-[var(--yp-blue)] px-6 py-2 sm:px-8 sm:py-3 rounded-full font-bold text-sm sm:text-lg shadow-lg hover:bg-blue-50 transition-all"
+            <motion.div
+              initial={{ opacity: 0, y: 16, filter: 'blur(10px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full max-w-[420px] sm:max-w-3xl rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md px-5 py-6 sm:px-10 sm:py-12 shadow-[0_18px_50px_rgba(0,0,0,0.35)] relative overflow-hidden"
+              style={{ animation: 'ypHeroFloat 5.2s ease-in-out infinite' }}
             >
-              Voir l'offre
-            </button>
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute -top-24 -left-24 w-64 h-64 rounded-full bg-white/10 blur-3xl" />
+                <div className="absolute -bottom-28 -right-24 w-72 h-72 rounded-full bg-[var(--yp-red)]/20 blur-3xl" />
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: 0.05, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                className="mb-3 sm:mb-5"
+              >
+                <motion.span
+                  animate={{ boxShadow: ['0 0 0 rgba(0,0,0,0)', '0 0 26px rgba(225,29,72,0.55)', '0 0 0 rgba(0,0,0,0)'] }}
+                  transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] sm:text-sm font-extrabold bg-gradient-to-r from-[var(--yp-red)] to-orange-500 text-white shadow-lg"
+                >
+                  PROMO
+                </motion.span>
+              </motion.div>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 16, filter: 'blur(8px)' }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  filter: ['drop-shadow(0 6px 18px rgba(59,130,246,0.0))', 'drop-shadow(0 6px 18px rgba(253,187,45,0.32))', 'drop-shadow(0 6px 18px rgba(59,130,246,0.0))'],
+                }}
+                transition={{
+                  opacity: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+                  y: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+                  filter: { duration: 3.6, repeat: Infinity, ease: 'easeInOut', delay: 0.7 },
+                }}
+                className={`text-3xl sm:text-5xl font-black text-white leading-[1.15] mb-3 sm:mb-5 ${isAr ? 'font-arabic' : 'font-heading'}`}
+              >
+                <span className="relative inline-block">
+                  <span className="absolute inset-0 text-transparent bg-clip-text yp-hero-shimmer" aria-hidden="true">
+                    {heroTitleText}
+                  </span>
+                  <span className="relative">{heroTitleText}</span>
+                </span>
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                transition={{ delay: 0.15, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                className={`text-sm sm:text-xl text-white/90 font-medium leading-relaxed max-w-[26rem] sm:max-w-2xl mx-auto mb-6 sm:mb-10 drop-shadow-md ${isAr ? 'font-arabic' : ''}`}
+              >
+                {heroSubtitleText}
+              </motion.p>
+
+              <motion.button
+                onClick={() => navigate(heroSettings.primaryCtaLink)}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                className="relative bg-white text-[var(--yp-blue)] px-7 py-3 sm:px-10 sm:py-4 rounded-full font-extrabold text-sm sm:text-lg shadow-[0_16px_36px_rgba(0,0,0,0.25)] hover:bg-blue-50 transition-all overflow-hidden"
+              >
+                <span className="absolute inset-y-0 left-[-45%] w-[40%] rotate-12 pointer-events-none yp-hero-shimmer" style={{ animation: 'ypHeroShimmer 2.6s linear infinite' }} />
+                <span className="relative">{heroCtaText}</span>
+              </motion.button>
+            </motion.div>
           </div>
         </section>
 

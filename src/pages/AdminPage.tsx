@@ -1406,10 +1406,10 @@ const AdminPage = () => {
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h3 className="font-semibold text-[#333] mb-4">Section Promo (Accueil)</h3>
-        <p className="text-sm text-[#666] mb-4">Afficher ou masquer la grande section "استمتع بعرض حصري" sur la page d'accueil.</p>
+        <p className="text-sm text-[#666] mb-4">Afficher ou masquer la section promo (badge "PROMO LIMITÉE" + code promo) sur la page d'accueil.</p>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setStoreForm((f: any) => ({ ...f, promoSectionEnabled: !f.promoSectionEnabled }))}
+            onClick={() => setStoreForm((f: any) => ({ ...f, promoSectionEnabled: f.promoSectionEnabled !== false ? false : true }))}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${storeForm.promoSectionEnabled !== false ? 'bg-green-500' : 'bg-gray-300'}`}
           >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${storeForm.promoSectionEnabled !== false ? 'translate-x-6' : 'translate-x-1'}`} />
@@ -1446,7 +1446,7 @@ const AdminPage = () => {
             <p className="text-sm text-[#666] mb-4">Choisir aléatoirement 4 produits dans votre catalogue si aucune modification de tag (vedette, tendance) n'a été effectuée.</p>
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setStoreForm((f: any) => ({ ...f, randomFillEmptySections: !f.randomFillEmptySections }))}
+                onClick={() => setStoreForm((f: any) => ({ ...f, randomFillEmptySections: f.randomFillEmptySections !== false ? false : true }))}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${storeForm.randomFillEmptySections === true ? 'bg-[var(--yp-blue)]' : 'bg-gray-300'}`}
               >
                 <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${storeForm.randomFillEmptySections === true ? 'translate-x-6' : 'translate-x-1'}`} />
@@ -1472,7 +1472,7 @@ const AdminPage = () => {
 
         <div className="flex items-center gap-3 mb-4">
           <button
-            onClick={() => setStoreForm((f: any) => ({ ...f, globalCouponEnabled: !f.globalCouponEnabled }))}
+            onClick={() => setStoreForm((f: any) => ({ ...f, globalCouponEnabled: f.globalCouponEnabled !== false ? false : true }))}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${storeForm.globalCouponEnabled !== false ? 'bg-green-500' : 'bg-gray-300'}`}
           >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${storeForm.globalCouponEnabled !== false ? 'translate-x-6' : 'translate-x-1'}`} />

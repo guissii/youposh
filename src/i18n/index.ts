@@ -32,8 +32,8 @@ const resources = {
       // Hero
       heroSlogan: '100% web uniquement – sur notre site',
       heroBadgeTitle: 'N°1 au Maroc',
-      heroTitle: 'YOUPOSH La qualité et la sincérité sont les piliers du succès',
-      heroSubtitle: 'Découvrez - un monde sans frontières. Notre site offre une expérience inoubliable. Haute qualité et concise',
+      heroTitle: 'YOUPOSH — Qualité garantie, prix malin',
+      heroSubtitle: 'Produits utiles et tendances. Livraison rapide partout au Maroc, paiement à la livraison.',
       heroPrimaryCta: 'Voir les fonctionnalités %',
       heroSecondaryCta: 'Télécharger le fichier',
       specialOffer: 'Offre spéciale',
@@ -254,8 +254,8 @@ const resources = {
       // Hero
       heroSlogan: 'YOUPOSH — علامة مغربية 100%',
       heroBadgeTitle: 'رقم 1 فالمغرب',
-      heroTitle: 'YOUPOSH الجودة والضمان بأقل ثمن',
-      heroSubtitle: 'إكسسوارات عملية، جديدة، ومعزولة بعناية باش توصلك تال باب الدار فأي مدينة فالمغرب',
+      heroTitle: 'YOUPOSH جودة مضمونة بثمن مناسب',
+      heroSubtitle: 'منتجات عملية وتخفيضات يومية. توصيل سريع حتى لباب دارك فالمغرب والدفع عند الاستلام.',
       heroPrimaryCta: 'تصفح المتجر',
       heroSecondaryCta: 'شوف التخفيضات',
       specialOffer: 'عرض خاص',
