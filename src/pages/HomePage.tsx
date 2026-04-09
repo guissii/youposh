@@ -330,7 +330,7 @@ export default function HomePage() {
 
               <div className="p-4 sm:p-8 relative z-10">
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 mb-6">
+                <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 mb-6 ${isAr ? 'sm:flex-row-reverse' : ''}`} dir={isAr ? 'rtl' : 'ltr'}>
                   <div className="flex items-center gap-3 sm:gap-4">
                     <div className="w-10 h-10 sm:w-14 sm:h-14 shrink-0 bg-white rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
                       <Flame className="w-5 h-5 sm:w-7 sm:h-7 text-[var(--yp-red)] fill-[var(--yp-red)]" />
@@ -339,11 +339,11 @@ export default function HomePage() {
                       <div className="flex items-center gap-2 mb-1">
                         <span className="inline-flex rounded-full h-1.5 w-1.5 bg-white animate-pulse" />
                         <span className="text-[10px] sm:text-xs font-bold tracking-widest text-white/90">
-                          استافد دابا من أحسن العروض
+                          {isAr ? 'استافد دابا من أحسن العروض' : 'Offres limitées • Stock qui part vite'}
                         </span>
                       </div>
                       <h2 className="text-xl sm:text-3xl font-extrabold font-heading text-white leading-tight tracking-tight drop-shadow-sm">
-                        Nos meilleures offres du jour
+                        Vente Flash
                       </h2>
                     </div>
                   </div>
@@ -352,8 +352,12 @@ export default function HomePage() {
                     onClick={() => navigate('/shop?filter=promo')}
                     className="group w-full sm:w-auto text-xs sm:text-sm font-bold flex justify-center items-center gap-2 bg-white text-[var(--yp-red)] hover:bg-white/90 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl shadow-lg transition-all duration-300 active:scale-95"
                   >
-                    Voir Toutes les Offres
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    {isAr ? 'شوف جميع العروض' : 'Voir toutes les offres'}
+                    {isAr ? (
+                      <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                    ) : (
+                      <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    )}
                   </button>
                 </div>
 
@@ -368,29 +372,13 @@ export default function HomePage() {
                       <p className="text-sm text-white/70 mt-1">Revenez bientôt, de nouvelles promos arrivent.</p>
                     </div>
                   ) : (
-                    <>
-                      {/* Mobile Horizontal Scroll */}
-                      <div className="sm:hidden -mx-4 px-4 overflow-x-auto scrollbar-hide pb-4">
-                        <div className="flex gap-3 snap-x snap-mandatory">
-                          {promoProducts.map(product => (
-                            <div key={product.id} className="snap-start shrink-0 w-[85vw] max-w-[320px]">
-                              <div className="bg-white rounded-[12px] overflow-hidden shadow-lg h-full transform transition-transform hover:scale-[1.02]">
-                                <ProductCard product={product} variant="compact" />
-                              </div>
-                            </div>
-                          ))}
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                      {promoProducts.slice(0, HOME_MAX_PRODUCTS).map(product => (
+                        <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                          <ProductCard product={product} variant="compact" />
                         </div>
-                      </div>
-
-                      {/* Desktop Grid */}
-                      <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-                        {promoProducts.slice(0, HOME_MAX_PRODUCTS).map(product => (
-                          <div key={product.id} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                            <ProductCard product={product} variant="compact" />
-                          </div>
-                        ))}
-                      </div>
-                    </>
+                      ))}
+                    </div>
                   )}
                 </div>
               </div>

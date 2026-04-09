@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useStore } from '@/contexts/StoreContext';
 
 const PromoCodeSection = () => {
+  const { i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   const { promoCode, promoStatus, promoMessage, applyPromoCode, removePromoCode } = useStore();
   const [inputCode, setInputCode] = useState('');
-  const rotatingMessages = ['توصيل سريع 24-48h', 'الدفع عند الاستلام', 'جودة مضمونة'];
+  const rotatingMessages = isAr
+    ? ['توصيل سريع 24-48h', 'الدفع عند الاستلام', 'جودة مضمونة']
+    : ['Livraison rapide 24-48h', 'Paiement à la livraison', 'Qualité garantie'];
   const [rotatingIndex, setRotatingIndex] = useState(0);
 
   useEffect(() => {
@@ -64,7 +69,7 @@ const PromoCodeSection = () => {
   return (
     <section 
       className="relative w-full py-16 px-4 sm:px-6 lg:px-8 overflow-hidden" 
-      dir="rtl"
+      dir={isAr ? 'rtl' : 'ltr'}
       style={{
         background: 'linear-gradient(135deg, #102450 0%, #0d1b3e 100%)'
       }}
@@ -86,29 +91,31 @@ const PromoCodeSection = () => {
           className="bg-[#e11d48] text-white text-xs font-bold px-4 py-1.5 rounded-full mb-6 tracking-widest shadow-[0_0_15px_rgba(225,29,72,0.5)]"
           style={{ fontFamily: "'Poppins', sans-serif" }}
         >
-          PROMO LIMITÉE
+          {isAr ? 'PROMO LIMITÉE' : 'PROMO LIMITÉE'}
         </motion.div>
 
         <motion.h2 
-          className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-4 leading-tight font-arabic"
+          className={`text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-4 leading-tight ${isAr ? 'font-arabic' : 'font-heading'}`}
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          style={{ textShadow: "0 0 16px rgba(255,255,255,0.18), 0 2px 10px rgba(0,0,0,0.35)", fontFamily: "'Cairo', 'Tajawal', sans-serif" }}
+          style={{ textShadow: "0 0 16px rgba(255,255,255,0.18), 0 2px 10px rgba(0,0,0,0.35)", fontFamily: isAr ? "'Cairo', 'Tajawal', sans-serif" : undefined }}
         >
-          عروض قوية بثمن مناسب وضمان مضمون
+          {isAr ? 'عروض قوية بثمن مناسب وضمان مضمون' : 'Promos fortes, prix malin, garantie'}
         </motion.h2>
         
         <motion.p 
-          className="text-base sm:text-lg text-white/80 mb-5 max-w-2xl font-arabic leading-loose"
+          className={`text-base sm:text-lg text-white/80 mb-5 max-w-2xl leading-loose ${isAr ? 'font-arabic' : ''}`}
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
-          style={{ fontFamily: "'Cairo', 'Tajawal', sans-serif" }}
+          style={{ fontFamily: isAr ? "'Cairo', 'Tajawal', sans-serif" : undefined }}
         >
-          منتجات عملية وعصرية، التوصيل سريع والدفع عند الاستلام فكل مدن المغرب
+          {isAr
+            ? 'منتجات عملية وعصرية، التوصيل سريع والدفع عند الاستلام فكل مدن المغرب'
+            : 'Produits utiles et tendances. Livraison rapide partout au Maroc, paiement à la livraison.'}
         </motion.p>
         <div className="h-7 mb-5">
           <AnimatePresence mode="wait">
@@ -119,7 +126,7 @@ const PromoCodeSection = () => {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.35 }}
               className="text-sm sm:text-base text-[#00d9d5] font-semibold"
-              style={{ fontFamily: "'Cairo', 'Tajawal', sans-serif" }}
+              style={{ fontFamily: isAr ? "'Cairo', 'Tajawal', sans-serif" : undefined }}
             >
               {rotatingMessages[rotatingIndex]}
             </motion.p>
@@ -141,16 +148,16 @@ const PromoCodeSection = () => {
                   type="text"
                   value={inputCode}
                   onChange={(e) => setInputCode(e.target.value)}
-                  placeholder="أدخل كود الترويج..."
-                  className="w-full h-12 sm:h-14 px-5 rounded-full bg-white/10 border border-white/20 text-center text-lg font-arabic text-white placeholder:text-white/50 focus:outline-none focus:border-white/50 focus:bg-white/20 transition-all shadow-inner"
-                  style={{ direction: 'rtl' }}
+                  placeholder={isAr ? 'أدخل كود الترويج...' : 'Entrez le code promo...'}
+                  className={`w-full h-12 sm:h-14 px-5 rounded-full bg-white/10 border border-white/20 text-center text-lg text-white placeholder:text-white/50 focus:outline-none focus:border-white/50 focus:bg-white/20 transition-all shadow-inner ${isAr ? 'font-arabic' : ''}`}
+                  style={{ direction: isAr ? 'rtl' : 'ltr' }}
                 />
               </div>
 
               <motion.button
                 type="submit"
                 disabled={promoStatus === 'loading'}
-                className="h-12 sm:h-14 px-8 bg-white text-[#1e3a8a] font-semibold text-lg rounded-full shadow-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors shrink-0"
+                className="h-12 sm:h-14 px-8 bg-white text-[#1e3a8a] font-semibold text-lg rounded-full shadow-xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors shrink-0 whitespace-nowrap"
                 whileHover={{ y: -2, boxShadow: '0 12px 26px rgba(37,99,235,0.35)' }}
                 whileTap={{ scale: 0.98 }}
                 style={{ fontFamily: "'Poppins', sans-serif" }}
@@ -158,7 +165,7 @@ const PromoCodeSection = () => {
                 {promoStatus === 'loading' ? (
                   <div className="w-5 h-5 border-2 border-[#1e3a8a] border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  "شوف العرض دابا / Voir l’offre"
+                  (isAr ? 'شوف العرض دابا' : "Voir l’offre")
                 )}
               </motion.button>
             </form>
@@ -195,7 +202,7 @@ const PromoCodeSection = () => {
               onClick={handleRemove}
               className="text-sm text-white/60 hover:text-white font-medium underline transition-colors text-center mt-2"
             >
-              حذف الكود (Retirer)
+              {isAr ? 'حذف الكود' : 'Retirer'}
             </button>
           )}
         </motion.div>
