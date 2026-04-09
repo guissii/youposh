@@ -132,8 +132,14 @@ export const createCategory = (data: any) =>
     apiFetch<any>('/categories', { method: 'POST', body: JSON.stringify(data) });
 export const updateCategory = (id: number, data: any) =>
     apiFetch<any>(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-export const deleteCategory = (id: number) =>
-    apiFetch<any>(`/categories/${id}`, { method: 'DELETE' });
+export const deleteCategory = (id: number, options?: { migrateToId?: number }) => {
+    const p = new URLSearchParams();
+    if (typeof options?.migrateToId === 'number' && Number.isFinite(options.migrateToId)) {
+        p.set('migrateToId', String(options.migrateToId));
+    }
+    const qs = p.toString();
+    return apiFetch<any>(`/categories/${id}${qs ? `?${qs}` : ''}`, { method: 'DELETE' });
+};
 
 // ─── Attribute Library ─────────────────────────────────────────
 export const fetchAttributeLibrary = () => apiFetch<any[]>('/attribute-library');

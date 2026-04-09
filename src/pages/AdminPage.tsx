@@ -63,6 +63,7 @@ const AdminPage = () => {
   const [productModal, setProductModal] = useState<{ open: boolean; product?: any }>({ open: false });
   const [promoModal, setPromoModal] = useState<{ open: boolean; promo?: any }>({ open: false });
   const [categoryModal, setCategoryModal] = useState<{ open: boolean; category?: any }>({ open: false });
+  const [categoryDeleteModal, setCategoryDeleteModal] = useState<{ open: boolean; category?: any; migrateToId?: number }>({ open: false });
   const [orderDetail, setOrderDetail] = useState<any>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: string; id: any; label?: string } | null>(null);
 
@@ -266,6 +267,36 @@ const AdminPage = () => {
       toast.error(e.message || 'Erreur lors de la suppression');
     }
     setDeleteConfirm(null);
+  };
+
+  const handleDeleteCategory = async () => {
+    const category = categoryDeleteModal.category;
+    if (!category) return;
+    try {
+      const id = Number(category.id);
+      if (isNaN(id)) throw new Error('ID catégorie invalide');
+
+      const productsCount = Number(category?._count?.products ?? 0);
+      const otherCategories = categories.filter((c: any) => Number(c.id) !== id);
+      const migrateToId = categoryDeleteModal.migrateToId;
+
+      if (productsCount > 0 && otherCategories.length === 0) {
+        throw new Error('Impossible: aucune autre catégorie pour migrer les produits');
+      }
+      if (productsCount > 0 && (typeof migrateToId !== 'number' || isNaN(migrateToId))) {
+        throw new Error('Choisissez la catégorie de destination');
+      }
+
+      await deleteCategory(id, productsCount > 0 ? { migrateToId } : undefined);
+      toast.success(productsCount > 0 ? 'Catégorie supprimée + produits migrés' : 'Catégorie supprimée avec succès');
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      loadCategories();
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e.message || 'Erreur lors de la suppression');
+    } finally {
+      setCategoryDeleteModal({ open: false });
+    }
   };
 
   // ─── Dashboard ──────────────────────────────────────────────
@@ -749,7 +780,10 @@ const AdminPage = () => {
                 <button onClick={() => setCategoryModal({ open: true, category: c })} className="p-1.5 hover:bg-blue-50 rounded-lg text-[#999] hover:text-blue-600"><Pencil className="w-3.5 h-3.5" /></button>
                 <button onClick={() => {
                   const id = Number(c.id);
-                  if (!isNaN(id)) setDeleteConfirm({ type: 'category', id });
+                  if (isNaN(id)) return;
+                  const otherCategories = categories.filter((x: any) => Number(x.id) !== id);
+                  const defaultTargetId = otherCategories.length ? Number(otherCategories[0].id) : undefined;
+                  setCategoryDeleteModal({ open: true, category: c, migrateToId: defaultTargetId });
                 }} className="p-1.5 hover:bg-red-50 rounded-lg text-[#999] hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
               </div>
             </div>
@@ -1795,6 +1829,48 @@ const AdminPage = () => {
       {promoModal.open && <PromoFormModal promo={promoModal.promo} onClose={() => setPromoModal({ open: false })} onSave={() => { setPromoModal({ open: false }); loadPromoCodes(); }} />}
       {categoryModal.open && <CategoryFormModal category={categoryModal.category} onClose={() => setCategoryModal({ open: false })} onSave={() => { setCategoryModal({ open: false }); loadCategories(); }} />}
       {renderOrderDetail()}
+      {categoryDeleteModal.open && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div className="flex items-center justify-between p-5 border-b">
+              <h3 className="text-lg font-bold text-[#333]">Supprimer une catégorie</h3>
+              <button onClick={() => setCategoryDeleteModal({ open: false })} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="bg-red-50 border border-red-100 rounded-xl p-4">
+                <p className="text-sm font-semibold text-red-700">{categoryDeleteModal.category?.name}</p>
+                <p className="text-xs text-red-600 mt-1">Suppression irréversible.</p>
+              </div>
+
+              {Number(categoryDeleteModal.category?._count?.products ?? 0) > 0 && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-[#666]">Migrer les produits vers</label>
+                  <select
+                    value={categoryDeleteModal.migrateToId ?? ''}
+                    onChange={e => setCategoryDeleteModal((p: any) => ({ ...p, migrateToId: Number(e.target.value) }))}
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--yp-blue)]"
+                  >
+                    {categories
+                      .filter((c: any) => Number(c.id) !== Number(categoryDeleteModal.category?.id))
+                      .map((c: any) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                  </select>
+                  <p className="text-xs text-[#999]">
+                    {Number(categoryDeleteModal.category?._count?.products ?? 0)} produits seront déplacés.
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="p-5 border-t bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
+              <button onClick={() => setCategoryDeleteModal({ open: false })} className="px-4 py-2 text-sm font-medium text-[#666] hover:bg-gray-200 rounded-xl transition-colors">Annuler</button>
+              <button onClick={handleDeleteCategory} className="px-4 py-2 text-sm font-semibold bg-red-600 text-white hover:bg-red-700 rounded-xl transition-colors">Supprimer</button>
+            </div>
+          </div>
+        </div>
+      )}
       {deleteConfirm && <ConfirmModal message={`Êtes-vous sûr de vouloir supprimer ? Cette action est irréversible.`} onConfirm={handleDelete} onCancel={() => setDeleteConfirm(null)} />}
 
       {/* EXPORT MODAL */}

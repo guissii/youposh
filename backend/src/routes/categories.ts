@@ -224,11 +224,50 @@ router.put('/:id', async (req, res) => {
 // DELETE category
 router.delete('/:id', async (req, res) => {
     try {
-        await prisma.category.delete({
-            where: { id: parseInt(String(req.params.id)) },
-        });
+        const id = parseInt(String(req.params.id));
+        if (isNaN(id)) {
+            return res.status(400).json({ error: 'Invalid category ID' });
+        }
+
+        const migrateToIdRaw = req.query.migrateToId;
+        const migrateToId = migrateToIdRaw != null && String(migrateToIdRaw).trim().length
+            ? parseInt(String(migrateToIdRaw))
+            : null;
+
+        const category = await prisma.category.findUnique({ where: { id } });
+        if (!category) {
+            return res.status(404).json({ error: 'Category not found' });
+        }
+
+        const productsCount = await prisma.product.count({ where: { categorySlug: category.slug } });
+
+        if (productsCount > 0) {
+            if (migrateToId == null || isNaN(migrateToId)) {
+                return res.status(400).json({ error: 'migrateToId is required when category has products' });
+            }
+            if (migrateToId === id) {
+                return res.status(400).json({ error: 'migrateToId must be different from the deleted category' });
+            }
+
+            const target = await prisma.category.findUnique({ where: { id: migrateToId } });
+            if (!target) {
+                return res.status(400).json({ error: 'Target category not found' });
+            }
+
+            await prisma.$transaction(async (tx) => {
+                await tx.product.updateMany({
+                    where: { categorySlug: category.slug },
+                    data: { categorySlug: target.slug },
+                });
+                await tx.category.delete({ where: { id } });
+            });
+            clearCache();
+            return res.json({ message: 'Category deleted', migratedProducts: productsCount });
+        }
+
+        await prisma.category.delete({ where: { id } });
         clearCache();
-        res.json({ message: 'Category deleted' });
+        res.json({ message: 'Category deleted', migratedProducts: 0 });
     } catch (error) {
         console.error('Error deleting category:', error);
         res.status(500).json({ error: 'Failed to delete category' });
