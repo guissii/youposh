@@ -55,11 +55,44 @@ export default function Header() {
 
   return (
     <>
+      {/* Announcement Bar — Fixed at top */}
+      <div className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-red-700 via-red-600 to-red-700 text-white py-1.5 sm:py-2 px-2 text-center flex items-center justify-center overflow-hidden shadow-md">
+        <style>{`
+          @keyframes shimmerEffect {
+            0% { transform: translateX(-150%) skewX(-20deg); }
+            100% { transform: translateX(150%) skewX(-20deg); }
+          }
+          .shimmer-element {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmerEffect 2.5s infinite;
+          }
+          @keyframes glowText {
+            0%, 100% { text-shadow: 0 0 5px rgba(255,255,255,0.5), 0 0 10px rgba(255,255,255,0.3); }
+            50% { text-shadow: 0 0 15px rgba(255,255,255,0.9), 0 0 25px rgba(255,255,255,0.6); }
+          }
+        `}</style>
+        <div className="shimmer-element" />
+        <div className="relative z-10 flex items-center justify-center gap-2 sm:gap-3">
+          <span className="text-sm sm:text-base drop-shadow-md">🇲🇦</span>
+          <span 
+            className="text-[11px] sm:text-[13px] font-extrabold tracking-wide uppercase font-arabic whitespace-nowrap"
+            style={{ animation: 'glowText 2s ease-in-out infinite' }}
+          >
+            {i18n.language === 'ar' ? 'جودة مضمونة بثمن مناسب' : 'Qualité garantie à un prix raisonnable'}
+          </span>
+          <span className="text-sm sm:text-base drop-shadow-md">🇲🇦</span>
+        </div>
+      </div>
+
       {/* Top Bar — Collapsible on scroll down */}
       <div
         className={`bg-[#002026] text-white/80 text-[12px] sm:text-[13px] py-1.5 px-4 sm:px-6 lg:px-8 transition-transform duration-300 ${
           scrollDirection === 'down' ? '-translate-y-full absolute w-full' : 'translate-y-0 relative'
-        } z-[45] pt-[max(0.5rem,env(safe-area-inset-top))] relative overflow-hidden`}
+        } z-[45] mt-[28px] sm:mt-[32px] pt-[max(0.5rem,env(safe-area-inset-top))] relative overflow-hidden`}
         dir="ltr"
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between relative z-10">
@@ -106,7 +139,7 @@ export default function Header() {
 
       {/* Main Header */}
       <header
-        className={`sticky top-0 z-40 transition-all duration-300 ${
+        className={`sticky top-[28px] sm:top-[32px] z-40 transition-all duration-300 ${
           isScrolled || scrollDirection === 'down'
             ? 'bg-white/95 backdrop-blur-md shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-b border-gray-200'
             : 'bg-white'
