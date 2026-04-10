@@ -5,8 +5,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   ChevronLeft, ChevronRight,
-  Flame, TrendingUp, Sparkles,
-  ShoppingCart, RefreshCcw, ShieldCheck, HeadphonesIcon
+  Flame, TrendingUp, Sparkles
 } from 'lucide-react';
 import { fetchProducts } from '@/lib/api';
 import ProductCard from '@/components/ui/ProductCard';
@@ -143,32 +142,6 @@ export default function HomePage() {
       <Header />
 
       <main className="pb-20">
-        {/* ══════════════════════════════════════════════
-            BANDEAU DE CONFIANCE (Responsive Carousel/Grid)
-            ══════════════════════════════════════════════ */}
-        <section className="bg-white py-4 sm:py-6 border-b border-[var(--yp-gray-200)] overflow-hidden">
-          <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
-            <div className="flex sm:grid sm:grid-cols-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4 sm:px-0 gap-4">
-              {[
-                { title: "Shop Facilement", desc: "Trouvez tout en un clic.", icon: ShoppingCart },
-                { title: "Garantie Confiance", desc: "Retour et remboursement faciles.", icon: RefreshCcw },
-                { title: "Paiement Sécurisé", desc: "À la livraison ou en ligne.", icon: ShieldCheck },
-                { title: "Support Client", desc: "À votre écoute 7j/7.", icon: HeadphonesIcon }
-              ].map((item, i) => (
-                <div key={i} className="snap-center shrink-0 w-[85vw] sm:w-auto max-w-[300px] sm:max-w-none flex items-center gap-3 bg-[var(--yp-gray-50)] p-3 sm:p-4 rounded-xl border border-[var(--yp-gray-200)]">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                    <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--yp-blue)]" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-[13px] sm:text-[15px] font-bold text-[var(--yp-dark)] leading-tight">{item.title}</h4>
-                    <p className="text-[11px] sm:text-[13px] text-[var(--yp-gray-600)] leading-snug mt-0.5">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* ══════════════════════════════════════════════
             PROMO CODE ENTRY — 3D Moroccan Style
             ══════════════════════════════════════════════ */}

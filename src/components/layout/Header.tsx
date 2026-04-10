@@ -77,14 +77,14 @@ export default function Header() {
         `}</style>
         <div className="shimmer-element" />
         <div className="relative z-10 flex items-center justify-center gap-2 sm:gap-3">
-          <span className="text-sm sm:text-base drop-shadow-md">🇲🇦</span>
+          <img src="https://flagcdn.com/w40/ma.png" srcSet="https://flagcdn.com/w80/ma.png 2x" width="20" alt="Maroc" className="drop-shadow-md rounded-sm" />
           <span 
             className="text-[11px] sm:text-[13px] font-extrabold tracking-wide uppercase font-arabic whitespace-nowrap"
             style={{ animation: 'glowText 2s ease-in-out infinite' }}
           >
             {i18n.language === 'ar' ? 'جودة مضمونة بثمن مناسب' : 'Qualité garantie à un prix raisonnable'}
           </span>
-          <span className="text-sm sm:text-base drop-shadow-md">🇲🇦</span>
+          <img src="https://flagcdn.com/w40/ma.png" srcSet="https://flagcdn.com/w80/ma.png 2x" width="20" alt="Maroc" className="drop-shadow-md rounded-sm" />
         </div>
       </div>
 
@@ -103,17 +103,17 @@ export default function Header() {
           </div>
 
           {/* Right: Social, Phone, Lang */}
-          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+          <div className="flex items-center gap-4 sm:gap-6 shrink-0 h-full">
             {/* Social Icons */}
-            <div className="flex items-center gap-2.5 sm:gap-3.5 text-white/90">
-              <a href={`https://wa.me/${waPhone}`} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">
-                <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <div className="flex items-center gap-3 sm:gap-4 text-white/90">
+              <a href={`https://wa.me/${waPhone}`} target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center justify-center">
+                <MessageCircle className="w-4 h-4 sm:w-4 sm:h-4" />
               </a>
-              <a href="https://www.instagram.com/youposh_officiel/" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">
-                <Instagram className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <a href="https://www.instagram.com/youposh_officiel/" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center justify-center">
+                <Instagram className="w-4 h-4 sm:w-4 sm:h-4" />
               </a>
-              <a href="https://www.tiktok.com/@youposh_officiel" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">
-                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <a href="https://www.tiktok.com/@youposh_officiel" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center justify-center">
+                <svg className="w-4 h-4 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
                 </svg>
               </a>
@@ -122,15 +122,15 @@ export default function Header() {
             <span className="text-white/20 text-xs">|</span>
 
             {/* Phone */}
-            <a href={`tel:${phone}`} className="flex items-center hover:text-white transition-colors text-white/90">
-              <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <a href={`tel:${phone}`} className="flex items-center justify-center hover:text-white transition-colors text-white/90">
+              <Phone className="w-4 h-4 sm:w-4 sm:h-4" />
             </a>
 
             <span className="text-white/20 text-xs">|</span>
 
             {/* Language */}
-            <button onClick={toggleLanguage} className="flex items-center gap-1 sm:gap-1.5 hover:text-white transition-colors font-medium text-white/90">
-              <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <button onClick={toggleLanguage} className="flex items-center justify-center gap-1.5 hover:text-white transition-colors font-medium text-white/90">
+              <Globe className="w-4 h-4 sm:w-4 sm:h-4" />
               <span className="uppercase text-xs sm:text-sm">{language === 'fr' ? 'AR' : 'FR'}</span>
             </button>
           </div>

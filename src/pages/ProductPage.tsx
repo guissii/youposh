@@ -570,37 +570,50 @@ export default function ProductPage() {
                 </div>
 
                 {/* ══════════════════════════════════════════════
-                    HOW TO ORDER SECTION (طريقة الطلب جد سهلة)
+                    DESCRIPTION SECTION (UNHIDDEN)
                     ══════════════════════════════════════════════ */}
-                <div className="py-4 border-t border-[var(--yp-gray-200)]">
-                  <h3 className="text-xl font-bold text-[var(--yp-dark)] mb-4 font-heading text-center">
-                    {isAr ? 'طريقة الطلب جد سهلة' : 'Comment commander facilement ?'}
+                {product.description && (
+                  <div className="py-4 border-t border-[var(--yp-gray-200)]">
+                    <h3 className="text-xl font-bold text-[var(--yp-dark)] mb-4 font-heading">
+                      {isAr ? 'وصف المنتج' : 'Description du produit'}
+                    </h3>
+                    <div 
+                      className={`prose prose-sm max-w-none text-[var(--yp-gray-600)] ${isAr ? 'text-right' : 'text-left'}`}
+                      dangerouslySetInnerHTML={{ __html: isAr && product.descriptionAr ? product.descriptionAr : product.description }}
+                      dir={isAr ? 'rtl' : 'ltr'}
+                    />
+                  </div>
+                )}
+
+                {/* ══════════════════════════════════════════════
+                    HOW TO ORDER SECTION (طريقة الطلب جد سهلة) - ALWAYS ARABIC
+                    ══════════════════════════════════════════════ */}
+                <div className="py-4 border-t border-[var(--yp-gray-200)]" dir="rtl">
+                  <h3 className="text-xl font-bold text-[var(--yp-dark)] mb-4 font-heading text-center font-arabic">
+                    طريقة الطلب جد سهلة
                   </h3>
                   <div className="flex flex-col gap-3">
                     {[
                       {
                         icon: FileText,
-                        textAr: 'إملأ النموذج عن طريق كتابة اسمك ورقم الهاتف بالإضافة إلى المدينة',
-                        textFr: 'Remplissez le formulaire avec votre nom, numéro de téléphone et ville.'
+                        text: 'إملأ النموذج عن طريق كتابة اسمك ورقم الهاتف بالإضافة إلى المدينة',
                       },
                       {
                         icon: PhoneCall,
-                        textAr: 'سيتم الإتصال بكم في أقرب وقت لتأكيد طلبكم وتزويدكم بالمزيد من المعلومات',
-                        textFr: 'Nous vous contacterons rapidement pour confirmer votre commande.'
+                        text: 'سيتم الإتصال بكم في أقرب وقت لتأكيد طلبكم وتزويدكم بالمزيد من المعلومات',
                       },
                       {
                         icon: Truck,
-                        textAr: 'لن تضطر لدفع أي دفعة حتى تتوصل بالمنتج بباب منزلك',
-                        textFr: "Paiement à la livraison. Vous ne payez qu'à la réception."
+                        text: 'لن تضطر لدفع أي دفعة حتى تتوصل بالمنتج بباب منزلك',
                       }
                     ].map((step, i) => (
                       <div key={i} className="flex items-center gap-3 bg-[#FEF2F2] border-2 border-[var(--yp-red)] rounded-2xl p-3 shadow-sm relative overflow-hidden">
                         <div className="w-12 h-12 shrink-0 bg-white rounded-xl flex items-center justify-center relative z-10 shadow-sm border border-[var(--yp-red)]/20">
                           <step.icon className="w-6 h-6 text-[var(--yp-red)]" />
                         </div>
-                        <div className="flex-1 relative z-10">
-                          <p className={`font-semibold text-[var(--yp-dark)] leading-snug ${isAr ? 'text-sm' : 'text-xs'}`}>
-                            {isAr ? step.textAr : step.textFr}
+                        <div className="flex-1 relative z-10 text-right">
+                          <p className="font-semibold text-[var(--yp-dark)] leading-snug text-sm font-arabic">
+                            {step.text}
                           </p>
                         </div>
                       </div>
