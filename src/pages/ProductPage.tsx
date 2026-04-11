@@ -458,7 +458,7 @@ export default function ProductPage() {
               </div>
 
               {/* ═══ Bloc 2 — Product Info ═══ */}
-              <div className="space-y-5">
+              <div className={`space-y-5 ${isAr ? 'text-right font-arabic' : 'text-left'}`} dir={isAr ? 'rtl' : 'ltr'}>
                 {/* Badges */}
                 <div className="flex flex-wrap gap-2">
                   {product.badge && (
@@ -477,7 +477,7 @@ export default function ProductPage() {
                     {isAr ? product.nameAr : product.name}
                   </h1>
                   <div className="flex items-center gap-3 mt-3">
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1" dir="ltr">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
@@ -490,13 +490,17 @@ export default function ProductPage() {
                 </div>
 
                 {/* Price */}
-                <div className="flex items-baseline gap-3 flex-wrap">
-                  <span className="text-3xl sm:text-4xl font-bold text-[var(--yp-dark)]">{product.price} <span className="text-xl">{t('currency')}</span></span>
+                <div className="flex items-baseline gap-3 flex-wrap" dir={isAr ? 'rtl' : 'ltr'}>
+                  <span className="text-3xl sm:text-4xl font-bold text-[var(--yp-dark)]">
+                    {product.price} <span className="text-xl">{t('currency')}</span>
+                  </span>
                   {product.originalPrice && (
                     <>
-                      <span className="text-xl text-[var(--yp-gray-500)] line-through">{product.originalPrice} {t('currency')}</span>
+                      <span className="text-xl text-[var(--yp-gray-500)] line-through">
+                        {product.originalPrice} {t('currency')}
+                      </span>
                       <span className="bg-[var(--yp-red-50)] text-[var(--yp-red)] px-3 py-1 rounded-lg text-sm font-bold">
-                        {t('save') || 'Économisez'} {product.originalPrice - product.price} {t('currency')}
+                        {t('save') || (isAr ? 'وفر' : 'Économisez')} {product.originalPrice - product.price} {t('currency')}
                       </span>
                     </>
                   )}
@@ -548,7 +552,7 @@ export default function ProductPage() {
                 <div>
                   <p className="font-semibold text-[var(--yp-dark)] mb-2.5 text-sm">{t('quantity')}</p>
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center border-2 border-[var(--yp-gray-300)] rounded-xl overflow-hidden">
+                    <div className="flex items-center border-2 border-[var(--yp-gray-300)] rounded-xl overflow-hidden" dir="ltr">
                       <button
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
                         className="w-11 h-11 flex items-center justify-center hover:bg-[var(--yp-gray-200)] transition-colors"
@@ -665,20 +669,20 @@ export default function ProductPage() {
                 </div>
 
                 {/* Trust badges */}
-                <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[var(--yp-gray-300)]">
+                <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[var(--yp-gray-300)]" dir={isAr ? 'rtl' : 'ltr'}>
                   {[
-                    { icon: Truck, text: t('freeDelivery') || 'Livraison gratuite', color: 'var(--yp-blue)' },
-                    { icon: Shield, text: t('warranty') || 'Garantie', color: 'var(--yp-blue)' },
+                    { icon: Truck, text: t('freeDelivery') || (isAr ? 'توصيل مجاني' : 'Livraison gratuite'), color: 'var(--yp-blue)' },
+                    { icon: Shield, text: t('warranty') || (isAr ? 'ضمان' : 'Garantie'), color: 'var(--yp-blue)' },
                   ].map((item, i) => (
                     <div key={i} className="text-center">
                       <item.icon className="w-5 h-5 mx-auto mb-1" style={{ color: item.color }} />
-                      <p className="text-xs text-[var(--yp-gray-600)]">{item.text}</p>
+                      <p className={`text-xs text-[var(--yp-gray-600)] ${isAr ? 'font-arabic' : ''}`}>{item.text}</p>
                     </div>
                   ))}
                 </div>
 
                 {/* SKU */}
-                <p className="text-sm text-[var(--yp-gray-500)]">{t('sku')}: {product.sku}</p>
+                <p className="text-sm text-[var(--yp-gray-500)]" dir="ltr">{t('sku')}: {product.sku}</p>
               </div>
             </div>
           </div>
