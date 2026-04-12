@@ -42,7 +42,7 @@ export default function CartDrawer() {
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const isSubmittingOrderRef = useRef(false);
 
-  const deliveryFee = settings.shippingFeeNational ?? 35;
+  const deliveryFee = settings.shippingFeeNational ?? 40;
   const subtotalAfterPromo = Math.max(0, cartTotal - (promoStatus === 'applied' ? promoDiscount : 0));
   const grandTotal = subtotalAfterPromo + deliveryFee;
 

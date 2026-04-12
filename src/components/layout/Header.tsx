@@ -82,7 +82,7 @@ export default function Header() {
             className="text-[11px] sm:text-[13px] font-extrabold tracking-wide uppercase font-arabic whitespace-nowrap"
             style={{ animation: 'glowText 2s ease-in-out infinite' }}
           >
-            {i18n.language === 'ar' ? 'جودة مضمونة بثمن مناسب' : 'Qualité garantie à un prix raisonnable'}
+            {i18n.language === 'ar' ? 'توصيل في جميع أنحاء المغرب | جودة مضمونة بثمن مناسب' : 'Livraison partout au Maroc | Qualité garantie à un prix raisonnable'}
           </span>
           <img src="https://flagcdn.com/w40/ma.png" srcSet="https://flagcdn.com/w80/ma.png 2x" width="20" alt="Maroc" className="drop-shadow-md rounded-sm" />
         </div>

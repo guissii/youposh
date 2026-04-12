@@ -246,7 +246,7 @@ export default function ProductPage() {
   const subtotalAfterPromo = Math.max(0, subtotal - (promoStatus === 'applied' ? promoDiscount : 0));
 
   // Delivery fee: flat national rate
-  const deliveryFee = settings.shippingFeeNational ?? 35;
+  const deliveryFee = settings.shippingFeeNational ?? 40;
   const grandTotal = subtotalAfterPromo + deliveryFee;
 
   const isFormValid = customerName.trim().length > 0 && customerPhone.trim().length > 0 && customerCity.trim().length > 0 && customerAddress.trim().length > 0;
@@ -848,7 +848,7 @@ export default function ProductPage() {
                   {customerCity.trim().length >= 2 && (
                     <p className="text-xs mt-1.5 flex items-center gap-1 text-[var(--yp-gray-500)]">
                       <Truck className="w-3 h-3" />
-                      {t('deliveryMaroc') || 'Livraison Maroc : 35 dh'}
+                      {t('deliveryMaroc') || 'Livraison Maroc : 40 dh'}
                     </p>
                   )}
                 </div>
