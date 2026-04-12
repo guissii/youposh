@@ -1,0 +1,479 @@
+1. Un administrateur constate que ses conteneurs Docker sur Ubuntu 22.04 (kernel 5.15) et ses VMs Ubuntu 22.04 ont des comportements différents face à une vulnérabilité kernel. Quelle explication architecturale est correcte ?
+
+A. Les conteneurs et VMs partagent tous le même kernel de l'hôte, donc sont tous vulnérables.
+B. Les VMs ont leur propre kernel isolé, seuls les conteneurs sont vulnérables via le kernel hôte.
+C. Les conteneurs sont isolés par namespaces donc ne sont pas affectés par les vulnérabilités kernel.
+D. Seules les VMs sans extensions de virtualisation (VT-x/AMD-V) sont vulnérables.
+
+
+2. Quelle affirmation caractérise le mieux un hyperviseur de Type I dans son architecture réelle ?
+
+A. Il s'exécute directement sur le matériel en utilisant un microkernel minimal, sans OS général complet.
+B. Il nécessite obligatoirement la paravirtualisation pour fonctionner efficacement.
+C. Il s'appuie sur un OS hôte minimaliste (comme Linux) transformé en hyperviseur via des modules noyau.
+D. Il émule complètement le matériel pour chaque VM sans accès direct au CPU.
+
+
+3. Dans la paravirtualisation, pourquoi le système invité doit-il être modifié ?
+
+A. Pour masquer totalement la présence de l'hyperviseur.
+B. Pour communiquer avec l'hyperviseur via des "hypercalls" optimisés.
+C. Pour permettre à l'OS invité de fonctionner sur un CPU incompatible.
+D. Pour permettre le partage de l'espace d'adressage entre les VMs.
+
+
+4. Quel rôle joue QEMU au sein de la solution KVM sous Linux ?
+
+A. Il remplace le module noyau kvm.ko.
+B. Il gère l'ordonnancement des threads du noyau Linux.
+C. Il sert uniquement d'interface graphique (GUI).
+D. Il fournit l'émulation des périphériques et l'interface utilisateur.
+
+
+5. Dans le cadre de l'optimisation de la mémoire par un hyperviseur, que désigne la technique de Page Sharing ?
+
+A. Une méthode permettant à l'hyperviseur de réallouer dynamiquement la mémoire physique entre les machines virtuelles selon leur charge.
+B. Un mécanisme par lequel certaines pages mémoire inactives sont déplacées vers un espace de stockage secondaire afin de libérer de la RAM.
+C. Une technique consistant à détecter des pages mémoire strictement identiques utilisées par plusieurs machines virtuelles et à les stocker une seule fois en mémoire physique.
+D. Une approche visant à réserver une quantité fixe de mémoire à chaque machine virtuelle afin d'éviter toute contention.
+
+
+6. Quelle distinction permet de différencier fondamentalement le SDN du NFV ?
+
+A. Le SDN repose sur la dissociation entre le plan de contrôle et le plan de données du réseau, tandis que le NFV vise à implémenter des fonctions réseau sous forme logicielle sur des serveurs standards.
+B. Le SDN est principalement orienté vers la virtualisation des ressources de calcul, alors que le NFV s'applique à la gestion centralisée des flux réseau.
+C. Le SDN et le NFV désignent une même approche, le SDN étant simplement une appellation alternative du NFV dans les architectures cloud.
+D. Le NFV correspond à une virtualisation de type hyperviseur, tandis que le SDN s'appuie exclusivement sur des équipements matériels spécialisés.
+
+
+7. Comment Microsoft Hyper-V permet-il aux partitions enfant (VMs) d'accéder aux ressources matérielles de façon performante ?
+
+A. Via le VMBus, un canal de communication haute performance.
+B. En permettant un accès direct et non-contrôlé au bus PCI physique.
+C. En émulant systématiquement chaque requête via la partition parente.
+D. En limitant l'usage du réseau à des commutateurs purement logiciels.
+
+
+8. Dans un datacenter, le CPU des serveurs est à 40%, mais aucune nouvelle VM ne peut être lancée. Quelle est la cause la plus probable ?
+
+A. Saturation réseau
+B. Manque de stockage
+C. Saturation de la RAM
+D. Limite du nombre de cœurs
+
+
+9. Qu'est-ce que le "Working Set" (Ensemble de travail) d'une VM ?
+
+A. La liste des VMs actives sur un même nœud physique.
+B. La quantité de mémoire active (pages chaudes) réellement sollicitée à un instant T.
+C. La somme totale du stockage disque et de la RAM allouée.
+D. L'espace mémoire réservé exclusivement au noyau de l'hyperviseur.
+
+
+10. Sur un serveur Linux moderne avec Intel VT-x activé, un administrateur lance une VM via QEMU et observe des performances proches du natif. Quelle affirmation explique cette situation ?
+
+A. QEMU traduit toutes les instructions CPU.
+B. KVM exécute le code invité directement sur le CPU.
+C. QEMU remplace le noyau Linux.
+D. Le système fonctionne en mode conteneur.
+
+
+11. Quel est le principe de fonctionnement du "Memory Ballooning" ?
+
+A. Gonfler un pilote dans l'invité pour forcer l'OS à libérer de la RAM.
+B. Compresser les blocs de données redondants entre plusieurs VMs.
+C. Déplacer dynamiquement une VM vers un hôte ayant plus de RAM libre.
+D. Augmenter le cache L3 du processeur physique.
+
+
+12. L'administration d'un serveur Citrix-Xen, un ingénieur remarque qu'une VM spéciale Linux gère les pilotes matériels et le contrôle global de l'hyperviseur. De quelle entité s'agit-il ?
+
+A. DomU
+B. Hypervisor Core
+C. Dom0
+D. XenCenter
+
+
+13. L'hyperviseur demande à une VM pro active de libérer de la mémoire sans arrêter la machine. Quel mécanisme est utilisé ?
+
+A. Swap sur disque
+B. Live migration
+C. Ballooning mémoire
+D. Snapshot
+
+
+14. Pourquoi le swap distant via RDMA est-il supérieur au swap local sur disque ?
+
+A. Il ne consomme aucune bande passante réseau.
+B. Il offre une latence d'accès réseau extrêmement faible, proche de la RAM.
+C. Il permet de se passer totalement de l'usage de l'hyperviseur.
+D. Il permet de chiffrer les données plus rapidement.
+
+
+15. Lors du ballooning, que fait concrètement le pilote à l'intérieur de la VM ?
+
+A. Il redémarre la VM.
+B. Il compresse la mémoire.
+C. Il alloue et verrouille des pages mémoire.
+D. Il supprime des fichiers système.
+
+
+16. Selon le NIST, quelle caractéristique distingue l'élasticité du simple scaling manuel ?
+
+A. L'élasticité permet de scale horizontalement, le scaling manuel uniquement verticalement.
+B. L'élasticité est automatique et rapide (en réponse à la demande), le scaling manuel nécessite intervention humaine.
+C. L'élasticité ne fonctionne que dans le cloud public, pas dans le cloud privé.
+D. L'élasticité concerne uniquement le calcul (CPU/RAM), pas le stockage ou le réseau.
+
+
+17. Dans le modèle de responsabilité partagée AWS, une faille dans l'hyperviseur Nitro permet à une VM d'accéder aux données d'une autre VM. Qui est responsable ?
+
+A. Le client, car il doit chiffrer ses données au repos et en transit.
+B. AWS, car la sécurité de l'hyperviseur fait partie de la "sécurité DU cloud".
+C. Les deux, car c'est un problème de configuration réseau (Security Groups).
+D. Le client, car il doit activer le chiffrement au niveau hyperviseur via KMS.
+
+
+18. Un e-commerce passe de 2 instances t3.small à 10 instances t3.small lors du Black Friday. Après l'événement, il scale down à 3 instances t3.medium. Quels mécanismes sont utilisés ?
+
+A. Scale out (2→10) puis scale up (small→medium)
+B. Scale out uniquement (changement de type = scale out)
+C. Scale out (2→10) puis scale in (10→3) ET scale up (small→medium)
+D. Scale up uniquement car le nombre de vCPUs total augmente
+
+
+19. Un utilisateur souhaite déployer une application à l'échelle mondiale avec la latence la plus faible possible pour ses clients finaux. Quel avantage du Cloud AWS doit-il exploiter ?
+
+A. Les économies d'échelle.
+B. L'agilité.
+C. L'élasticité.
+D. La portée mondiale (Global Reach).
+
+
+20. Une entreprise financière refuse le cloud public malgré les économies potentielles. Quelle raison technique est la plus légitime ?
+
+A. Le cloud public ne permet pas de chiffrer les données au repos.
+B. La perte de contrôle sur la localisation physique des données et l'infrastructure sous-jacente.
+C. Le cloud public est moins évolutif qu'une infrastructure on-premise.
+
+
+21. Une application augmente automatiquement de 4 vCPUs et 8 Go RAM à 8 vCPUs et 16 Go RAM sans redémarrage (hot-add). De quel mécanisme s'agit-il ?
+
+A. Scaling out – Car on ajoute des ressources.
+B. Scaling up (vertical) – Car on augmente la capacité d'une instance existante.
+C. Scaling in – Car on consolide les ressources.
+D. Auto-scaling horizontal – Car le processus est automatique.
+
+
+22. Une entreprise loue 10 serveurs dédiés chez OVH avec facturation mensuelle fixe. Elle installe VMware et déploie 50 VMs. Pourquoi ce n'est PAS du Cloud Computing selon le NIST ?
+
+A. Car les serveurs ne sont pas dans un datacenter AWS/Azure/GCP.
+B. Car il manque l'élasticité rapide, la mutualisation avec d'autres clients, et le paiement à l'usage.
+C. Car la virtualisation n'est pas gérée par le fournisseur.
+D. Car il n'y a pas de self-service portal pour provisionner les ressources.
+
+
+23. Quel élément constitue la contrainte principale limitant l'évolutivité d'une infrastructure de cloud privé ?
+
+A. Les performances du réseau interne, qui conditionnent les échanges entre machines virtuelles et services.
+B. Les mécanismes de stockage distribué, dont l'extension nécessite une reconfiguration logicielle complexe.
+C. Les ressources matérielles effectivement disponibles au sein de l'infrastructure physique appartenant à l'organisation.
+D. Les technologies de virtualisation, qui imposent un plafond fixe au nombre de machines virtuelles déployables.
+
+
+24. Une organisation exige sécurité maximale, contrôle total, mais élasticité ponctuelle. Quel modèle est le plus cohérent ?
+
+A. Cloud public
+B. Cloud privé
+C. Cloud communautaire
+D. Cloud hybride
+
+
+25. Une entreprise souhaite déployer une application Java personnalisée. Elle veut gérer elle-même le système d'exploitation, installer des outils spécifiques, mais ne pas acheter de matériel. Quel modèle correspond le mieux ?
+
+A. SaaS
+B. PaaS
+C. IaaS
+D. Cloud privé
+
+
+26. Une entreprise utilise un logiciel SaaS pour la gestion RH. Elle souhaite modifier profondément la logique métier interne du logiciel. Pourquoi ce besoin est-il difficile à satisfaire ?
+
+A. Le SaaS est trop coûteux.
+B. Le client ne contrôle pas le code ni l'architecture.
+C. Le SaaS n'est pas sécurisé.
+D. Le SaaS ne supporte pas le cloud public.
+
+
+27. Une équipe utilise un service PaaS (ex : Azure App Service). Le fournisseur met automatiquement à jour l'OS et le runtime. Quel avantage réel cela apporte à l'équipe ?
+
+A. Contrôle total de l'infrastructure.
+B. Réduction de la charge d'administration système.
+C. Accès root au serveur.
+D. Liberté totale de configuration réseau.
+
+
+28. Dans un environnement multi-cloud, quel profil est responsable d'exploitation du système ?
+
+A. La fournisseur Cloud
+B. Le client
+C. Personnes
+D. Les deux sont égales
+
+
+29. Dans un scénario de migration de PaaS vers FaaS à long terme, elles du PaaS vers FaaS, elles sont égales ?
+
+A. IaaS
+B. PaaS
+C. SaaS
+D. Cloud privé
+
+
+30. Pourquoi affirme-t-on qu'un service SaaS "repose" sur IaaS/PaaS bien que le client n'y ait pas accès ?
+
+A. Car le fournisseur SaaS utilise nécessairement des serveurs (IaaS) et plateformes (PaaS) pour héberger son application.
+B. Car le client peut basculer vers IaaS à tout abonnement.
+C. Car SaaS est juste un alias marketing pour PaaS avec une interface web.
+D. Car les données SaaS sont toujours stockées dans des buckets S3 (IaaS).
+
+
+31. Une banque conserve ses bases clients en cloud privé mais utilise le cloud public pour ses applications web. Quel objectif principal est recherché ?
+
+A. Absence de route vers l'IGW.
+B. Mauvais type d'instance.
+C. Problème IAM.
+D. Absence de NAT Gateway.
+
+
+32. Une entreprise loue une base de données managée, sans accès au serveur, avec sauvegardes automatiques. De quel modèle s'agit-il ?
+
+A. IaaS
+B. PaaS
+C. SaaS
+D. Cloud privé
+
+
+33. Un administrateur AWS utilise un rôle EC2 attaché à des instances. Quel est le comportement réel ?
+
+A. L'utilisateur peut démarrer les instances.
+B. Les instances EC2-Admin temporaire.
+C. L'action est refusée.
+D. Le résultat dépend de la région.
+
+
+34. Deux équipes déploient la même application. Équipe A : EC2 + OS + runtime. Équipe B : PaaS. Quelle différence fondamentale existe entre les deux ?
+
+A. SaaS – Cloud paiment
+B. IaaS Private uniquement
+C. PaaS/PaaS + Cloud hybride
+D. Équipe B : PaaS
+
+
+35. Des données rarement consultées mais à conserver longtemps doivent être stockées dans :
+
+A. S3 Standard
+B. S3 Intelligent-Tiering
+C. EBS HDD
+D. EBS Glacier
+
+
+36. Quel avantage principal distingue Amazon RDS d'une base de données installée manuellement sur une instance EC2 ?
+
+A. RDS ne supporte que les bases de données NoSQL.
+B. RDS prend en charge automatiquement la gestion des sauvegardes, les mises à jour logicielles et assure la haute disponibilité.
+C. RDS est proposé gratuitement pour toutes les instances, contrairement à EC2.
+D. RDS ne stocke pas réellement les données, il sert uniquement de moteur de calcul.
+
+
+37. Pourquoi AWS utilise-t-il des Noms et Prénoms (Edge Locations) ?
+
+A. Pour stocker les bases de données.
+B. Pour remplacer les régions.
+C. Pour lancer via le code.
+D. Pour réduire la latence pour les utilisateurs finaux up-régionaux.
+
+
+38. Un utilisateur appartient à deux groupes IAM :
+
+Groupe A : accès lecture S3
+Groupe B : accès EC2 complet
+
+Quel sera le résultat réel ?
+
+A. L'utilisateur doit choisir un groupe.
+B. Les permissions se neutralisent.
+C. L'utilisateur hérite des permissions des deux groupes.
+D. Seul le dernier groupe compte.
+
+
+39. Un administrateur crée un rôle EC2 avec accès S3 ReadOnly. Pourquoi est-il préférable d'utiliser via le code ?
+
+A. Car IAM répète toutes les régions automatiquement des permissions haute.
+B. Car S3 ReadOnly est un service global (non régional), les identifiants et permissions.
+C. Car IAM attache un service global (non régional).
+D. Car IAM remplace les buckets dans up-régionaux, les identifiants et.
+
+
+40. Un utilisateur membre du groupe EC2-Admin peut voir toutes les instances EC2 et démarrer une instance. Mais lorsqu'il essaie d'arrêter une instance, l'action est refusée. Quelle est l'explication la plus probable ?
+
+A. Le service EC2 est trop régional.
+B. La politique ne contient pas la bonne région.
+C. L'utilisateur n'est pas dans la bonne région.
+D. Les Security Groups bloquent l'action.
+
+
+41. Comment peut-on connecter à une instance EC2 privée sans passer par Internet ?
+
+A. Internet Gateway
+B. NAT Gateway
+C. VPC Endpoint
+D. Load Balancer
+
+
+42. Pourquoi un volume EBS est-il considéré comme fiable ?
+
+A. Il est répliqué automatiquement dans plusieurs AZ.
+B. Il est répliqué automatiquement dans la même AZ.
+C. Il est stocké dans S3 directement.
+D. Il est public.
+
+
+43. Quel élément AWS est obligatoire pour passer un LAN ?
+
+A. Il
+B. Principal
+C. Ping
+D. (option manquante)
+
+
+44. Pourquoi utiliser le VPC Peering ?
+
+A. Pour connecter un VPC à Internet.
+B. Pour remplacer une VPN.
+C. Pour échanger du trafic privé entre deux VPC.
+D. Pour créer des sous-réseaux.
+
+
+45. Quelle est la différence fondamentale entre S3 et EBS ?
+
+A. S3 est local, EBS distant.
+B. S3 est un stockage objet, EBS un stockage bloc.
+C. S3 est régional, EBS global.
+D. S3 est persistant, EBS non.
+
+
+46. Quel entité IAM peut contenir uniquement des utilisateurs ?
+
+A. Un rôle
+B. Un groupe
+C. Une policy
+D. Une région
+
+
+47. Quel est le risque principal d'utiliser IAM ?
+
+A. Augmentation de la latence.
+B. Exposition inutile de ressources.
+C. Incompatibilité multi-régions.
+D. Coût plus élevé.
+
+
+48. Une instance dans un sous-réseau public possède une IP publique et un Security Group autorisant HTTP, mais elle reste inaccessible depuis Internet. Cause la plus probable ?
+
+A. Absence de route vers l'IGW.
+B. Mauvais type d'instance.
+C. Problème IAM.
+D. Absence de NAT Gateway.
+
+
+49. Un étudiant déploie 2 instances EC2 dans le même sous-réseau, dans la même AZ. Pourquoi cette architecture n'est PAS tolérante aux pannes ?
+
+A. Le type d'instance est trop petit.
+B. Une AZ est un point de défaillance unique.
+C. Il manque un Load Balancer.
+D. Il faut plus de RAM.
+
+
+50. Un administrateur ne parvient pas à démarrer l'instance EC2. Cause la plus probable ?
+
+A. Le type d'instance est trop petit.
+B. Absence de NAT Gateway.
+C. Problème IAM.
+D. Absence de route vers l'IGW.
+
+
+51. Un administrateur ne parvient pas à arrêter EC2. Cause la plus probable ?
+
+A. Security Group restreint.
+B. Problème IAM.
+C. Instance dans un ASG.
+D. (option manquante)
+
+
+52. Après avoir augmenté un volume EBS de 8 Go à 10 Go, l'OS affiche toujours 8 Go. Pourquoi ?
+
+A. Il faut redémarrer AWS.
+B. Le système de fichiers n'a pas été étendu.
+C. Le volume est limité.
+D. EBS ne peut pas être étendu.
+
+
+53. Quel indicateur est le plus critique pour détecter une surcharge CPU ?
+
+A. Network In
+B. Disk Read Ops
+C. CPU Utilization
+D. Status Checks
+
+
+54. Un étudiant ne peut plus lancer d'instances EC2. Cause possible ?
+
+A. Mauvais AMI.
+B. Mauvais Security Group atteint.
+C. Quota régional atteint.
+D. Instance trop grande.
+
+
+55. Pourquoi ouvrir HTTP (80) à 0.0.0.0/0 peut être dangereux en production ?
+
+A. Cela ralentit le réseau.
+B. Cela augmente la facture.
+C. Cela expose l'instance à Internet entier.
+D. Cela empêche le HTTPS.
+
+
+56. Quel entité IAM peut contenir uniquement des utilisateurs ?
+
+A. Un rôle
+B. Un groupe
+C. Une policy
+D. Une région
+
+
+57. Quel composant permet à un VPC d'accéder à Internet ?
+
+A. NAT Gateway
+B. Route Table
+C. Internet Gateway
+D. Security Group
+
+
+58. Quel élément définit le système d'exploitation d'une instance EC2 ?
+
+A. EBS
+
+
+59. Quel service permet de répartir le trafic entre plusieurs instances EC2 ?
+
+A. Auto Scaling
+B. Classic Load Balancer
+C. CloudWatch
+D. Amazon S3
+
+
+60. Quel concept S3 représente le conteneur de stockage ?
+
+A. Object
+B. Bucket
+C. Key
+D. Volume

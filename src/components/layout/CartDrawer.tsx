@@ -247,7 +247,7 @@ Merci !`;
                       type="button"
                       onClick={() => applyPromoCode(promoInput)}
                       disabled={promoStatus === 'loading'}
-                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold ${promoStatus === 'loading' ? 'bg-gray-200 text-gray-400' : 'bg-[var(--yp-blue)] text-white hover:opacity-95'}`}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold shrink-0 whitespace-nowrap ${promoStatus === 'loading' ? 'bg-gray-200 text-gray-400' : 'bg-[var(--yp-blue)] text-white hover:opacity-95'}`}
                     >
                       Appliquer
                     </button>

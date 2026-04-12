@@ -56,7 +56,7 @@ export default function Header() {
   return (
     <>
       {/* Announcement Bar — Fixed at top */}
-      <div className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-red-700 via-red-600 to-red-700 text-white py-1.5 sm:py-2 px-2 text-center flex items-center justify-center overflow-hidden shadow-md">
+      <div className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-[#018bb5] via-[#01b3ea] to-[#018bb5] text-white py-1.5 sm:py-2 px-2 text-center flex items-center justify-center overflow-hidden shadow-md">
         <style>{`
           @keyframes shimmerEffect {
             0% { transform: translateX(-150%) skewX(-20deg); }

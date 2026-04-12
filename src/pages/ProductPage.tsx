@@ -923,7 +923,7 @@ export default function ProductPage() {
                           applyPromoCode(code, { silent: false });
                         }}
                         disabled={promoStatus === 'loading'}
-                        className={`px-4 py-3 rounded-xl font-bold text-sm ${promoStatus === 'loading'
+                        className={`px-4 py-3 rounded-xl font-bold text-sm shrink-0 whitespace-nowrap ${promoStatus === 'loading'
                           ? 'bg-[var(--yp-gray-300)] text-[var(--yp-gray-500)] cursor-not-allowed'
                           : 'bg-[var(--yp-blue)] text-white hover:opacity-95'
                           }`}
