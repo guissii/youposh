@@ -980,7 +980,7 @@ export default function ProductPage() {
                       <Truck className="w-3.5 h-3.5" />
                       {t('delivery') || 'Livraison'}
                     </span>
-                    <span className="font-medium">{deliveryFee} {t('currency')}</span>
+                    <span className="font-medium">{deliveryFee === 0 ? 'Gratuite' : `${deliveryFee} ${t('currency')}`}</span>
                   </div>
                   <div className="border-t border-[var(--yp-gray-300)] pt-2 mt-2">
                     <div className="flex justify-between">

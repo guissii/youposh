@@ -333,7 +333,7 @@ Merci !`;
                 )}
                 <div className="flex justify-between text-sm">
                   <span className="text-[#666]">🚚 Livraison {customerCity ? `(${customerCity})` : ''}</span>
-                  <span>{deliveryFee} dh</span>
+                  <span>{deliveryFee === 0 ? 'Gratuite' : `${deliveryFee} dh`}</span>
                 </div>
                 <div className="border-t pt-1.5 flex justify-between font-bold text-base">
                   <span>Total</span>
