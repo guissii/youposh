@@ -1,5 +1,11 @@
 const { Client } = require('ssh2');
 
+const vpsPassword = process.env.VPS_SSH_PASSWORD;
+
+if (!vpsPassword) {
+    throw new Error('Missing VPS_SSH_PASSWORD environment variable');
+}
+
 const conn = new Client();
 conn.on('ready', () => {
     console.log('Connexion établie. Déploiement des correctifs de vitesse...');
@@ -38,5 +44,5 @@ conn.on('ready', () => {
     host: '84.247.184.208',
     port: 22,
     username: 'root',
-    password: 'Abc12345!'
+    password: vpsPassword
 });

@@ -91,8 +91,8 @@ conn.on('ready', () => {
         readStream.pipe(writeStream);
     });
 }).connect({
-    host: '84.247.184.208',
+    host: process.env.VPS_HOST || '84.247.184.208',
     port: 22,
     username: 'root',
-    password: 'Abc12345!'
+    password: process.env.VPS_PASSWORD
 });

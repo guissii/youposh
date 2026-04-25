@@ -1,3 +1,52 @@
+# Custom ignores for project cleanup (Root only)
+/*.txt
+/*.sh
+/*.ps1
+/*.cjs
+/*.mjs
+/*.js
+!/eslint.config.js
+!/vite.config.ts
+!/tailwind.config.js
+!/postcss.config.js
+/*.json
+!/package.json
+!/package-lock.json
+!/components.json
+!/tsconfig.json
+!/tsconfig.app.json
+!/tsconfig.node.json
+!/vercel.json
+!/n8n_whatsapp_ecommerce_workflows.json
+!/youposh-product-import.config.json
+
+# Sensitive and Internal directories
+/scripts/vps/
+/scripts/audit/
+/docs/
+/.trae/
+/info youposh/
+/infoo/
+
+# Sensitive VPS files (even if moved)
+vps_key
+vps_deploy_key
+vps_*
+
+# Temporary/Audit files
+/examen
+/reponses*
+/build_log.txt
+/tsc_output.txt
+/tsc_errors.txt
+/audit_results.txt
+/cpu_*.txt
+/final_*.txt
+/output.json
+/products_dump.json
+/purge_result.txt
+
+# Standard ignores
 node_modules
 dist
 build
