@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, ArrowRight, Clock, TrendingUp, ShoppingBag, Trash2 } from 'lucide-react';
+import { Search, X, Clock, TrendingUp, ShoppingBag, Trash2 } from 'lucide-react';
 import { fetchProducts } from '@/lib/api';
 import { getImageUrl } from '@/lib/utils';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
@@ -176,58 +176,62 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   </div>
 
                   {filteredResults.length > 0 ? (
-                    <div className="grid gap-3">
-                      {filteredResults.map(product => {
-                        const isOutOfStock = product.stock <= 0;
-                        return (
-                          <button
-                            key={product.id}
-                            onClick={() => handleProductClick(product)}
-                            className="group flex items-center gap-4 p-3 bg-white hover:bg-gray-50 border border-gray-100 hover:border-[var(--yp-blue-light)] rounded-2xl transition-all duration-200 w-full text-left"
-                          >
-                            <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 border border-gray-100">
-                              <LazyLoadImage
-                                src={getImageUrl(product.image)}
-                                alt={product.name}
-                                effect="blur"
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                              />
-                              {isOutOfStock && (
-                                <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-                                  <span className="text-[10px] font-bold bg-gray-900 text-white px-2 py-0.5 rounded-full">Épuisé</span>
-                                </div>
-                              )}
-                            </div>
-                            
-                            <div className="flex-1 min-w-0 py-1">
-                              <h4 className="font-semibold text-gray-900 truncate group-hover:text-[var(--yp-blue)] transition-colors text-base sm:text-lg">
-                                {i18n.language === 'ar' ? product.nameAr : product.name}
-                              </h4>
-                              <p className="text-sm text-gray-500 truncate mb-1">
-                                {product.category}
-                              </p>
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold text-[var(--yp-blue)]">
-                                  {product.price} DH
-                                </span>
-                                {product.oldPrice && (
-                                  <span className="text-xs text-gray-400 line-through">
-                                    {product.oldPrice} DH
+                    <div>
+                      {/* Grid 2 colonnes sur mobile, 3-4 sur desktop */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {filteredResults.map(product => {
+                          const isOutOfStock = product.stock <= 0;
+                          return (
+                            <button
+                              key={product.id}
+                              onClick={() => handleProductClick(product)}
+                              className="group flex flex-col bg-white hover:bg-gray-50 border border-gray-100 hover:border-[var(--yp-blue-light)] rounded-2xl transition-all duration-200 overflow-hidden text-left shadow-sm hover:shadow-md"
+                            >
+                              {/* Image */}
+                              <div className="relative w-full aspect-square flex-shrink-0 overflow-hidden bg-gray-100">
+                                <LazyLoadImage
+                                  src={getImageUrl(product.image)}
+                                  alt={product.name}
+                                  effect="blur"
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                  wrapperClassName="w-full h-full block"
+                                />
+                                {isOutOfStock && (
+                                  <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                                    <span className="text-[10px] font-bold bg-gray-900 text-white px-2 py-0.5 rounded-full">Épuisé</span>
+                                  </div>
+                                )}
+                                {product.originalPrice && product.originalPrice > product.price && (
+                                  <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                                    -{Math.round((1 - product.price / product.originalPrice) * 100)}%
                                   </span>
                                 )}
                               </div>
-                            </div>
-
-                            <div className="p-2 text-gray-300 group-hover:text-[var(--yp-blue)] group-hover:translate-x-1 transition-all">
-                              <ArrowRight className="w-5 h-5" />
-                            </div>
-                          </button>
-                        );
-                      })}
+                              
+                              {/* Info */}
+                              <div className="p-2.5 flex flex-col gap-1">
+                                <h4 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-[var(--yp-blue)] transition-colors text-xs sm:text-sm leading-snug">
+                                  {i18n.language === 'ar' ? product.nameAr : product.name}
+                                </h4>
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="font-bold text-[var(--yp-blue)] text-sm">
+                                    {product.price} DH
+                                  </span>
+                                  {product.originalPrice && product.originalPrice > product.price && (
+                                    <span className="text-xs text-gray-400 line-through">
+                                      {product.originalPrice} DH
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
                       
                       <button
                         onClick={() => handleSearch(query)}
-                        className="w-full py-4 text-center text-[var(--yp-blue)] font-semibold hover:underline mt-2"
+                        className="w-full py-4 text-center text-[var(--yp-blue)] font-semibold hover:underline mt-4"
                       >
                         Voir tous les résultats pour "{query}"
                       </button>
