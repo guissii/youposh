@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, Clock, TrendingUp, ShoppingBag, Trash2 } from 'lucide-react';
+import { Search, X, ArrowRight, Clock, TrendingUp, ShoppingBag, Trash2 } from 'lucide-react';
 import { fetchProducts } from '@/lib/api';
 import { getImageUrl } from '@/lib/utils';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
