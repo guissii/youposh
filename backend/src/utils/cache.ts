@@ -2,7 +2,7 @@ import NodeCache from 'node-cache';
 import { Request, Response, NextFunction } from 'express';
 
 // Global cache instance: Default TTL 60 seconds, max keys to prevent memory leaks
-export const cache = new NodeCache({ stdTTL: 60, checkperiod: 120, maxKeys: 200 });
+export const cache = new NodeCache({ stdTTL: 300, checkperiod: 60, maxKeys: 500 });
 
 /**
  * Express Middleware to cache JSON responses.
