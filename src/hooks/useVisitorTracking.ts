@@ -36,7 +36,7 @@ export const useVisitorTracking = () => {
           return;
         }
 
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
         
         lastTrackedPath.current = location.pathname;
         sessionStorage.setItem(`tracked_${location.pathname}`, now.toString());
