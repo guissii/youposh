@@ -89,8 +89,9 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/sync', syncRoutes);
 app.use('/api/track', trackingRoutes);
 
-// Only listen when running locally (not on Vercel)
-if (!process.env.VERCEL) {
+// Only listen when running locally or on VPS (not on Vercel)
+// PM2 sets pm_id or PM2_HOME, so we can use that to detect VPS
+if (!process.env.VERCEL || process.env.pm_id !== undefined || process.env.PM2_HOME) {
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
         console.log(`Version: ${new Date().toISOString()} - API boot OK`);
