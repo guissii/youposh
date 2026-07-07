@@ -245,8 +245,8 @@ export default function ProductPage() {
 
   const subtotalAfterPromo = Math.max(0, subtotal - (promoStatus === 'applied' ? promoDiscount : 0));
 
-  // Delivery fee: flat national rate
-  const deliveryFee = settings.shippingFeeNational ?? 40;
+  // Delivery fee: hidden on frontend
+  const deliveryFee = 0;
   const grandTotal = subtotalAfterPromo + deliveryFee;
 
   const isFormValid = customerName.trim().length > 0 && customerPhone.trim().length > 0 && customerCity.trim().length > 0 && customerAddress.trim().length > 0;
@@ -845,12 +845,7 @@ export default function ProductPage() {
                     placeholder={t('cityPlaceholder') || 'Ex: Fès, Casablanca, Marrakech...'}
                     className="w-full px-4 py-3 bg-[var(--yp-gray-200)] border border-[var(--yp-gray-300)] rounded-xl text-[var(--yp-dark)] placeholder-[var(--yp-gray-500)] focus:outline-none focus:border-[var(--yp-blue)] focus:ring-2 focus:ring-[var(--yp-blue)]/20 transition-all"
                   />
-                  {customerCity.trim().length >= 2 && (
-                    <p className="text-xs mt-1.5 flex items-center gap-1 text-[var(--yp-gray-500)]">
-                      <Truck className="w-3 h-3" />
-                      {t('deliveryMaroc') || 'Livraison Maroc : 40 dh'}
-                    </p>
-                  )}
+                  {/* Delivery price text hidden on frontend */}
                 </div>
 
                 <div>
@@ -975,13 +970,7 @@ export default function ProductPage() {
                       <span className="font-medium text-[var(--yp-dark)]">{subtotalAfterPromo} {t('currency')}</span>
                     </div>
                   )}
-                  <div className="flex justify-between items-center text-[var(--yp-gray-600)]">
-                    <span className="flex items-center gap-1">
-                      <Truck className="w-3.5 h-3.5" />
-                      {t('delivery') || 'Livraison'}
-                    </span>
-                    <span className="font-medium">{deliveryFee === 0 ? 'Gratuite' : `${deliveryFee} ${t('currency')}`}</span>
-                  </div>
+                  {/* Delivery fee hidden on frontend */}
                   <div className="border-t border-[var(--yp-gray-300)] pt-2 mt-2">
                     <div className="flex justify-between">
                       <span className="font-bold text-[var(--yp-dark)]">{t('total')}</span>

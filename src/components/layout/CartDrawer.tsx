@@ -42,7 +42,7 @@ export default function CartDrawer() {
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const isSubmittingOrderRef = useRef(false);
 
-  const deliveryFee = settings.shippingFeeNational ?? 40;
+  const deliveryFee = 0; // Hidden delivery fee on client side
   const subtotalAfterPromo = Math.max(0, cartTotal - (promoStatus === 'applied' ? promoDiscount : 0));
   const grandTotal = subtotalAfterPromo + deliveryFee;
 
@@ -73,8 +73,7 @@ export default function CartDrawer() {
 ${itemsList}
 
 Sous-total: ${cartTotal} dh
-${promoStatus === 'applied' && promoCode && promoDiscount > 0 ? `Code promo (${promoCode}): -${promoDiscount} dh\n` : ''}Livraison: ${deliveryFee} dh
-Total: ${grandTotal} dh
+${promoStatus === 'applied' && promoCode && promoDiscount > 0 ? `Code promo (${promoCode}): -${promoDiscount} dh\n` : ''}Total: ${grandTotal} dh
 
 Mes informations :
 Nom: ${customerName}
@@ -331,10 +330,7 @@ Merci !`;
                     <span className="text-emerald-600">- {promoDiscount} dh</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm">
-                  <span className="text-[#666]">🚚 Livraison {customerCity ? `(${customerCity})` : ''}</span>
-                  <span>{deliveryFee === 0 ? 'Gratuite' : `${deliveryFee} dh`}</span>
-                </div>
+                {/* Delivery fee hidden on frontend */}
                 <div className="border-t pt-1.5 flex justify-between font-bold text-base">
                   <span>Total</span>
                   <span className="text-[var(--yp-blue)]">{grandTotal} dh</span>

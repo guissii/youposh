@@ -70,8 +70,7 @@ URL: ${window.location.origin}/product/${product.id}
 Quantité: ${quantity}
 Prix unitaire: ${product.price} dh
 Sous-total: ${subtotal} dh
-${promoLines}Livraison: ${deliveryFee} dh
-Total: ${grandTotal} dh
+${promoLines}Total: ${grandTotal} dh
 
 Mes informations :
 Nom: ${customer.customerName}
