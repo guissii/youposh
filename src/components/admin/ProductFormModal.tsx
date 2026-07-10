@@ -683,7 +683,7 @@ export const ProductFormModal = ({ product, onClose, onSave }: Props) => {
                     <div>
                         <label className="block text-sm font-medium text-[#666] mb-2">Caractéristiques Rapides</label>
                         <div className="flex flex-wrap gap-2 mb-2">
-                            {['Sans fil', 'Bluetooth', 'Étanche (IPX7)', 'Garantie 1 an', 'Livraison Gratuite', 'Haute Qualité', 'Batterie Longue Durée', 'Micro Intégré'].map(feat => {
+                            {['Sans fil', 'Bluetooth', 'Étanche (IPX7)', 'Garantie 1 an', 'Haute Qualité', 'Batterie Longue Durée', 'Micro Intégré'].map(feat => {
                                 const currentFeats = (form.features || '').split(',').map((t: string) => t.trim()).filter(Boolean);
                                 const isSelected = currentFeats.includes(feat);
                                 return (

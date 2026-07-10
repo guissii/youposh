@@ -669,9 +669,8 @@ export default function ProductPage() {
                 </div>
 
                 {/* Trust badges */}
-                <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[var(--yp-gray-300)]" dir={isAr ? 'rtl' : 'ltr'}>
+                <div className="flex justify-center gap-3 pt-4 border-t border-[var(--yp-gray-300)]" dir={isAr ? 'rtl' : 'ltr'}>
                   {[
-                    { icon: Truck, text: t('freeDelivery') || (isAr ? 'توصيل مجاني' : 'Livraison gratuite'), color: 'var(--yp-blue)' },
                     { icon: Shield, text: t('warranty') || (isAr ? 'ضمان' : 'Garantie'), color: 'var(--yp-blue)' },
                   ].map((item, i) => (
                     <div key={i} className="text-center">
