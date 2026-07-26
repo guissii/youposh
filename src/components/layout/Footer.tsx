@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   Instagram, Facebook, MessageCircle,
-  MapPin, Phone, Truck, CreditCard, ArrowRight,
+  MapPin, Phone, CreditCard, ArrowRight,
   ChevronDown, Music2, Mail
 } from 'lucide-react';
 import { useStoreSettings } from '@/data/storeSettings';

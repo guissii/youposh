@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Heart, Star, Minus, Plus, ArrowLeft, ShoppingCart,
-  Truck, Shield, Check, ChevronRight, ChevronLeft, MessageCircle, PhoneCall,
+  Truck, Check, ChevronRight, ChevronLeft, MessageCircle, PhoneCall,
   X, User, Phone, MapPin, FileText, Package, Ticket, ImageOff
 } from 'lucide-react';
 import { useStore } from '@/contexts/StoreContext';
