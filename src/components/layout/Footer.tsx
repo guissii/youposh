@@ -46,11 +46,10 @@ export default function Footer() {
       {/* ── Reassurance — Compact 2×2 grid on mobile ── */}
       <div className="border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
-          <div className="grid grid-cols-3 gap-3 sm:gap-6">
+          <div className="grid grid-cols-2 gap-3 sm:gap-6">
             {[
-              { icon: Truck, title: t('deliveryAllMorocco') || 'Livraison Maroc', color: 'var(--yp-blue)' },
               { icon: MessageCircle, title: t('whatsappOrder') || 'WhatsApp', color: 'var(--yp-whatsapp)' },
-              { icon: CreditCard, title: t('cashOnDelivery') || 'Paiement livraison', color: 'var(--yp-red)' },
+              { icon: CreditCard, title: t('cashOnDelivery') || 'Paiement à la livraison', color: 'var(--yp-red)' },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2.5 sm:gap-4">
                 <div

@@ -668,17 +668,7 @@ export default function ProductPage() {
                   </div>
                 </div>
 
-                {/* Trust badges */}
-                <div className="flex justify-center gap-3 pt-4 border-t border-[var(--yp-gray-300)]" dir={isAr ? 'rtl' : 'ltr'}>
-                  {[
-                    { icon: Shield, text: t('warranty') || (isAr ? 'ضمان' : 'Garantie'), color: 'var(--yp-blue)' },
-                  ].map((item, i) => (
-                    <div key={i} className="text-center">
-                      <item.icon className="w-5 h-5 mx-auto mb-1" style={{ color: item.color }} />
-                      <p className={`text-xs text-[var(--yp-gray-600)] ${isAr ? 'font-arabic' : ''}`}>{item.text}</p>
-                    </div>
-                  ))}
-                </div>
+                {/* Trust badges — hidden */}
 
                 {/* SKU */}
                 <p className="text-sm text-[var(--yp-gray-500)]" dir="ltr">{t('sku')}: {product.sku}</p>
